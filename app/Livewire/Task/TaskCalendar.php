@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Task;
 
+use App\Livewire\Concerns\HandlesRecurringTaskCompletion;
 use App\Models\Task;
+use App\Services\TaskGamificationService;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -13,6 +15,17 @@ use Livewire\Component;
 #[Title('Calendario de tareas')]
 class TaskCalendar extends Component
 {
+    use HandlesRecurringTaskCompletion {
+        confirmRecurringCompletion as protected completeRecurring;
+    }
+
+    private const PRIORITIES = [
+        'urgent-important' => 'Urgente e importante',
+        'not-urgent-important' => 'Importante, no urgente',
+        'urgent-not-important' => 'Urgente, no importante',
+        'not-urgent-not-important' => 'Ni urgente ni importante',
+    ];
+
     // Contrato del editor compartido: lo abre al cargar y lo limpia al cerrarse.
     #[Url(as: 'edit')]
     public ?string $editTask = null;
@@ -70,6 +83,41 @@ class TaskCalendar extends Component
         ]);
     }
 
+    public function toggleComplete(string $id, TaskGamificationService $gamification): void
+    {
+        $task = Task::findOrFail($id);
+        if ($this->prepareRecurringCompletion($task)) {
+            return;
+        }
+
+        $result = $gamification->toggle($task);
+        if ($result['completed']) {
+            $this->dispatch('task-completed', ...$result);
+        }
+        $this->dispatch('task-calendar-refresh');
+    }
+
+    public function confirmRecurringCompletion(TaskGamificationService $gamification): ?array
+    {
+        $result = $this->completeRecurring($gamification);
+        $this->dispatch('task-calendar-refresh');
+
+        return $result;
+    }
+
+    private function timeLabel(Carbon $start, Carbon $end, bool $allDay): string
+    {
+        $day = fn (Carbon $date) => $date->locale('es')->translatedFormat('D j M');
+
+        if ($allDay) {
+            return $start->isSameDay($end) ? $day($start).' · Todo el día' : $day($start).' – '.$day($end);
+        }
+
+        return $start->isSameDay($end)
+            ? $day($start).' · '.$start->format('H:i').($end->gt($start) ? '–'.$end->format('H:i') : '')
+            : $day($start).' '.$start->format('H:i').' – '.$day($end).' '.$end->format('H:i');
+    }
+
     private function toEvent(Task $task): array
     {
         $start = $task->start_date ?? $task->end_date;
@@ -86,6 +134,12 @@ class TaskCalendar extends Component
             'start' => $allDay ? $start->toDateString() : $start->toIso8601String(),
             'end' => $allDay ? $end->copy()->addDay()->toDateString() : ($end->gt($start) ? $end->toIso8601String() : null),
             'allDay' => $allDay,
+            'extendedProps' => [
+                'completed' => (bool) $task->completed,
+                'category' => $task->category,
+                'priority' => $task->priority ? (self::PRIORITIES[$task->priority] ?? null) : null,
+                'timeLabel' => $this->timeLabel($start, $end, $allDay),
+            ],
             'classNames' => array_values(array_filter([
                 'md-calendar-task',
                 $task->completed ? 'is-completed' : null,

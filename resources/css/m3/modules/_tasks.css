@@ -188,3 +188,11 @@
   .md-task-calendar__surface .fc-toolbar-title { font-size: 1rem; }
   .md-task-calendar__surface .fc-button { padding: 4px 10px; }
 }
+
+.md-task-calendar__surface .fc-event.is-completed .fc-event-title::before,
+.md-task-calendar__surface .fc-event.is-completed .fc-list-event-title a::before { content: '\F26A'; font-family: 'bootstrap-icons'; margin-right: 4px; display: inline-block; text-decoration: none; }
+.md-task-calendar-anchor { position: fixed; top: var(--quick-top, 0); left: var(--quick-left, 0); z-index: var(--md-sys-z-menu, 1100); width: 0; height: 0; }
+.md-task-calendar-anchor .md-popover { top: 0; left: 0; right: auto; }
+.md-task-calendar-popover__info { display: grid; gap: 6px; color: var(--md-sys-color-on-surface-variant); }
+.md-task-calendar-popover__info .md-title-medium { color: var(--md-sys-color-on-surface); }
+@media (max-width: 767.98px) { .md-task-calendar-anchor { position: static; } }

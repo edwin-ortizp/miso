@@ -121,6 +121,28 @@ class TaskViewsTest extends TestCase
         $this->assertSame('2026-10-10', $due->end_date->toDateString());
     }
 
+    public function test_calendar_completes_tasks_from_the_quick_view(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $task = Task::create(['title' => 'Rápida', 'start_date' => '2026-10-07 09:00', 'start_is_date' => false, 'end_date' => '2026-10-07 09:15', 'end_is_date' => false]);
+        $recurring = Task::create(['title' => 'Repetida', 'start_date' => '2026-10-07', 'start_is_date' => true, 'is_recurrent' => true, 'recurrence_interval_days' => 7]);
+
+        $component = Livewire::test(TaskCalendar::class)
+            ->call('toggleComplete', $task->id)
+            ->assertDispatched('task-calendar-refresh');
+
+        $this->assertTrue($task->refresh()->completed);
+        $event = collect($component->instance()->events('2026-10-05', '2026-10-12'))->firstWhere('title', 'Rápida');
+        $this->assertTrue($event['extendedProps']['completed']);
+        $this->assertContains('is-completed', $event['classNames']);
+
+        $component->call('toggleComplete', $task->id);
+        $this->assertFalse($task->refresh()->completed);
+
+        $component->call('toggleComplete', $recurring->id)->assertSet('showRecurringCompletion', true);
+        $this->assertFalse($recurring->refresh()->completed);
+    }
+
     public function test_bulk_creation_uses_non_empty_lines_and_shared_attributes(): void
     {
         $user = User::factory()->create();

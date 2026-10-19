@@ -20,6 +20,33 @@ export function registerTaskCalendar(Alpine) {
     Alpine.data('taskCalendar', (wire) => ({
         calendar: null,
         refresh: null,
+        quickOpen: false,
+        selected: null,
+        busy: false,
+        // Ancla el popover junto al evento (en escritorio); en móvil el CSS lo convierte en hoja inferior.
+        openQuick(event, el) {
+            const rect = el.getBoundingClientRect();
+            const width = 360;
+            const left = rect.right + 8 + width <= innerWidth ? rect.right + 8 : Math.max(8, rect.left - width - 8);
+            const top = Math.min(Math.max(8, rect.top), innerHeight - 260);
+            this.$refs.anchor.style.setProperty('--quick-top', `${top}px`);
+            this.$refs.anchor.style.setProperty('--quick-left', `${left}px`);
+            this.selected = { id: event.id, title: event.title, ...event.extendedProps };
+            this.quickOpen = true;
+        },
+        edit() {
+            this.quickOpen = false;
+            this.$dispatch('task-editor', { action: 'openForm', id: this.selected.id });
+        },
+        async toggleComplete() {
+            this.busy = true;
+            try {
+                await wire.toggleComplete(this.selected.id);
+                this.quickOpen = false;
+            } finally {
+                this.busy = false;
+            }
+        },
         async init() {
             const { Calendar, locale, plugins } = await loadFullCalendar();
             const persist = async (info) => {
@@ -30,7 +57,7 @@ export function registerTaskCalendar(Alpine) {
                 }
             };
 
-            this.calendar = new Calendar(this.$el, {
+            this.calendar = new Calendar(this.$refs.calendar, {
                 plugins,
                 locale,
                 firstDay: 1,
@@ -52,14 +79,16 @@ export function registerTaskCalendar(Alpine) {
                 // La rejilla horaria necesita altura fija para desplazarse por dentro; mes y lista crecen con su contenido.
                 datesSet: ({ view }) => {
                     const height = view.type.startsWith('timeGrid')
-                        ? Math.max(480, innerHeight - this.$el.getBoundingClientRect().top - 24)
+                        ? Math.max(480, innerHeight - this.$refs.calendar.getBoundingClientRect().top - 24)
                         : 'auto';
                     if (this.calendar && this.calendar.getOption('height') !== height) this.calendar.setOption('height', height);
                 },
                 editable: true,
                 dayMaxEvents: 3,
                 events: (info, success, failure) => wire.events(info.startStr, info.endStr).then(success, failure),
-                eventClick: (info) => this.$dispatch('task-editor', { action: 'openForm', id: info.event.id }),
+                eventClick: (info) => this.openQuick(info.event, info.el),
+                // El clic en otro evento no debe contar como «clic afuera» del popover abierto.
+                eventDidMount: (info) => { info.el.dataset.popoverTrigger = ''; },
                 dateClick: (info) => this.$dispatch('task-editor', {
                     action: 'openForm',
                     prefill: info.allDay
