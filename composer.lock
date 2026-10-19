@@ -516,7 +516,7 @@
             "version": "0.2.0-dev",
             "dist": {
                 "type": "path",
-                "url": "../laravel-markdown",
+                "url": "https://github.com/edwin-ortizp/laravel-markdown",
                 "reference": "3872d1bb4ecffc2699a11e02dc5f37c76475c543"
             },
             "require": {
