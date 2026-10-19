@@ -145,3 +145,41 @@
   .task-settings-nav { grid-row: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .task-settings-nav__item { padding: 10px 8px; gap: 6px; font-size: .8rem; }
 }
+
+/* Calendario (FullCalendar): sus variables --fc-* se resuelven con tokens M3. */
+.md-task-calendar { padding: 16px; }
+.md-task-calendar__surface {
+  --fc-border-color: var(--md-sys-color-outline-variant);
+  --fc-page-bg-color: var(--md-sys-color-surface);
+  --fc-neutral-bg-color: var(--md-sys-color-surface-container);
+  --fc-list-event-hover-bg-color: var(--md-sys-color-surface-container-high);
+  --fc-today-bg-color: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+  --fc-now-indicator-color: var(--md-sys-color-error);
+  --fc-event-bg-color: var(--md-sys-color-primary-container);
+  --fc-event-border-color: var(--md-sys-color-primary-container);
+  --fc-event-text-color: var(--md-sys-color-on-primary-container);
+  --fc-button-bg-color: var(--md-sys-color-surface-container-high);
+  --fc-button-border-color: transparent;
+  --fc-button-text-color: var(--md-sys-color-on-surface);
+  --fc-button-hover-bg-color: var(--md-sys-color-secondary-container);
+  --fc-button-hover-border-color: transparent;
+  --fc-button-active-bg-color: var(--md-sys-color-secondary-container);
+  --fc-button-active-border-color: transparent;
+  color: var(--md-sys-color-on-surface);
+}
+.md-task-calendar__surface .fc-toolbar-title { font-size: 1.25rem; font-weight: 500; text-transform: capitalize; }
+.md-task-calendar__surface .fc-button { border-radius: 999px; padding: 6px 14px; font-weight: 500; text-transform: capitalize; box-shadow: none !important; }
+.md-task-calendar__surface .fc-button-primary:not(:disabled).fc-button-active { color: var(--md-sys-color-on-secondary-container); }
+.md-task-calendar__surface .fc-col-header-cell-cushion,
+.md-task-calendar__surface .fc-daygrid-day-number { color: var(--md-sys-color-on-surface-variant); text-decoration: none; text-transform: capitalize; }
+.md-task-calendar__surface .fc-event { cursor: pointer; border-radius: 6px; padding: 1px 4px; }
+.md-task-calendar__surface .fc-daygrid-dot-event .fc-event-title { font-weight: 500; }
+.md-task-calendar__surface .fc-event.is-urgent-important { --fc-event-bg-color: var(--md-sys-color-error-container); --fc-event-border-color: var(--md-sys-color-error-container); --fc-event-text-color: var(--md-sys-color-on-error-container); }
+.md-task-calendar__surface .fc-event.is-completed { opacity: .6; }
+.md-task-calendar__surface .fc-event.is-completed .fc-event-title,
+.md-task-calendar__surface .fc-event.is-completed .fc-list-event-title { text-decoration: line-through; }
+@media (max-width: 767.98px) {
+  .md-task-calendar { padding: 8px; }
+  .md-task-calendar__surface .fc-toolbar-title { font-size: 1rem; }
+  .md-task-calendar__surface .fc-button { padding: 4px 10px; }
+}

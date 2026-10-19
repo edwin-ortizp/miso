@@ -9,6 +9,7 @@ import { markPlatform, registerAppFrame, registerPageTransitions } from './app-f
 import { registerInstallPrompt, registerServiceWorker } from './pwa';
 import { registerFeedback } from './feedback';
 import { registerHealthBodyMap } from './health-body-map';
+import { registerTaskCalendar } from './task-calendar';
 
 registerPomodoroTimer(Alpine);
 registerUiSurfaces(Alpine);
@@ -19,6 +20,7 @@ registerMarkdownAdapter(Alpine);
 registerAppFrame(Alpine);
 registerFeedback(Alpine);
 registerHealthBodyMap(Alpine);
+registerTaskCalendar(Alpine);
 
 registerInstallPrompt(Alpine);
 

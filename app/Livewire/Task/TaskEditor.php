@@ -50,5 +50,6 @@ class TaskEditor extends TaskList
     {
         parent::closeForm();
         $this->dispatch('task-records-changed')->to(TaskList::class);
+        $this->dispatch('task-calendar-refresh');
     }
 }

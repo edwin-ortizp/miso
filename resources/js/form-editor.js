@@ -15,6 +15,7 @@ export function registerFormEditor(Alpine) {
             this.closeEditor();
             const generation = ++this.generation;
             Object.entries(defaults).forEach(([key, value]) => wire.$set(key, structuredClone(value), false));
+            Object.entries(detail.prefill ?? {}).forEach(([key, value]) => wire.$set(key, value, false));
             this.submitted = false;
             this.loadError = '';
             wire.$set(state, true, false);

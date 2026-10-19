@@ -146,6 +146,7 @@ return [
         'tabs' => [
             ['label' => 'Lista', 'route' => 'tasks.list', 'icon' => 'bi-list-task', 'active' => ['tasks.list']],
             ['label' => 'Gantt', 'route' => 'tasks.gantt', 'archetype' => 'dashboard', 'icon' => 'bi-bar-chart-steps', 'active' => ['tasks.gantt']],
+            ['label' => 'Calendario', 'route' => 'tasks.calendar', 'archetype' => 'dashboard', 'icon' => 'bi-calendar3', 'active' => ['tasks.calendar']],
             ['label' => 'Flujo', 'route' => 'tasks.flow', 'archetype' => 'dashboard', 'icon' => 'bi-signpost-split', 'active' => ['tasks.flow']],
             ['label' => 'Kanban', 'route' => 'tasks.kanban', 'archetype' => 'dashboard', 'icon' => 'bi-kanban', 'active' => ['tasks.kanban']],
             ['label' => 'Planificación', 'route' => 'tasks.planning', 'archetype' => 'dashboard', 'icon' => 'bi-calendar-week', 'active' => ['tasks.planning']],

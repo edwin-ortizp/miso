@@ -42,6 +42,7 @@ use App\Livewire\Relationship\RelationshipShow;
 use App\Livewire\Relationship\RelationshipTasks;
 use App\Livewire\Settings\SettingsPage;
 use App\Livewire\Statistics\StatisticsDashboard;
+use App\Livewire\Task\TaskCalendar;
 use App\Livewire\Task\TaskFlow;
 use App\Livewire\Task\TaskGantt;
 use App\Livewire\Task\TaskKanban;
@@ -134,6 +135,7 @@ Route::middleware('auth')->group(function () {
     Route::redirect('/tasks', '/tasks/list')->name('tasks');
     Route::get('/tasks/list', TaskList::class)->name('tasks.list');
     Route::get('/tasks/gantt', TaskGantt::class)->name('tasks.gantt');
+    Route::get('/tasks/calendar', TaskCalendar::class)->name('tasks.calendar');
     Route::get('/tasks/flow', TaskFlow::class)->name('tasks.flow');
     Route::get('/tasks/kanban', TaskKanban::class)->name('tasks.kanban');
     Route::get('/tasks/planning', TaskPlanning::class)->name('tasks.planning');

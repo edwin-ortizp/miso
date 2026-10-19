@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Task\TaskCalendar;
 use App\Livewire\Task\TaskFlow;
 use App\Livewire\Task\TaskEditor;
 use App\Livewire\Task\TaskGantt;
@@ -74,13 +75,50 @@ class TaskViewsTest extends TestCase
             ->assertSee('aria-current="page"', false)
             ->assertSee('Kanban');
 
-        foreach (['gantt' => 'Gantt', 'flow' => 'Flujo', 'kanban' => 'Kanban', 'planning' => 'Planificación', 'progress' => 'Progreso'] as $view => $tab) {
+        foreach (['calendar' => 'Calendario', 'gantt' => 'Gantt', 'flow' => 'Flujo', 'kanban' => 'Kanban', 'planning' => 'Planificación', 'progress' => 'Progreso'] as $view => $tab) {
             $this->actingAs($user)->get("/tasks/{$view}")
                 ->assertOk()
                 ->assertSee('<h1 class="visually-hidden" data-region="identity">Tareas</h1>', false)
                 ->assertSee($tab)
                 ->assertSee('aria-current="page"', false);
         }
+    }
+
+    public function test_calendar_returns_visible_events_for_the_current_user_only(): void
+    {
+        $this->actingAs(User::factory()->create());
+        Task::create(['title' => 'Todo el día', 'start_date' => '2026-10-05', 'start_is_date' => true, 'end_date' => '2026-10-06', 'end_is_date' => true]);
+        Task::create(['title' => 'Con hora', 'start_date' => '2026-10-07 09:00', 'start_is_date' => false, 'end_date' => '2026-10-07 10:30', 'end_is_date' => false]);
+        Task::create(['title' => 'Fuera de rango', 'start_date' => '2026-12-01', 'start_is_date' => true]);
+
+        $this->actingAs(User::factory()->create());
+        Task::create(['title' => 'Ajena', 'start_date' => '2026-10-05', 'start_is_date' => true]);
+
+        $this->actingAs(User::query()->first());
+        $events = collect(Livewire::test(TaskCalendar::class)->instance()->events('2026-09-28', '2026-11-09'))->keyBy('title');
+
+        $this->assertSame(['Todo el día', 'Con hora'], $events->keys()->all());
+        $this->assertTrue($events['Todo el día']['allDay']);
+        $this->assertSame('2026-10-07', $events['Todo el día']['end']);
+        $this->assertFalse($events['Con hora']['allDay']);
+    }
+
+    public function test_calendar_moves_tasks_preserving_their_schedule_kind(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $timed = Task::create(['title' => 'Con hora', 'start_date' => '2026-10-07 09:00', 'start_is_date' => false, 'end_date' => '2026-10-07 10:00', 'end_is_date' => false]);
+        $due = Task::create(['title' => 'Vencimiento', 'end_date' => '2026-10-07', 'end_is_date' => true]);
+
+        Livewire::test(TaskCalendar::class)
+            ->call('moveTask', $timed->id, '2026-10-08T14:00:00', '2026-10-08T16:00:00', false)
+            ->call('moveTask', $due->id, '2026-10-10', '2026-10-11', true);
+
+        $timed->refresh();
+        $due->refresh();
+        $this->assertSame('2026-10-08 14:00', $timed->start_date->format('Y-m-d H:i'));
+        $this->assertSame(120, $timed->estimated_time);
+        $this->assertNull($due->start_date);
+        $this->assertSame('2026-10-10', $due->end_date->toDateString());
     }
 
     public function test_bulk_creation_uses_non_empty_lines_and_shared_attributes(): void
