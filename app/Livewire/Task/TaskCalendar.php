@@ -30,6 +30,11 @@ class TaskCalendar extends Component
     #[Url(as: 'edit')]
     public ?string $editTask = null;
 
+    // Aviso tras programar la siguiente repetición: la tarea se mueve y puede quedar fuera de la vista.
+    public ?string $notice = null;
+
+    public ?string $noticeDate = null;
+
     /**
      * Eventos de FullCalendar para el rango visible [$start, $end).
      */
@@ -99,8 +104,16 @@ class TaskCalendar extends Component
 
     public function confirmRecurringCompletion(TaskGamificationService $gamification): ?array
     {
+        $taskId = $this->recurringTaskId;
         $result = $this->completeRecurring($gamification);
         $this->dispatch('task-calendar-refresh');
+
+        $next = $result ? Task::find($taskId) : null;
+        $date = $next?->start_date ?? $next?->end_date;
+        if ($date) {
+            $this->noticeDate = $date->toDateString();
+            $this->notice = 'Completada. Próxima repetición: '.$date->locale('es')->translatedFormat('l j \d\e F').'.';
+        }
 
         return $result;
     }
@@ -136,6 +149,7 @@ class TaskCalendar extends Component
             'allDay' => $allDay,
             'extendedProps' => [
                 'completed' => (bool) $task->completed,
+                'recurrent' => (bool) $task->is_recurrent,
                 'category' => $task->category,
                 'priority' => $task->priority ? (self::PRIORITIES[$task->priority] ?? null) : null,
                 'timeLabel' => $this->timeLabel($start, $end, $allDay),
@@ -143,6 +157,7 @@ class TaskCalendar extends Component
             'classNames' => array_values(array_filter([
                 'md-calendar-task',
                 $task->completed ? 'is-completed' : null,
+                $task->is_recurrent ? 'is-recurrent' : null,
                 $task->priority ? 'is-'.$task->priority : null,
             ])),
         ];

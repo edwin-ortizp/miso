@@ -153,7 +153,11 @@ class HomeDashboardTest extends TestCase
             ->call('confirmRecurringCompletion')
             ->assertSet('showRecurringCompletion', false);
 
-        $this->assertTrue((bool) $task->fresh()->completed);
+        // La tarea viva se mueve a la próxima fecha; lo completado queda como copia de historial.
+        $task->refresh();
+        $this->assertFalse((bool) $task->completed);
+        $this->assertSame('2026-07-16', $task->end_date->toDateString());
+        $this->assertTrue(Task::where('is_recurrence_history', true)->where('completed', true)->where('recurrence_series_id', $task->recurrence_series_id)->exists());
     }
 
     public function test_weekly_trend_reports_seven_days_of_percentages(): void

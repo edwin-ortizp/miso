@@ -11,6 +11,7 @@
                     <p class="md-body-medium mb-0"><i class="bi bi-clock" aria-hidden="true"></i> <span x-text="selected.timeLabel"></span></p>
                     <p class="md-body-small mb-0" x-show="selected.category"><i class="bi bi-tag" aria-hidden="true"></i> <span x-text="selected.category"></span></p>
                     <p class="md-body-small mb-0" x-show="selected.priority"><i class="bi bi-flag" aria-hidden="true"></i> <span x-text="selected.priority"></span></p>
+                    <p class="md-body-small mb-0" x-show="selected.recurrent"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Se repite</p>
                     <p class="md-body-small mb-0" x-show="selected.completed"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Completada</p>
                 </div>
             </template>
@@ -42,4 +43,14 @@
     <livewire:task.task-editor :edit-task="$editTask" />
 
     @include('livewire.task.partials.recurring-completion-dialog')
+
+    @if ($notice)
+        <x-ui.snackbar wire:key="calendar-notice-{{ $noticeDate }}">
+            {{ $notice }}
+            <x-slot:actions>
+                <button type="button" class="md-btn-text" x-on:click="$dispatch('task-calendar-goto', { date: @js($noticeDate) }); $wire.set('notice', null)">Ver</button>
+                <x-ui.icon-action icon="bi-x-lg" size="sm" label="Cerrar aviso" wire:click="$set('notice', null)" />
+            </x-slot:actions>
+        </x-ui.snackbar>
+    @endif
 </x-module-shell>

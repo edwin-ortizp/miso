@@ -143,6 +143,48 @@ class TaskViewsTest extends TestCase
         $this->assertFalse($recurring->refresh()->completed);
     }
 
+    public function test_calendar_completes_recurring_tasks_and_moves_them_to_the_next_date(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $task = Task::create(['title' => 'Arriendo', 'start_date' => '2026-10-19', 'start_is_date' => true, 'end_date' => '2026-10-19', 'end_is_date' => true, 'is_recurrent' => true, 'recurrence_interval_days' => 7]);
+
+        Livewire::test(TaskCalendar::class)
+            ->call('toggleComplete', $task->id)
+            ->assertSet('showRecurringCompletion', true)
+            ->set('nextOccurrenceDate', '2026-10-26')
+            ->call('confirmRecurringCompletion')
+            ->assertHasNoErrors()
+            ->assertSet('showRecurringCompletion', false)
+            ->assertDispatched('task-calendar-refresh')
+            ->assertSet('noticeDate', '2026-10-26')
+            ->assertSee('Próxima repetición: lunes 26 de octubre');
+
+        $task->refresh();
+        $this->assertFalse($task->completed);
+        $this->assertSame('2026-10-26', $task->start_date->toDateString());
+        $this->assertTrue(Task::where('is_recurrence_history', true)->where('completed', true)->whereDate('start_date', '2026-10-19')->exists());
+    }
+
+    public function test_recurring_completion_keeps_the_time_of_timed_tasks(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $task = Task::create(['title' => 'Con hora', 'start_date' => '2026-10-19 09:15', 'start_is_date' => false, 'end_date' => '2026-10-19 10:15', 'end_is_date' => false, 'is_recurrent' => true, 'recurrence_interval_days' => 2]);
+
+        Livewire::test(TaskCalendar::class)
+            ->call('toggleComplete', $task->id)
+            ->set('nextOccurrenceDate', '2026-10-21')
+            ->call('confirmRecurringCompletion');
+
+        $task->refresh();
+        $this->assertSame('2026-10-21 09:15', $task->start_date->format('Y-m-d H:i'));
+        $this->assertSame('2026-10-21 10:15', $task->end_date->format('Y-m-d H:i'));
+        $this->assertFalse($task->start_is_date);
+
+        $history = Task::where('is_recurrence_history', true)->firstOrFail();
+        Livewire::test(TaskCalendar::class)->call('toggleComplete', $history->id)->call('toggleComplete', $history->id);
+        $this->assertTrue($history->refresh()->is_recurrence_history);
+    }
+
     public function test_bulk_creation_uses_non_empty_lines_and_shared_attributes(): void
     {
         $user = User::factory()->create();

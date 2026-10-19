@@ -196,3 +196,7 @@
 .md-task-calendar-popover__info { display: grid; gap: 6px; color: var(--md-sys-color-on-surface-variant); }
 .md-task-calendar-popover__info .md-title-medium { color: var(--md-sys-color-on-surface); }
 @media (max-width: 767.98px) { .md-task-calendar-anchor { position: static; } }
+/* FullCalendar pinta `icon: 'arrow-clockwise'` como .fc-icon-arrow-clockwise; se resuelve con Bootstrap Icons. */
+.md-task-calendar__surface .fc-icon-arrow-clockwise::before { content: '\F116'; font-family: 'bootstrap-icons'; }
+.md-task-calendar__surface .fc-event.is-recurrent .fc-event-title::after,
+.md-task-calendar__surface .fc-event.is-recurrent .fc-list-event-title a::after { content: '\F130'; font-family: 'bootstrap-icons'; margin-left: 4px; font-size: .85em; }

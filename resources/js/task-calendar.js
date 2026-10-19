@@ -20,6 +20,7 @@ export function registerTaskCalendar(Alpine) {
     Alpine.data('taskCalendar', (wire) => ({
         calendar: null,
         refresh: null,
+        goto: null,
         quickOpen: false,
         selected: null,
         busy: false,
@@ -62,17 +63,28 @@ export function registerTaskCalendar(Alpine) {
                 locale,
                 firstDay: 1,
                 height: 'auto',
-                initialView: compact() ? 'listWeek' : 'dayGridMonth',
+                initialView: compact() ? 'listWeek' : 'timeGridWeek',
                 headerToolbar: compact()
-                    ? { left: 'prev,next', center: 'title', right: 'today' }
-                    : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+                    ? { left: 'prev,next', center: 'title', right: 'refresh today' }
+                    : { left: 'prev,next today refresh', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
                 footerToolbar: compact() ? { center: 'dayGridMonth,timeGridWeek,listWeek' } : false,
+                // Recarga eventos y la lista «Sin fecha» sin recargar la página, como «Actualizar tabla» en las vistas de gestión.
+                customButtons: {
+                    refresh: {
+                        icon: 'arrow-clockwise',
+                        hint: 'Actualizar calendario',
+                        click: () => { this.calendar.refetchEvents(); wire.$refresh(); },
+                    },
+                },
+                loading: (isLoading) => {
+                    const button = this.$refs.calendar.querySelector('.fc-refresh-button');
+                    if (button) button.disabled = isLoading;
+                },
                 nowIndicator: true,
-                // Día y semana: cuartos de hora con altura legible, desde las 5 a. m., abriendo una hora antes de ahora.
+                // Día y semana: cuartos de hora con altura legible, abriendo una hora antes de ahora.
                 slotDuration: '00:15:00',
                 slotLabelInterval: '01:00',
-                slotMinTime: '05:00:00',
-                scrollTime: `${String(Math.max(new Date().getHours() - 1, 5)).padStart(2, '0')}:00:00`,
+                scrollTime: `${String(Math.max(new Date().getHours() - 1, 0)).padStart(2, '0')}:00:00`,
                 scrollTimeReset: false,
                 slotEventOverlap: false,
                 eventMinHeight: 26,
@@ -102,9 +114,12 @@ export function registerTaskCalendar(Alpine) {
 
             this.refresh = () => this.calendar?.refetchEvents();
             window.addEventListener('task-calendar-refresh', this.refresh);
+            this.goto = (event) => this.calendar?.gotoDate(event.detail.date);
+            window.addEventListener('task-calendar-goto', this.goto);
         },
         destroy() {
             window.removeEventListener('task-calendar-refresh', this.refresh);
+            window.removeEventListener('task-calendar-goto', this.goto);
             this.calendar?.destroy();
             this.calendar = null;
         },

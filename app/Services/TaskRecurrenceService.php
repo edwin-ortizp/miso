@@ -85,6 +85,12 @@ class TaskRecurrenceService
      */
     public function completeAndSchedule(Task $task, Carbon $nextDate, TaskGamificationService $gamification): array
     {
+        // El diálogo solo pide la fecha: una tarea con hora conserva la suya en vez de caer a medianoche.
+        $timed = $task->start_date ? ! $task->start_is_date : ($task->end_date && ! $task->end_is_date);
+        if ($timed) {
+            $nextDate = $nextDate->copy()->setTimeFrom($task->start_date ?? $task->end_date);
+        }
+
         return $this->completeAt($task, $nextDate, $gamification);
     }
 

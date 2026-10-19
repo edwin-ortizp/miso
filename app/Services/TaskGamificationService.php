@@ -30,7 +30,6 @@ class TaskGamificationService
             'completed_at' => null,
             'completion_xp' => null,
             'progress' => min((int) $task->progress, 99),
-            'is_recurrence_history' => false,
         ]);
 
         return ['completed' => false];

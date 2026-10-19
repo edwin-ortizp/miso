@@ -95,15 +95,17 @@ class TaskGamificationTest extends TestCase
             ->assertSet('showRecurringCompletion', false)
             ->assertDispatched('task-completed', xp: 2);
 
+        // Lo completado queda como copia de historial y la misma tarea pasa a la próxima fecha.
         $this->assertDatabaseHas('tasks', [
-            'id' => $task->id,
+            'user_id' => $user->id,
+            'title' => 'Trapear la casa',
             'completed' => true,
+            'is_recurrence_history' => true,
             'completed_at' => '2026-07-12 10:00:00',
             'completion_xp' => 2,
         ]);
         $this->assertDatabaseHas('tasks', [
-            'user_id' => $user->id,
-            'title' => 'Trapear la casa',
+            'id' => $task->id,
             'completed' => false,
             'is_recurrent' => true,
             'start_date' => '2026-07-21 00:00:00',
