@@ -2,7 +2,7 @@
 
 El partial `resources/views/partials/markdown-editor.blade.php` utiliza el componente
 portable `x-markdown::editor` de `edwin-ortizp/laravel-markdown`.
-Actualmente utiliza una copia local `0.2.0-dev`, preparada para una futura v0.2.0.
+Usa la versión publicada `v0.2.0` instalada desde Packagist.
 Ya no utiliza `markdown::profiles.miso`. Las ocho herramientas y la vista previa
 pertenecen al paquete; no se duplican sus botones ni el motor de formato.
 
@@ -46,7 +46,7 @@ Las pruebas verifican etiquetas, clic sobre el icono, persistencia tras reapertu
 y morph, fuente de iconos, ancho móvil y las ocho acciones de formato.
 
 
-## Scroll y ampliación (0.2.0-dev local)
+## Scroll y ampliación (v0.2.0)
 
 El paquete limita el cuerpo del editor, mantiene la barra visible y aporta el botón
 Ampliar / Restaurar con iconos SVG propios. No necesita Bootstrap Icons para esa
@@ -60,37 +60,29 @@ observa tamaño del editor, modal, ventana y visualViewport. El contenido interm
 de `.lt-cm-body` ahora tiene min-height:0 y overflow:auto: cabecera y acciones quedan
 fuera del scroll. No se duplican la lógica de edición ni la ampliación del paquete.
 
-Composer usa `../laravel-markdown`, override local `0.2.0-dev` y `symlink:false`.
-Solo cambió esa entrada del lock respecto al inicio de este trabajo. Para incorporar
-futuros cambios de la fuente a la copia instalada:
-
-```powershell
-composer reinstall edwin-ortizp/laravel-markdown --no-interaction --no-scripts
-php artisan vendor:publish --tag=markdown-assets --force
-```
-
-Compilar con `npm run build` cuando cambien también el adaptador o estilos de MiSo.
-No editar vendor ni public/vendor manualmente. No se ha publicado v0.2.0.
-
-### Reversión a la versión pública 0.1.0
-
-Retirar únicamente el repositorio path de este paquete en composer.json, conservar
-otros repositorios si existen y cambiar su require a `0.1.0`. Después:
+Composer resuelve el paquete desde Packagist (`edwin-ortizp/laravel-markdown: ^0.2.0`);
+ya no se usa un repositorio `path` local. Para actualizar los assets publicados tras
+cambiar de versión:
 
 ```powershell
 composer update edwin-ortizp/laravel-markdown --no-interaction --no-scripts
 php artisan vendor:publish --tag=markdown-assets --force
 ```
 
-Cambiar la URL anticipada de editor.js en app-scripts a `?v=0.1.0` y recompilar MiSo.
-El partial y los iconos siguen siendo compatibles con 0.1.0; desaparece la ampliación.
-La corrección del contenedor del modal puede conservarse. La copia de archivos al
-inicio del trabajo está en storage/framework/testing/markdown-expand-backup; no
-restaurar archivos completos si contienen cambios posteriores de otros trabajos.
-No requiere SQL ni conversiones del contenido.
+Compilar con `npm run build` cuando cambien también el adaptador o estilos de MiSo.
+No editar vendor ni public/vendor manualmente. Mantener sincronizado el `?v=` de
+editor.js en app-scripts con la versión instalada.
+
+### Cambiar de versión
+
+Ajustar el require a la versión deseada (por ejemplo `^0.1.0`), ejecutar el
+`composer update` y el `vendor:publish` anteriores, actualizar el `?v=` de editor.js
+en app-scripts y recompilar MiSo. El partial y los iconos siguen siendo compatibles
+con 0.1.0; en 0.1.0 desaparece la ampliación. La corrección del contenedor del modal
+puede conservarse en cualquier caso. No requiere SQL ni conversiones del contenido.
 
 
-Validación final de 0.2.0-dev: **12 pruebas Browser, 131 aserciones correctas**.
+Validación final de v0.2.0: **12 pruebas Browser, 131 aserciones correctas**.
 Incluye modo ampliado, mismo nodo/selección, formulario Blade independiente,
 expandable:false, fallback sin Popover, scroll de contenido largo, cierre del
 ancestro, desmontaje, Escape/foco, morph, guardado inmediato/diferido y viewport

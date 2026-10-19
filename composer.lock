@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3c7f9e68c9236b00aeb32f67c6d24a3d",
+    "content-hash": "5bf177d3923effaecc6277163fd1463f",
     "packages": [
         {
             "name": "brick/math",
@@ -513,11 +513,17 @@
         },
         {
             "name": "edwin-ortizp/laravel-markdown",
-            "version": "0.2.0-dev",
+            "version": "v0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/edwin-ortizp/laravel-markdown.git",
+                "reference": "0a11d087ae6daabb21c9141313d13ae7d53aac52"
+            },
             "dist": {
-                "type": "path",
-                "url": "https://github.com/edwin-ortizp/laravel-markdown",
-                "reference": "3872d1bb4ecffc2699a11e02dc5f37c76475c543"
+                "type": "zip",
+                "url": "https://api.github.com/repos/edwin-ortizp/laravel-markdown/zipball/0a11d087ae6daabb21c9141313d13ae7d53aac52",
+                "reference": "0a11d087ae6daabb21c9141313d13ae7d53aac52",
+                "shasum": ""
             },
             "require": {
                 "illuminate/support": "^13.0",
@@ -541,6 +547,7 @@
                     "Edwin\\LaravelMarkdown\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -557,10 +564,7 @@
                 "issues": "https://github.com/edwin-ortizp/laravel-markdown/issues",
                 "source": "https://github.com/edwin-ortizp/laravel-markdown"
             },
-            "transport-options": {
-                "symlink": false,
-                "relative": true
-            }
+            "time": "2026-10-19T03:52:42+00:00"
         },
         {
             "name": "egulias/email-validator",
@@ -13410,9 +13414,7 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "edwin-ortizp/laravel-markdown": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
