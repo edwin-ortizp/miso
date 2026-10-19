@@ -18,6 +18,51 @@ class TaskViewsTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_existing_tasks_open_description_preview_on_every_open(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $task = Task::create(['title' => 'Con descripción', 'description' => '**Detalle**']);
+        $emptyTask = Task::create(['title' => 'Sin descripción']);
+
+        foreach ([TaskEditor::class, TaskFlow::class, TaskGantt::class, TaskPlanning::class] as $component) {
+            Livewire::test($component)
+                ->call('openForm', $task->id)
+                ->assertSet('descriptionMode', 'preview')
+                ->assertSee('<strong>Detalle</strong>', false)
+                ->set('descriptionMode', 'write')
+                ->set('description', 'Texto actualizado')
+                ->set('descriptionMode', 'preview')
+                ->assertSet('description', 'Texto actualizado')
+                ->assertSee('Texto actualizado')
+                ->set('descriptionMode', 'write')
+                ->call('closeForm')
+                ->call('openForm', $emptyTask->id)
+                ->assertSet('descriptionMode', 'preview')
+                ->assertSee('Sin contenido para previsualizar.');
+        }
+    }
+
+    public function test_new_tasks_open_description_in_write_mode_after_an_existing_task(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $task = Task::create(['title' => 'Tarea existente']);
+
+        foreach ([TaskEditor::class, TaskList::class] as $component) {
+            Livewire::test($component)
+                ->call('openForm')
+                ->assertSet('descriptionMode', 'write')
+                ->call('openForm', $task->id)
+                ->assertSet('descriptionMode', 'preview')
+                ->call('closeForm')
+                ->call('openForm')
+                ->assertSet('descriptionMode', 'write')
+                ->assertSet('description', '');
+        }
+
+        Livewire::test(TaskEditor::class, ['editTask' => $task->id])
+            ->assertSet('descriptionMode', 'preview');
+    }
+
     public function test_task_views_have_canonical_routes_and_shared_tabs(): void
     {
         $user = User::factory()->create();

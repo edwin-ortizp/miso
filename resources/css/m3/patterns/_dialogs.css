@@ -419,3 +419,31 @@
 
 .lt-field-condition { display: contents; }
 .lt-editor-pristine .md-error [role="alert"] { display: none; }
+
+/* Propiedades persistentes del editor de tareas; el resto de modales conserva su ancho. */
+.task-properties-dialog.md-form-dialog { width: min(1400px, calc(100vw - 48px)); }
+.task-properties-dialog.md-form-dialog.is-expanded { width: 100%; }
+.lt-editor-pristine .task-properties-dialog .md-form-dialog__nav-dot { display: none; }
+.task-properties-layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; align-items: start;
+}
+.task-properties-content { grid-column: 1; grid-row: 1; min-width: 0; }
+.task-properties-panel {
+  grid-column: 2; grid-row: 1; min-width: 0; padding: 16px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--md-sys-shape-corner-large);
+  background: var(--md-sys-color-surface-container-low);
+}
+.task-properties-panel select { width: 100%; min-width: 0; }
+@media (max-width: 1199.98px) {
+  .task-properties-layout { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .task-properties-panel, .task-properties-content { grid-column: 1; grid-row: auto; }
+}
+@media (max-width: 767.98px) {
+  .task-properties-dialog.md-form-dialog { width: 100%; }
+}
+
+/* The stepped body introduces an extra level between dialog and content. */
+.md-dialog--large > .lt-cm-body > .md-dialog-content {
+  min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain;
+}

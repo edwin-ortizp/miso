@@ -1,3 +1,4 @@
+import { registerMarkdownAdapter } from './markdown-adapter';
 import { registerFormEditor } from './form-editor';
 import { registerEnergyPricing } from './energy-pricing';
 import { registerDialogViewport } from './dialog-viewport';
@@ -14,6 +15,7 @@ registerUiSurfaces(Alpine);
 registerEnergyPricing(Alpine);
 registerDialogViewport(Alpine);
 registerFormEditor(Alpine);
+registerMarkdownAdapter(Alpine);
 registerAppFrame(Alpine);
 registerFeedback(Alpine);
 registerHealthBodyMap(Alpine);

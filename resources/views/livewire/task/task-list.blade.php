@@ -169,11 +169,13 @@
     </div>
 
     <div class="lt-fab-zone">
-        <x-module-actions fab-always
-            :primary="['label' => 'Nueva tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']]" />
+        <x-module-actions fab-always :split="true"
+            :primary="['label' => 'Nueva tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']]"
+            :secondary="[['label' => 'Crear múltiples tareas', 'icon' => 'bi-list-task', 'event' => 'task-bulk-editor', 'detail' => ['action' => 'openForm'], 'create' => true]]" />
     </div>
 
     <livewire:task.task-editor :edit-task="$editTask" />
+    <livewire:task.task-bulk-editor />
 
     @include('livewire.task.partials.recurring-completion-dialog')
 </div>

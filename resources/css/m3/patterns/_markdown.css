@@ -48,3 +48,41 @@
 .md-markdown-empty { margin: 0; color: var(--md-sys-color-on-surface-variant); text-align: center; }
 
 @media (max-width: 575.98px) { .md-markdown-editor-toolbar { align-items: flex-start; flex-direction: column; } }
+
+/* Portable package editor: MiSo skin, no duplicated toolbar or formatting logic. */
+.md-markdown-editor .lm-editor { border: 0; border-radius: inherit; background: var(--md-sys-color-surface); }
+.md-markdown-editor .lm-editor__toolbar { padding: 8px 12px; gap: 6px; background: var(--md-sys-color-surface-container-low); border-color: var(--md-sys-color-outline-variant); }
+.md-markdown-editor .lm-editor__mode { border-color: var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface); }
+.md-markdown-editor .lm-editor__button { min-height: 36px; padding: 4px 8px; color: var(--md-sys-color-on-surface-variant); font-family: inherit; font-size: .8125rem; }
+.md-markdown-editor .lm-editor__button:is(:hover, .active) { color: var(--md-sys-color-primary); background: var(--md-sys-color-primary-container); }
+.md-markdown-editor .lm-editor__button:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: -2px; }
+.md-markdown-editor .lm-editor__source { width: 100%; min-height: 132px; padding: 16px; background: transparent; color: var(--md-sys-color-on-surface); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: .875rem; line-height: 1.7; }
+.md-markdown-editor .lm-editor__preview { min-height: 132px; padding: 16px; color: var(--md-sys-color-on-surface); line-height: 1.7; }
+.md-markdown-editor .lm-editor__preview :is(h1,h2,h3,h4,h5,h6) { color: inherit; }
+.md-markdown-editor .lm-editor__preview a { color: var(--md-sys-color-primary); }
+.md-markdown-editor .lm-editor__preview :is(code,pre) { color: inherit; background: var(--md-sys-color-surface-container-high); }
+.md-markdown-editor .lm-editor__preview blockquote { border-color: var(--md-sys-color-primary); color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface-container-low); }
+@media (max-width: 575.98px) {
+  .md-markdown-editor .lm-editor__mode { flex-basis: 100%; margin-right: 0; }
+  .md-markdown-editor .lm-editor__button { min-height: 40px; }
+}
+
+/* Icon-only tools; editor modes retain their visible labels. */
+.md-markdown-editor [data-markdown-snippet] { width: 36px; min-width: 36px; flex: 0 0 36px; padding: 0; font-size: 1.05rem; }
+.md-markdown-editor [data-miso-markdown-icon] { display: block; line-height: 1; }
+@media (max-width: 575.98px) {
+  .md-markdown-editor .lm-editor__toolbar { gap: 4px; }
+}
+
+/* Expanded surfaces keep the same Material skin in the browser top layer. */
+.md-markdown-editor .lm-editor.lm-editor--expanded { border-radius: 24px; border: var(--lm-expanded-margin, 16px) solid transparent; }
+.md-markdown-editor .lm-editor__expand { margin-left: auto; }
+
+@media (max-width: 575.98px) {
+  .md-markdown-editor .lm-editor__mode { flex-basis: calc(100% - 48px); }
+  .md-markdown-editor .lm-editor__expand { order: 0; width: 36px; flex: 0 0 36px; padding: 0; }
+}
+
+@media (max-width: 575.98px) {
+  .md-markdown-editor [data-markdown-snippet] { order: 1; }
+}

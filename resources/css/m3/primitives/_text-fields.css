@@ -208,8 +208,8 @@
 
 /* Combobox: select con buscador (x-ui.combobox) */
 .md-combobox { position: relative; }
-.md-combobox > .md-field__control { padding-right: 40px; }
-.md-combobox__chevron { position: absolute; right: 14px; top: 28px; transform: translateY(-50%); pointer-events: none; color: var(--md-sys-color-on-surface-variant); font-size: .8rem; }
+.md-combobox > .md-field__control { padding-right: 52px; }
+.md-combobox__chevron { position: absolute; right: 6px; top: 6px; width: 44px; height: 44px; color: var(--md-sys-color-on-surface-variant); font-size: .8rem; }
 .md-combobox__list { position: absolute; z-index: 40; left: 0; right: 0; top: calc(56px + 4px); max-height: 260px; overflow-y: auto; margin: 0; padding: 6px 0; list-style: none; background: var(--md-sys-color-surface-container); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-medium); box-shadow: 0 6px 20px rgb(0 0 0 / .16); }
 .md-combobox__option { padding: 10px 16px; font-size: .9rem; color: var(--md-sys-color-on-surface); cursor: pointer; }
 .md-combobox__option:hover, .md-combobox__option.is-active { background: color-mix(in srgb, var(--md-sys-color-primary) 12%, transparent); }

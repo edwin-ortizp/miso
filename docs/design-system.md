@@ -149,6 +149,8 @@ Patrón común y obligatorio para todo modal que crea o edita información, y de
 - En móvil, cabecera y acciones permanecen fuera del scroll; solo se desplaza el contenido central. La capa usa la altura y el desplazamiento de `visualViewport` mientras está abierta, con respaldo `100dvh`, y respeta las áreas seguras. El teclado no debe desplazar las acciones fuera del área visible. Este ajuste no cambia las dimensiones de escritorio.
 - `submit-action` conserva el guardado Livewire habitual. Para borradores Alpine que deben enviarse juntos, `submit-expression` declara la expresión de envío en el formulario; el servidor sigue validando y calculando los valores persistidos.
 
+Tareas usa este modal con Información básica, Privacidad y Programación, y propiedades persistentes a la derecha (apiladas en pantallas estrechas). El FAB dividido abre Nueva tarea o Crear múltiples tareas; el segundo usa un borrador independiente, un título por línea y campos comunes, sin Estado ni Recurrencia.
+
 ### Campos (outlined, Material Design 3)
 
 Base visual de **todos** los formularios, no solo de los modales:
@@ -158,6 +160,7 @@ Base visual de **todos** los formularios, no solo de los modales:
 - Ícono inicial opcional; los select muestran chevron propio.
 - Estados: hover (borde on-surface), focus (borde 2 px del acento y label del mismo color), error (borde, label y ayuda en rojo), disabled (opacidad .38).
 - Obligatorio: asterisco rojo junto al label.
+- **Select con buscador** (`x-ui.combobox`): recibir foco no abre la lista. Clic/toque en el campo o su flecha alterna la apertura; escribir o usar las flechas del teclado abre. Seleccionar, pulsar fuera, Tab o salir del campo cierra y restaura la etiqueta seleccionada. Escape cierra primero la lista sin cerrar el diálogo.
 
 ## Menús, filtros y botón flotante
 

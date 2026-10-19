@@ -186,6 +186,7 @@ class TaskList extends Component
             $task = Task::find($id);
             if ($task) {
                 $this->editingId = $id;
+                $this->descriptionMode = 'preview';
                 $this->title = $task->title;
                 $this->description = $task->description ?? '';
                 $this->category = $task->category ?? '';
@@ -213,7 +214,7 @@ class TaskList extends Component
 
     public function saveBulk(): void
     {
-        $lines = collect(preg_split('/\R/', $this->bulkTitles) ?: [])
+        $lines = collect(preg_split('/\R/u', $this->bulkTitles) ?: [])
             ->map(fn (string $line) => trim($line))
             ->filter()
             ->values();

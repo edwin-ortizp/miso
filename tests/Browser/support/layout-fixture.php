@@ -11,6 +11,7 @@ if (! app()->environment('testing') || config('database.default') !== 'sqlite'
 Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--force' => true]);
 $user = App\Models\User::factory()->create(['email' => 'layout@example.test', 'password' => 'browser-test-password']);
 auth()->login($user);
+App\Support\DefaultTaskCategories::createFor($user);
 App\Models\Task::create(['title' => 'Tarea de prueba de distribución', 'start_date' => today()]);
 App\Models\HealthEvent::create(['title' => 'Evento sintético', 'type' => 'symptom', 'event_date' => today(), 'details' => ['body_area' => 'head']]);
 foreach (['Correr', 'Ciclismo', 'Tenis'] as $name) {

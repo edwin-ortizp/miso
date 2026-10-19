@@ -1,91 +1,74 @@
-<x-create-modal :state="'showDialog'" :title="$dialogTitle ?? 'Editar tarea'" icon="bi-list-task" module="tasks"
-    :wide="true" :client-close="$localEditor ?? false" :title-expression="($localEditor ?? false) ? '$wire.editingId ? \'Editar tarea\' : \'Nueva tarea\'' : null"
-    :steps="[
-        ['label' => 'Lo básico'],
-        ['label' => 'Clasificación'],
-        ['label' => 'Programación'],
-    ]"
-    save-action="save" save-label="{{ $saveLabel ?? 'Actualizar' }}"
-    :bulk-action="($localEditor ?? false) || !$editingId ? 'saveBulk' : null" bulk-save-label="Crear tareas"
-    close-action="closeForm">
-
-    <div x-show="step === 0" class="lt-cm-form">
-        <div x-show="!bulk">
-            <div class="md-text-field"><input type="text" wire:model="title" placeholder=" " id="{{ $dialogId }}-title"><label for="{{ $dialogId }}-title">Título</label></div>
-            @error('title')<p class="md-error" role="alert" @if($localEditor ?? false) x-show="submitted" @endif>{{ $message }}</p>@enderror
-        </div>
-        <div x-show="bulk" x-cloak>
-            <div class="md-text-field">
-                <textarea wire:model="bulkTitles" placeholder=" " id="{{ $dialogId }}-bulk-titles" rows="6"></textarea>
-                <label for="{{ $dialogId }}-bulk-titles">Tareas</label>
-                @error('bulkTitles')
-                    <div class="md-supporting-text" style="color: var(--md-sys-color-error);">{{ $message }}</div>
-                @enderror
-            </div>
-        </div>
-
-        @include('partials.markdown-editor', [
-            'model' => 'description',
-            'mode' => 'descriptionMode',
-            'modeValue' => $descriptionMode,
-            'content' => $description,
-            'id' => $dialogId.'-description',
-            'deferred' => $localEditor ?? false,
-            'placeholder' => 'Detalles de la tarea. Admite Markdown.',
-        ])
-
-        @if (($localEditor ?? false) || ! $editingId)
-            <label class="lt-cm-switch" @if($localEditor ?? false) x-show="!$wire.editingId" @endif>
-                <input type="checkbox" x-model="bulk">
-                <span class="lt-cm-switch__track" aria-hidden="true"><span class="lt-cm-switch__thumb"></span></span>
-                <span class="lt-cm-switch__text">
-                    <b>Varias a la vez</b>
-                    <small x-text="bulk ? 'Una tarea por línea; los campos comunes se aplican a todas.' : 'Crea de golpe una lista de tareas con los mismos campos.'"></small>
-                </span>
-            </label>
-        @endif
-    </div>
-
-    <div x-show="step === 1" x-cloak class="lt-cm-form">
-        <div class="lt-cm-row lt-cm-row--3">
+@php
+    $localEditor = $localEditor ?? false;
+    $bulkEditor = $bulkEditor ?? false;
+@endphp
+<x-ui.form-dialog :open="$showForm" :state="$localEditor ? 'showDialog' : null"
+    :id="$dialogId" :title="$dialogTitle ?? 'Editar tarea'" icon="bi-list-task" module="tasks"
+    class="task-properties-dialog" close="closeForm" submit-action="save"
+    :validation-state="$localEditor ? 'submitted' : null"
+    :title-expression="$localEditor && ! $bulkEditor ? '$wire.editingId ? \'Editar tarea\' : \'Nueva tarea\'' : null"
+    :sections="[
+        'basic' => ['label' => 'Información básica', 'icon' => 'bi-file-earmark-text', 'error' => $errors->hasAny(['title', 'bulkTitles'])],
+        'privacy' => ['label' => 'Privacidad', 'icon' => 'bi-lock'],
+        'schedule' => ['label' => 'Programación', 'icon' => 'bi-calendar3', 'error' => $errors->hasAny(['startDate', 'endDate', 'startTime', 'endTime'])],
+    ]">
+    <div class="task-properties-layout">
+        <aside class="task-properties-panel lt-cm-form" aria-label="Propiedades de la tarea">
             <x-ui.category-select name="category" :id="$dialogId.'-category'" :options="$categories" wire:model="category" />
-            <div class="md-text-field"><select wire:model="priority" id="{{ $dialogId }}-priority"><option value="">Sin prioridad</option>@foreach ($priorities as $key => $label)<option value="{{ $key }}">{{ $label }}</option>@endforeach</select><label for="{{ $dialogId }}-priority">Prioridad</label></div>
-            <div class="md-text-field"><select wire:model="size" id="{{ $dialogId }}-size"><option value="">Sin tamaño</option>@foreach ($sizes as $key => $label)<option value="{{ $key }}">{{ $label }}</option>@endforeach</select><label for="{{ $dialogId }}-size">Tamaño</label></div>
-        </div>
-        @isset($statusOptions)
-            <div class="md-text-field"><select wire:model="statusId" id="{{ $dialogId }}-status"><option value="">{{ $editingId ? 'Conservar estado actual' : 'Estado inicial (por hacer)' }}</option>@foreach ($statusOptions as $key => $label)<option value="{{ $key }}">{{ $label }}</option>@endforeach</select><label for="{{ $dialogId }}-status">Estado</label></div>
-        @endisset
-        <label class="md-checkbox"><input type="checkbox" wire:model="isPrivate"><i class="bi bi-lock"></i> Tarea privada</label>
-        <p class="lt-cm-hint"><i class="bi bi-info-circle" aria-hidden="true"></i> La prioridad ordena la lista y tiñe la tarjeta en la semana.</p>
-    </div>
-
-    <div x-show="step === 2" x-cloak class="lt-cm-form">
-        @include('livewire.task.partials.schedule-fields', ['idPrefix' => $dialogId, 'startModel' => 'startDate', 'startTimeModel' => 'startTime', 'endModel' => 'endDate', 'endTimeModel' => 'endTime', 'durationAction' => 'applyDuration'])
-        @if ($showRecurrenceFields ?? false)
-            <div class="d-flex flex-wrap align-items-center gap-3">
-                @if ($localEditor ?? false)
-                    <label class="md-checkbox"><input type="checkbox" wire:model="isRecurrent"><i class="bi bi-arrow-repeat"></i> Tarea recurrente</label>
-                    <div x-show="$wire.isRecurrent">
-                        <span class="md-chip-tonal" x-show="$wire.nativeRecurrenceRule" x-text="$wire.nativeRecurrenceRule" title="Esta regla CalDAV se conserva sin cambios"></span>
-                        <div class="md-text-field lt-cm-field--sm" x-show="!$wire.nativeRecurrenceRule"><input type="number" min="1" wire:model="recurrenceIntervalDays" placeholder=" " id="{{ $dialogId }}-recurrence-days"><label for="{{ $dialogId }}-recurrence-days">Repetir cada (días)</label></div>
-                    </div>
-                @else
-                <label class="md-checkbox"><input type="checkbox" wire:model.live="isRecurrent"><i class="bi bi-arrow-repeat"></i> Tarea recurrente</label>
-                @if ($isRecurrent)
-                    @if (($nativeRecurrenceRule ?? '') !== '')
-                        <span class="md-chip-tonal" title="Esta regla CalDAV se conserva sin cambios"><i class="bi bi-calendar2-week"></i> {{ $nativeRecurrenceRule }}</span>
+            @if (! $bulkEditor && isset($statusOptions))
+                <x-ui.select name="statusId" label="Estado" :id="$dialogId.'-status'" :options="$statusOptions"
+                    :placeholder="$editingId ? 'Conservar estado actual' : 'Estado inicial (por hacer)'" wire:model="statusId" />
+            @endif
+            <x-ui.select name="priority" label="Prioridad" :id="$dialogId.'-priority'" :options="$priorities" placeholder="Sin prioridad" wire:model="priority" />
+            <x-ui.select name="size" label="Tamaño" :id="$dialogId.'-size'" :options="$sizes" placeholder="Sin tamaño" wire:model="size" />
+        </aside>
+        <div class="task-properties-content">
+            <x-ui.form-dialog-section name="basic" title="Información básica">
+                <div class="lt-cm-form">
+                    @if ($bulkEditor)
+                        <x-ui.textarea name="bulkTitles" label="Tareas" :id="$dialogId.'-bulk-titles'" rows="6" wire:model="bulkTitles"
+                            help="Una tarea por línea. Los campos comunes se aplican a todas." />
                     @else
-                        <div class="md-text-field lt-cm-field--sm"><input type="number" min="1" wire:model="recurrenceIntervalDays" placeholder=" " id="{{ $dialogId }}-recurrence-days"><label for="{{ $dialogId }}-recurrence-days">Repetir cada (días)</label></div>
+                        <x-ui.field name="title" label="Título" :id="$dialogId.'-task-title'" wire:model="title" required />
                     @endif
-                @endif
-                @endif
-            </div>
-        @endif
+                    @include('partials.markdown-editor', [
+                        'model' => 'description', 'mode' => 'descriptionMode', 'modeValue' => $descriptionMode,
+                        'content' => $description, 'id' => $dialogId.'-description', 'deferred' => $localEditor,
+                        'placeholder' => 'Detalles de la tarea. Admite Markdown.',
+                    ])
+                    @if ($showCompletionAction ?? false)
+                        <div><button type="button" wire:click="toggleComplete('{{ $editingId }}')" class="md-btn-text"><i class="bi bi-{{ $completed ? 'arrow-counterclockwise' : 'check2-circle' }}" aria-hidden="true"></i> {{ $completed ? 'Reabrir' : 'Completar' }}</button></div>
+                    @endif
+                </div>
+            </x-ui.form-dialog-section>
+            <x-ui.form-dialog-section name="privacy" title="Privacidad">
+                <label class="md-checkbox"><input type="checkbox" wire:model="isPrivate"><i class="bi bi-lock" aria-hidden="true"></i> Tarea privada</label>
+            </x-ui.form-dialog-section>
+            <x-ui.form-dialog-section name="schedule" title="Programación">
+                <div class="lt-cm-form">
+                    @include('livewire.task.partials.schedule-fields', ['idPrefix' => $dialogId, 'startModel' => 'startDate', 'startTimeModel' => 'startTime', 'endModel' => 'endDate', 'endTimeModel' => 'endTime', 'durationAction' => 'applyDuration'])
+                    @if ($showRecurrenceFields ?? false)
+                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            @if ($localEditor ?? false)
+                                <label class="md-checkbox"><input type="checkbox" wire:model="isRecurrent"><i class="bi bi-arrow-repeat"></i> Tarea recurrente</label>
+                                <div x-show="$wire.isRecurrent">
+                                    <span class="md-chip-tonal" x-show="$wire.nativeRecurrenceRule" x-text="$wire.nativeRecurrenceRule" title="Esta regla CalDAV se conserva sin cambios"></span>
+                                    <div class="md-text-field lt-cm-field--sm" x-show="!$wire.nativeRecurrenceRule"><input type="number" min="1" wire:model="recurrenceIntervalDays" placeholder=" " id="{{ $dialogId }}-recurrence-days"><label for="{{ $dialogId }}-recurrence-days">Repetir cada (días)</label></div>
+                                </div>
+                            @else
+                            <label class="md-checkbox"><input type="checkbox" wire:model.live="isRecurrent"><i class="bi bi-arrow-repeat"></i> Tarea recurrente</label>
+                            @if ($isRecurrent)
+                                @if (($nativeRecurrenceRule ?? '') !== '')
+                                    <span class="md-chip-tonal" title="Esta regla CalDAV se conserva sin cambios"><i class="bi bi-calendar2-week"></i> {{ $nativeRecurrenceRule }}</span>
+                                @else
+                                    <div class="md-text-field lt-cm-field--sm"><input type="number" min="1" wire:model="recurrenceIntervalDays" placeholder=" " id="{{ $dialogId }}-recurrence-days"><label for="{{ $dialogId }}-recurrence-days">Repetir cada (días)</label></div>
+                                @endif
+                            @endif
+                            @endif
+                        </div>
+                    @endif
+                </div>
+            </x-ui.form-dialog-section>
+        </div>
     </div>
-
-    @if ($showCompletionAction ?? false)
-        <x-slot:actions>
-            <button type="button" wire:click="toggleComplete('{{ $editingId }}')" class="md-btn-text md-dialog-actions__lead"><i class="bi bi-{{ $completed ? 'arrow-counterclockwise' : 'check2-circle' }}"></i> {{ $completed ? 'Reabrir' : 'Completar' }}</button>
-        </x-slot:actions>
-    @endif
-</x-create-modal>
+</x-ui.form-dialog>

@@ -90,7 +90,7 @@ class TaskGantt extends Component
         $this->size = $task->size ?? '';
         $this->loadTaskSchedule($task);
         $this->isPrivate = $task->is_private;
-        $this->descriptionMode = 'write';
+        $this->descriptionMode = 'preview';
         $this->showForm = true;
     }
 

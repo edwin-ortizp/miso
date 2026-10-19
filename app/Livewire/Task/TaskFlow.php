@@ -97,7 +97,7 @@ class TaskFlow extends Component
         $this->loadTaskSchedule($task);
         $this->isPrivate = $task->is_private;
         $this->completed = $task->completed;
-        $this->descriptionMode = 'write';
+        $this->descriptionMode = 'preview';
         $this->showForm = true;
     }
 

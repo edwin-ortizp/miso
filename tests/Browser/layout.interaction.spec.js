@@ -29,6 +29,20 @@ test.beforeEach(async ({ page }) => {
     await page.waitForURL(url => !url.pathname.includes('/login'));
 });
 
+async function openTaskDialog(page, bulk = false) {
+    const mobile = page.viewportSize().width < 768;
+    if (mobile) await page.getByRole('button', { name: 'Nueva tarea', exact: true }).click();
+    else if (bulk) await page.getByRole('button', { name: 'Más acciones de creación', exact: true }).click();
+    if (bulk || mobile) await page.getByRole('menuitem', { name: bulk ? 'Crear múltiples tareas' : 'Nueva tarea', exact: true }).click();
+    else await page.getByRole('button', { name: 'Nueva tarea', exact: true }).click();
+}
+
+async function taskSection(dialog, name) {
+    const nav = dialog.getByRole('navigation', { name: 'Secciones del formulario' });
+    if (!await nav.isVisible()) await dialog.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
+    await nav.getByRole('button', { name: new RegExp('^' + name) }).click();
+}
+
 for (const width of [390, 768, 1440, 1920, 2560]) {
     test(`Salud y Tareas a ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 1000 });
@@ -51,6 +65,9 @@ for (const width of [390, 768, 1440, 1920, 2560]) {
 
 test('exercise search, keyboard, Escape, reopening and registration', async ({ page }) => {
     await page.goto('/habits');
+    const morning = page.locator('button[aria-controls^="habit-time-morning-"]');
+    await expect(morning).toHaveAttribute('aria-expanded', /true|false/);
+    if (await morning.getAttribute('aria-expanded') === 'false') await morning.click();
     await page.locator(`[wire\\:click="toggleHabit(${habit})"]`).click();
     const dialog = page.locator('#habit-action-prompt');
     await expect(dialog).toBeVisible();
@@ -79,3 +96,173 @@ test('exercise search, keyboard, Escape, reopening and registration', async ({ p
     await page.goto('/exercise');
     await expect(page.locator('tbody .md-table__title').filter({ hasText: 'Ciclismo' })).toBeVisible();
 });
+
+for (const mobile of [false, true]) {
+    test.describe(`searchable category ${mobile ? 'touch' : 'desktop'}`, () => {
+        test.use({ viewport: { width: mobile ? 390 : 1440, height: 900 }, hasTouch: mobile, isMobile: mobile });
+
+        test('closes, reopens without blur and preserves the selected value', async ({ page }) => {
+            test.setTimeout(60000);
+            const errors = [];
+            page.on('pageerror', error => errors.push(error.message));
+            await page.goto('/tasks/list');
+            await openTaskDialog(page);
+            const dialog = page.locator('.task-properties-dialog:visible');
+            const input = dialog.getByRole('combobox', { name: 'Categoría', exact: true });
+            const panel = dialog.locator('.md-combobox__list');
+            const activate = async locator => mobile ? locator.tap() : locator.click();
+            await expect(input).toBeVisible();
+            await expect(input).toHaveAttribute('aria-expanded', 'false');
+            await input.focus();
+            await expect(panel).toBeHidden();
+
+            await activate(input);
+            await expect(panel).toBeVisible();
+            await dialog.locator('.md-form-dialog__title').dispatchEvent('pointerdown');
+            await expect(panel).toBeHidden();
+            await expect(input).toBeFocused();
+            await activate(input);
+            await activate(dialog.getByRole('textbox', { name: 'Título', exact: true }));
+            await expect(panel).toBeHidden();
+
+            await activate(input);
+            await activate(dialog.getByRole('option', { name: 'Educación', exact: true }));
+            await expect(input).toHaveValue('Educación');
+            await expect(panel).toBeHidden();
+            await activate(input);
+            await expect(dialog.getByRole('option', { name: 'Personal', exact: true })).toBeVisible();
+            await activate(input);
+            await expect(panel).toBeHidden();
+            await expect(input).toHaveValue('Educación');
+
+            const toggle = dialog.getByRole('button', { name: 'Mostrar opciones de Categoría', exact: true });
+            await activate(toggle);
+            await expect(panel).toBeVisible();
+            await activate(dialog.getByRole('button', { name: 'Ocultar opciones de Categoría', exact: true }));
+            await expect(panel).toBeHidden();
+            await expect(input).toBeFocused();
+
+            await input.fill('TECNOLOGIA');
+            await expect(dialog.getByRole('option', { name: 'Tecnología', exact: true })).toBeVisible();
+            await input.press('ArrowDown');
+            await input.press('Enter');
+            await expect(input).toHaveValue('Tecnología');
+            await expect(panel).toBeHidden();
+            await input.press('ArrowDown');
+            await expect(dialog.getByRole('option', { name: 'Personal', exact: true })).toBeVisible();
+            await input.press('Escape');
+            await expect(panel).toBeHidden();
+            await expect(dialog).toBeVisible();
+            await expect(input).toHaveValue('Tecnología');
+
+            await input.fill('sin coincidencia');
+            await expect(dialog.getByText('Sin resultados', { exact: true })).toBeVisible();
+            await input.press('Tab');
+            await expect(panel).toBeHidden();
+            await expect(input).toHaveValue('Tecnología');
+            await input.focus();
+            await expect(panel).toBeHidden();
+            await input.fill('descartar');
+            await dialog.getByRole('textbox', { name: 'Título', exact: true }).focus();
+            await expect(panel).toBeHidden();
+            await expect(input).toHaveValue('Tecnología');
+
+            await activate(input);
+            await panel.evaluate(el => { el.scrollTop = el.scrollHeight; });
+            await activate(dialog.getByRole('option', { name: 'Otros', exact: true }));
+            await expect(input).toHaveValue('Otros');
+            const accessibility = await new AxeBuilder({ page }).include('.task-properties-dialog .md-combobox').analyze();
+            expect(accessibility.violations).toEqual([]);
+
+            await dialog.getByRole('textbox', { name: 'Título', exact: true }).fill(`Categoría buscable ${mobile}`);
+            await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+            await expect(dialog).toBeHidden();
+            await page.getByRole('button', { name: `Abrir tarea: Categoría buscable ${mobile}`, exact: true }).click();
+            await expect(input).toHaveValue('Otros');
+            await expect(panel).toBeHidden();
+            await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+            expect(errors).toEqual([]);
+        });
+    });
+}
+
+for (const width of [390, 768, 1440]) {
+    test(`canonical task dialogs and isolated bulk creation ${width}`, async ({ page }) => {
+        test.setTimeout(60000);
+        await page.setViewportSize({ width, height: 900 });
+        const errors = [];
+        page.on('pageerror', error => errors.push(error.message));
+        await page.goto('/tasks/list');
+        await openTaskDialog(page);
+        const single = page.locator('#task-editor');
+        await expect(single).toBeVisible();
+        await expect(single.locator('small')).toHaveCount(0);
+        await expect(single.getByText('Varias a la vez')).toHaveCount(0);
+        await expect(single.locator('.md-form-dialog__actions button')).toHaveCount(2);
+        await single.getByRole('textbox', { name: 'Título', exact: true }).fill('Borrador individual');
+        await single.getByLabel('Tamaño', { exact: true }).selectOption('L');
+        await taskSection(single, 'Privacidad');
+        await single.getByLabel('Tarea privada', { exact: true }).check();
+        await single.getByRole('button', { name: 'Expandir', exact: true }).click();
+        await expect(single).toHaveClass(/is-expanded/);
+        await expect(single.getByLabel('Tarea privada', { exact: true })).toBeChecked();
+        await single.getByRole('button', { name: 'Restaurar', exact: true }).click();
+        await taskSection(single, 'Programación');
+        await expect(single.getByLabel('Fecha inicio', { exact: true })).toBeVisible();
+        await expect(single.getByLabel('Tarea recurrente', { exact: true })).toBeVisible();
+        await taskSection(single, 'Información básica');
+        await expect(single.getByRole('textbox', { name: 'Título', exact: true })).toHaveValue('Borrador individual');
+        await page.screenshot({ path: `storage/framework/testing/playwright/layout/task-dialog-${width}.png` });
+        await single.getByRole('button', { name: 'Cancelar', exact: true }).click();
+
+        await openTaskDialog(page, true);
+        const bulk = page.locator('#task-bulk-editor');
+        await expect(bulk).toBeVisible();
+        await expect(bulk.getByRole('textbox', { name: 'Tareas', exact: true })).toHaveValue('');
+        await expect(bulk.getByLabel('Tamaño', { exact: true })).toHaveValue('');
+        await expect(bulk.getByLabel('Estado', { exact: true })).toHaveCount(0);
+        await bulk.getByRole('button', { name: 'Guardar', exact: true }).click();
+        await expect(bulk.getByText('Escribe al menos una tarea.', { exact: true })).toBeVisible();
+        await bulk.getByRole('textbox', { name: 'Tareas', exact: true }).fill(`Lote ${width} A\n\nLote ${width} B`);
+        await bulk.getByLabel('Tamaño', { exact: true }).selectOption('M');
+        await taskSection(bulk, 'Privacidad');
+        await expect(bulk.getByLabel('Tarea privada', { exact: true })).not.toBeChecked();
+        await bulk.getByLabel('Tarea privada', { exact: true }).check();
+        await taskSection(bulk, 'Programación');
+        await expect(bulk.getByLabel('Tarea recurrente', { exact: true })).toHaveCount(0);
+        await bulk.getByLabel('Fecha inicio', { exact: true }).fill('2026-12-01');
+        await taskSection(bulk, 'Información básica');
+        await page.screenshot({ path: `storage/framework/testing/playwright/layout/task-bulk-dialog-${width}.png` });
+        const accessibility = await new AxeBuilder({ page }).include('#task-bulk-editor').withRules(['aria-valid-attr-value', 'duplicate-id-aria', 'label', 'button-name']).analyze();
+        expect(accessibility.violations).toEqual([]);
+        await bulk.getByRole('button', { name: 'Guardar', exact: true }).click();
+        await expect(bulk).toBeHidden();
+        await page.getByRole('button', { name: `Abrir tarea: Lote ${width} A`, exact: true }).click();
+        await expect(single.getByLabel('Tamaño', { exact: true })).toHaveValue('M');
+        await taskSection(single, 'Privacidad');
+        await expect(single.getByLabel('Tarea privada', { exact: true })).toBeChecked();
+        await single.getByRole('button', { name: 'Cancelar', exact: true }).click();
+        await openTaskDialog(page);
+        await expect(single.getByRole('textbox', { name: 'Título', exact: true })).toHaveValue('');
+        await expect(single.getByLabel('Tamaño', { exact: true })).toHaveValue('');
+        await single.getByRole('button', { name: 'Cancelar', exact: true }).click();
+        await openTaskDialog(page, true);
+        await expect(bulk.getByRole('textbox', { name: 'Tareas', exact: true })).toHaveValue('');
+        await expect(bulk.getByText('Escribe al menos una tarea.', { exact: true })).toBeHidden();
+        if (width === 1440) {
+            await bulk.getByRole('textbox', { name: 'Tareas', exact: true }).fill('Descartar programación');
+            await taskSection(bulk, 'Programación');
+            await bulk.getByLabel('Fecha inicio', { exact: true }).fill('2026-12-02');
+            await bulk.getByLabel('Fecha fin', { exact: true }).fill('2026-12-01');
+            await bulk.getByRole('button', { name: 'Guardar', exact: true }).click();
+            await expect(bulk.getByText('La fecha y hora de finalización debe ser posterior al inicio.', { exact: true })).toBeVisible();
+            await bulk.getByRole('button', { name: 'Cancelar', exact: true }).click();
+            await openTaskDialog(page, true);
+            await taskSection(bulk, 'Programación');
+            await expect(bulk.getByLabel('Fecha inicio', { exact: true })).toHaveValue('');
+            await expect(bulk.getByText('La fecha y hora de finalización debe ser posterior al inicio.', { exact: true })).toBeHidden();
+        }
+        await bulk.getByRole('button', { name: 'Cerrar', exact: true }).click();
+        expect(errors).toEqual([]);
+    });
+}
