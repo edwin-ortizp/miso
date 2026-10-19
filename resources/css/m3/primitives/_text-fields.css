@@ -28,6 +28,13 @@
   appearance: none;
 }
 
+/* Los tipos con selector nativo necesitan su apariencia: sin ella Android no abre el picker. */
+.md-text-field > input:is([type="date"], [type="time"], [type="datetime-local"], [type="month"], [type="week"]) {
+  -webkit-appearance: auto;
+  appearance: auto;
+  line-height: 56px;
+}
+
 /* `textarea.md-field__control` iguala la especificidad de la regla base: sin él, el
    `padding: 0 16px` común pega el texto al borde superior, debajo de la etiqueta. */
 .md-text-field > textarea,

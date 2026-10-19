@@ -266,6 +266,14 @@ function bootstrapUi() {
         });
     }).observe(document.documentElement, { childList: true, subtree: true });
 
+    // Respaldo: abre el selector nativo aunque el navegador no lo haga solo al tocar.
+    document.addEventListener('click', (e) => {
+        const input = e.target;
+        if (!(input instanceof HTMLInputElement) || input.disabled || input.readOnly) return;
+        if (!['date', 'time', 'datetime-local', 'month', 'week'].includes(input.type)) return;
+        try { input.showPicker?.(); } catch {}
+    });
+
     document.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'l' && e.target.matches('textarea.md-markdown-editor-input')) {
             e.preventDefault();
