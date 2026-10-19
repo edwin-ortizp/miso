@@ -176,6 +176,11 @@
 .md-task-calendar__surface .fc-daygrid-dot-event .fc-event-title { font-weight: 500; }
 .md-task-calendar__surface .fc-event.is-urgent-important { --fc-event-bg-color: var(--md-sys-color-error-container); --fc-event-border-color: var(--md-sys-color-error-container); --fc-event-text-color: var(--md-sys-color-on-error-container); }
 .md-task-calendar__surface .fc-event.is-completed { opacity: .6; }
+.md-task-calendar__surface .fc-timegrid-slot { height: 2rem; }
+.md-task-calendar__surface .fc-timegrid-slot-minor { border-top-style: dotted; }
+.md-task-calendar__surface .fc-timegrid-event .fc-event-main { font-size: .8rem; line-height: 1.25; }
+.md-task-calendar__surface .fc-timegrid-event-short .fc-event-main-frame { align-items: center; gap: 4px; }
+.md-task-calendar__surface .fc-timegrid-event-short .fc-event-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .md-task-calendar__surface .fc-event.is-completed .fc-event-title,
 .md-task-calendar__surface .fc-event.is-completed .fc-list-event-title { text-decoration: line-through; }
 @media (max-width: 767.98px) {

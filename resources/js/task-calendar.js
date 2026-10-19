@@ -41,6 +41,21 @@ export function registerTaskCalendar(Alpine) {
                     : { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
                 footerToolbar: compact() ? { center: 'dayGridMonth,timeGridWeek,listWeek' } : false,
                 nowIndicator: true,
+                // Día y semana: cuartos de hora con altura legible, desde las 5 a. m., abriendo una hora antes de ahora.
+                slotDuration: '00:15:00',
+                slotLabelInterval: '01:00',
+                slotMinTime: '05:00:00',
+                scrollTime: `${String(Math.max(new Date().getHours() - 1, 5)).padStart(2, '0')}:00:00`,
+                scrollTimeReset: false,
+                slotEventOverlap: false,
+                eventMinHeight: 26,
+                // La rejilla horaria necesita altura fija para desplazarse por dentro; mes y lista crecen con su contenido.
+                datesSet: ({ view }) => {
+                    const height = view.type.startsWith('timeGrid')
+                        ? Math.max(480, innerHeight - this.$el.getBoundingClientRect().top - 24)
+                        : 'auto';
+                    if (this.calendar && this.calendar.getOption('height') !== height) this.calendar.setOption('height', height);
+                },
                 editable: true,
                 dayMaxEvents: 3,
                 events: (info, success, failure) => wire.events(info.startStr, info.endStr).then(success, failure),
