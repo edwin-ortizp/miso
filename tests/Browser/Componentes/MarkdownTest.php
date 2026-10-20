@@ -43,7 +43,7 @@ it('aplica las ocho herramientas de la librería sin modificar otro editor', fun
     }
     $page->click('#save')->assertSeeIn('#saved', '`Texto`')->assertValue('#miso-secondary', 'Otro campo');
     expect($page->script('Array.from(document.querySelectorAll("[data-editor-id=miso-description] [data-markdown-snippet]")).map(button => [button.textContent.trim(), button.getAttribute("aria-label"), button.getAttribute("title"), !!button.querySelector("i.bi[aria-hidden=true]")])'))
-        ->toBe(array_map(fn (string $label): array => ['', $label, $label, true], ['Título', 'Negrita', 'Cursiva', 'Enlace', 'Lista', 'Checklist', 'Cita', 'Código']));
+        ->toBe(array_map(fn (string $label): array => ['', $label, $label, true], ['Título', 'Negrita (Ctrl+B)', 'Cursiva (Ctrl+I)', 'Enlace (Ctrl+K)', 'Lista', 'Checklist (Ctrl+L)', 'Cita', 'Código']));
     $page->assertNoJavaScriptErrors();
 })->with([false, true])->group('component', 'write', 'form');
 
@@ -91,7 +91,7 @@ it('amplía contenido largo dentro del modal sin perder el borrador', function (
         ->click($root.' [data-markdown-mode="preview"]');
     expect($page->script('(() => {const e=document.querySelector("[data-editor-id=miso-description]"), b=e.querySelector("[data-markdown-body]"), f=e.closest(".md-dialog").querySelector(".md-dialog-actions");return b.scrollHeight>b.clientHeight && b.getBoundingClientRect().bottom<=f.getBoundingClientRect().top && f.getBoundingClientRect().bottom<=innerHeight+1;})()'))->toBeTrue();
     $page->script('window.originalMarkdown=document.querySelector("#miso-description");document.querySelector("[data-editor-id=miso-description] [data-markdown-body]").scrollTop=200');
-    $page->click($root.' [data-markdown-expand]')->assertAttribute($root.' [data-markdown-expand]', 'aria-label', 'Restaurar');
+    $page->click($root.' [data-markdown-expand]')->assertAttribute($root.' [data-markdown-expand]', 'aria-label', 'Restaurar (Esc)');
     $page->assertScript('document.activeElement === document.querySelector("[data-editor-id=miso-description] [data-markdown-body]")');
     expect($page->script('document.querySelector("[data-editor-id=miso-description]").matches(":popover-open") && window.originalMarkdown===document.querySelector("#miso-description")'))->toBeTrue();
     $page->script('const b=document.querySelector("[data-editor-id=miso-description] [data-markdown-body]");b.scrollTop=b.scrollHeight');
@@ -104,9 +104,9 @@ it('amplía contenido largo dentro del modal sin perder el borrador', function (
     $page->script('document.querySelector("#miso-description").setSelectionRange(0,5)');
     $page->click($root.' [data-markdown-snippet="bold"]')->assertValue('#miso-description', '**Texto** ampliado áéí 👩🏽‍💻');
     $page->script('Livewire.all()[0].$wire.$set("refreshes", 1)');
-    $page->assertSeeIn('#refreshes', '1')->assertAttribute($root.' [data-markdown-expand]', 'aria-label', 'Restaurar');
+    $page->assertSeeIn('#refreshes', '1')->assertAttribute($root.' [data-markdown-expand]', 'aria-label', 'Restaurar (Esc)');
     $page->script('document.querySelector("#miso-description").dispatchEvent(new KeyboardEvent("keydown",{key:"Escape",bubbles:true,cancelable:true}))');
-    $page->assertVisible('.task-properties-dialog')->assertAttribute($root.' [data-markdown-expand]', 'aria-label', 'Ampliar');
+    $page->assertVisible('.task-properties-dialog')->assertAttribute($root.' [data-markdown-expand]', 'aria-label', 'Ampliar (Ctrl+Shift+F)');
     $page->click('.task-properties-dialog .md-dialog-actions .md-btn-filled')->assertSeeIn('#saved', '**Texto** ampliado áéí 👩🏽‍💻')->assertValue('#miso-secondary', 'Otro campo');
     $page->click($root.' [data-markdown-mode="preview"]')->click($root.' [data-markdown-expand]');
     $page->script('const b=document.querySelector("[data-editor-id=miso-description] [data-markdown-body]");b.focus();b.dispatchEvent(new KeyboardEvent("keydown",{key:"Tab",bubbles:true,cancelable:true}))');
@@ -114,7 +114,7 @@ it('amplía contenido largo dentro del modal sin perder el borrador', function (
     $page->script('Livewire.all()[0].$wire.$set("showEditor", false)');
     $page->assertMissing('.task-properties-dialog');
     expect($page->script('!document.querySelector(":popover-open") && !document.querySelector("[inert]") && document.documentElement.style.overflow!=="hidden"'))->toBeTrue();
-    $page->click('#reopen')->assertSeeIn($root.' [data-markdown-preview]', 'ampliado')->assertAttribute($root.' [data-markdown-expand]', 'aria-label', 'Ampliar');
+    $page->click('#reopen')->assertSeeIn($root.' [data-markdown-preview]', 'ampliado')->assertAttribute($root.' [data-markdown-expand]', 'aria-label', 'Ampliar (Ctrl+Shift+F)');
     $page->click($root.' [data-markdown-expand]');
     $page->script('Livewire.all()[0].$wire.$set("mounted", false)');
     $page->assertNotPresent('#miso-description')->assertScript('!document.querySelector(":popover-open") && !document.querySelector("[inert]")')->assertNoJavaScriptErrors();

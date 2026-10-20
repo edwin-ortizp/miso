@@ -76,10 +76,15 @@
 
 /* Expanded surfaces keep the same Material skin in the browser top layer. */
 .md-markdown-editor .lm-editor.lm-editor--expanded { border-radius: 24px; border: var(--lm-expanded-margin, 16px) solid transparent; }
-.md-markdown-editor .lm-editor__expand { margin-left: auto; }
+/* Copiar + Ampliar van juntos a la derecha: el paquete da a Ampliar `order: 2` y `margin-left: auto`. */
+.md-markdown-editor .lm-editor__copy { order: 2; width: 36px; min-width: 36px; flex: 0 0 36px; margin-left: auto; padding: 0; font-size: 1.05rem; }
+.md-markdown-editor .lm-editor__copy + .lm-editor__expand { margin-left: 0; }
+.md-markdown-editor .lm-editor__copy.is-copied { color: var(--md-sys-color-primary); }
+.md-markdown-editor .lm-editor__copy.is-failed { color: var(--md-sys-color-error); }
 
 @media (max-width: 575.98px) {
-  .md-markdown-editor .lm-editor__mode { flex-basis: calc(100% - 48px); }
+  .md-markdown-editor .lm-editor__mode { flex-basis: calc(100% - 92px); }
+  .md-markdown-editor .lm-editor__copy { order: 0; }
   .md-markdown-editor .lm-editor__expand { order: 0; width: 36px; flex: 0 0 36px; padding: 0; }
 }
 

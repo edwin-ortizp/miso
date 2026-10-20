@@ -15,14 +15,17 @@
             <button type="button" class="lm-editor__button" data-markdown-mode="edit">Editar</button>
             <button type="button" class="lm-editor__button" data-markdown-mode="preview">Vista previa</button>
         </div>
+        @foreach (['heading' => 'Título', 'bold' => 'Negrita', 'italic' => 'Cursiva', 'link' => 'Enlace', 'list' => 'Lista', 'checklist' => 'Checklist', 'quote' => 'Cita', 'code' => 'Código'] as $tool => $label)
+            <button type="button" class="lm-editor__button" data-markdown-snippet="{{ $tool }}">{{ $label }}</button>
+        @endforeach
+        <button type="button" class="lm-editor__button lm-editor__copy" data-markdown-copy aria-label="Copiar contenido" title="Copiar contenido">
+            <i class="bi bi-clipboard" aria-hidden="true"></i>
+        </button>
         @if($expandable ?? true)
             <button type="button" class="lm-editor__button lm-editor__expand" data-markdown-expand hidden aria-label="Ampliar" title="Ampliar" aria-expanded="false">
                 <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path data-markdown-expand-icon d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" /></svg>
             </button>
         @endif
-        @foreach (['heading' => 'Título', 'bold' => 'Negrita', 'italic' => 'Cursiva', 'link' => 'Enlace', 'list' => 'Lista', 'checklist' => 'Checklist', 'quote' => 'Cita', 'code' => 'Código'] as $tool => $label)
-            <button type="button" class="lm-editor__button" data-markdown-snippet="{{ $tool }}">{{ $label }}</button>
-        @endforeach
     </div>
     <div class="lm-editor__body" data-markdown-body tabindex="0" aria-label="Contenido Markdown">
     <div data-markdown-edit @if($initialMode !== 'edit') hidden @endif>
