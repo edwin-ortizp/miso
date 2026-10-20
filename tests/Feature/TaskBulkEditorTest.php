@@ -74,7 +74,7 @@ class TaskBulkEditorTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
         $task = Task::create(['title' => 'Individual']);
-        foreach ([TaskEditor::class, TaskGantt::class, TaskFlow::class] as $component) {
+        foreach ([TaskEditor::class, TaskFlow::class] as $component) {
             Livewire::test($component)->call('openForm', $task->id)
                 ->assertSee('md-form-dialog__nav', false)
                 ->assertSee('Información básica')

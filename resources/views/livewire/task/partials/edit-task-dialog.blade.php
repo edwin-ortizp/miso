@@ -11,6 +11,7 @@
         'basic' => ['label' => 'Información básica', 'icon' => 'bi-file-earmark-text', 'error' => $errors->hasAny(['title', 'bulkTitles'])],
         'privacy' => ['label' => 'Privacidad', 'icon' => 'bi-lock'],
         'schedule' => ['label' => 'Programación', 'icon' => 'bi-calendar3', 'error' => $errors->hasAny(['startDate', 'endDate', 'startTime', 'endTime'])],
+        ...(isset($relationOptions) && ! $bulkEditor ? ['relations' => ['label' => 'Relacionado', 'icon' => 'bi-link-45deg']] : []),
     ]">
     <div class="task-properties-layout">
         <aside class="task-properties-panel lt-cm-form" aria-label="Propiedades de la tarea">
@@ -69,6 +70,31 @@
                     @endif
                 </div>
             </x-ui.form-dialog-section>
+            @if (isset($relationOptions) && ! $bulkEditor)
+                <x-ui.form-dialog-section name="relations" title="Relacionado">
+                    <div class="lt-cm-form">
+                        @foreach ($relations as $index => $relation)
+                            <div class="row g-2 align-items-center" wire:key="task-relation-{{ $index }}">
+                                <div class="col-5">
+                                    <x-ui.select :name="'relations.'.$index.'.type'" label="Módulo" :id="$dialogId.'-relation-type-'.$index"
+                                        :options="$relationModules" placeholder="Elige un módulo" wire:model.live="relations.{{ $index }}.type" />
+                                </div>
+                                {{-- Las opciones del combobox se fijan al iniciar Alpine: cambiar de módulo debe recrearlo. --}}
+                                <div class="col" wire:key="task-relation-{{ $index }}-{{ $relation['type'] ?? '' }}-picker">
+                                    <x-ui.combobox :name="'relations.'.$index.'.id'" label="Relación" :id="$dialogId.'-relation-id-'.$index"
+                                        :options="$relationOptions[$relation['type'] ?? ''] ?? []" placeholder="Sin relación"
+                                        :empty="($relation['type'] ?? '') === '' ? 'Elige primero un módulo' : 'Sin resultados'"
+                                        wire:model="relations.{{ $index }}.id" />
+                                </div>
+                                <div class="col-auto">
+                                    <x-ui.icon-action icon="bi-x-lg" label="Quitar relación" wire:click="removeRelation({{ $index }})" />
+                                </div>
+                            </div>
+                        @endforeach
+                        <div><button type="button" wire:click="addRelation" class="md-btn-text"><i class="bi bi-plus-lg" aria-hidden="true"></i> Añadir relación</button></div>
+                    </div>
+                </x-ui.form-dialog-section>
+            @endif
         </div>
     </div>
 </x-ui.form-dialog>

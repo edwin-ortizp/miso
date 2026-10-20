@@ -13,6 +13,7 @@ $user = App\Models\User::factory()->create(['email' => 'layout@example.test', 'p
 auth()->login($user);
 App\Support\DefaultTaskCategories::createFor($user);
 App\Models\Task::create(['title' => 'Tarea de prueba de distribución', 'start_date' => today()]);
+App\Models\Goal::create(['title' => 'Meta de prueba']);
 App\Models\HealthEvent::create(['title' => 'Evento sintético', 'type' => 'symptom', 'event_date' => today(), 'details' => ['body_area' => 'head']]);
 foreach (['Correr', 'Ciclismo', 'Tenis'] as $name) {
     App\Models\ExerciseType::create(['name' => $name, 'calories_per_hour' => 600, 'steps_equivalent' => 0]);

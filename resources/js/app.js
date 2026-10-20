@@ -10,6 +10,7 @@ import { registerInstallPrompt, registerServiceWorker } from './pwa';
 import { registerFeedback } from './feedback';
 import { registerHealthBodyMap } from './health-body-map';
 import { registerTaskCalendar } from './task-calendar';
+import { registerTaskGantt } from './task-gantt';
 
 registerPomodoroTimer(Alpine);
 registerUiSurfaces(Alpine);
@@ -21,6 +22,7 @@ registerAppFrame(Alpine);
 registerFeedback(Alpine);
 registerHealthBodyMap(Alpine);
 registerTaskCalendar(Alpine);
+registerTaskGantt(Alpine);
 
 registerInstallPrompt(Alpine);
 
@@ -268,8 +270,11 @@ function bootstrapUi() {
         });
     }).observe(document.documentElement, { childList: true, subtree: true });
 
-    // Respaldo: abre el selector nativo aunque el navegador no lo haga solo al tocar.
+    // Respaldo táctil: abre el selector nativo aunque el navegador no lo haga solo al tocar.
+    // En escritorio rompería la escritura por segmentos y el botón nativo del selector.
+    const coarsePointer = window.matchMedia('(pointer: coarse)');
     document.addEventListener('click', (e) => {
+        if (!coarsePointer.matches) return;
         const input = e.target;
         if (!(input instanceof HTMLInputElement) || input.disabled || input.readOnly) return;
         if (!['date', 'time', 'datetime-local', 'month', 'week'].includes(input.type)) return;

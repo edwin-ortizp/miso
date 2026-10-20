@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Task;
 
+use App\Livewire\Task\Concerns\InteractsWithTaskRelations;
 use App\Livewire\Task\Concerns\LoadsTaskCategories;
 use App\Services\TaskRecurrenceService;
 use App\Livewire\Concerns\HandlesRecurringTaskCompletion;
@@ -21,7 +22,7 @@ use App\Livewire\Concerns\WithManagementCard;
 #[Title('Tareas')]
 class TaskList extends Component
 {
-    use LoadsTaskCategories;
+    use InteractsWithTaskRelations, LoadsTaskCategories;
     use HandlesRecurringTaskCompletion, InteractsWithTaskSchedule, WithManagementCard;
 
     #[Url(as: 'status', history: true, keep: true)]
@@ -198,6 +199,7 @@ class TaskList extends Component
                 $this->isRecurrent = $task->is_recurrent;
                 $this->recurrenceIntervalDays = max(1, (int) (($task->recurrence ?? [])['customDays'] ?? 7));
                 $this->nativeRecurrenceRule = (string) (($task->recurrence ?? [])['rrule'] ?? '');
+                $this->loadTaskRelations($task);
             }
         }
 
@@ -330,12 +332,14 @@ class TaskList extends Component
 
         if ($this->editingId) {
             $task = Task::find($this->editingId);
-            if ($task) {
-                $task->update($data);
-            }
+            $task?->update($data);
         } else {
             $data['task_code'] = rand(10000, 99999);
-            Task::create($data);
+            $task = Task::create($data);
+        }
+
+        if ($task) {
+            $this->syncTaskRelations($task);
         }
 
         $this->closeForm();
@@ -378,6 +382,7 @@ class TaskList extends Component
         $this->estimatedTime = null;
         $this->isPrivate = false;
         $this->isRecurrent = false;
+        $this->relations = [['type' => '', 'id' => '']];
         $this->recurrenceIntervalDays = 7;
         $this->nativeRecurrenceRule = '';
         $this->descriptionMode = 'write';

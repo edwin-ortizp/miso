@@ -30,6 +30,7 @@
         "@fullcalendar/timegrid": "^6.1.22",
         "apexcharts": "^5.16.0",
         "bootstrap": "^5.3.3",
-        "bootstrap-icons": "^1.11.3"
+        "bootstrap-icons": "^1.11.3",
+        "frappe-gantt": "^1.2.2"
     }
 }

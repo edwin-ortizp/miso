@@ -1,7 +1,8 @@
 {{-- Keep MiSo's field/mode contract; editing and tools belong to the package. --}}
 <div class="md-markdown-editor"
      x-data="misoMarkdown(@js($id), @js($mode), @js($model))"
-     x-on:markdown-editor-mode-changed="modeChanged($event)">
+     x-on:markdown-editor-mode-changed="modeChanged($event)"
+     x-on:click.capture="editBeforeFormatting($event)">
     <x-markdown::editor
         :id="$id"
         :value="$content"

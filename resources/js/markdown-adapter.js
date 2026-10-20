@@ -83,6 +83,13 @@ export function registerMarkdownAdapter(Alpine) {
                 button.replaceChildren(icon);
             });
         },
+        // La barra sigue activa en vista previa; sin esto escribiría en el textarea oculto.
+        editBeforeFormatting(event) {
+            if (!event.target.closest('[data-markdown-snippet]')) return;
+            if (!this.$el.querySelector('[data-markdown-edit]')?.hidden) return;
+            window.dispatchEvent(new CustomEvent('markdown-editor-set-mode', { detail: { editorId, mode: 'edit' } }));
+            if (this.$wire[modeProperty] !== 'write') this.$wire.$set(modeProperty, 'write', false);
+        },
         modeChanged(event) {
             if (event.detail.editorId !== editorId) return;
             const mode = event.detail.mode === 'preview' ? 'preview' : 'write';

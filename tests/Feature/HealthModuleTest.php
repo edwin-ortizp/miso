@@ -44,7 +44,7 @@ class HealthModuleTest extends TestCase
         $this->assertTrue($event->tasks()->whereKey($task->id)->exists());
 
         Livewire::test(TaskPlanning::class)->assertSee('Salud: Control de riñones');
-        Livewire::test(TaskGantt::class)->call('nextMonth')->assertSee('Salud: Control de riñones');
+        $this->assertContains('Salud: Control de riñones', array_column(Livewire::test(TaskGantt::class)->instance()->tasks(), 'name'));
         Carbon::setTestNow();
     }
 

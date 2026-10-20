@@ -2,175 +2,93 @@
 
 namespace App\Livewire\Task;
 
-use App\Livewire\Task\Concerns\LoadsTaskCategories;
 use App\Models\Task;
-use App\Livewire\Concerns\InteractsWithTaskSchedule;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
 #[Title('Gantt de tareas')]
 class TaskGantt extends Component
 {
-    use LoadsTaskCategories;
-    use InteractsWithTaskSchedule;
-    public string $month;
+    // Contrato del editor compartido: lo abre al cargar y lo limpia al cerrarse.
+    #[Url(as: 'edit')]
+    public ?string $editTask = null;
 
-    public bool $showForm = false;
-
-    public string $descriptionMode = 'write';
-
-    public ?string $editingId = null;
-
-    public string $title = '';
-
-    public string $description = '';
-
-    public string $category = '';
-
-    public string $priority = '';
-
-    public string $size = '';
-
-    public ?string $startDate = null;
-
-    public ?string $endDate = null;
-
-    public ?int $estimatedTime = null;
-
-    public bool $isPrivate = false;
-
-
-    public array $priorities = [
-        'urgent-important' => '🔴 Urgente e Importante',
-        'not-urgent-important' => '🟡 No Urgente pero Importante',
-        'urgent-not-important' => '🟠 Urgente No Importante',
-        'not-urgent-not-important' => '⚪ No Urgente No Importante',
-    ];
-
-    public array $sizes = [
-        'XS' => 'XS (< 30 min)',
-        'S' => 'S (30 min - 1h)',
-        'M' => 'M (1-2h)',
-        'L' => 'L (2-4h)',
-        'XL' => 'XL (> 4h)',
-    ];
-
-    public function mount(): void
+    /**
+     * Barras de Frappe Gantt: granularidad de día, fin inclusivo.
+     */
+    public function tasks(): array
     {
-        $this->month = now()->startOfMonth()->format('Y-m-d');
+        return Task::query()
+            ->where(fn ($query) => $query->whereNotNull('start_date')->orWhereNotNull('end_date'))
+            ->orderByRaw('COALESCE(start_date, end_date)')
+            ->get()
+            ->map(function (Task $task) {
+                [$start, $end] = $this->range($task);
+
+                return [
+                    'id' => $task->id,
+                    'name' => $task->title,
+                    'start' => $start->toDateString(),
+                    'end' => $end->toDateString(),
+                    'progress' => $task->completed ? 100 : 0,
+                    // Frappe aplica la clase con classList.add: debe ser un único token.
+                    'custom_class' => match (true) {
+                        (bool) $task->completed => 'md-gantt-task--completed',
+                        $task->priority === 'urgent-important' => 'md-gantt-task--urgent',
+                        default => 'md-gantt-task',
+                    },
+                ];
+            })
+            ->values()
+            ->all();
     }
 
-    public function previousMonth(): void
+    /** Mueve o estira la tarea por días conservando la hora de cada extremo. */
+    public function moveTask(string $id, string $start, string $end): void
     {
-        $this->month = Carbon::parse($this->month)->subMonthNoOverflow()->startOfMonth()->format('Y-m-d');
-    }
+        $task = Task::findOrFail($id);
+        $newStart = Carbon::parse($start)->startOfDay();
+        $newEnd = Carbon::parse($end)->startOfDay();
+        $atDay = fn (?Carbon $original, Carbon $day) => $original ? $day->copy()->setTime($original->hour, $original->minute) : $day;
 
-    public function nextMonth(): void
-    {
-        $this->month = Carbon::parse($this->month)->addMonthNoOverflow()->startOfMonth()->format('Y-m-d');
-    }
+        // Una tarea con un solo extremo sigue teniendo un solo extremo.
+        if (! $task->start_date || ! $task->end_date) {
+            $field = $task->start_date ? 'start_date' : 'end_date';
+            $task->update([$field => $atDay($task->{$field}, $newStart)]);
 
-    public function openForm(string $id): void
-    {
-        $task = Task::find($id);
-
-        if (! $task) {
             return;
         }
 
-        $this->editingId = $task->id;
-        $this->title = $task->title;
-        $this->description = $task->description ?? '';
-        $this->category = $task->category ?? '';
-        $this->priority = $task->priority ?? '';
-        $this->size = $task->size ?? '';
-        $this->loadTaskSchedule($task);
-        $this->isPrivate = $task->is_private;
-        $this->descriptionMode = 'preview';
-        $this->showForm = true;
+        $startAt = $atDay($task->start_date, $newStart);
+        $endAt = $atDay($task->end_date, $newEnd);
+        if ($endAt->lt($startAt)) {
+            $endAt = $startAt->copy();
+        }
+
+        $task->update([
+            'start_date' => $startAt,
+            'end_date' => $endAt,
+            'estimated_time' => $task->start_is_date || $task->end_is_date ? $task->estimated_time : (int) $startAt->diffInMinutes($endAt),
+        ]);
     }
 
-    public function closeForm(): void
+    /** @return array{0: Carbon, 1: Carbon} */
+    private function range(Task $task): array
     {
-        $this->showForm = false;
-        $this->editingId = null;
-        $this->reset('title', 'description', 'category', 'priority', 'size', 'startDate', 'startTime', 'endDate', 'endTime', 'estimatedTime', 'isPrivate');
-        $this->descriptionMode = 'write';
-    }
+        $start = ($task->start_date ?? $task->end_date)->copy()->startOfDay();
+        $end = ($task->end_date ?? $task->start_date)->copy()->startOfDay();
 
-    public function save(): void
-    {
-        if (blank(trim($this->title)) || ! $this->editingId) {
-            return;
-        }
-
-        $schedule = $this->taskScheduleData();
-        if (! $schedule) {
-            return;
-        }
-
-        $task = Task::find($this->editingId);
-
-        if ($task) {
-            $task->update([
-                'title' => trim($this->title),
-                'description' => $this->description ?: null,
-                'category' => $this->category ?: null,
-                'priority' => $this->priority ?: null,
-                'size' => $this->size ?: null,
-                ...$schedule,
-                'is_private' => $this->isPrivate,
-            ]);
-        }
-
-        $this->closeForm();
+        return $end->lt($start) ? [$end, $start] : [$start, $end];
     }
 
     public function render()
     {
-        $monthStart = Carbon::parse($this->month)->startOfMonth();
-        $monthEnd = $monthStart->copy()->endOfMonth();
-        $days = collect(CarbonPeriod::create($monthStart, $monthEnd));
-
-        $scheduledTasks = Task::query()
-            ->where(fn ($query) => $query->whereNotNull('start_date')->orWhereNotNull('end_date'))
-            ->orderBy('start_date')
-            ->orderBy('end_date')
-            ->get()
-            ->map(function (Task $task) {
-                $start = ($task->start_date ?? $task->end_date)->copy()->startOfDay();
-                $end = ($task->end_date ?? $task->start_date)->copy()->startOfDay();
-
-                if ($end->lt($start)) {
-                    [$start, $end] = [$end, $start];
-                }
-
-                return ['task' => $task, 'start' => $start, 'end' => $end];
-            })
-            ->filter(fn (array $item) => $item['end']->gte($monthStart) && $item['start']->lte($monthEnd))
-            ->map(function (array $item) use ($monthStart, $monthEnd) {
-                $visibleStart = $item['start']->max($monthStart);
-                $visibleEnd = $item['end']->min($monthEnd);
-
-                return [...$item, 'column' => $monthStart->diffInDays($visibleStart) + 1, 'span' => $visibleStart->diffInDays($visibleEnd) + 1];
-            })
-            ->values();
-
-        $unscheduledTasks = Task::query()
-            ->whereNull('start_date')
-            ->whereNull('end_date')
-            ->orderByDesc('created_at')
-            ->get();
-
         return view('livewire.task.task-gantt', [
-            'monthLabel' => $monthStart->locale('es')->translatedFormat('F Y'),
-            'days' => $days,
-            'scheduledTasks' => $scheduledTasks,
-            'unscheduledTasks' => $unscheduledTasks,
+            'unscheduledTasks' => Task::query()->whereNull('start_date')->whereNull('end_date')->where('completed', false)->orderByDesc('created_at')->get(),
         ]);
     }
 }

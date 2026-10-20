@@ -32,7 +32,7 @@ class TaskEditor extends TaskList
 
     protected function formDefaults(): array
     {
-        $fields = ['editingId', 'title', 'description', 'descriptionMode', 'category', 'statusId', 'priority', 'size', 'startDate', 'startTime', 'endDate', 'endTime', 'estimatedTime', 'isPrivate', 'isRecurrent', 'recurrenceIntervalDays', 'nativeRecurrenceRule', 'bulkTitles', 'editTask'];
+        $fields = ['editingId', 'title', 'description', 'descriptionMode', 'category', 'statusId', 'priority', 'size', 'startDate', 'startTime', 'endDate', 'endTime', 'estimatedTime', 'isPrivate', 'isRecurrent', 'recurrenceIntervalDays', 'nativeRecurrenceRule', 'bulkTitles', 'editTask', 'relations'];
 
         return array_intersect_key(get_class_vars(self::class), array_flip($fields));
     }
@@ -43,6 +43,8 @@ class TaskEditor extends TaskList
             'defaults' => $this->formDefaults(),
             'statusOptions' => \App\Models\TaskStatus::ensureFor(auth()->id())
                 ->where('type', '!=', \App\Models\TaskStatus::DONE)->pluck('name', 'id')->all(),
+            'relationModules' => self::RELATION_MODULES,
+            'relationOptions' => $this->relationOptions(),
         ]);
     }
 

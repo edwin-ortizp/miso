@@ -25,7 +25,7 @@ class TaskViewsTest extends TestCase
         $task = Task::create(['title' => 'Con descripción', 'description' => '**Detalle**']);
         $emptyTask = Task::create(['title' => 'Sin descripción']);
 
-        foreach ([TaskEditor::class, TaskFlow::class, TaskGantt::class, TaskPlanning::class] as $component) {
+        foreach ([TaskEditor::class, TaskFlow::class, TaskPlanning::class] as $component) {
             Livewire::test($component)
                 ->call('openForm', $task->id)
                 ->assertSet('descriptionMode', 'preview')
@@ -509,59 +509,45 @@ class TaskViewsTest extends TestCase
             ->assertSee('Repetir cada (días)');
     }
 
-    public function test_gantt_shows_ranges_milestones_and_tasks_without_dates(): void
+    public function test_gantt_lists_scheduled_tasks_as_inclusive_day_bars(): void
     {
-        Carbon::setTestNow('2026-07-12 10:00:00');
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        Task::create(['title' => 'Rango de julio', 'start_date' => '2026-07-10', 'end_date' => '2026-07-15']);
+        Task::create(['title' => 'Rango de julio', 'start_date' => '2026-07-10 09:00', 'end_date' => '2026-07-15 18:00', 'priority' => 'urgent-important']);
         Task::create(['title' => 'Hito de julio', 'end_date' => '2026-07-14']);
-        Task::create(['title' => 'Cruza el mes', 'start_date' => '2026-06-29', 'end_date' => '2026-07-03']);
         Task::create(['title' => 'Sin programar']);
 
-        Livewire::test(TaskGantt::class)
-            ->assertSee('Rango de julio')
-            ->assertSee('Hito de julio')
-            ->assertSee('Cruza el mes')
-            ->assertSee('Sin programar')
-            ->call('nextMonth')
-            ->assertDontSee('Rango de julio');
+        $component = Livewire::test(TaskGantt::class)->assertSee('Sin programar');
+        $bars = collect($component->instance()->tasks())->keyBy('name');
 
-        Carbon::setTestNow();
+        $this->assertSame(['2026-07-10', '2026-07-15', 'md-gantt-task--urgent'], [$bars['Rango de julio']['start'], $bars['Rango de julio']['end'], $bars['Rango de julio']['custom_class']]);
+        $this->assertSame(['2026-07-14', '2026-07-14'], [$bars['Hito de julio']['start'], $bars['Hito de julio']['end']]);
+        $this->assertArrayNotHasKey('Sin programar', $bars->all());
     }
 
-    public function test_tasks_can_be_opened_from_the_list_and_gantt_then_updated(): void
+    public function test_gantt_drag_moves_days_and_keeps_times_and_single_ends(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
-        $task = Task::create(['title' => 'Planificar semana', 'start_date' => '2026-07-10', 'end_date' => '2026-07-12']);
-
-        Livewire::test(TaskList::class)
-            ->call('openForm', $task->id)
-            ->assertSet('showForm', true)
-            ->assertSet('title', 'Planificar semana');
+        $range = Task::create(['title' => 'Planificar semana', 'start_date' => '2026-07-10 09:00', 'start_is_date' => false, 'end_date' => '2026-07-12 11:30', 'end_is_date' => false]);
+        $deadline = Task::create(['title' => 'Entregar', 'end_date' => '2026-07-14']);
 
         Livewire::test(TaskGantt::class)
-            ->call('openForm', $task->id)
-            ->set('startDate', '2026-07-14')
-            ->set('endDate', '2026-07-18')
-            ->call('save')
-            ->assertSet('showForm', false);
+            ->call('moveTask', $range->id, '2026-07-14', '2026-07-18')
+            ->call('moveTask', $deadline->id, '2026-07-20', '2026-07-20');
 
-        $this->assertDatabaseHas('tasks', ['id' => $task->id, 'start_date' => '2026-07-14 00:00:00', 'end_date' => '2026-07-18 00:00:00']);
+        $this->assertDatabaseHas('tasks', ['id' => $range->id, 'start_date' => '2026-07-14 09:00:00', 'end_date' => '2026-07-18 11:30:00']);
+        $this->assertDatabaseHas('tasks', ['id' => $deadline->id, 'start_date' => null, 'end_date' => '2026-07-20 00:00:00']);
     }
 
-    public function test_gantt_description_preview_renders_safe_markdown(): void
+    public function test_gantt_page_uses_the_shared_task_editor(): void
     {
-        $user = User::factory()->create();
-        $this->actingAs($user);
-        $task = Task::create(['title' => 'Documentar', 'description' => '**Importante**']);
+        $this->actingAs(User::factory()->create());
 
-        Livewire::test(TaskGantt::class)
-            ->call('openForm', $task->id)
-            ->set('descriptionMode', 'preview')
-            ->assertSeeHtml('<strong>Importante</strong>');
+        $this->get('/tasks/gantt')->assertOk()
+            ->assertSee('x-data="taskGantt($wire)"', false)
+            ->assertSee('id="task-editor"', false);
     }
 
     public function test_planning_groups_only_pending_tasks_by_their_scheduled_date(): void
