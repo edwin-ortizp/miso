@@ -23,9 +23,12 @@ test.beforeAll(async () => {
     throw Error('Testing server did not start');
 });
 test.afterAll(() => server?.kill());
+let blocked = [];
+test.afterEach(() => expect(blocked, 'Recursos pedidos a rutas que no existen en producción').toEqual([]));
 test.beforeEach(async ({ page }) => {
     // Como en producción: el hosting bloquea /vendor/ y /build/ no se despliega.
-    await page.route(/\/(vendor|build)\//, route => route.abort());
+    blocked = [];
+    await page.route(/\/(vendor|build)\//, route => { blocked.push(route.request().url()); return route.abort(); });
     await page.goto(`${BASE}/login`);
     await page.getByLabel('Correo electrónico', { exact: true }).fill('layout@example.test');
     await page.getByLabel('Contraseña', { exact: true }).fill('browser-test-password');
@@ -172,4 +175,12 @@ test('en escritorio el click no fuerza el selector', async ({ page }) => {
     await taskSection(dialog, 'Programación');
     await dialog.getByLabel('Fecha inicio', { exact: true }).click({ position: { x: 24, y: 28 } });
     expect(await page.evaluate(() => window.__pickers)).toBe(0);
+});
+
+test('el calendario carga FullCalendar sin pedir recursos a /build/', async ({ page }) => {
+    const errors = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.goto(`${BASE}/tasks/calendar`);
+    await expect(page.locator('.md-task-calendar__surface .fc-view-harness')).toBeVisible();
+    expect(errors).toEqual([]);
 });

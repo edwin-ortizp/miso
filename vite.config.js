@@ -10,6 +10,11 @@ export default defineConfig({
         }),
         tailwindcss(),
     ],
+    build: {
+        // La precarga de chunks usa la base /build/, que no se despliega (se publican en public/js
+        // y se importan con ruta relativa). Sin precarga, cada chunk se pide solo al importarse.
+        modulePreload: false,
+    },
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],
