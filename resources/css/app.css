@@ -18,6 +18,8 @@
 @import '@fontsource/instrument-sans/latin-700.css';
 @import 'bootstrap/dist/css/bootstrap.min.css';
 @import 'bootstrap-icons/font/bootstrap-icons.min.css';
+/* En el CSS principal: los chunks CSS diferidos se piden a /build, que no se despliega. */
+@import '../../node_modules/frappe-gantt/dist/frappe-gantt.css';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',

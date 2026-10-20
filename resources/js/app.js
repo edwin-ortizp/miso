@@ -1,3 +1,5 @@
+// Dentro del bundle y antes que Alpine: el hosting bloquea las URL bajo /vendor/.
+import '../../vendor/edwin-ortizp/laravel-markdown/resources/assets/editor.js';
 import { registerMarkdownAdapter } from './markdown-adapter';
 import { registerFormEditor } from './form-editor';
 import { registerEnergyPricing } from './energy-pricing';

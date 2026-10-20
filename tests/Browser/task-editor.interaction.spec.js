@@ -24,6 +24,8 @@ test.beforeAll(async () => {
 });
 test.afterAll(() => server?.kill());
 test.beforeEach(async ({ page }) => {
+    // Como en producción: el hosting bloquea /vendor/ y /build/ no se despliega.
+    await page.route(/\/(vendor|build)\//, route => route.abort());
     await page.goto(`${BASE}/login`);
     await page.getByLabel('Correo electrónico', { exact: true }).fill('layout@example.test');
     await page.getByLabel('Contraseña', { exact: true }).fill('browser-test-password');

@@ -1,10 +1,9 @@
 let ganttPromise;
 
 // Frappe Gantt se carga bajo demanda: solo la pestaña Gantt de Tareas lo usa.
-// Su CSS no figura en "exports" del paquete: se importa por ruta.
+// Su CSS va en app.css: un chunk CSS diferido se pediría a /build, que no se despliega.
 function loadGantt() {
-    ganttPromise ??= Promise.all([import('frappe-gantt'), import('../../node_modules/frappe-gantt/dist/frappe-gantt.css')])
-        .then(([module]) => module.default);
+    ganttPromise ??= import('frappe-gantt').then(module => module.default);
 
     return ganttPromise;
 }
