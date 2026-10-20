@@ -13,12 +13,18 @@ export function registerDialogViewport(Alpine) {
                 el.style.removeProperty('--dialog-viewport-top');
             }
         };
-        const events = [[viewport, 'resize'], [viewport, 'scroll'], [window, 'resize'], [mobile, 'change']];
-        const toggle = open => {
+        // Seguir el scroll del viewport visual solo hace falta en móvil (teclado en pantalla);
+        // en escritorio ese listener solo dispara el aviso de efecto «scroll-linked» de Firefox.
+        const events = [[viewport, 'resize'], [viewport, 'scroll'], [window, 'resize']];
+        const listen = () => {
             events.forEach(([target, event]) => target?.removeEventListener(event, update));
-            active = !!open;
-            if (active) events.forEach(([target, event]) => target?.addEventListener(event, update));
+            if (active && mobile.matches) events.forEach(([target, event]) => target?.addEventListener(event, update));
             update();
+        };
+        const toggle = open => {
+            active = !!open;
+            mobile[active ? 'addEventListener' : 'removeEventListener']('change', listen);
+            listen();
         };
         if (expression) { const read = evaluateLater(expression); effect(() => read(toggle)); }
         else toggle(true);

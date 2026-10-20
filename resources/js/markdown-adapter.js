@@ -48,7 +48,8 @@ export function registerMarkdownAdapter(Alpine) {
             if (modal) this.resizeObserver.observe(modal);
             window.addEventListener('resize', this.layoutListener);
             window.visualViewport?.addEventListener('resize', this.layoutListener);
-            window.visualViewport?.addEventListener('scroll', this.layoutListener);
+            // El scroll del viewport visual solo cambia la altura útil en móvil (teclado en pantalla).
+            if (matchMedia('(pointer: coarse)').matches) window.visualViewport?.addEventListener('scroll', this.layoutListener);
             this.toolObserver = new MutationObserver(() => this.decorateTools());
             this.toolObserver.observe(this.$el, { childList: true, subtree: true, characterData: true });
             this.$watch(() => this.$wire[modeProperty], () => this.syncMode());

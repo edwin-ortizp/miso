@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('icons/icon-96x96.png') }}">
     <meta charset="UTF-8">
     {{-- `viewport-fit=cover` deja que el contenido llegue a los bordes; las
          areas seguras se respetan despues con los tokens `--lt-safe-*`. --}}
