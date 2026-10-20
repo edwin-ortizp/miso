@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Task;
 
+use App\Livewire\Task\Concerns\FiltersTasks;
 use App\Livewire\Task\Concerns\LoadsTaskCategories;
 use App\Livewire\Concerns\HandlesRecurringTaskCompletion;
 use App\Livewire\Concerns\InteractsWithTaskSchedule;
@@ -16,7 +17,7 @@ use Livewire\Component;
 #[Title('Planificación de tareas')]
 class TaskPlanning extends Component
 {
-    use LoadsTaskCategories;
+    use FiltersTasks, LoadsTaskCategories;
     use HandlesRecurringTaskCompletion, InteractsWithTaskSchedule;
 
     public bool $showForm = false;
@@ -154,7 +155,7 @@ class TaskPlanning extends Component
         $columns = collect(['overdue', 'today', 'tomorrow', 'future', 'no-date'])
             ->mapWithKeys(fn (string $key) => [$key => collect()]);
 
-        Task::query()->where('completed', false)->get()->each(function (Task $task) use ($columns, $today): void {
+        $this->applyTaskFilters(Task::query())->where('completed', false)->get()->each(function (Task $task) use ($columns, $today): void {
             $scheduledDate = ($task->start_date ?? $task->end_date)?->copy()->startOfDay();
 
             if (! $scheduledDate) {

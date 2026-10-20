@@ -53,14 +53,18 @@
                             @if ($localEditor ?? false)
                                 <label class="md-checkbox"><input type="checkbox" wire:model="isRecurrent"><i class="bi bi-arrow-repeat"></i> Tarea recurrente</label>
                                 <div x-show="$wire.isRecurrent">
-                                    <span class="md-chip-tonal" x-show="$wire.nativeRecurrenceRule" x-text="$wire.nativeRecurrenceRule" title="Esta regla CalDAV se conserva sin cambios"></span>
+                                    <span class="d-inline-flex align-items-center gap-1" x-show="$wire.nativeRecurrenceRule">
+                                        <span class="md-chip-tonal" x-text="$wire.nativeRecurrenceRule" title="Regla del calendario; usa Cambiar para reemplazarla"></span>
+                                        <button type="button" class="md-btn-text md-btn--sm" x-on:click="$wire.set('nativeRecurrenceRule', '', false)">Cambiar</button>
+                                    </span>
                                     <div class="md-text-field lt-cm-field--sm" x-show="!$wire.nativeRecurrenceRule"><input type="number" min="1" wire:model="recurrenceIntervalDays" placeholder=" " id="{{ $dialogId }}-recurrence-days"><label for="{{ $dialogId }}-recurrence-days">Repetir cada (días)</label></div>
                                 </div>
                             @else
                             <label class="md-checkbox"><input type="checkbox" wire:model.live="isRecurrent"><i class="bi bi-arrow-repeat"></i> Tarea recurrente</label>
                             @if ($isRecurrent)
                                 @if (($nativeRecurrenceRule ?? '') !== '')
-                                    <span class="md-chip-tonal" title="Esta regla CalDAV se conserva sin cambios"><i class="bi bi-calendar2-week"></i> {{ $nativeRecurrenceRule }}</span>
+                                    <span class="md-chip-tonal" title="Regla del calendario; usa Cambiar para reemplazarla"><i class="bi bi-calendar2-week"></i> {{ $nativeRecurrenceRule }}</span>
+                                    <button type="button" class="md-btn-text md-btn--sm" wire:click="$set('nativeRecurrenceRule', '')">Cambiar</button>
                                 @else
                                     <div class="md-text-field lt-cm-field--sm"><input type="number" min="1" wire:model="recurrenceIntervalDays" placeholder=" " id="{{ $dialogId }}-recurrence-days"><label for="{{ $dialogId }}-recurrence-days">Repetir cada (días)</label></div>
                                 @endif

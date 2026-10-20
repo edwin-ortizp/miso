@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Task;
 
+use App\Livewire\Task\Concerns\FiltersTasks;
 use App\Livewire\Task\Concerns\LoadsTaskCategories;
 use App\Livewire\Concerns\HandlesRecurringTaskCompletion;
 use App\Livewire\Concerns\InteractsWithTaskSchedule;
@@ -16,7 +17,7 @@ use Livewire\Component;
 #[Title('Flujo de tareas')]
 class TaskFlow extends Component
 {
-    use LoadsTaskCategories;
+    use FiltersTasks, LoadsTaskCategories;
     use HandlesRecurringTaskCompletion, InteractsWithTaskSchedule;
 
     private const INITIAL_LANE_LIMIT = 30;
@@ -205,7 +206,7 @@ class TaskFlow extends Component
 
     private function tasksForCategory(?string $category)
     {
-        $query = Task::query();
+        $query = $this->applyTaskFilters(Task::query());
 
         return $category === null ? $query->whereNull('category') : $query->where('category', $category);
     }

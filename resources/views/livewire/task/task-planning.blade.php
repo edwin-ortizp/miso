@@ -9,6 +9,7 @@
         ];
     @endphp
 
+    @include('livewire.task.partials.filter-bar', ['title' => 'Tareas en planificación', 'icon' => 'bi-calendar-week'])
     <div class="md-planning-board" aria-label="Tablero de planificación de tareas">
         @foreach ($definitions as $key => [$label, $icon, $class])
             <section class="md-planning-column {{ $class }}">

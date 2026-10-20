@@ -222,3 +222,8 @@
 .md-task-calendar__surface .fc-icon-arrow-clockwise::before { content: '\F116'; font-family: 'bootstrap-icons'; }
 .md-task-calendar__surface .fc-event.is-recurrent .fc-event-title::after,
 .md-task-calendar__surface .fc-event.is-recurrent .fc-list-event-title a::after { content: '\F130'; font-family: 'bootstrap-icons'; margin-left: 4px; font-size: .85em; }
+
+/* Barra de filtros de las vistas de tablero (Gantt, Planificación, Kanban, Flujo):
+ * la card de gestión sin cuerpo, solo cabecera con búsqueda/Filtros y la franja de filtros aplicados. */
+.task-filter-bar { margin-bottom: 16px; }
+.task-filter-bar .md-mcard__body { display: none; }

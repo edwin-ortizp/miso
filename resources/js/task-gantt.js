@@ -14,6 +14,7 @@ export function registerTaskGantt(Alpine) {
     Alpine.data('taskGantt', (wire) => ({
         gantt: null,
         refresh: null,
+        redraw: null,
         mode: 'Day',
         empty: false,
         setMode(mode) {
@@ -54,10 +55,14 @@ export function registerTaskGantt(Alpine) {
                 this.gantt?.refresh(next);
                 wire.$refresh();
             };
+            // Al cambiar un filtro el componente ya se volvió a renderizar: solo se redibujan las barras.
+            this.redraw = async () => this.gantt?.refresh(await this.load());
             window.addEventListener('task-calendar-refresh', this.refresh);
+            window.addEventListener('task-gantt-refresh', this.redraw);
         },
         destroy() {
             window.removeEventListener('task-calendar-refresh', this.refresh);
+            window.removeEventListener('task-gantt-refresh', this.redraw);
             this.$refs.gantt?.replaceChildren();
             this.gantt = null;
         },

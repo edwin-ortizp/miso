@@ -3,6 +3,8 @@
 namespace App\Livewire\Task;
 
 use App\Livewire\Concerns\HandlesRecurringTaskCompletion;
+use App\Livewire\Task\Concerns\FiltersTasks;
+use App\Livewire\Task\Concerns\LoadsTaskCategories;
 use App\Models\Task;
 use App\Services\TaskGamificationService;
 use Livewire\Component;
@@ -13,7 +15,7 @@ use Livewire\Attributes\Title;
 #[Title('Kanban')]
 class TaskKanban extends Component
 {
-    use HandlesRecurringTaskCompletion;
+    use FiltersTasks, HandlesRecurringTaskCompletion, LoadsTaskCategories;
 
     public function toggleComplete(string $id, TaskGamificationService $gamification): void
     {
@@ -33,7 +35,7 @@ class TaskKanban extends Component
 
     public function render()
     {
-        $tasks = Task::orderByDesc('created_at')->get();
+        $tasks = $this->applyTaskFilters(Task::query())->orderByDesc('created_at')->get();
 
         $columns = [
             'urgent-important' => ['label' => 'Urgente + Importante', 'color' => 'danger', 'tasks' => collect()],

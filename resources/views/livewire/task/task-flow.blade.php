@@ -1,4 +1,5 @@
 <x-module-shell module="tasks" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+    @include('livewire.task.partials.filter-bar', ['title' => 'Tareas en el flujo', 'icon' => 'bi-signpost-split'])
 <section class="task-flow-page">
     @forelse ($lanes as $lane)
         <section class="task-flow-lane" wire:key="flow-lane-{{ $lane['laneKey'] }}" aria-labelledby="flow-lane-{{ $lane['laneKey'] }}">

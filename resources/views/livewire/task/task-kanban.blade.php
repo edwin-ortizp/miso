@@ -1,4 +1,5 @@
 <x-module-shell module="tasks" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+    @include('livewire.task.partials.filter-bar', ['title' => 'Tareas en el Kanban', 'icon' => 'bi-kanban'])
     {{-- Kanban Grid --}}
     <div class="row g-3">
         @php

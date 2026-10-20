@@ -3,6 +3,7 @@
 namespace App\Livewire\Task;
 
 use App\Livewire\Task\Concerns\InteractsWithTaskRelations;
+use App\Livewire\Task\Concerns\FiltersTasks;
 use App\Livewire\Task\Concerns\LoadsTaskCategories;
 use App\Services\TaskRecurrenceService;
 use App\Livewire\Concerns\HandlesRecurringTaskCompletion;
@@ -23,30 +24,19 @@ use App\Livewire\Concerns\WithManagementCard;
 class TaskList extends Component
 {
     use InteractsWithTaskRelations, LoadsTaskCategories;
-    use HandlesRecurringTaskCompletion, InteractsWithTaskSchedule, WithManagementCard;
+    use HandlesRecurringTaskCompletion, InteractsWithTaskSchedule;
+    use WithManagementCard, FiltersTasks {
+        FiltersTasks::removeFilter insteadof WithManagementCard;
+        FiltersTasks::clearFilters insteadof WithManagementCard;
+    }
 
-    #[Url(as: 'status', history: true, keep: true)]
-    public $statusQuery = 'pending';
-
-    public $filter = [];
+    protected function defaultStatusFilter(): string
+    {
+        return 'pending';
+    }
 
     /** Catálogo de estados memorizado durante la petición (siguiente paso de cada fila). */
     protected ?\Illuminate\Support\Collection $statusCatalog = null;
-
-    #[Url(as: 'category', history: true, keep: true)]
-    public $categoryFilter = [];
-
-    #[Url(as: 'priority', history: true, keep: true)]
-    public string $priorityFilter = '';
-
-    #[Url(as: 'date', history: true, keep: true)]
-    public string $dateFilter = '';
-
-    #[Url(as: 'size', history: true, keep: true)]
-    public string $sizeFilter = '';
-
-    #[Url(as: 'q', history: true, keep: true)]
-    public string $search = '';
 
     public const SORTS = [
         'chronological' => 'Cronológico',
@@ -115,117 +105,10 @@ class TaskList extends Component
         'XL' => 'XL (> 4h)',
     ];
 
-    public function mount(): void
-    {
-        $this->filter = $this->statusQuery;
-        $this->normalizeFilters();
-
-    }
-
-    public function updatedStatusQuery(): void
-    {
-        $this->filter = $this->statusQuery;
-        $this->normalizeFilters();
-        $this->resetPage();
-    }
-
-    public function updatedFilter(): void
-    {
-        $this->normalizeFilters();
-        $this->resetPage();
-    }
-
-    public function updatedCategoryFilter(): void
-    {
-        $this->normalizeFilters();
-        $this->resetPage();
-    }
-
-    public function updatedPriorityFilter(): void
-    {
-        $this->normalizeFilters();
-        $this->resetPage();
-    }
-
-    public function updatedDateFilter(): void
-    {
-        $this->normalizeFilters();
-        $this->resetPage();
-    }
-
-    public function updatedSizeFilter(): void
-    {
-        $this->normalizeFilters();
-        $this->resetPage();
-    }
-
     public function updatedSort(): void
     {
         $this->sort = array_key_exists($this->sort, self::SORTS) ? $this->sort : 'chronological';
         $this->resetPage();
-    }
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
-    public function clearFilters(): void
-    {
-        $this->filter = 'pending';
-        $this->dateFilter = '';
-        $this->categoryFilter = [];
-        $this->priorityFilter = '';
-        $this->sizeFilter = '';
-        $this->normalizeFilters();
-        $this->resetPage();
-    }
-
-    public function removeFilter(string $key, ?string $value = null): void
-    {
-        match ($key) {
-            'date' => $this->dateFilter = '',
-            'priority' => $this->priorityFilter = '',
-            'size' => $this->sizeFilter = '',
-            'category' => $this->categoryFilter = array_values(array_diff($this->categoryFilter, [$value])),
-            'status' => $this->filter = $value === null ? 'all' : array_values(array_diff($this->filter, [$value])),
-            default => null,
-        };
-        $this->normalizeFilters();
-        $this->resetPage();
-    }
-
-    /** Chips de la franja «Filtros aplicados»; la búsqueda la agrega la card. */
-    private function activeFilters(array $statusOptions): array
-    {
-        $filters = [];
-        $dates = ['hoy' => 'Hoy', 'vencidas' => 'Vencidas', 'proximas' => 'Próximas', 'sin-fecha' => 'Sin fecha'];
-        if ($this->dateFilter !== '') {
-            $filters[] = ['key' => 'date', 'value' => null, 'label' => 'Cuándo: '.$dates[$this->dateFilter], 'icon' => 'bi-calendar-event'];
-        }
-
-        $pending = TaskStatus::query()->where('user_id', auth()->id())->where('type', '!=', TaskStatus::DONE)->pluck('id')->sort()->values()->all();
-        $selected = collect($this->filter)->sort()->values()->all();
-        if ($selected !== [] && $selected === $pending) {
-            $filters[] = ['key' => 'status', 'value' => null, 'label' => 'Estado: Pendientes', 'icon' => 'bi-circle'];
-        } else {
-            foreach ($this->filter as $id) {
-                $filters[] = ['key' => 'status', 'value' => $id, 'label' => 'Estado: '.($statusOptions[$id] ?? $id), 'icon' => 'bi-circle'];
-            }
-        }
-
-        foreach ($this->categoryFilter as $category) {
-            $label = $category === '__none__' ? 'Sin categoría' : ($this->categories[$category] ?? $category);
-            $filters[] = ['key' => 'category', 'value' => $category, 'label' => 'Categoría: '.$label, 'icon' => 'bi-tag'];
-        }
-        if ($this->priorityFilter !== '') {
-            $filters[] = ['key' => 'priority', 'value' => null, 'label' => 'Prioridad: '.$this->priorities[$this->priorityFilter], 'icon' => 'bi-flag'];
-        }
-        if ($this->sizeFilter !== '') {
-            $filters[] = ['key' => 'size', 'value' => null, 'label' => 'Tamaño: '.$this->sizeFilter, 'icon' => 'bi-rulers'];
-        }
-
-        return $filters;
     }
 
     public function openForm(?string $id = null)
@@ -496,91 +379,12 @@ class TaskList extends Component
         $this->resetValidation('bulkTitles');
     }
 
-    private function normalizeFilters(): void
-    {
-        $statuses = TaskStatus::query()->where('user_id', auth()->id())->ordered()->get();
-        $values = match (true) {
-            $this->filter === 'pending' => $statuses->where('type', '!=', TaskStatus::DONE)->pluck('id')->all(),
-            $this->filter === 'completed' => $statuses->where('type', TaskStatus::DONE)->pluck('id')->all(),
-            $this->filter === 'all' => [],
-            is_array($this->filter) => $this->filter,
-            default => [$this->filter],
-        };
-        $this->filter = array_values(array_unique(array_filter($values,
-            fn ($value) => is_string($value) && $statuses->contains('id', $value))));
-        // Livewire omits empty URL arrays; keep an explicit value so reload preserves all states.
-        $this->statusQuery = $this->filter ?: 'all';
-
-        $values = is_array($this->categoryFilter) ? $this->categoryFilter : [$this->categoryFilter];
-        $this->categoryFilter = array_values(array_unique(array_filter($values,
-            fn ($value) => is_string($value) && ($value === '__none__' || array_key_exists($value, $this->categories)))));
-
-        if ($this->priorityFilter !== '' && ! array_key_exists($this->priorityFilter, $this->priorities)) {
-            $this->priorityFilter = '';
-        }
-
-        if ($this->dateFilter !== '' && ! in_array($this->dateFilter, ['sin-fecha', 'vencidas', 'hoy', 'proximas'], true)) {
-            $this->dateFilter = '';
-        }
-
-        if ($this->sizeFilter !== '' && ! array_key_exists($this->sizeFilter, $this->sizes)) {
-            $this->sizeFilter = '';
-        }
-    }
-
     #[\Livewire\Attributes\On('task-records-changed')]
     public function refreshRecords(): void {}
 
     public function render()
     {
-        $query = Task::query()->with('status');
-
-        if ($this->filter) {
-            $query->whereIn('status_id', $this->filter);
-        }
-
-        if ($this->categoryFilter) {
-            $values = \App\Models\TaskCategory::expandSelection($this->categoryFilter, auth()->id(), 'key');
-            $query->where(function ($q) use ($values) {
-                $q->whereIn('category', array_values(array_diff($values, ['__none__'])));
-                if (in_array('__none__', $values, true)) {
-                    $q->orWhereNull('category');
-                }
-            });
-        }
-
-        if ($this->priorityFilter) {
-            $query->where('priority', $this->priorityFilter);
-        }
-
-        if ($this->sizeFilter) {
-            $query->where('size', $this->sizeFilter);
-        }
-
-        match ($this->dateFilter) {
-            'sin-fecha' => $query->whereNull('start_date')->whereNull('end_date'),
-            'vencidas' => $query->where('completed', false)->where(fn ($q) => $q
-                ->where('end_date', '<', now())
-                ->orWhere(fn ($q2) => $q2->whereNull('end_date')->where('start_date', '<', now()))
-            ),
-            'hoy' => $query->where(fn ($q) => $q
-                ->whereDate('start_date', today())
-                ->orWhereDate('end_date', today())
-            ),
-            'proximas' => $query->where(fn ($q) => $q
-                ->where('start_date', '>', now())
-                ->orWhere(fn ($q2) => $q2->whereNull('start_date')->where('end_date', '>', now()))
-            ),
-            default => null,
-        };
-
-        if ($this->search !== '') {
-            $term = '%'.$this->search.'%';
-            $query->where(fn ($q) => $q
-                ->where('title', 'like', $term)
-                ->orWhere('description', 'like', $term)
-            );
-        }
+        $query = $this->applyTaskFilters(Task::query()->with('status'));
 
         match ($this->sort) {
             'priority' => $query->orderByRaw("CASE WHEN priority = 'urgent-important' THEN 1 WHEN priority = 'not-urgent-important' THEN 2 WHEN priority = 'urgent-not-important' THEN 3 ELSE 4 END"),
@@ -618,7 +422,7 @@ class TaskList extends Component
             'tasks' => $tasks,
             'sorts' => self::SORTS,
             'statusOptions' => $statusOptions,
-            'activeFilters' => $this->activeFilters($statusOptions),
+            'activeFilters' => $this->taskFilterChips(),
             'pendingCount' => (int) $stats->pending_count,
             'completedCount' => (int) $stats->completed_count,
             'completedToday' => (int) $stats->completed_today,

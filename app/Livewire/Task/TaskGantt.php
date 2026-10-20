@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Task;
 
+use App\Livewire\Task\Concerns\FiltersTasks;
+use App\Livewire\Task\Concerns\LoadsTaskCategories;
 use App\Models\Task;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
@@ -13,6 +15,8 @@ use Livewire\Component;
 #[Title('Gantt de tareas')]
 class TaskGantt extends Component
 {
+    use FiltersTasks, LoadsTaskCategories;
+
     // Contrato del editor compartido: lo abre al cargar y lo limpia al cerrarse.
     #[Url(as: 'edit')]
     public ?string $editTask = null;
@@ -22,7 +26,7 @@ class TaskGantt extends Component
      */
     public function tasks(): array
     {
-        return Task::query()
+        return $this->applyTaskFilters(Task::query())
             ->where(fn ($query) => $query->whereNotNull('start_date')->orWhereNotNull('end_date'))
             ->orderByRaw('COALESCE(start_date, end_date)')
             ->get()
@@ -45,6 +49,12 @@ class TaskGantt extends Component
             })
             ->values()
             ->all();
+    }
+
+    /** Las barras las pinta Frappe en el cliente: se piden de nuevo al cambiar un filtro. */
+    protected function filtersChanged(): void
+    {
+        $this->dispatch('task-gantt-refresh');
     }
 
     /** Mueve o estira la tarea por días conservando la hora de cada extremo. */
@@ -88,7 +98,7 @@ class TaskGantt extends Component
     public function render()
     {
         return view('livewire.task.task-gantt', [
-            'unscheduledTasks' => Task::query()->whereNull('start_date')->whereNull('end_date')->where('completed', false)->orderByDesc('created_at')->get(),
+            'unscheduledTasks' => $this->applyTaskFilters(Task::query())->whereNull('start_date')->whereNull('end_date')->where('completed', false)->orderByDesc('created_at')->get(),
         ]);
     }
 }
