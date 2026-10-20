@@ -19,6 +19,16 @@
                 @endforeach
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $timeFilter !== '' ? ['key' => 'timeFilter', 'value' => null, 'label' => 'Momento: '.($timesOfDay[$timeFilter] ?? $timeFilter), 'icon' => 'bi-clock'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         <x-slot:menu>
             <x-ui.menu-item icon="bi-arrow-counterclockwise" wire:click="restoreDefaults">Restaurar hábitos predeterminados</x-ui.menu-item>
         </x-slot:menu>

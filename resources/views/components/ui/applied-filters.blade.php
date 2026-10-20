@@ -1,13 +1,13 @@
 @props([
     'filters' => [],
     'remove' => 'removeFilter',
-    'clear' => 'clearFilters',
 ])
 
 {{--
-    Franja de filtros aplicados de una card de gestión (slot `strip` de x-ui.management-card).
-    `filters` = [['key', 'value', 'label', 'icon'], ...]; cada chip llama a `remove(key, value)`
-    y «Limpiar filtros» a `clear`. Un filtro por defecto (p. ej. «Fecha: Hoy») se declara igual.
+    Chips de filtros aplicados de una card de gestión (slot `strip` de x-ui.management-card).
+    `filters` = [['key', 'value', 'label', 'icon'], ...]; cada chip llama a `remove(key, value)`.
+    La card agrega el chip de búsqueda y «Limpiar filtros» (prop `clear`). Un filtro por defecto
+    (p. ej. «Fecha: Hoy») se declara igual.
 --}}
 @foreach ($filters as $filter)
     <span {{ $attributes->class(['md-chip', 'md-chip-input', 'md-applied-chip']) }} wire:key="applied-filter-{{ $filter['key'] }}-{{ $filter['value'] ?? 'all' }}">
@@ -20,4 +20,3 @@
         </button>
     </span>
 @endforeach
-<button type="button" class="md-btn-text md-btn--sm md-applied-clear" wire:click="{{ $clear }}">Limpiar filtros</button>

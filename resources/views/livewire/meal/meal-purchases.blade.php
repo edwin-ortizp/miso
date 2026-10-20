@@ -13,6 +13,19 @@
                 <x-ui.select name="itemId" label="Producto" :options="$products" :selected="$itemId" placeholder="Todos" wire:model.live="itemId" />
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $from !== '' ? ['key' => 'from', 'value' => null, 'label' => 'Desde: '.\Carbon\Carbon::parse($from)->translatedFormat('j M Y'), 'icon' => 'bi-calendar-event'] : null,
+                $to !== '' ? ['key' => 'to', 'value' => null, 'label' => 'Hasta: '.\Carbon\Carbon::parse($to)->translatedFormat('j M Y'), 'icon' => 'bi-calendar-event'] : null,
+                $storeId !== '' ? ['key' => 'storeId', 'value' => null, 'label' => 'Tienda: '.($stores[$storeId] ?? $storeId), 'icon' => 'bi-shop'] : null,
+                $itemId !== '' ? ['key' => 'itemId', 'value' => null, 'label' => 'Producto: '.($products[$itemId] ?? $itemId), 'icon' => 'bi-basket'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         <div class="purchase-history-list">
             @forelse ($purchases as $purchase)
                 <a class="purchase-history-row" href="{{ route('meals.purchases.show', ['purchase' => $purchase->id, 'history' => $historyState]) }}" wire:navigate wire:key="purchase-{{ $purchase->id }}">

@@ -9,7 +9,9 @@
         <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message }}</div>
     @endif
 
-    @php($moodFilterCount = collect([$status, $category])->filter()->count())
+    @php
+        $moodFilterCount = collect([$status, $category])->filter()->count();
+    @endphp
     <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'mood')">Gestionar categorías</x-ui.action></nav>
     <x-ui.management-card id="mood-catalog" title="Catálogo de emociones" icon="bi-emoji-smile" :count="'('.$states->total().' / '.$totalCount.')'"
                           search="search" search-placeholder="Buscar una emoción" :active-filters="$moodFilterCount"
@@ -42,6 +44,17 @@
             </div>
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $status !== '' ? ['key' => 'status', 'value' => null, 'label' => 'Estado: '.($status === 'active' ? 'Activas' : 'Inactivas'), 'icon' => 'bi-toggle-on'] : null,
+                $category !== '' ? ['key' => 'category', 'value' => null, 'label' => 'Categoría: '.($categories[$category] ?? $category), 'icon' => 'bi-tag'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         <x-slot:menu>
             <x-ui.menu-item icon="bi-arrow-counterclockwise" wire:click="confirmRestore">Restaurar catálogo predeterminado</x-ui.menu-item>
         </x-slot:menu>

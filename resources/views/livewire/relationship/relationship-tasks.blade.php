@@ -16,6 +16,16 @@
                 @endforeach
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $status !== 'all' ? ['key' => 'status', 'value' => null, 'label' => 'Estado: '.(\App\Livewire\Relationship\RelationshipTasks::STATUS_FILTERS[$status]['label'] ?? $status), 'icon' => 'bi-circle'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
 
         @if ($tasks->isNotEmpty())
             <table class="md-table md-table--stack">

@@ -23,6 +23,16 @@
             @endforeach
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $monthFilter !== '' ? ['key' => 'monthFilter', 'value' => null, 'label' => 'Mes: '.($monthNames[(int) $monthFilter] ?? $monthFilter), 'icon' => 'bi-calendar3'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
     @forelse ($rows as $row)
         <div class="md-card-outlined md-relationship-birthday mb-2" wire:key="birthday-{{ $row['relationship']->id }}">
             <div class="d-flex align-items-center gap-3">

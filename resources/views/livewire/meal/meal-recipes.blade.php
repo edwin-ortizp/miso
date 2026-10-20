@@ -52,6 +52,18 @@
             </div>
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $favoriteFilter ? ['key' => 'favoriteFilter', 'value' => null, 'label' => 'Favoritos', 'icon' => 'bi-heart-fill'] : null,
+                $mealTypeFilter !== '' ? ['key' => 'mealTypeFilter', 'value' => null, 'label' => 'Tipo: '.($this->mealTypes[$mealTypeFilter] ?? $mealTypeFilter), 'icon' => 'bi-egg-fried'] : null,
+                $difficultyFilter !== '' ? ['key' => 'difficultyFilter', 'value' => null, 'label' => 'Dificultad: '.($this->difficulties[$difficultyFilter] ?? $difficultyFilter), 'icon' => 'bi-speedometer2'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
     @if ($recipes->isEmpty())
         <div class="md-card-elevated p-4 text-center">
             <i class="bi bi-book" style="font-size: 2rem; color: var(--md-sys-color-outline);"></i>

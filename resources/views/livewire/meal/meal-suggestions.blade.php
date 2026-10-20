@@ -23,6 +23,16 @@
                 <x-ui.field label="Días de vencimiento" name="days" type="number" min="0" max="365" wire:model.live.debounce.300ms="days" />
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $availability !== 'all' ? ['key' => 'availability', 'value' => null, 'label' => 'Disponibilidad: '.(\App\Livewire\Meal\MealSuggestions::AVAILABILITY[$availability] ?? $availability), 'icon' => 'bi-basket'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
 
         @if ($recipes->isEmpty())
             <x-ui.state variant="empty" icon="bi-egg-fried" title="No hay recetas que coincidan"

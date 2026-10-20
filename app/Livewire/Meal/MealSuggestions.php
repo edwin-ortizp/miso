@@ -56,6 +56,20 @@ class MealSuggestions extends Component
         $this->detailId = null;
     }
 
+    public function removeFilter(string $key, ?string $value = null): void
+    {
+        if ($key === 'availability') {
+            $this->availability = 'all';
+        }
+        $this->resetPage();
+    }
+
+    public function clearFilters(): void
+    {
+        $this->availability = 'all';
+        $this->resetPage();
+    }
+
     public function render()
     {
         $suggestions = app(MealNeeds::class)->suggestions((int) auth()->id(), min(999999, max(0.01, (float) $this->portions)), min(365, max(0, (int) $this->days)));

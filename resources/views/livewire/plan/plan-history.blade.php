@@ -5,6 +5,18 @@
             <x-ui.field name="to" type="date" label="Hasta" wire:model.live="to" />
             <x-ui.multi-select name="people" label="Acompañantes" :options="$peopleOptions" />
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $from !== '' ? ['key' => 'from', 'value' => null, 'label' => 'Desde: '.\Carbon\Carbon::parse($from)->translatedFormat('j M Y'), 'icon' => 'bi-calendar-event'] : null,
+                $to !== '' ? ['key' => 'to', 'value' => null, 'label' => 'Hasta: '.\Carbon\Carbon::parse($to)->translatedFormat('j M Y'), 'icon' => 'bi-calendar-event'] : null,
+                ...array_map(fn ($person) => ['key' => 'people', 'value' => $person, 'label' => 'Acompañante: '.($peopleOptions[$person] ?? '—'), 'icon' => 'bi-person'], $people),
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         <x-slot:filterActions><x-ui.action variant="outlined" wire:click="clearFilters">Limpiar</x-ui.action><x-ui.action x-on:click="filtersOpen = false">Filtrar</x-ui.action></x-slot:filterActions>
         @if ($visits->isEmpty())
             <x-ui.state variant="empty" title="No hay visitas" message="Registra una visita desde un plan o prueba otros filtros." icon="bi-clock-history" />

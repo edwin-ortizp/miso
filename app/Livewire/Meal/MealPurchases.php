@@ -46,6 +46,11 @@ class MealPurchases extends Component
         $this->resetPage();
     }
 
+    protected function filterProperties(): array
+    {
+        return ['from', 'to', 'storeId', 'itemId'];
+    }
+
     public function render()
     {
         $query = Purchase::where('user_id', auth()->id())->with('store')->withCount('lines');

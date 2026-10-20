@@ -186,6 +186,19 @@ class GoalIndex extends Component
         ];
     }
 
+    public function removeFilter(string $key, ?string $value = null): void
+    {
+        if ($key === 'statusFilter') {
+            $this->statusFilter = 'all';
+        }
+        $this->resetPage();
+    }
+
+    protected function filterProperties(): array
+    {
+        return ['statusFilter'];
+    }
+
     public function render()
     {
         $query = Goal::query();

@@ -20,9 +20,11 @@
         <x-ui.snackbar>{{ $catalogMessage }}</x-ui.snackbar>
     @endif
 
-    @php($catalogActive = count(array_filter([$catalogCategory, $catalogSource, $catalogVehicleType, $catalogPowerSource, $catalogTransmissionType], static fn ($value) => $value !== '')))
+    @php
+        $catalogActive = count(array_filter([$catalogCategory, $catalogSource, $catalogVehicleType, $catalogPowerSource, $catalogTransmissionType], static fn ($value) => $value !== ''));
+    @endphp
     <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'maintenance')">Gestionar categorías</x-ui.action></nav>
-    <x-ui.management-card id="vehicle-catalog" title="Plantillas" icon="bi-tools" :count="'('.$catalogTemplates->total().')'"
+    <x-ui.management-card clear="clearCatalogFilters" id="vehicle-catalog" title="Plantillas" icon="bi-tools" :count="'('.$catalogTemplates->total().')'"
                           search="catalogSearch" search-placeholder="Buscar nombre o descripción" :active-filters="$catalogActive"
                           :paginator="$catalogTemplates" noun="plantillas" alpine="openMenu: null">
         <x-slot:filters>
@@ -48,6 +50,20 @@
                                   :selected="$catalogTransmissionType" />
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $catalogCategory !== '' ? ['key' => 'catalogCategory', 'value' => null, 'label' => 'Categoría: '.($catalogCategories[$catalogCategory] ?? $catalogCategory), 'icon' => 'bi-tag'] : null,
+                $catalogSource !== '' ? ['key' => 'catalogSource', 'value' => null, 'label' => 'Origen: '.($catalogSource === 'base' ? 'Solo base' : 'Solo personal'), 'icon' => 'bi-collection'] : null,
+                $catalogVehicleType !== '' ? ['key' => 'catalogVehicleType', 'value' => null, 'label' => 'Vehículo: '.(['automovil' => 'Automóvil', 'motocicleta' => 'Motocicleta', 'bicicleta' => 'Bicicleta', 'patineta' => 'Patineta', 'otro' => 'Otro'][$catalogVehicleType] ?? $catalogVehicleType), 'icon' => 'bi-car-front'] : null,
+                $catalogPowerSource !== '' ? ['key' => 'catalogPowerSource', 'value' => null, 'label' => 'Propulsión: '.(['gasolina' => 'Gasolina', 'diesel' => 'Diésel', 'electrico' => 'Eléctrica', 'hibrido' => 'Híbrida', 'humana' => 'Humana', 'ninguna' => 'Ninguna'][$catalogPowerSource] ?? $catalogPowerSource), 'icon' => 'bi-lightning-charge'] : null,
+                $catalogTransmissionType !== '' ? ['key' => 'catalogTransmissionType', 'value' => null, 'label' => 'Transmisión: '.(['manual' => 'Manual', 'automatica' => 'Automática', 'cvt' => 'CVT', 'automatizada' => 'Automatizada', 'no_aplica' => 'No aplica'][$catalogTransmissionType] ?? $catalogTransmissionType), 'icon' => 'bi-gear'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         @if ($catalogActive)
             <x-slot:filterActions>
                 <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearCatalogFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>

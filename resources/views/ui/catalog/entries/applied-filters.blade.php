@@ -4,5 +4,6 @@
             ['key' => 'date', 'value' => null, 'label' => 'Fecha: Hoy', 'icon' => 'bi-calendar-event'],
             ['key' => 'drink', 'value' => null, 'label' => 'Bebida: Agua', 'icon' => 'bi-cup-straw'],
         ]" />
+        <button type="button" class="md-btn-text md-btn--sm md-applied-clear">Limpiar filtros</button>
     </div>
 </x-catalog.example>

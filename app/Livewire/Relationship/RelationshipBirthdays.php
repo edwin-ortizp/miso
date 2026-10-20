@@ -85,6 +85,11 @@ class RelationshipBirthdays extends Component
         $this->taskDueDate = null;
     }
 
+    protected function filterProperties(): array
+    {
+        return ['monthFilter'];
+    }
+
     public function render()
     {
         $rows = $this->birthdayRows();

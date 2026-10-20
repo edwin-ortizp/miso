@@ -354,6 +354,11 @@ class RelationshipIndex extends Component
         }
     }
 
+    protected function filterProperties(): array
+    {
+        return ['showArchived', 'circleFilter', 'tagFilter'];
+    }
+
     public function render()
     {
         $circles = Circle::orderBy('sort_order')->orderBy('name')->get();

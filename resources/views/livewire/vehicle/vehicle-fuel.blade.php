@@ -17,7 +17,7 @@
         <article class="md-card-outlined"><span>Rendimiento</span><strong>{{ $energyAnalytics['latest_efficiency'] ? number_format($energyAnalytics['latest_efficiency']['efficiency'], 1, ',', '.') : '—' }}</strong><small>{{ $energyAnalytics['latest_efficiency'] ? $vehicle->usage_unit.'/'.$energyAnalytics['unit'] : 'Requiere dos llenados completos' }}</small></article>
     </section>
 
-    <x-ui.management-card id="vehicle-energy-history" :title="'Historial de '.strtolower($energyUi['tab'])" icon="bi-fuel-pump"
+    <x-ui.management-card clear="clearFuelFilters" id="vehicle-energy-history" :title="'Historial de '.strtolower($energyUi['tab'])" icon="bi-fuel-pump"
                           :count="'('.$energyLogs->total().' / '.$totalCount.')'" search="fuelSearch" search-placeholder="Buscar estación o nota"
                           :active-filters="$fuelActive" :paginator="$energyLogs" sort-model="fuelSort" :sort-options="$sorts" :sort-value="$fuelSort" noun="registros" alpine="openMenu: null" class="vehicle-history-section" flush>
         <x-slot:filters>
@@ -32,6 +32,18 @@
                 @endif
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $fuelPeriod !== '' ? ['key' => 'fuelPeriod', 'value' => null, 'label' => 'Periodo: '.($periodOptions[$fuelPeriod] ?? $fuelPeriod), 'icon' => 'bi-calendar-range'] : null,
+                $fuelFill !== '' ? ['key' => 'fuelFill', 'value' => null, 'label' => 'Carga: '.($fuelFill === 'full' ? 'Solo completas' : 'Solo parciales'), 'icon' => 'bi-fuel-pump'] : null,
+                $fuelSource !== '' ? ['key' => 'fuelSource', 'value' => null, 'label' => 'Fuente: '.($fuelSource === 'electrico' ? 'Electricidad' : ucfirst($fuelSource)), 'icon' => 'bi-lightning-charge'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         @if ($fuelActive)
             <x-slot:filterActions>
                 <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearFuelFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>

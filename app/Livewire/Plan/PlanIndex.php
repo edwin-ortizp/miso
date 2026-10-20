@@ -107,9 +107,10 @@ class PlanIndex extends Component
         }
         if (in_array($key, ['types', 'circles', 'people', 'tags'], true)) {
             $this->{$key} = array_values(array_diff($this->{$key}, [$value]));
-        } elseif (in_array($key, ['status', 'city', 'q'], true)) {
+        } elseif (in_array($key, ['group', 'status', 'city', 'q', 'from', 'to'], true)) {
             $this->{$key} = '';
         }
+        $this->resetPage();
     }
 
     public function clearFilters(): void
@@ -193,6 +194,14 @@ class PlanIndex extends Component
     private function activeFilters(array $options): array
     {
         $filters = [];
+        if ($this->group !== '') {
+            $filters[] = ['key' => 'group', 'value' => null, 'label' => 'Grupo: '.Plan::GROUPS[$this->group]['label'], 'icon' => Plan::GROUPS[$this->group]['icon']];
+        }
+        foreach (['from' => 'Desde', 'to' => 'Hasta'] as $field => $label) {
+            if ($this->scheduled && $this->{$field} !== '') {
+                $filters[] = ['key' => $field, 'value' => null, 'label' => $label.': '.\Carbon\Carbon::parse($this->{$field})->translatedFormat('j M Y'), 'icon' => 'bi-calendar-event'];
+            }
+        }
         if ($this->category !== '') {
             $filters[] = ['key' => 'category', 'value' => $this->category, 'label' => PlanCategory::query()->find($this->category)?->name ?? 'Categoría', 'icon' => 'bi-grid'];
         }

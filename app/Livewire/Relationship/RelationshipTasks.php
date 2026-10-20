@@ -45,6 +45,19 @@ class RelationshipTasks extends Component
         $this->resetPage();
     }
 
+    public function removeFilter(string $key, ?string $value = null): void
+    {
+        if ($key === 'status') {
+            $this->status = 'all';
+        }
+        $this->resetPage();
+    }
+
+    protected function filterProperties(): array
+    {
+        return ['status'];
+    }
+
     public function render()
     {
         $this->status = array_key_exists($this->status, self::STATUS_FILTERS) ? $this->status : 'pending';

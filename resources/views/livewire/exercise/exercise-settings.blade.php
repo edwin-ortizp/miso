@@ -26,6 +26,16 @@
                 <x-ui.chip variant="filter" :selected="$category === 'none'" wire:click="$set('category', 'none')">Sin categoría</x-ui.chip>
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $category !== '' ? ['key' => 'category', 'value' => null, 'label' => 'Categoría: '.($category === 'none' ? 'Sin categoría' : ($categories[$category] ?? $category)), 'icon' => 'bi-tag'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         <x-slot:menu>
             <x-ui.menu-item icon="bi-arrow-counterclockwise" wire:click="restoreDefaults">Restaurar tipos predeterminados</x-ui.menu-item>
         </x-slot:menu>

@@ -15,6 +15,16 @@
             @endforeach
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $status !== '' ? ['key' => 'status', 'value' => null, 'label' => 'Estado: '.(\App\Livewire\Relationship\RelationshipPlans::STATUS_FILTERS[$status]['label'] ?? $status), 'icon' => 'bi-flag'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         <x-slot:menu>
             <x-ui.menu-item icon="bi-shuffle" wire:click="surprise">Sorpréndeme</x-ui.menu-item>
             <x-ui.menu-item icon="bi-sliders" :href="route('plans', ['people' => [$relationship->id]])">Filtros avanzados en Planes</x-ui.menu-item>

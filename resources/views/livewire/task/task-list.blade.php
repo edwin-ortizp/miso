@@ -34,6 +34,11 @@
                 <x-ui.select name="sizeFilter" label="Tamaño" wire:model.live="sizeFilter" :options="$sizes" placeholder="Todos los tamaños" />
             </div>
         </x-slot:filters>
+        @if (count($activeFilters) > 0)
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$activeFilters" />
+            </x-slot:strip>
+        @endif
         @if ($activeFilterCount)
             <x-slot:filterActions>
                 <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>
@@ -66,9 +71,6 @@
                         <div class="md-list-item-supporting text-truncate">{{ $task->description }}</div>
                     @endif
                     <div class="d-flex flex-wrap gap-1 mt-1">
-                        @if ($task->status && ! $task->completed)
-                            <span class="md-chip-tonal" title="Estado"><i class="bi {{ $task->status->icon }}" aria-hidden="true"></i> {{ $task->status->name }}</span>
-                        @endif
                         @if ($task->priority)
                             @php
                                 $priorityChipClass = match($task->priority) {
@@ -116,9 +118,14 @@
                         @if ($task->estimated_time)<span class="md-chip-tonal"><i class="bi bi-clock" style="font-size: 0.625rem;"></i> {{ $task->estimated_time_label }}</span>@endif
                     </div>
                 </button>
+                <div class="task-row__status">
+                    @if ($task->status)
+                        <span class="md-chip-tonal {{ $task->completed ? 'md-chip-tonal--success' : '' }}" title="Estado"><i class="bi {{ $task->status->icon }}" aria-hidden="true"></i> {{ $task->status->name }}</span>
+                    @endif
+                </div>
                 <div class="md-list-item-trailing">
                     <x-ui.row-actions :label="'Más acciones de '.$task->title">
-                        <x-slot:primary wire:click.stop="toggleComplete('{{ $task->id }}')" x-optimistic-toggle>{{ $task->completed ? 'Reabrir' : 'Completar' }}</x-slot:primary>
+                        <x-slot:primary wire:click.stop="advanceStatus('{{ $task->id }}')">{{ $this->advanceLabel($task) }}</x-slot:primary>
                         <x-ui.menu-item icon="bi-pencil" x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})">Editar</x-ui.menu-item>
                         <x-ui.menu-divider />
                         <x-ui.menu-item icon="bi-trash" tone="danger" wire:click="delete('{{ $task->id }}')" wire:confirm="La tarea «{{ $task->title }}» se elimina de forma permanente.">Eliminar</x-ui.menu-item>

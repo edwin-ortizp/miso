@@ -30,6 +30,9 @@ class TaskList extends Component
 
     public $filter = [];
 
+    /** Catálogo de estados memorizado durante la petición (siguiente paso de cada fila). */
+    protected ?\Illuminate\Support\Collection $statusCatalog = null;
+
     #[Url(as: 'category', history: true, keep: true)]
     public $categoryFilter = [];
 
@@ -178,6 +181,53 @@ class TaskList extends Component
         $this->resetPage();
     }
 
+    public function removeFilter(string $key, ?string $value = null): void
+    {
+        match ($key) {
+            'date' => $this->dateFilter = '',
+            'priority' => $this->priorityFilter = '',
+            'size' => $this->sizeFilter = '',
+            'category' => $this->categoryFilter = array_values(array_diff($this->categoryFilter, [$value])),
+            'status' => $this->filter = $value === null ? 'all' : array_values(array_diff($this->filter, [$value])),
+            default => null,
+        };
+        $this->normalizeFilters();
+        $this->resetPage();
+    }
+
+    /** Chips de la franja «Filtros aplicados»; la búsqueda la agrega la card. */
+    private function activeFilters(array $statusOptions): array
+    {
+        $filters = [];
+        $dates = ['hoy' => 'Hoy', 'vencidas' => 'Vencidas', 'proximas' => 'Próximas', 'sin-fecha' => 'Sin fecha'];
+        if ($this->dateFilter !== '') {
+            $filters[] = ['key' => 'date', 'value' => null, 'label' => 'Cuándo: '.$dates[$this->dateFilter], 'icon' => 'bi-calendar-event'];
+        }
+
+        $pending = TaskStatus::query()->where('user_id', auth()->id())->where('type', '!=', TaskStatus::DONE)->pluck('id')->sort()->values()->all();
+        $selected = collect($this->filter)->sort()->values()->all();
+        if ($selected !== [] && $selected === $pending) {
+            $filters[] = ['key' => 'status', 'value' => null, 'label' => 'Estado: Pendientes', 'icon' => 'bi-circle'];
+        } else {
+            foreach ($this->filter as $id) {
+                $filters[] = ['key' => 'status', 'value' => $id, 'label' => 'Estado: '.($statusOptions[$id] ?? $id), 'icon' => 'bi-circle'];
+            }
+        }
+
+        foreach ($this->categoryFilter as $category) {
+            $label = $category === '__none__' ? 'Sin categoría' : ($this->categories[$category] ?? $category);
+            $filters[] = ['key' => 'category', 'value' => $category, 'label' => 'Categoría: '.$label, 'icon' => 'bi-tag'];
+        }
+        if ($this->priorityFilter !== '') {
+            $filters[] = ['key' => 'priority', 'value' => null, 'label' => 'Prioridad: '.$this->priorities[$this->priorityFilter], 'icon' => 'bi-flag'];
+        }
+        if ($this->sizeFilter !== '') {
+            $filters[] = ['key' => 'size', 'value' => null, 'label' => 'Tamaño: '.$this->sizeFilter, 'icon' => 'bi-rulers'];
+        }
+
+        return $filters;
+    }
+
     public function openForm(?string $id = null)
     {
         $this->resetForm();
@@ -199,6 +249,10 @@ class TaskList extends Component
                 $this->isRecurrent = $task->is_recurrent;
                 $this->recurrenceIntervalDays = max(1, (int) (($task->recurrence ?? [])['customDays'] ?? 7));
                 $this->nativeRecurrenceRule = (string) (($task->recurrence ?? [])['rrule'] ?? '');
+                // Una regla diaria simple precarga los días por si el usuario la cambia.
+                if (preg_match('/^FREQ=DAILY;INTERVAL=(\d+)$/', $this->nativeRecurrenceRule, $match)) {
+                    $this->recurrenceIntervalDays = max(1, (int) $match[1]);
+                }
                 $this->loadTaskRelations($task);
             }
         }
@@ -361,6 +415,58 @@ class TaskList extends Component
         }
     }
 
+    /**
+     * Acción principal de la fila: avanza la tarea al siguiente tipo de estado del flujo
+     * (por hacer → listo → en curso) y desde el último paso abierto la completa.
+     */
+    public function advanceStatus(string $id, TaskGamificationService $gamification): void
+    {
+        $task = Task::with('status')->find($id);
+        if (! $task) {
+            return;
+        }
+
+        $next = $task->completed ? null : $this->nextStatus($task->status);
+        if (! $next) {
+            $this->toggleComplete($id, $gamification);
+
+            return;
+        }
+
+        $task->update(['status_id' => $next->id]);
+    }
+
+    /** Primer estado del usuario del siguiente tipo abierto del flujo; null si toca completar. */
+    private function nextStatus(?TaskStatus $status): ?TaskStatus
+    {
+        $types = [TaskStatus::TODO, TaskStatus::READY, TaskStatus::IN_PROGRESS];
+        $position = array_search($status?->type ?? TaskStatus::TODO, $types, true);
+        if ($position === false) {
+            return null;
+        }
+
+        $this->statusCatalog ??= TaskStatus::query()->where('user_id', auth()->id())->ordered()->get();
+        foreach (array_slice($types, $position + 1) as $type) {
+            if ($next = $this->statusCatalog->firstWhere('type', $type)) {
+                return $next;
+            }
+        }
+
+        return null;
+    }
+
+    /** Etiqueta del botón principal de la fila según el siguiente paso. */
+    public function advanceLabel(Task $task): string
+    {
+        if ($task->completed) {
+            return 'Reabrir';
+        }
+
+        $next = $this->nextStatus($task->status);
+
+        return $next ? 'Pasar a '.$next->name : 'Completar';
+    }
+
     public function delete(string $id)
     {
         // Por modelo, no masivo: así corren el observer de CalDAV y la limpieza de vínculos.
@@ -506,10 +612,13 @@ class TaskList extends Component
             ->pluck('total', 'category')
             ->toArray();
 
+        $statusOptions = TaskStatus::query()->where('user_id', auth()->id())->ordered()->pluck('name', 'id')->all();
+
         return view('livewire.task.task-list', [
             'tasks' => $tasks,
             'sorts' => self::SORTS,
-            'statusOptions' => TaskStatus::query()->where('user_id', auth()->id())->ordered()->pluck('name', 'id')->all(),
+            'statusOptions' => $statusOptions,
+            'activeFilters' => $this->activeFilters($statusOptions),
             'pendingCount' => (int) $stats->pending_count,
             'completedCount' => (int) $stats->completed_count,
             'completedToday' => (int) $stats->completed_today,

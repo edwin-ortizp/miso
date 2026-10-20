@@ -73,8 +73,7 @@ class JournalSummary extends Component
     public function removeFilter(string $key): void
     {
         match ($key) {
-            'period' => $this->clearFilters(),
-            'search' => $this->search = '',
+            'period' => [$this->period, $this->from, $this->to] = ['all', '', ''],
             default => null,
         };
         $this->resetPage();

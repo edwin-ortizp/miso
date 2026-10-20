@@ -264,6 +264,11 @@ class MealShopping extends Component
             ->map(fn ($row) => $row + ['shopping_item' => $products[$row['shopping_item_id']], 'recipes' => collect()]);
     }
 
+    protected function filterProperties(): array
+    {
+        return ['placeFilter'];
+    }
+
     public function render()
     {
         $query = ShoppingItem::query()

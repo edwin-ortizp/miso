@@ -21,7 +21,7 @@
         <article class="md-card-outlined"><span>Registros</span><strong>{{ number_format($expenses->total(), 0, ',', '.') }}</strong><small>El combustible y los servicios se registran en sus pestañas</small></article>
     </section>
 
-    <x-ui.management-card id="vehicle-expense-history" title="Historial de gastos" icon="bi-receipt"
+    <x-ui.management-card clear="clearExpenseFilters" id="vehicle-expense-history" title="Historial de gastos" icon="bi-receipt"
                           :count="'('.$expenses->total().' / '.$totalCount.')'" search="expenseSearch" search-placeholder="Buscar descripción o proveedor"
                           :active-filters="$expenseActive" :paginator="$expenses" sort-model="expenseSort" :sort-options="$sorts" :sort-value="$expenseSort" noun="gastos" alpine="openMenu: null" class="vehicle-history-section" flush>
         <x-slot:filters>
@@ -30,6 +30,17 @@
                 <x-ui.filter-menu name="expenseCategory" label="Categoría" allLabel="Todas las categorías" :options="$categoryOptions" :selected="$expenseCategory" />
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $expensePeriod !== '' ? ['key' => 'expensePeriod', 'value' => null, 'label' => 'Periodo: '.($periodOptions[$expensePeriod] ?? $expensePeriod), 'icon' => 'bi-calendar-range'] : null,
+                $expenseCategory !== '' ? ['key' => 'expenseCategory', 'value' => null, 'label' => 'Categoría: '.($categoryOptions[$expenseCategory] ?? $expenseCategory), 'icon' => 'bi-tag'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         @if ($expenseActive)
             <x-slot:filterActions>
                 <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearExpenseFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>

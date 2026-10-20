@@ -6,7 +6,9 @@
         @endif
     </div>
 
-    @php($eventFilterCount = collect([$showArchived, $includeSensitive, $relationFilter, $categoryFilter])->filter()->count())
+    @php
+        $eventFilterCount = collect([$showArchived, $includeSensitive, $relationFilter, $categoryFilter])->filter()->count();
+    @endphp
     <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'relationship-events')">Gestionar categorías</x-ui.action></nav>
     <x-ui.management-card id="relationship-events" title="Acontecimientos" icon="bi-calendar-event" :count="'('.$events->total().')'"
                           search="search" search-placeholder="Buscar acontecimientos" :active-filters="$eventFilterCount"
@@ -66,6 +68,20 @@
             </div>
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $periodFilter !== 'all' ? ['key' => 'periodFilter', 'value' => null, 'label' => 'Periodo: '.($periods[$periodFilter] ?? $periodFilter), 'icon' => 'bi-calendar-range'] : null,
+                $showArchived ? ['key' => 'showArchived', 'value' => null, 'label' => 'Archivados', 'icon' => 'bi-archive'] : null,
+                $includeSensitive ? ['key' => 'includeSensitive', 'value' => null, 'label' => 'Incluye sensibles', 'icon' => 'bi-eye'] : null,
+                $relationFilter !== '' ? ['key' => 'relationFilter', 'value' => null, 'label' => 'Relación: '.($relationships->firstWhere('id', $relationFilter)?->full_name ?? '—'), 'icon' => 'bi-person'] : null,
+                $categoryFilter !== '' ? ['key' => 'categoryFilter', 'value' => null, 'label' => 'Categoría: '.(\App\Support\CategoryCatalog::options('relationship-events')[$categoryFilter] ?? $categoryFilter), 'icon' => 'bi-tag'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
 
     @forelse ($events as $event)
         <div class="md-card-outlined md-relationship-event mb-2" wire:key="global-event-{{ $event->id }}">

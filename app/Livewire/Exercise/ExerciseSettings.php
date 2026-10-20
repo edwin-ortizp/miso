@@ -221,6 +221,11 @@ class ExerciseSettings extends Component
         $this->resetPage();
     }
 
+    protected function filterProperties(): array
+    {
+        return ['category'];
+    }
+
     public function render()
     {
         $term = trim($this->search);

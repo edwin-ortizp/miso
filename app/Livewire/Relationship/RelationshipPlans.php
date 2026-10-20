@@ -59,6 +59,11 @@ class RelationshipPlans extends Component
         $this->surpriseFrom($this->baseQuery($this->relationship()));
     }
 
+    protected function filterProperties(): array
+    {
+        return ['status'];
+    }
+
     public function render()
     {
         $relationship = $this->relationship();

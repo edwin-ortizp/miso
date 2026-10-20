@@ -14,13 +14,23 @@
         <x-ui.snackbar>{{ $maintenanceMessage }}</x-ui.snackbar>
     @endif
 
-    <x-ui.management-card id="vehicle-care-plans" title="Plan de mantenimiento" icon="bi-calendar2-check" :count="'('.$plans->count().' / '.$totalPlans.')'"
+    <x-ui.management-card clear="clearPlanFilters" id="vehicle-care-plans" title="Plan de mantenimiento" icon="bi-calendar2-check" :count="'('.$plans->count().' / '.$totalPlans.')'"
                           search="planSearch" search-placeholder="Buscar mantenimiento" :active-filters="$planActive" alpine="openMenu: null" class="vehicle-plans-section">
         <x-slot:filters>
             <div class="md-chip-rail md-mcard__filter-chips" role="group" aria-label="Filtros del plan" @click.outside="openMenu = null">
                 <x-ui.filter-menu name="planStatus" label="Estado" allLabel="Todos los estados" :options="$statusOptions" :selected="$planStatus" />
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $planStatus !== '' ? ['key' => 'planStatus', 'value' => null, 'label' => 'Estado: '.($statusOptions[$planStatus] ?? $planStatus), 'icon' => 'bi-activity'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         @if ($planActive)
             <x-slot:filterActions>
                 <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearPlanFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>
@@ -35,7 +45,9 @@
         @if ($planState === DataState::CONTENT)
             <div class="vehicle-plan-grid">
                 @foreach ($plans as $plan)
-                    @php($status = $plan->status_data['status'])
+                    @php
+                        $status = $plan->status_data['status'];
+                    @endphp
                     <article class="md-card-outlined vehicle-plan-card is-{{ $status }}" wire:key="plan-{{ $plan->id }}">
                         <header>
                             <div><span>{{ $statusOptions[$status] ?? str_replace('_', ' ', $status) }}</span><h2>{{ $plan->template->name }}</h2></div>

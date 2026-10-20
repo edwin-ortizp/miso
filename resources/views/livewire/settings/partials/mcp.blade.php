@@ -1,4 +1,6 @@
-@php($modules = \App\Mcp\Support\ToolCatalog::MODULES)
+@php
+    $modules = \App\Mcp\Support\ToolCatalog::MODULES;
+@endphp
 
 <x-ui.section title="Servidor MCP"
               description="Conecta tu asistente de IA (Claude, ChatGPT…) con MiSo mediante Model Context Protocol."
@@ -29,7 +31,7 @@
 
 <x-ui.management-card id="mcp-tools" title="Herramientas disponibles" icon="bi-tools"
                       :count="'('.$tools->count().' / '.$toolTotal.')'"
-                      search="toolSearch" search-placeholder="Buscar herramientas"
+                      search="toolSearch" search-placeholder="Buscar herramientas" clear="clearToolFilters"
                       :active-filters="($toolKind !== '' ? 1 : 0) + ($toolModule !== '' ? 1 : 0)" noun="herramientas">
     <x-slot:filters>
         <div class="md-chip-rail md-mcard__filter-chips" role="group" aria-label="Tipo de herramienta">
@@ -43,6 +45,17 @@
     <x-slot:filterActions>
         <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearToolFilters">Limpiar</x-ui.action>
     </x-slot:filterActions>
+    @php
+        $toolFilters = array_values(array_filter([
+            $toolKind !== '' ? ['key' => 'toolKind', 'value' => null, 'label' => 'Tipo: '.($toolKind === 'read' ? 'Lectura' : 'Escritura'), 'icon' => 'bi-pencil-square'] : null,
+            $toolModule !== '' ? ['key' => 'toolModule', 'value' => null, 'label' => 'Módulo: '.($modules[$toolModule][0] ?? $toolModule), 'icon' => 'bi-grid'] : null,
+        ]));
+    @endphp
+    @if ($toolFilters !== [])
+        <x-slot:strip>
+            <x-ui.applied-filters :filters="$toolFilters" remove="removeToolFilter" />
+        </x-slot:strip>
+    @endif
 
     @if ($tools->isEmpty())
         <x-ui.state variant="empty" title="Ninguna herramienta coincide" message="Prueba con otro texto o limpia los filtros." icon="bi-search" />

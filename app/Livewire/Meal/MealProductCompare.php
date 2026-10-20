@@ -97,6 +97,18 @@ class MealProductCompare extends Component
         $this->item->prices()->whereKey($priceId)->first()?->update(['verified_at' => now(), 'verified_by' => auth()->id()]);
     }
 
+    public function removeFilter(string $key): void
+    {
+        if (in_array($key, ['storeFilter', 'brandFilter'], true)) {
+            $this->reset($key);
+        }
+    }
+
+    public function clearFilters(): void
+    {
+        $this->reset('storeFilter', 'brandFilter');
+    }
+
     public function render()
     {
         $item = ShoppingItem::withOffers()->findOrFail($this->item->id);

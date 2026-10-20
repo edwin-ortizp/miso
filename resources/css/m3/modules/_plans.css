@@ -11,9 +11,6 @@
 .plans-groups { display: flex; flex-wrap: wrap; gap: 8px; }
 .plans-search { display: grid; grid-template-columns: minmax(0, 1fr) minmax(200px, 260px); gap: 12px; }
 .plans-applied-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.plans-applied-chip { display: inline-flex; align-items: center; gap: 6px; padding: 0 4px 0 12px; }
-.plans-applied-chip__remove { width: 24px; height: 24px; min-width: 24px; font-size: .95rem; }
-.plans-clear-filters { text-decoration: underline; text-underline-offset: 3px; }
 .plans-notice { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--md-custom-color-info-container); color: var(--md-custom-color-on-info-container); font-size: .85rem; }
 .plans-muted { margin: 0; color: var(--md-sys-color-on-surface-variant); font-size: .82rem; }
 

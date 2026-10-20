@@ -52,6 +52,16 @@
             @endif
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $placeFilter !== '' ? ['key' => 'placeFilter', 'value' => null, 'label' => 'Tienda: '.($places[$placeFilter] ?? $placeFilter), 'icon' => 'bi-shop'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
 
     {{-- Estimated cost of the next purchase --}}
     @if ($totalItems > 0)

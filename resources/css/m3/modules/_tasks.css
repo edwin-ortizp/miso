@@ -105,6 +105,10 @@
 
 .ta-chip-plain { background: var(--md-sys-color-surface-container-lowest) !important; border: 1px solid var(--md-sys-color-outline-variant); }
 
+/* Columna de estado de la fila de tareas: ancho fijo para que los estados queden alineados. */
+.task-row__status { display: flex; flex: 0 0 132px; justify-content: flex-start; align-items: center; }
+.task-row__status .md-chip-tonal { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* Mobile: la fila de tareas se aprieta un poco; las acciones ya se colapsan
  * a ⋮ en x-ui.row-actions y dejan más espacio al contenido. */
 @media (max-width: 767.98px) {
@@ -113,6 +117,7 @@
   .task-row .md-list-item-supporting { font-size: .78rem; }
   .task-row .md-chip-tonal { height: 21px; padding: 0 8px; font-size: .68rem; }
   .task-row .d-flex.flex-wrap.gap-1 { gap: 5px !important; margin-top: 4px !important; }
+  .task-row__status { flex-basis: auto; }
 }
 
 /* Ajustes de tareas: contenido + navegación lateral derecha de secciones (mismo patrón que Ajustes de planes) */

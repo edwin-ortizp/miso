@@ -177,6 +177,11 @@ class HabitSettings extends Component
         $this->resetPage();
     }
 
+    protected function filterProperties(): array
+    {
+        return ['timeFilter'];
+    }
+
     public function render()
     {
         $term = trim($this->search);

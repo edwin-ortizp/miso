@@ -27,16 +27,11 @@
 
         @if ($activeFilters > 0)
             <x-slot:strip>
-                @if ($type !== '')
-                    <x-ui.chip variant="input" icon="bi-x" wire:click="clearFilter('type')" :aria-label="'Quitar filtro '.$typeFilters[$type]">{{ $typeFilters[$type] }}</x-ui.chip>
-                @endif
-                @if ($category !== '')
-                    <x-ui.chip variant="input" icon="bi-x" wire:click="clearFilter('category')" :aria-label="'Quitar filtro '.$categories[$category]">{{ $categories[$category] }}</x-ui.chip>
-                @endif
-                @if ($archived)
-                    <x-ui.chip variant="input" icon="bi-x" wire:click="clearFilter('archived')" aria-label="Quitar filtro Incluir archivados">Incluye archivados</x-ui.chip>
-                @endif
-                <button type="button" class="md-btn-text md-btn--sm" wire:click="clearFilters">Limpiar filtros</button>
+                <x-ui.applied-filters remove="clearFilter" :filters="array_values(array_filter([
+                    $type !== '' ? ['key' => 'type', 'value' => null, 'label' => 'Tipo: '.$typeFilters[$type], 'icon' => $type === 'event' ? 'bi-calendar-event' : 'bi-map'] : null,
+                    $category !== '' ? ['key' => 'category', 'value' => null, 'label' => 'Categoría: '.$categories[$category], 'icon' => 'bi-tag'] : null,
+                    $archived ? ['key' => 'archived', 'value' => null, 'label' => 'Incluye archivados', 'icon' => 'bi-archive'] : null,
+                ]))" />
             </x-slot:strip>
         @endif
 

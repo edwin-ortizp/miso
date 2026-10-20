@@ -206,6 +206,11 @@ class MoodSettings extends Component
         $this->resetPage();
     }
 
+    protected function filterProperties(): array
+    {
+        return ['status', 'category'];
+    }
+
     public function render()
     {
         $term = trim($this->search);

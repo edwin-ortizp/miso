@@ -29,6 +29,16 @@
                 @endforeach
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $statusFilter !== 'all' ? ['key' => 'statusFilter', 'value' => null, 'label' => 'Estado: '.($statusLabels[$statusFilter] ?? $statusFilter), 'icon' => 'bi-flag'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         @if ($goalsState === DataState::CONTENT)
             <x-ui.list label="Objetivos">
                 @foreach ($goals as $goal)

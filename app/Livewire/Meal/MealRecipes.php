@@ -255,6 +255,11 @@ class MealRecipes extends Component
         Recipe::where('id', $id)->delete();
     }
 
+    protected function filterProperties(): array
+    {
+        return ['favoriteFilter', 'mealTypeFilter', 'difficultyFilter'];
+    }
+
     public function render()
     {
         $recipes = Recipe::query()

@@ -23,7 +23,7 @@
         <article class="md-card-outlined"><span>Último servicio</span><strong>{{ $latestService ? \Illuminate\Support\Carbon::parse($latestService)->translatedFormat('d M Y') : '—' }}</strong><small>{{ $latestService ? \Illuminate\Support\Carbon::parse($latestService)->diffForHumans() : 'Sin servicios registrados' }}</small></article>
     </section>
 
-    <x-ui.management-card id="vehicle-maintenance-history" title="Historial de servicios" icon="bi-clock-history"
+    <x-ui.management-card clear="clearServiceFilters" id="vehicle-maintenance-history" title="Historial de servicios" icon="bi-clock-history"
                           :count="'('.$maintenanceLogs->total().' / '.$totalCount.')'" search="serviceSearch" search-placeholder="Buscar servicio, taller o nota"
                           :active-filters="$serviceActive" :paginator="$maintenanceLogs" sort-model="serviceSort" :sort-options="$sorts" :sort-value="$serviceSort" noun="servicios" alpine="openMenu: null" class="vehicle-history-section" flush>
         <x-slot:filters>
@@ -34,6 +34,17 @@
                 @endif
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $servicePeriod !== '' ? ['key' => 'servicePeriod', 'value' => null, 'label' => 'Periodo: '.($periodOptions[$servicePeriod] ?? $servicePeriod), 'icon' => 'bi-calendar-range'] : null,
+                $servicePlan !== '' ? ['key' => 'servicePlan', 'value' => null, 'label' => 'Mantenimiento: '.($planOptions[$servicePlan] ?? $servicePlan), 'icon' => 'bi-wrench'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         @if ($serviceActive)
             <x-slot:filterActions>
                 <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearServiceFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>

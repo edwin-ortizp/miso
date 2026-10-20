@@ -267,6 +267,13 @@ class SettingsPage extends Component
         $this->selectedTool = null;
     }
 
+    public function removeToolFilter(string $key): void
+    {
+        if (in_array($key, ['toolKind', 'toolModule'], true)) {
+            $this->reset($key);
+        }
+    }
+
     public function clearToolFilters(): void
     {
         $this->reset('toolSearch', 'toolKind', 'toolModule');

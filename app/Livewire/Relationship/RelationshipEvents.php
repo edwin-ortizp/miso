@@ -58,6 +58,21 @@ class RelationshipEvents extends Component
         }
     }
 
+    public function removeFilter(string $key, ?string $value = null): void
+    {
+        match ($key) {
+            'periodFilter' => $this->periodFilter = 'all',
+            'showArchived', 'includeSensitive', 'relationFilter', 'categoryFilter' => $this->reset($key),
+            default => null,
+        };
+        $this->resetPage();
+    }
+
+    protected function filterProperties(): array
+    {
+        return ['periodFilter', 'showArchived', 'includeSensitive', 'relationFilter', 'categoryFilter'];
+    }
+
     public function render()
     {
         $relationships = Relationship::orderBy('full_name')->get(['id', 'full_name', 'nickname']);

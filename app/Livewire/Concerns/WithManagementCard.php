@@ -43,6 +43,43 @@ trait WithManagementCard
     }
 
     /**
+     * Chip de la franja «Filtros aplicados» (x-ui.applied-filters): por defecto `key` es la propiedad
+     * del filtro; se restablece a su valor inicial o, si es una lista, se quita `value`.
+     * Los componentes con filtros compuestos la redefinen.
+     */
+    public function removeFilter(string $key, ?string $value = null): void
+    {
+        if (! property_exists($this, $key)) {
+            return;
+        }
+
+        if (is_array($this->{$key}) && $value !== null) {
+            $this->{$key} = array_values(array_diff($this->{$key}, [$value]));
+        } else {
+            $this->reset($key);
+        }
+
+        $this->resetPage();
+    }
+
+    /**
+     * «Limpiar filtros» de la franja: restablece las propiedades de `filterProperties()`.
+     */
+    public function clearFilters(): void
+    {
+        $this->reset($this->filterProperties());
+        $this->resetPage();
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function filterProperties(): array
+    {
+        return [];
+    }
+
+    /**
      * Pagina una colección ya ordenada o calculada en PHP (cumpleaños, planes ordenados por visitas…).
      */
     protected function paginateCollection(Collection $items, string $pageName = 'page'): LengthAwarePaginator

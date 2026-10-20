@@ -17,6 +17,7 @@
     'sortOptions' => [],
     'sortValue' => null,
     'refreshable' => true,
+    'clear' => 'clearFilters',
 ])
 
 @php
@@ -127,9 +128,28 @@
         @endif
     </header>
 
-    @isset($strip)
-        <div class="md-mcard__strip" role="group" aria-label="Filtros aplicados">{{ $strip }}</div>
-    @endisset
+    {{-- Filtros aplicados: chips del componente (slot `strip`) + búsqueda activa, que también filtra. --}}
+    @if ($search)
+        <div class="md-mcard__strip" role="group" aria-label="Filtros aplicados"
+             @unless (isset($strip)) x-cloak x-show="$wire.{{ $search }}" @endunless>
+            <span class="md-chip md-chip-input md-applied-chip" x-cloak x-show="$wire.{{ $search }}">
+                <i class="bi bi-search" aria-hidden="true"></i>
+                <span>Búsqueda: «<span x-text="$wire.{{ $search }}"></span>»</span>
+                <button type="button" class="md-btn-icon md-btn--sm md-applied-chip__remove"
+                        x-on:click="$wire.set(@js($search), '')" aria-label="Quitar búsqueda" title="Quitar filtro">
+                    <i class="bi bi-x" aria-hidden="true"></i>
+                </button>
+            </span>
+            {{ $strip ?? '' }}
+            <button type="button" class="md-btn-text md-btn--sm md-applied-clear"
+                    x-on:click="$wire.set(@js($search), '', {{ isset($strip) ? 'false' : 'true' }}){{ isset($strip) ? '; $wire.'.$clear.'()' : '' }}">Limpiar filtros</button>
+        </div>
+    @elseif (isset($strip))
+        <div class="md-mcard__strip" role="group" aria-label="Filtros aplicados">
+            {{ $strip }}
+            <button type="button" class="md-btn-text md-btn--sm md-applied-clear" wire:click="{{ $clear }}">Limpiar filtros</button>
+        </div>
+    @endif
 
     <div @class(['md-mcard__body', 'md-mcard__body--flush' => $flush])>{{ $slot }}</div>
 

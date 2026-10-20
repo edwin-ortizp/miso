@@ -10,7 +10,9 @@
     </x-slot:actions>
 
 
-    @php($activeFilterCount = collect([$showArchived, $circleFilter, $tagFilter])->filter()->count())
+    @php
+        $activeFilterCount = collect([$showArchived, $circleFilter, $tagFilter])->filter()->count();
+    @endphp
     <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'contacts')">Gestionar categorías</x-ui.action></nav>
     <x-ui.management-card id="relationship-people" title="Personas" icon="bi-people" :count="'('.$relationships->total().' / '.($activeCount + $archivedCount).')'"
                           search="search" search-placeholder="Buscar por nombre, apodo, teléfono o correo" :active-filters="$activeFilterCount"
@@ -59,8 +61,22 @@
             </div>
             </div>
         </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $showArchived ? ['key' => 'showArchived', 'value' => null, 'label' => 'Archivadas', 'icon' => 'bi-archive'] : null,
+                $circleFilter !== '' ? ['key' => 'circleFilter', 'value' => null, 'label' => 'Círculo: '.($circles->firstWhere('id', $circleFilter)?->name ?? '—'), 'icon' => 'bi-bullseye'] : null,
+                $tagFilter !== '' ? ['key' => 'tagFilter', 'value' => null, 'label' => 'Etiqueta: '.($tags->firstWhere('id', $tagFilter)?->name ?? '—'), 'icon' => 'bi-tag'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
     @forelse ($relationships as $rel)
-        @php($birthday = $rel->birthday())
+        @php
+            $birthday = $rel->birthday();
+        @endphp
         <div class="md-card-outlined md-relationship-card mb-2 {{ $rel->is_archived ? 'md-relationship-card--archived' : '' }}">
             <div class="d-flex align-items-center justify-content-between gap-2">
                 <a href="{{ route('relationships.show', $rel) }}" class="md-relationship-card__link d-flex align-items-center gap-3" wire:navigate>

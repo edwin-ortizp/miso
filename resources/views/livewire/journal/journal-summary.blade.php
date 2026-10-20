@@ -1,7 +1,4 @@
 <x-module-shell module="journal">
-    @php
-        $isFiltered = $period !== '1m' || trim($search) !== '';
-    @endphp
 
     <x-ui.management-card id="journal-summary" title="Resumen del diario" icon="bi-card-list"
                           :count="'('.$entries->total().' / '.$totalCount.')'" search="search" search-placeholder="Buscar en los resúmenes"
@@ -20,21 +17,11 @@
             <x-ui.action variant="filled" icon="bi-funnel-fill" x-on:click="$wire.applyFilters(draftPeriod, draftFrom, draftTo); filtersOpen = false">Filtrar</x-ui.action>
         </x-slot:filterActions>
 
-        <x-slot:strip>
-            <span class="md-chip md-chip-input" wire:key="journal-summary-period-{{ $period }}-{{ $from }}-{{ $to }}">
-                <i class="bi bi-calendar-range" aria-hidden="true"></i>
-                <span>{{ $periodLabel }}</span>
-                @if ($period !== '1m')
-                    <button type="button" class="md-btn-icon md-btn--sm" wire:click="removeFilter('period')"
-                            aria-label="Quitar filtro {{ $periodLabel }}" title="Quitar filtro">
-                        <i class="bi bi-x" aria-hidden="true"></i>
-                    </button>
-                @endif
-            </span>
-            @if ($isFiltered)
-                <button type="button" class="md-btn-text md-btn--sm" wire:click="clearFilters" x-on:click="$wire.set('search', '')">Limpiar filtros</button>
-            @endif
-        </x-slot:strip>
+        @if ($period !== 'all')
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="[['key' => 'period', 'value' => null, 'label' => $periodLabel, 'icon' => 'bi-calendar-range']]" />
+            </x-slot:strip>
+        @endif
 
         @if ($entries->isNotEmpty())
             <div class="md-list journal-summary__list" role="list" aria-label="Resúmenes por día, del más reciente al más antiguo">

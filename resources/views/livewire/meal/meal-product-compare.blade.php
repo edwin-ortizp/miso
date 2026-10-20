@@ -53,6 +53,17 @@
                     </div>
                 </div>
             </x-slot:filters>
+        @php
+            $appliedChips = array_values(array_filter([
+                $storeFilter !== '' ? ['key' => 'storeFilter', 'value' => null, 'label' => 'Tienda: '.($stores[$storeFilter] ?? $storeFilter), 'icon' => 'bi-shop'] : null,
+                $brandFilter !== '' ? ['key' => 'brandFilter', 'value' => null, 'label' => 'Marca: '.($brands[$brandFilter] ?? $brandFilter), 'icon' => 'bi-award'] : null,
+            ]));
+        @endphp
+        @if ($appliedChips !== [])
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$appliedChips" />
+            </x-slot:strip>
+        @endif
         @endif
 
         @if ($comparable->isNotEmpty())
