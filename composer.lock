@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5bf177d3923effaecc6277163fd1463f",
+    "content-hash": "192f1215445ad554d49be36e71b2dbb5",
     "packages": [
         {
             "name": "brick/math",
@@ -513,16 +513,16 @@
         },
         {
             "name": "edwin-ortizp/laravel-markdown",
-            "version": "v0.2.0",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/edwin-ortizp/laravel-markdown.git",
-                "reference": "0a11d087ae6daabb21c9141313d13ae7d53aac52"
+                "reference": "8926895852f5b8620b7360c8e22f3c4adf1f975f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/edwin-ortizp/laravel-markdown/zipball/0a11d087ae6daabb21c9141313d13ae7d53aac52",
-                "reference": "0a11d087ae6daabb21c9141313d13ae7d53aac52",
+                "url": "https://api.github.com/repos/edwin-ortizp/laravel-markdown/zipball/8926895852f5b8620b7360c8e22f3c4adf1f975f",
+                "reference": "8926895852f5b8620b7360c8e22f3c4adf1f975f",
                 "shasum": ""
             },
             "require": {
@@ -564,7 +564,7 @@
                 "issues": "https://github.com/edwin-ortizp/laravel-markdown/issues",
                 "source": "https://github.com/edwin-ortizp/laravel-markdown"
             },
-            "time": "2026-10-19T03:52:42+00:00"
+            "time": "2026-10-20T21:27:57+00:00"
         },
         {
             "name": "egulias/email-validator",

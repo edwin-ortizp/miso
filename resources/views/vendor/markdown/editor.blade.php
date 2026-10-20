@@ -19,7 +19,7 @@
             <button type="button" class="lm-editor__button" data-markdown-snippet="{{ $tool }}">{{ $label }}</button>
         @endforeach
         <button type="button" class="lm-editor__button lm-editor__copy" data-markdown-copy aria-label="Copiar contenido" title="Copiar contenido">
-            <i class="bi bi-clipboard" aria-hidden="true"></i>
+            <i class="bi bi-clipboard" data-copy-idle="bi bi-clipboard" data-copy-done="bi bi-clipboard-check" data-copy-fail="bi bi-clipboard-x" aria-hidden="true"></i>
         </button>
         @if($expandable ?? true)
             <button type="button" class="lm-editor__button lm-editor__expand" data-markdown-expand hidden aria-label="Ampliar" title="Ampliar" aria-expanded="false">

@@ -84,6 +84,36 @@ it('conserva el atajo de checklist y cabe en móvil con estilos MiSo', function 
     $page->assertNoJavaScriptErrors();
 })->group('component', 'read', 'form');
 
+it('copia con el botón y ejecuta los atajos del paquete con el foco en el editor', function (): void {
+    $root = '[data-editor-id="miso-description"]';
+    $key = fn (string $init) => 'const t=document.querySelector("#miso-description");t.focus();t.setSelectionRange(0,t.value.length);t.dispatchEvent(new KeyboardEvent("keydown",Object.assign({bubbles:true,cancelable:true},'.$init.')))';
+    $page = visit('/__markdown-test?deferred=1')->click($root.' [data-markdown-mode="edit"]')->fill('#miso-description', 'Texto');
+    // El portapapeles real no está disponible en el navegador de pruebas: se captura lo copiado.
+    $page->script('window.__copied=null;Object.defineProperty(navigator,"clipboard",{configurable:true,value:{writeText:v=>{window.__copied=v;return Promise.resolve()}}})');
+
+    expect($page->script('Array.from(document.querySelectorAll(`'.$root.' .lm-editor__toolbar > button`)).slice(-2).map(b => b.hasAttribute("data-markdown-copy") ? "copy" : (b.hasAttribute("data-markdown-expand") ? "expand" : "other"))'))
+        ->toBe(['copy', 'expand']);
+    $page->assertAttribute($root.' [data-markdown-copy]', 'title', 'Copiar contenido (Alt+Shift+C)');
+
+    $page->script($key('{key:"b",ctrlKey:true}'));
+    $page->assertValue('#miso-description', '**Texto**');
+    $page->script($key('{key:"C",code:"KeyC",altKey:true,shiftKey:true}'));
+    expect($page->script('window.__copied'))->toBe('**Texto**');
+    $page->assertAttribute($root.' [data-markdown-copy]', 'title', 'Copiado');
+
+    // También copia desde la vista previa.
+    $page->fill('#miso-description', 'Otro')->script('window.__copied=null');
+    $page->click($root.' [data-markdown-mode="preview"]');
+    $page->click($root.' [data-markdown-copy]');
+    expect($page->script('window.__copied'))->toBe('Otro');
+
+    $page->click($root.' [data-markdown-mode="edit"]');
+    $page->script($key('{key:"F",ctrlKey:true,shiftKey:true}'));
+    $page->assertAttribute($root.' [data-markdown-expand]', 'aria-expanded', 'true')
+        ->assertAttribute($root.' [data-markdown-expand]', 'title', 'Restaurar (Esc)');
+    $page->assertNoJavaScriptErrors();
+})->group('component', 'write', 'form');
+
 it('amplía contenido largo dentro del modal sin perder el borrador', function (bool $deferred): void {
     $root = '[data-editor-id="miso-description"]';
     $page = visit('/__markdown-test?modal=1&deferred='.(int) $deferred)->resize(1280, 720)

@@ -1,5 +1,3 @@
-import { markdownShortcuts, shortcutAction, shortcutAria, withShortcut } from './markdown-shortcuts';
-
 const toolIcons = {
     heading: 'bi-type-h2',
     bold: 'bi-type-bold',
@@ -10,89 +8,6 @@ const toolIcons = {
     quote: 'bi-blockquote-left',
     code: 'bi-code-slash',
 };
-
-// Copia el Markdown crudo de cualquier editor (con o sin Livewire), también en vista previa.
-async function copyMarkdown(button) {
-    const source = button.closest('[data-markdown-editor]')?.querySelector('[data-markdown-source]');
-    const text = source?.value ?? '';
-    if (!text.trim()) return;
-
-    let copied = false;
-    try {
-        await navigator.clipboard.writeText(text);
-        copied = true;
-    } catch {
-        // Sin Clipboard API (HTTP, navegador antiguo): copia desde un textarea temporal.
-        const helper = Object.assign(document.createElement('textarea'), { value: text, readOnly: true });
-        helper.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
-        (button.closest('dialog, .lm-editor') ?? document.body).append(helper);
-        helper.select();
-        copied = document.execCommand('copy');
-        helper.remove();
-    }
-
-    const label = copied ? 'Copiado' : 'No se pudo copiar';
-    const icon = button.querySelector('i');
-    clearTimeout(button.copyTimer);
-    button.classList.toggle('is-copied', copied);
-    button.classList.toggle('is-failed', !copied);
-    button.setAttribute('aria-label', label);
-    button.setAttribute('title', label);
-    if (icon) icon.className = `bi ${copied ? 'bi-clipboard-check' : 'bi-clipboard-x'}`;
-    let status = button.querySelector('[data-markdown-copy-status]');
-    if (!status) {
-        status = Object.assign(document.createElement('span'), { className: 'visually-hidden' });
-        status.setAttribute('role', 'status');
-        status.setAttribute('data-markdown-copy-status', '');
-        button.append(status);
-    }
-    status.textContent = label;
-    button.copyTimer = setTimeout(() => {
-        button.classList.remove('is-copied', 'is-failed');
-        labelButton(button, 'Copiar contenido', 'copy');
-        if (icon) icon.className = 'bi bi-clipboard';
-        status.textContent = '';
-    }, 1500);
-}
-
-document.addEventListener('click', event => {
-    const button = event.target.closest('[data-markdown-copy]');
-    if (button) copyMarkdown(button);
-});
-
-// Tooltip y nombre accesible con el atajo; aria-keyshortcuts para lectores de pantalla.
-// Solo escribe si cambia: el MutationObserver del editor vigila `title` y entraría en bucle.
-function labelButton(button, label, action) {
-    const text = withShortcut(label, action);
-    setAttr(button, 'aria-label', text);
-    setAttr(button, 'title', text);
-    const aria = shortcutAria(markdownShortcuts[action]);
-    if (aria) setAttr(button, 'aria-keyshortcuts', aria);
-}
-
-function setAttr(element, name, value) {
-    if (element.getAttribute(name) !== value) element.setAttribute(name, value);
-}
-
-// Atajos activos solo con el foco dentro de un editor (también ampliado).
-document.addEventListener('keydown', event => {
-    const editor = event.target.closest?.('[data-markdown-editor]');
-    if (!editor) return;
-    const action = shortcutAction(event);
-    if (!action) return;
-    const button = action === 'copy'
-        ? editor.querySelector('[data-markdown-copy]')
-        : action === 'expand'
-            ? editor.querySelector('[data-markdown-expand]:not([hidden])')
-            : editor.querySelector(`[data-markdown-snippet="${action}"]`);
-    if (!button) return;
-    event.preventDefault();
-    if (action === 'copy') {
-        copyMarkdown(button);
-    } else {
-        button.click();
-    }
-});
 
 // Only bridges MiSo's state contract. Formatting and toolbar stay in the package.
 export function registerMarkdownAdapter(Alpine) {
@@ -136,7 +51,7 @@ export function registerMarkdownAdapter(Alpine) {
             // El scroll del viewport visual solo cambia la altura útil en móvil (teclado en pantalla).
             if (matchMedia('(pointer: coarse)').matches) window.visualViewport?.addEventListener('scroll', this.layoutListener);
             this.toolObserver = new MutationObserver(() => this.decorateTools());
-            this.toolObserver.observe(this.$el, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['aria-expanded', 'title'] });
+            this.toolObserver.observe(this.$el, { childList: true, subtree: true, characterData: true });
             this.$watch(() => this.$wire[modeProperty], () => this.syncMode());
             this.$watch(() => this.$wire[modelProperty], () => this.syncContent());
             this.$nextTick(() => {
@@ -153,35 +68,20 @@ export function registerMarkdownAdapter(Alpine) {
             window.visualViewport?.removeEventListener('resize', this.layoutListener);
             window.visualViewport?.removeEventListener('scroll', this.layoutListener);
         },
+        // Iconos de Bootstrap en los botones de formato; el paquete pone tooltip y atajo
+        // (`data-markdown-label` conserva el nombre al quitar el texto del botón).
         decorateTools() {
             this.$el.querySelectorAll('[data-markdown-snippet]').forEach(button => {
                 const iconClass = toolIcons[button.dataset.markdownSnippet];
-                if (!iconClass) return;
-                const label = button.dataset.misoLabel ?? (button.textContent.trim() || button.getAttribute('aria-label'));
-                if (!label) return;
-                button.dataset.misoLabel = label;
-                labelButton(button, label, button.dataset.markdownSnippet);
-                if (button.querySelector('[data-miso-markdown-icon]')) return;
+                if (!iconClass || button.querySelector('[data-miso-markdown-icon]')) return;
+                button.dataset.markdownLabel ??= button.textContent.trim() || button.getAttribute('aria-label') || '';
                 const icon = document.createElement('i');
                 icon.className = `bi ${iconClass}`;
                 icon.setAttribute('aria-hidden', 'true');
                 icon.setAttribute('data-miso-markdown-icon', '');
                 button.replaceChildren(icon);
             });
-            const copy = this.$el.querySelector('[data-markdown-copy]');
-            if (copy && !copy.classList.contains('is-copied') && !copy.classList.contains('is-failed')) labelButton(copy, 'Copiar contenido', 'copy');
-            this.labelExpand();
-        },
-        // El paquete reescribe la etiqueta al ampliar/restaurar; se le vuelve a añadir el atajo.
-        labelExpand() {
-            const expand = this.$el.querySelector('[data-markdown-expand]');
-            if (!expand) return;
-            const restoring = expand.getAttribute('aria-expanded') === 'true';
-            const text = restoring ? 'Restaurar (Esc)' : withShortcut('Ampliar', 'expand');
-            if (expand.getAttribute('title') === text) return;
-            setAttr(expand, 'title', text);
-            setAttr(expand, 'aria-label', text);
-            if (!restoring) setAttr(expand, 'aria-keyshortcuts', shortcutAria(markdownShortcuts.expand));
+            window.LaravelMarkdownEditor?.labelToolbar(this.$el);
         },
         // La barra sigue activa en vista previa; sin esto escribiría en el textarea oculto.
         editBeforeFormatting(event) {

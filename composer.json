@@ -10,14 +10,14 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
+        "edwin-ortizp/laravel-markdown": "^0.3.0",
         "laravel/framework": "^13.8",
         "laravel/mcp": "^0.9.4",
         "laravel/passport": "^13.8",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.3",
         "monicahq/laravel-sabre": "^1.10",
-        "opcodesio/log-viewer": "^3.24",
-        "edwin-ortizp/laravel-markdown": "^0.2.0"
+        "opcodesio/log-viewer": "^3.24"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^4.4",
