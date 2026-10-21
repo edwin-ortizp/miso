@@ -10,6 +10,7 @@ use App\Models\RelationshipEvent;
 use App\Models\Task;
 use App\Models\TaskAssociation;
 use App\Models\User;
+use App\Support\DefaultTaskCategories;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use InvalidArgumentException;
@@ -27,6 +28,10 @@ class RelationshipRemindersTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        User::created(function (User $user) {
+            DefaultTaskCategories::createFor($user);
+            $user->taskCategories()->create(['key' => 'trabajo', 'name' => 'Trabajo']);
+        });
 
         Carbon::setTestNow('2026-08-04 09:00:00');
         $this->user = User::factory()->create();

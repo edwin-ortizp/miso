@@ -22,7 +22,7 @@
                         @php($scheduledDate = $task->start_date ?? $task->end_date)
                         <article class="md-planning-card" wire:key="planning-{{ $task->id }}">
                             <button wire:click="openForm('{{ $task->id }}')" class="md-planning-card-main" aria-label="Abrir tarea: {{ $task->title }}">
-                                <span class="md-planning-card-title">{{ $task->title }}</span>
+                                <span class="md-planning-card-title"><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>
                                 <span class="md-planning-card-meta">
                                     @if ($task->category)<span class="md-chip-tonal">{{ $categories[$task->category] ?? $task->category }}</span>@endif
                                     @if ($task->priority)<span class="md-planning-priority {{ $task->priority }}"></span>@endif

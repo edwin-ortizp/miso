@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Exceptions\TaskCreationCancelled;
 use App\Models\Traits\BelongsToUser;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use App\Services\TaskCodeService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +15,49 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 class Task extends Model
 {
     use BelongsToUser, HasUuids;
+
+    public function save(array $options = [])
+    {
+        if ($this->exists) {
+            if ($this->isDirty('code')) {
+                throw new \InvalidArgumentException('El código de la tarea no es editable.');
+            }
+
+            return parent::save($options);
+        }
+        $this->user_id ??= auth()->id();
+        if (! $this->user_id) {
+            throw new \InvalidArgumentException('La tarea necesita un propietario.');
+        }
+        $attributes = $this->getAttributes();
+        $original = $this->getRawOriginal();
+        try {
+            return $this->getConnection()->transaction(function () use ($options, $attributes, $original) {
+                // A failed attempt may have fired created/saved before rollback.
+                $this->exists = false;
+                $this->wasRecentlyCreated = false;
+                $this->setRawAttributes($original, true);
+                $this->setRawAttributes($attributes);
+                $codes = app(TaskCodeService::class);
+                $codes->lock($this->user_id);
+                $this->code = $codes->next($this->user_id, $this->category);
+                if (! parent::save($options)) {
+                    throw new TaskCreationCancelled;
+                }
+
+                return true;
+            }, $this->getConnection()->transactionLevel() === 0 ? 3 : 1);
+        } catch (\Throwable $e) {
+            $this->exists = false;
+            $this->wasRecentlyCreated = false;
+            $this->setRawAttributes($original, true);
+            $this->setRawAttributes($attributes);
+            if ($e instanceof TaskCreationCancelled) {
+                return false;
+            }
+            throw $e;
+        }
+    }
 
     protected $fillable = [
         'task_code',
@@ -143,8 +188,7 @@ class Task extends Model
 
     public function hasExternalRef(string $id, ?string $provider = null): bool
     {
-        return collect($this->external_refs ?? [])->contains(fn ($ref) =>
-            mb_strtolower($ref['id'] ?? '') === mb_strtolower(trim($id))
+        return collect($this->external_refs ?? [])->contains(fn ($ref) => mb_strtolower($ref['id'] ?? '') === mb_strtolower(trim($id))
             && (! $provider || ($ref['provider'] ?? null) === mb_strtolower($provider)));
     }
 

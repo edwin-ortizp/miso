@@ -41,7 +41,7 @@
                 <button x-on:click.stop="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-list-item-content md-task-open-button" aria-label="Abrir tarea: {{ $task->title }}">
                     <div class="d-flex align-items-center gap-2">
                         <span class="md-list-item-headline {{ $task->completed ? '' : 'fw-medium' }}">
-                            {{ $task->title }}
+                            <x-ui.task-code :code="$task->code" /> {{ $task->title }}
                         </span>
                         @if ($task->is_private)
                             <i class="bi bi-lock-fill" style="color: var(--md-sys-color-on-surface-variant); font-size: 0.75rem;"></i>

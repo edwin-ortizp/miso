@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "tablet-panel",
+  "version": "1.0.0",
+  "title": "Panel de pared",
+  "pages": [
+    {
+      "id": "main",
+      "template": "pages/main.html.jinja",
+      "screens": [
+        "panel"
+      ],
+      "output": "tablet-panel.html"
+    }
+  ],
+  "screens": {
+    "panel": {
+      "template": "screens/panel.html.jinja",
+      "title": "Panel de pared",
+      "bodyClass": ""
+    }
+  },
+  "routes": [
+    {
+      "path": "/panel",
+      "screen": "panel"
+    }
+  ],
+  "datasets": {
+    "include": [
+      "empty",
+      "alternate"
+    ],
+    "default": "empty",
+    "switcher": true,
+    "changePolicy": "reset"
+  },
+  "roles": [
+    "reviewer"
+  ],
+  "defaultRole": "reviewer",
+  "entryRoute": "/panel",
+  "entryScript": "scripts/entry.js",
+  "styles": [
+    "@project/project-assets/mockups.css"
+  ],
+  "runtime": {
+    "persistence": "none",
+    "resetEnabled": true
+  },
+  "build": {
+    "selfContained": true,
+    "offline": true,
+    "externalResources": "forbid",
+    "externalNavigation": "forbid",
+    "maxOutputBytes": 10000000
+  }
+}

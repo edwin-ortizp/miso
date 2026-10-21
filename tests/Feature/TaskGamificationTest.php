@@ -9,6 +9,7 @@ use App\Livewire\Task\TaskProgress;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\TaskGamificationService;
+use App\Support\DefaultTaskCategories;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -21,6 +22,10 @@ class TaskGamificationTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        User::created(function (User $user) {
+            DefaultTaskCategories::createFor($user);
+            $user->taskCategories()->create(['key' => 'trabajo', 'name' => 'Trabajo']);
+        });
         Carbon::setTestNow('2026-07-12 10:00:00');
     }
 

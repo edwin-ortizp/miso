@@ -18,7 +18,7 @@
         <section class="md-card-filled mt-3">
             <div class="d-flex align-items-center gap-2 mb-2"><i class="bi bi-calendar-x"></i><h2 class="md-title-medium mb-0">Sin fecha</h2></div>
             @foreach ($unscheduledTasks as $task)
-                <div class="md-list-item px-0"><button x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-list-item-content md-task-open-button"><span class="md-list-item-headline">{{ $task->title }}</span></button></div>
+                <div class="md-list-item px-0"><button x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-list-item-content md-task-open-button"><span class="md-list-item-headline"><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span></button></div>
             @endforeach
         </section>
     @endif

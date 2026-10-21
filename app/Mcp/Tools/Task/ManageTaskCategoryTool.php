@@ -7,6 +7,7 @@ use App\Mcp\Tools\Task\Concerns\InteractsWithTaskFields;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -25,12 +26,13 @@ class ManageTaskCategoryTool extends Tool
             'category' => ['required_unless:action,create', 'nullable', 'string', 'max:80'],
             'name' => ['required_unless:action,delete', 'nullable', 'string', 'max:60'],
             'parent_id' => ['nullable', 'uuid'],
+            'code_prefix' => ['sometimes', 'required', 'string'],
             'reassign_to' => ['nullable', 'string', 'max:80'],
         ]);
 
         try {
             if ($data['action'] === 'create') {
-                $category = $categories->create(Auth::user(), $data['name'], null, $data['parent_id'] ?? null);
+                $category = $categories->create(Auth::user(), $data['name'], null, $data['parent_id'] ?? null, $data['code_prefix'] ?? null);
 
                 return Response::text("Categoría \"{$category->name}\" creada (key: {$category->key}).");
             }
@@ -42,7 +44,7 @@ class ManageTaskCategoryTool extends Tool
 
             if ($data['action'] === 'rename') {
                 $previous = $category->name;
-                $categories->update($category, $data['name'], null, array_key_exists('parent_id', $data) ? $data['parent_id'] : $category->parent_id);
+                $categories->update($category, $data['name'], null, array_key_exists('parent_id', $data) ? $data['parent_id'] : $category->parent_id, $data['code_prefix'] ?? null);
 
                 return Response::text("Categoría \"{$previous}\" renombrada a \"{$category->name}\". Sus tareas la conservan.");
             }
@@ -56,7 +58,7 @@ class ManageTaskCategoryTool extends Tool
             }
 
             $moved = $categories->delete($category, $target);
-        } catch (InvalidArgumentException|\Illuminate\Validation\ValidationException $exception) {
+        } catch (InvalidArgumentException|ValidationException $exception) {
             return Response::error($exception->getMessage());
         }
 
@@ -76,6 +78,7 @@ class ManageTaskCategoryTool extends Tool
                 ->description('Key o nombre de la categoría existente (rename y delete).'),
             'name' => $schema->string()
                 ->description('Nombre de la nueva categoría o nuevo nombre (create y rename).'),
+            'code_prefix' => $schema->string()->description('Prefijo propio de 2 a 5 letras, único por usuario.'),
             'parent_id' => $schema->string()->nullable()->description('UUID de la categoría padre; null la convierte en raíz.'),
             'reassign_to' => $schema->string()
                 ->description('Al eliminar: key o nombre de la categoría que recibe sus tareas. Si se omite, quedan sin categoría.'),

@@ -212,3 +212,55 @@ for (const width of [1280, 1600, 390]) {
         await page.screenshot({ path: `storage/framework/testing/playwright/tasks-settings/statuses-${width}.png`, fullPage: true });
     });
 }
+
+for (const width of [390, 1280]) {
+    test(`task codes copy, search and prefix settings ${width}`, async ({ page, context }) => {
+        test.setTimeout(90000);
+        page.setDefaultTimeout(12000);
+        await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto('/login');
+        await page.getByLabel('Correo electrónico', { exact: true }).fill('tasks-settings-browser@example.test');
+        await page.getByLabel('Contraseña', { exact: true }).fill('browser-test-password');
+        await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
+        await page.waitForURL(url => !url.pathname.includes('/login'));
+        await page.goto('/tasks/list');
+        const row = page.locator('.md-task-open-button').filter({ hasText: 'Barrer la casa' });
+        const code = (await row.locator('code').textContent()).trim();
+        expect(code).toMatch(/^HOG-\d{5}$/);
+        await row.click();
+        const dialog = page.locator('#task-editor');
+        const copy = dialog.getByRole('button', { name: `Copiar código ${code}`, exact: true });
+        await expect(copy).toBeVisible();
+        await copy.focus();
+        await page.keyboard.press('Enter');
+        await expect(dialog.getByRole('status').filter({ hasText: 'Código copiado' })).toBeVisible();
+        expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(code);
+        await page.evaluate(() => { navigator.clipboard.writeText = async () => { throw new Error('Clipboard unavailable'); }; });
+        await copy.click();
+        await expect(dialog.getByRole('status').filter({ hasText: 'No se pudo copiar el código' })).toBeVisible();
+        expect(await dialog.locator('input[name="code"]').count()).toBe(0);
+        await page.screenshot({ path: `storage/framework/testing/playwright/task-code-${width}.png` });
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        // The shared Markdown toolbar has an existing contrast issue; check the new code control itself.
+        const a11y = await analyze(page, '#task-editor .md-task-code');
+        expect(a11y.violations, describeViolations(a11y.violations)).toEqual([]);
+        await page.keyboard.press('Escape');
+        await expect(dialog).toBeHidden();
+        const search = page.locator('#task-list-search');
+        if (!await search.isVisible()) await page.locator('#task-list .md-mcard__search-toggle').click();
+        await search.fill(code.toLowerCase());
+        await expect(row).toBeVisible();
+        await expect(page.locator('.md-task-open-button')).toHaveCount(1);
+        await page.goto('/tasks/flow');
+        await expect(page.locator('.task-flow-card').filter({ hasText: 'Barrer la casa' })).toContainText(code);
+        await page.goto('/tasks/settings');
+        await page.getByLabel('Prefijo para tareas sin categoría', { exact: true }).fill('MSS');
+        await Promise.all([
+            page.waitForResponse(response => response.url().includes('/update') && response.request().method() === 'POST'),
+            page.getByRole('button', { name: 'Guardar prefijo', exact: true }).click(),
+        ]);
+        await page.reload();
+        await expect(page.getByLabel('Prefijo para tareas sin categoría', { exact: true })).toHaveValue('MSS');
+    });
+}

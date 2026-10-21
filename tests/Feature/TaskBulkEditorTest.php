@@ -5,9 +5,9 @@ namespace Tests\Feature;
 use App\Livewire\Task\TaskBulkEditor;
 use App\Livewire\Task\TaskEditor;
 use App\Livewire\Task\TaskFlow;
-use App\Livewire\Task\TaskGantt;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\DefaultTaskCategories;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -15,6 +15,15 @@ use Tests\TestCase;
 class TaskBulkEditorTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        User::created(function (User $user) {
+            DefaultTaskCategories::createFor($user);
+            $user->taskCategories()->create(['key' => 'trabajo', 'name' => 'Trabajo']);
+        });
+    }
 
     public function test_bulk_editor_saves_shared_fields_and_per_line_metadata(): void
     {

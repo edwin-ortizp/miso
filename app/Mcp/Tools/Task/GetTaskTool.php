@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools\Task;
 
 use App\Models\Task;
+use App\Services\TaskCodeService;
 use App\Services\TaskRecurrenceService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
@@ -19,9 +20,10 @@ class GetTaskTool extends Tool
     {
         $data = $request->validate([
             'task_id' => ['required', 'string'],
+            'code' => ['prohibited'],
         ]);
 
-        $task = Auth::user()->tasks()->find($data['task_id']);
+        $task = app(TaskCodeService::class)->resolve(Auth::id(), $data['task_id']);
 
         if (! $task) {
             return Response::error('No se encontró la tarea o no te pertenece.');
@@ -31,6 +33,7 @@ class GetTaskTool extends Tool
 
         return Response::structured([
             'id' => $task->id,
+            'code' => $task->code,
             'title' => $task->title,
             'description' => $task->description,
             'subtasks' => $task->subtask_progress,
@@ -76,7 +79,7 @@ class GetTaskTool extends Tool
     {
         return [
             'task_id' => $schema->string()
-                ->description('Identificador (UUID) de la tarea.')
+                ->description('UUID o código legible exacto de la tarea (p. ej. SGX-00002).')
                 ->required(),
         ];
     }

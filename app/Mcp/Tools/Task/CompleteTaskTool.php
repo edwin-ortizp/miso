@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Tools\Task;
 
+use App\Services\TaskCodeService;
 use App\Services\TaskGamificationService;
 use App\Services\TaskRecurrenceService;
 use Carbon\Carbon;
@@ -20,11 +21,12 @@ class CompleteTaskTool extends Tool
     {
         $data = $request->validate([
             'task_id' => ['required', 'string'],
+            'code' => ['prohibited'],
             'action' => ['nullable', 'string', Rule::in(['complete', 'reopen', 'toggle'])],
             'next_occurrence_date' => ['nullable', 'date'],
         ]);
 
-        $task = Auth::user()->tasks()->find($data['task_id']);
+        $task = app(TaskCodeService::class)->resolve(Auth::id(), $data['task_id']);
 
         if (! $task) {
             return Response::error('No se encontró la tarea o no te pertenece.');
@@ -71,7 +73,7 @@ class CompleteTaskTool extends Tool
     {
         return [
             'task_id' => $schema->string()
-                ->description('Identificador (UUID) de la tarea.')
+                ->description('UUID o código legible exacto de la tarea (p. ej. SGX-00002).')
                 ->required(),
             'action' => $schema->string()
                 ->enum(['complete', 'reopen', 'toggle'])

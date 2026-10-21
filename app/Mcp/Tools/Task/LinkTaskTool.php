@@ -4,6 +4,7 @@ namespace App\Mcp\Tools\Task;
 
 use App\Mcp\Tools\Relationship\Concerns\ResolvesContact;
 use App\Models\TaskAssociation;
+use App\Services\TaskCodeService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -23,13 +24,14 @@ class LinkTaskTool extends Tool
     {
         $data = $request->validate([
             'task_id' => ['required', 'string'],
+            'code' => ['prohibited'],
             'target_type' => ['required', 'string', Rule::in(self::TARGETS)],
             'target_id' => ['nullable', 'string'],
             'contact_name' => ['nullable', 'string'],
             'unlink' => ['nullable', 'boolean'],
         ]);
 
-        $task = Auth::user()->tasks()->find($data['task_id']);
+        $task = app(TaskCodeService::class)->resolve(Auth::id(), $data['task_id']);
         if (! $task) {
             return Response::error('No se encontró la tarea o no te pertenece.');
         }
@@ -68,7 +70,7 @@ class LinkTaskTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
-            'task_id' => $schema->string()->description('Id de la tarea.')->required(),
+            'task_id' => $schema->string()->description('UUID o código legible exacto de la tarea.')->required(),
             'target_type' => $schema->string()->enum(self::TARGETS)->description('Qué se vincula: contact (persona), health_event o goal.')->required(),
             'target_id' => $schema->string()->description('Id del destino. Para contact puede usarse contact_name en su lugar.'),
             'contact_name' => $schema->string()->description('Nombre, apodo o alias de la persona (solo para target_type=contact).'),

@@ -103,6 +103,7 @@ No consultes para preguntas generales que no dependen de su vida, si el dato ya 
 - Un síntoma, dolor, cita o examen → get-health-context-tool con palabras clave en "search" y la zona del cuerpo si aplica.
 - "¿Cómo me fue?", resumen del día o la semana → get-recent-activity-tool.
 - Recomendar planes → list-plans-tool (círculo, persona, ciudad, not_visited) + list-plan-visits-tool para no repetir lo reciente.
+- Los códigos legibles (p. ej. SGX-00002) identifican tareas: usa get-task-tool con task_id igual al código antes de refinar; update, complete y link también aceptan código o UUID.
 - Trabajo y pendientes → list-tasks-tool por categoría, por tipo de estado (status_type: todo, ready, in_progress, done) o con updated_since; get-task-tool solo para la tarea en foco. Los estados son personalizables (manage-task-status-tool); para terminar una tarea usa complete-task-tool.
 - Metas, propósitos o progreso → list-goals-tool (con goal_id o title para el detalle).
 - Comida, qué cocinar o el mercado de la semana → list-meal-plan-tool y list-recipes-tool.

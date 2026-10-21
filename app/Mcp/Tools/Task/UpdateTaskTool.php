@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools\Task;
 
 use App\Mcp\Tools\Task\Concerns\InteractsWithTaskFields;
+use App\Services\TaskCodeService;
 use App\Services\TaskRecurrenceService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,7 @@ class UpdateTaskTool extends Tool
     {
         $data = $request->validate([
             'task_id' => ['required', 'string'],
+            'code' => ['prohibited'],
             'title' => ['sometimes', 'required', 'string', 'max:255'],
             'append_description' => ['nullable', 'string'],
             'remove_external_refs' => ['nullable', 'array', 'max:20'],
@@ -30,7 +32,7 @@ class UpdateTaskTool extends Tool
             ...$this->fieldRules(),
         ]);
 
-        $task = Auth::user()->tasks()->find($data['task_id']);
+        $task = app(TaskCodeService::class)->resolve(Auth::id(), $data['task_id']);
 
         if (! $task) {
             return Response::error('No se encontró la tarea o no te pertenece.');
@@ -83,7 +85,7 @@ class UpdateTaskTool extends Tool
     {
         return [
             'task_id' => $schema->string()
-                ->description('Identificador (UUID) de la tarea.')
+                ->description('UUID o código legible exacto de la tarea (p. ej. SGX-00002).')
                 ->required(),
             'title' => $schema->string()
                 ->description('Nuevo título.'),

@@ -31,7 +31,7 @@
                                     </button>
                                     <div style="min-width: 0;">
                                         <span class="md-body-small {{ $task->completed ? '' : 'fw-medium' }}" style="color: var(--md-sys-color-on-surface);">
-                                            {{ $task->title }}
+                                            <x-ui.task-code :code="$task->code" /> {{ $task->title }}
                                         </span>
                                         @if ($task->category)
                                             <br><span class="md-chip-tonal" style="font-size: 0.5625rem; height: 18px; padding: 0 6px;">{{ $task->category }}</span>

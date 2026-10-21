@@ -1,18 +1,20 @@
+{#- Grupos de módulos (config/modules.php): (etiqueta, ícono, [(módulo, ícono, id)]). Los usan el shell y el rail del panel de pared. -#}
+{% set module_groups = [
+('Vista general', 'bi-grid-1x2', [('Mi día','bi-sunrise','home'),('Estadísticas','bi-bar-chart','statistics'),('Ajustes','bi-gear','settings')]),
+('Salud y cuerpo', 'bi-heart-pulse', [('Salud','bi-heart-pulse','health'),('Ejercicio','bi-activity','exercise'),('Hidratación','bi-droplet','hydration'),('Comidas','bi-egg-fried','meals')]),
+('Hábitos', 'bi-check2-square', [('Hábitos','bi-check2-square','habits'),('Hábitos a evitar','bi-shield-check','negative-habits')]),
+('Productividad', 'bi-calendar-check', [('Tareas','bi-list-task','tasks'),('Pomodoro','bi-stopwatch','pomodoro'),('Objetivos','bi-flag','goals')]),
+('Vida personal', 'bi-person-heart', [('Diario','bi-journal-text','journal'),('Relaciones','bi-people','relationships'),('Planes','bi-map','plans'),('Ánimo y energía','bi-emoji-smile','mood')]),
+('Vehículos', 'bi-car-front', [('Vehículos','bi-car-front','vehicles')])
+] %}
 {#- `back` = (ruta, etiqueta): en un detalle sin pestañas el regreso va en la barra superior, antes del ícono del módulo. -#}
 {% macro shell(module, title, icon, catalog_navigation=None, status=None, back=None) -%}
-{% set sections = [
-  ('Vista general', [('Mi día','bi-sunrise','home'),('Estadísticas','bi-bar-chart','statistics'),('Ajustes','bi-gear','settings')]),
-  ('Salud y cuerpo', [('Salud','bi-heart-pulse','health'),('Ejercicio','bi-activity','exercise'),('Hidratación','bi-droplet','hydration'),('Comidas','bi-egg-fried','meals')]),
-  ('Hábitos', [('Hábitos','bi-check2-square','habits'),('Hábitos a evitar','bi-shield-check','negative-habits')]),
-  ('Productividad', [('Tareas','bi-list-task','tasks'),('Pomodoro','bi-stopwatch','pomodoro'),('Objetivos','bi-flag','goals')]),
-  ('Vida personal', [('Diario','bi-journal-text','journal'),('Relaciones','bi-people','relationships'),('Planes','bi-map','plans'),('Ánimo y energía','bi-emoji-smile','mood')]),
-  ('Vehículos', [('Vehículos','bi-car-front','vehicles')])
-] %}
+
 <div class="lt-shell" data-module="{{ module }}">
   <aside class="lt-sidebar" aria-label="Módulos de Life Tracker">
     <div class="lt-sidebar__brand"><span class="lt-sidebar__mark" aria-hidden="true"><i class="bi bi-activity"></i></span><span class="lt-sidebar__name">Life Tracker</span></div>
     <nav class="lt-sidebar__scroll">
-      {% if catalog_navigation %}<div class="lt-nav-group"><span class="lt-nav-group__label">Sistema visual</span>{% for nav_label, nav_icon, category in catalog_navigation %}<button class="lt-nav-item{% if loop.first %} is-active{% endif %}" type="button" data-catalog-category="{{ category }}"{% if loop.first %} aria-current="page"{% endif %}><span class="lt-nav-item__icon"><i class="bi {{ nav_icon }}" aria-hidden="true"></i></span><span class="lt-nav-item__label">{{ nav_label }}</span></button>{% endfor %}</div>{% else %}{% for label, items in sections %}<div class="lt-nav-group"><span class="lt-nav-group__label">{{ label }}</span>{% for nav_label, nav_icon, nav_module in items %}<button class="lt-nav-item{% if nav_module == module %} is-active{% endif %}" type="button" data-module="{{ nav_module }}" data-lt-static-nav{% if nav_module == module %} aria-current="page"{% endif %}><span class="lt-nav-item__icon"><i class="bi {{ nav_icon }}" aria-hidden="true"></i></span><span class="lt-nav-item__label">{{ nav_label }}</span></button>{% endfor %}</div>{% endfor %}{% endif %}
+      {% if catalog_navigation %}<div class="lt-nav-group"><span class="lt-nav-group__label">Sistema visual</span>{% for nav_label, nav_icon, category in catalog_navigation %}<button class="lt-nav-item{% if loop.first %} is-active{% endif %}" type="button" data-catalog-category="{{ category }}"{% if loop.first %} aria-current="page"{% endif %}><span class="lt-nav-item__icon"><i class="bi {{ nav_icon }}" aria-hidden="true"></i></span><span class="lt-nav-item__label">{{ nav_label }}</span></button>{% endfor %}</div>{% else %}{% for label, group_icon, items in module_groups %}<div class="lt-nav-group"><span class="lt-nav-group__label">{{ label }}</span>{% for nav_label, nav_icon, nav_module in items %}<button class="lt-nav-item{% if nav_module == module %} is-active{% endif %}" type="button" data-module="{{ nav_module }}" data-lt-static-nav{% if nav_module == module %} aria-current="page"{% endif %}><span class="lt-nav-item__icon"><i class="bi {{ nav_icon }}" aria-hidden="true"></i></span><span class="lt-nav-item__label">{{ nav_label }}</span></button>{% endfor %}</div>{% endfor %}{% endif %}
     </nav>
   </aside>
   <button class="lt-scrim" type="button" data-lt-close-drawer aria-label="Cerrar módulos"></button>

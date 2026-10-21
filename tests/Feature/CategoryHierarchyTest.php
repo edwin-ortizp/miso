@@ -3,12 +3,25 @@
 namespace Tests\Feature;
 
 use App\Actions\ManageTaskCategories;
+use App\Livewire\Category\CategorySettings;
+use App\Livewire\Meal\MealSettings;
+use App\Livewire\Plan\PlanSettings;
 use App\Livewire\Task\TaskList;
+use App\Livewire\Task\TaskSettings;
+use App\Mcp\Servers\LifeTrackerServer;
+use App\Mcp\Tools\Common\ManageCategoryCatalogTool;
+use App\Models\DrinkType;
+use App\Models\ExerciseType;
+use App\Models\MealCategory;
+use App\Models\PlanCategory;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\User;
 use App\Models\UserCategory;
+use App\Support\CategoryCatalog;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -74,6 +87,7 @@ class CategoryHierarchyTest extends TestCase
         $child = $manager->create($user, 'Child', null, $root->id);
         Task::create(['title' => 'Branch task', 'category' => $child->key]);
         Task::create(['title' => 'Without category']);
+        $user->taskCategories()->create(['key' => 'outside', 'name' => 'Outside']);
         Task::create(['title' => 'Excluded task', 'category' => 'outside']);
         Livewire::withQueryParams(['category' => $root->key])->test(TaskList::class)
             ->assertSet('categoryFilter', [$root->key])->assertSee('Branch task')->assertDontSee('Excluded task')
@@ -87,8 +101,8 @@ class CategoryHierarchyTest extends TestCase
         $other = User::factory()->create();
         $parent = UserCategory::withoutGlobalScopes()->where('user_id', $user->id)->where('domain', 'contacts')->firstOrFail();
         $child = UserCategory::create(['user_id' => $user->id, 'domain' => 'contacts', 'key' => 'child', 'name' => 'Child', 'parent_id' => $parent->id]);
-        $this->assertContains('child', \App\Support\CategoryCatalog::expand('contacts', [$parent->key], $user->id));
-        $this->assertNotContains('child', \App\Support\CategoryCatalog::expand('contacts', [$parent->key], $other->id));
+        $this->assertContains('child', CategoryCatalog::expand('contacts', [$parent->key], $user->id));
+        $this->assertNotContains('child', CategoryCatalog::expand('contacts', [$parent->key], $other->id));
         $this->expectException(ValidationException::class);
         $child->update(['domain' => 'mood']);
     }
@@ -98,15 +112,15 @@ class CategoryHierarchyTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
         $root = app(ManageTaskCategories::class)->create($user, 'Root');
-        Livewire::test(\App\Livewire\Task\TaskSettings::class)->call('openForm')
+        Livewire::test(TaskSettings::class)->call('openForm')
             ->set('name', 'Child')->set('parent_id', $root->id)->call('save')->assertHasNoErrors();
         $this->assertDatabaseHas('task_categories', ['name' => 'Child', 'parent_id' => $root->id, 'user_id' => $user->id]);
-        $meal = \App\Models\MealCategory::where('user_id', $user->id)->firstOrFail();
-        Livewire::test(\App\Livewire\Meal\MealSettings::class, ['section' => 'categories'])->call('openForm')
+        $meal = MealCategory::where('user_id', $user->id)->firstOrFail();
+        Livewire::test(MealSettings::class, ['section' => 'categories'])->call('openForm')
             ->set('name', 'Meal child')->set('parent_id', $meal->id)->call('save')->assertHasNoErrors();
         $this->assertDatabaseHas('meal_categories', ['name' => 'Meal child', 'parent_id' => $meal->id]);
-        $plan = \App\Models\PlanCategory::create(['name' => 'Plan root']);
-        Livewire::test(\App\Livewire\Plan\PlanSettings::class)->set('section', 'categories')->call('openForm')
+        $plan = PlanCategory::create(['name' => 'Plan root']);
+        Livewire::test(PlanSettings::class)->set('section', 'categories')->call('openForm')
             ->set('name', 'Plan child')->set('parent_id', $plan->id)->call('save')->assertHasNoErrors();
         $this->assertDatabaseHas('plan_categories', ['name' => 'Plan child', 'parent_id' => $plan->id]);
     }
@@ -115,9 +129,9 @@ class CategoryHierarchyTest extends TestCase
     {
         $user = User::factory()->create();
         $this->actingAs($user);
-        foreach (array_keys(\App\Support\CategoryCatalog::DOMAINS) as $domain) {
+        foreach (array_keys(CategoryCatalog::DOMAINS) as $domain) {
             $this->get(route('categories.settings', $domain))->assertOk();
-            $component = Livewire::test(\App\Livewire\Category\CategorySettings::class, ['domain' => $domain])
+            $component = Livewire::test(CategorySettings::class, ['domain' => $domain])
                 ->call('openForm')->set('name', 'New root')->call('save')->assertHasNoErrors();
             $root = UserCategory::where('domain', $domain)->where('name', 'New root')->firstOrFail();
             $component->call('openForm')->set('name', 'New child')->set('parent_id', $root->id)->call('save')->assertHasNoErrors()
@@ -130,7 +144,7 @@ class CategoryHierarchyTest extends TestCase
     {
         $user = User::factory()->create();
         $this->actingAs($user);
-        $drink = \App\Models\DrinkType::create(['name' => 'Legacy beverage', 'hydration_factor' => 1, 'category' => 'legacy-drink']);
+        $drink = DrinkType::create(['name' => 'Legacy beverage', 'hydration_factor' => 1, 'category' => 'legacy-drink']);
         $category = UserCategory::where('domain', 'drinks')->where('key', 'legacy-drink')->firstOrFail();
         $category->update(['name' => 'Renamed beverage group']);
         $migration = require database_path('migrations/2026_10_13_000001_add_category_hierarchies.php');
@@ -146,9 +160,9 @@ class CategoryHierarchyTest extends TestCase
         $this->actingAs($user);
         $root = UserCategory::where('domain', 'contacts')->firstOrFail();
         UserCategory::create(['user_id' => $user->id, 'domain' => 'contacts', 'name' => 'Client', 'key' => 'client', 'parent_id' => $root->id]);
-        \App\Mcp\Servers\LifeTrackerServer::actingAs($user)->tool(\App\Mcp\Tools\Common\ManageCategoryCatalogTool::class,
+        LifeTrackerServer::actingAs($user)->tool(ManageCategoryCatalogTool::class,
             ['domain' => 'contacts', 'action' => 'list'])->assertOk()->assertSee($root->id);
-        \App\Mcp\Servers\LifeTrackerServer::actingAs($user)->tool(\App\Mcp\Tools\Common\ManageCategoryCatalogTool::class,
+        LifeTrackerServer::actingAs($user)->tool(ManageCategoryCatalogTool::class,
             ['domain' => 'contacts', 'action' => 'delete', 'id' => $root->id])->assertHasErrors();
     }
 
@@ -160,9 +174,9 @@ class CategoryHierarchyTest extends TestCase
         foreach ([[$other->id, 'contacts'], [$user->id, 'mood']] as [$owner, $domain]) {
             $foreign = UserCategory::withoutGlobalScopes()->where('user_id', $owner)->where('domain', $domain)->firstOrFail();
             try {
-                \Illuminate\Support\Facades\DB::table('user_categories')->where('id', $category->id)->update(['parent_id' => $foreign->id]);
+                DB::table('user_categories')->where('id', $category->id)->update(['parent_id' => $foreign->id]);
                 $this->fail('Foreign parent was accepted by the database');
-            } catch (\Illuminate\Database\QueryException) {
+            } catch (QueryException) {
                 $this->assertNull($category->fresh()->parent_id);
             }
         }
@@ -172,7 +186,7 @@ class CategoryHierarchyTest extends TestCase
     {
         $user = User::factory()->create();
         $this->actingAs($user);
-        $type = \App\Models\ExerciseType::create(['name' => 'Imported exercise', 'category' => 'legacy-custom', 'calories_per_hour' => 100, 'steps_equivalent' => 0]);
+        $type = ExerciseType::create(['name' => 'Imported exercise', 'category' => 'legacy-custom', 'calories_per_hour' => 100, 'steps_equivalent' => 0]);
         $category = UserCategory::where('domain', 'exercise')->where('key', 'legacy-custom')->firstOrFail();
         $category->update(['name' => 'Personal training']);
         $this->assertSame('legacy-custom', $type->fresh()->category);

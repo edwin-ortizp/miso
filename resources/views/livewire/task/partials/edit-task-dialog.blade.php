@@ -15,6 +15,11 @@
     ]">
     <div class="task-properties-layout">
         <aside class="task-properties-panel lt-cm-form" aria-label="Propiedades de la tarea">
+            @if (! $bulkEditor && $editingId)
+                <div x-show="$wire.editingId" x-cloak>
+                    <x-ui.task-code :code="\App\Models\Task::find($editingId)?->code" :copy="true" />
+                </div>
+            @endif
             <x-ui.category-select name="category" :id="$dialogId.'-category'" :options="$categories" wire:model="category" />
             @if (! $bulkEditor && isset($statusOptions))
                 <x-ui.select name="statusId" label="Estado" :id="$dialogId.'-status'" :options="$statusOptions"

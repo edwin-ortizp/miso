@@ -1,0 +1,243 @@
+{% from '@project/components/life-shell.html.jinja' import dialog, module_groups %}
+{#- Hora simulada del mockup: miércoles 21 de octubre, 07:42 (bloque «Mañana»). -#}
+{#- Día cargado: 24 tareas (9 con hora, 15 sin hora, 3 hechas) + comidas, hábitos con hora y personas.
+    Línea de tiempo: solo lo que tiene hora, en minutos desde las 00:00: (minuto, hora, título, tipo, hecho). El JS agrupa y ventanea. -#}
+{% set timeline = [
+  (390,'06:30','Meditar','habit',True),(420,'07:00','Vitaminas','habit',True),(420,'07:00','Desayuno · Huevos y arepa','meal',True),(435,'07:15','Pagar servicios','task',True),(465,'07:45','Tender la cama','habit',False),
+  (480,'08:00','Daily Siigo','task',True),(570,'09:30','Revisión sprint SGX','task',False),(630,'10:30','Responder correos Unicauca','task',False),(660,'11:00','1:1 con Andrés','task',False),
+  (750,'12:30','Almuerzo · Arroz con pollo','meal',False),(840,'14:00','Revisar PR CertMind','task',False),(900,'15:00','Caminar 30 min','habit',False),(930,'15:30','Llamada con proveedor','task',False),
+  (1020,'17:00','Entrega QuizLab','task',False),(1080,'18:00','Llamar a mamá','people',False),(1170,'19:30','Cena · Ensalada','meal',False),(1260,'21:00','Escribir en el diario','habit',False),(1350,'22:30','Dormir antes de 11 pm','habit',False)
+] %}
+{#- Semana: (día, número, hoy, [(hora, título, capa, hecho)], comida). Capas: task-*, plan, people. Hora vacía = tarea sin hora. -#}
+{% set week = [
+  ('Hoy','21',True,[('09:30','Revisión sprint SGX','task-work',False),('10:30','Responder correos Unicauca','task-work',False),('11:00','1:1 con Andrés','task-work',False),('14:00','Revisar PR CertMind','task-work',False),('15:30','Llamada con proveedor','task-work',False),('17:00','Entrega QuizLab','task-work',False),('18:00','Llamar a mamá','people',False),('','Actualizar README de Gesthor','task-work',False),('','Comprar regalo para Laura','task-home',False),('','Revisar tests de MiSo','task-work',False),('','Agendar cita médica','task-health',False),('','Renovar SOAT','task-home',False),('','Leer artículo de arquitectura','task-study',False),('','Responder a Caro','task-home',False),('','Ordenar escritorio','task-home',False),('','Preparar clase del jueves','task-study',False),('','Revisar presupuesto','task-home',False),('','Backup de fotos','task-home',False),('','Enviar factura de octubre','task-work',False),('','Llamar al banco','task-home',False),('','Planear vacaciones','task-home',False),('07:15','Pagar servicios','task-home',True),('08:00','Daily Siigo','task-work',True),('','Pagar tarjeta de crédito','task-home',True)],'Arroz con pollo · Ensalada'),
+  ('Jue','22',False,[('07:00','Gimnasio pierna','task-health',False),('08:00','Daily Siigo','task-work',False),('10:00','Refinamiento SGX','task-work',False),('15:00','Entrega informe Unicauca','task-work',False),('18:30','Preparar clase','task-study',False),('','Pagar arriendo','task-home',False),('','Comprar regalo para Laura','task-home',False)],'Lentejas · Plátano maduro'),
+  ('Vie','23',False,[('08:00','Daily Siigo','task-work',False),('10:00','Cita odontología','task-health',False),('14:00','Demo CertMind','task-work',False),('19:00','Cine con Caro','plan',False),('','Enviar factura de octubre','task-work',False)],'Pasta boloñesa'),
+  ('Sáb','24',False,[('Todo el día','Cumpleaños de Laura · 31','people',False),('09:00','Ciclovía','task-health',False),('11:00','Mercado semanal','task-home',False),('20:00','Cena de cumpleaños','plan',False),('','Lavar el carro','task-home',False)],None),
+  ('Dom','25',False,[('08:00','Ciclovía y desayuno en Usaquén','plan',False),('','Planear la semana','task-home',False)],'Sancocho'),
+  ('Lun','26',False,[('Todo el día','2 años con Caro','people',False),('08:00','Daily Siigo','task-work',False),('09:00','Planeación CertMind','task-work',False),('11:00','Retro SGX','task-work',False),('16:00','Revisión QuizLab','task-work',False),('','Pagar internet','task-home',False)],'Pollo al horno'),
+  ('Mar','27',False,[('08:00','Daily Siigo','task-work',False),('18:30','Clase de inglés','task-study',False)],None)
+] %}
+{% set layer_icons = {'plan':'bi-map','people':'bi-heart'} %}
+{#- Hábitos por momento del día (HabitDefinition.time_of_day): (id, nombre, ícono, hora, hecho, racha). -#}
+{% set habit_blocks = [
+  ('morning','Mañana',[('h1','Meditar','bi-flower1','06:30',True,12),('h2','Vitaminas','bi-capsule','07:00',True,20),('h3','Tender la cama','bi-house-check','07:45',False,4)]),
+  ('anytime','Cualquier momento',[('h4','Leer 20 min','bi-book',None,False,5),('h5','Sin azúcar','bi-cup-straw',None,False,8)]),
+  ('afternoon','Tarde',[('h6','Caminar 30 min','bi-person-walking','15:00',False,3)]),
+  ('night','Noche',[('h7','Escribir en el diario','bi-journal-text','21:00',False,9),('h8','Dormir antes de 11 pm','bi-moon-stars','22:30',False,2)])
+] %}
+{% set drinks = [('💧','Agua'),('☕','Café'),('🧃','Jugo'),('🍵','Té verde'),('🥛','Leche'),('🥤','Gaseosa'),('🍺','Cerveza'),('🥥','Agua de coco')] %}
+{% set moods = [('😄','Feliz'),('🙂','Bien'),('😐','Neutral'),('😔','Triste'),('😤','Frustrado'),('😰','Ansioso'),('😴','Cansado'),('🤩','Motivado'),('😌','Tranquilo'),('🥰','Agradecido'),('😠','Enojado'),('🤒','Enfermo')] %}
+{% set mood_week = [('Jue','😌',3),('Vie','🤩',5),('Sáb','🙂',4),('Dom','😴',2),('Lun','😐',3),('Mar','🙂',4),('Hoy','🙂',4)] %}
+{% set goals = [('g1','Correr 10K en diciembre','6,2 de 10 km',62),('g2','Leer 12 libros en 2026','9 de 12 libros',75)] %}
+{% macro ring(value, color, label, sub, target, day=None) -%}<button class="tp-ring-btn" type="button" data-lt-toggle="{{ target }}"{% if day is not none %} data-tp-day="{{ day }}"{% endif %} aria-haspopup="dialog"><span class="tp-ring tp-ring--{{ color }}" style="--value:{{ value }}"><b>{{ label }}</b></span><small>{{ sub }}</small></button>{%- endmacro %}
+
+<div class="lt-shell tp" data-module="home" data-tp-root>
+  <main class="tp-grid">
+    <section class="tp-now" aria-label="Ahora">
+      <div class="tp-now__time"><strong>07:42</strong><span><b>Miércoles</b> 21 de octubre</span><span class="tp-block"><i class="bi bi-sunrise"></i> Mañana · 1 hábito pendiente</span></div>
+      <div class="tp-now__rings">
+        {{ ring(25, 'habits', '2/8', 'Hábitos', 'tp-habits-dialog') }}
+        <button class="tp-ring-btn" type="button" data-lt-toggle="tp-water-dialog" aria-haspopup="dialog"><span class="tp-ring tp-ring--water" style="--value:45" data-tp-ring><b data-tp-water-pct>45%</b></span><small>Agua</small></button>
+        {{ ring(13, 'tasks', '3/24', 'Tareas', 'tp-day-dialog', 0) }}
+        {{ ring(0, 'focus', '0/100', 'Min. foco', 'tp-focus-dialog') }}
+      </div>
+      <div class="tp-timeline" data-tp-timeline data-now="462" aria-label="Línea de tiempo de hoy: solo lo que tiene hora">
+        <button class="tp-timeline__nav" type="button" data-tp-tl-shift="-240" aria-label="Horas anteriores"><i class="bi bi-chevron-left"></i></button>
+        <div class="tp-timeline__body">
+          <div class="tp-timeline__track" data-tp-tl-track><span class="tp-timeline__past" data-tp-tl-past></span><span class="tp-timeline__now" data-tp-tl-now><em>Ahora</em></span></div>
+          <div class="tp-timeline__scale" data-tp-tl-scale></div>
+        </div>
+        <button class="tp-timeline__nav" type="button" data-tp-tl-shift="240" aria-label="Horas siguientes"><i class="bi bi-chevron-right"></i></button>
+        <ul hidden data-tp-tl-items>{% for minute, time, title, kind, done in timeline %}<li data-min="{{ minute }}" data-time="{{ time }}" data-kind="{{ kind }}"{% if done %} data-done{% endif %}>{{ title }}</li>{% endfor %}</ul>
+        <span class="tp-timeline__untimed"><b>+15</b> sin hora</span>
+      </div>
+    </section>
+
+    <section class="tp-next" aria-label="Lo próximo">
+      <div class="tp-next__head"><span>Lo próximo</span><span class="tp-pill">en 1 h 48 min</span></div>
+      <strong>Revisión sprint SGX</strong>
+      <span>Hoy · 09:30–10:30 · Trabajo</span>
+      <div class="tp-next__actions">
+        <button type="button" data-tp-complete-next><i class="bi bi-check2-circle"></i> Completar</button>
+        <button type="button" data-lt-toggle="tp-task-dialog" aria-haspopup="dialog"><i class="bi bi-clock-history"></i> Posponer</button>
+        <button type="button" data-tp-focus-start><i class="bi bi-stopwatch"></i> Foco</button>
+      </div>
+      <span class="tp-next__then"><i class="bi bi-arrow-return-right"></i> Después: Responder correos Unicauca · 10:30</span>
+    </section>
+
+    <section class="tp-week" aria-label="Semana" data-tp-week>
+      <header class="tp-week__head"><h2>Esta semana</h2><span>21 – 27 oct</span>
+        <div class="tp-layers" role="group" aria-label="Capas del calendario">
+          <button type="button" class="tp-layer" data-tp-layer="task" aria-pressed="true"><i class="bi bi-list-task"></i> Tareas</button>
+          <button type="button" class="tp-layer" data-tp-layer="plan" aria-pressed="true"><i class="bi bi-map"></i> Planes</button>
+          <button type="button" class="tp-layer" data-tp-layer="people" aria-pressed="true"><i class="bi bi-heart"></i> Personas</button>
+          <button type="button" class="tp-layer" data-tp-layer="meal" aria-pressed="true"><i class="bi bi-egg-fried"></i> Comidas</button>
+        </div>
+      </header>
+      <div class="tp-week__days">
+      {% for name, num, today, items, meal in week %}
+      <article class="tp-day{% if today %} is-today{% endif %}" data-tp-day-col="{{ loop.index0 }}" data-tp-day-label="{{ 'Hoy, miércoles' if today else name }} {{ num }} de octubre">
+        <button class="tp-day__head" type="button" data-lt-toggle="tp-day-dialog" data-tp-day="{{ loop.index0 }}" aria-haspopup="dialog" aria-label="Ver agenda del {{ name }} {{ num }}"><span>{{ name }}</span><b>{{ num }}</b></button>
+        {% if today %}<p class="tp-day__summary">9 con hora · 15 sin hora · <b>3 hechas</b></p>{% endif %}
+        <div class="tp-day__items" data-tp-fit>
+          {% for time, title, layer, done in items %}
+          <button class="tp-row tp-row--{{ layer }}{% if done %} is-done{% endif %}" type="button" data-tp-layer-item="{{ layer.split('-')[0] }}" {% if layer.startswith('task') %}data-lt-toggle="tp-task-dialog"{% elif layer == 'plan' %}data-lt-toggle="tp-plan-dialog"{% else %}data-lt-toggle="tp-person-dialog"{% endif %} aria-haspopup="dialog"{% if title == 'Revisión sprint SGX' and today %} data-tp-sprint{% endif %}>{% if layer in layer_icons %}<i class="bi {{ layer_icons[layer] }}"></i>{% else %}<i class="tp-row__dot"></i>{% endif %}{% if time %}<small>{{ time if time != 'Todo el día' else 'Día' }}</small>{% endif %}<span>{{ title }}</span></button>
+          {% endfor %}
+          <button class="tp-more-chip" type="button" data-tp-more data-lt-toggle="tp-day-dialog" data-tp-day="{{ loop.index0 }}" aria-haspopup="dialog" hidden>+<b>0</b> más</button>
+          {% if not items %}<p class="tp-day__empty">Día libre</p>{% endif %}
+        </div>
+        {% if meal %}<button class="tp-meal" type="button" data-tp-layer-item="meal" data-lt-toggle="tp-meal-dialog" aria-haspopup="dialog" title="{{ meal }}"><i class="bi bi-egg-fried"></i><span>{{ meal }}</span></button>{% endif %}
+      </article>
+      {% endfor %}
+      </div>
+    </section>
+
+    <section class="tp-cards">
+      <article class="tp-card tp-card--habits">
+        <header class="tp-card__head"><i class="bi bi-check2-square"></i><h2>Hábitos · Mañana</h2><small data-tp-habit-count>2/5</small><button class="tp-more" type="button" data-lt-toggle="tp-habits-dialog" aria-haspopup="dialog" aria-label="Ver todos los hábitos del día"><i class="bi bi-three-dots"></i></button></header>
+        <div class="tp-habits">{% for key, label, items in habit_blocks[:2] %}{% for id, name, icon, time, done, streak in items %}<button class="tp-habit{% if done %} is-done{% endif %}" type="button" data-tp-habit="{{ id }}" aria-pressed="{{ 'true' if done else 'false' }}"><i class="bi {{ icon }}"></i><span>{{ name }}</span><small>🔥{{ streak }}</small></button>{% endfor %}{% endfor %}</div>
+        <p class="tp-card__foot">Luego: Caminar 30 min (tarde) y 2 de noche</p>
+      </article>
+
+      <article class="tp-card tp-card--water">
+        <header class="tp-card__head"><i class="bi bi-droplet-fill"></i><h2>Agua</h2><small><b data-tp-water>900</b> ml</small><button class="tp-more" type="button" data-lt-toggle="tp-water-dialog" aria-haspopup="dialog" aria-label="Más bebidas"><i class="bi bi-three-dots"></i></button></header>
+        <div class="tp-quick">
+          <button class="tp-quick__btn" type="button" data-tp-drink="Agua" data-tp-ml="250">💧<span>Agua 250</span></button>
+          <button class="tp-quick__btn" type="button" data-tp-drink="Agua" data-tp-ml="500">💧<span>Agua 500</span></button>
+          <button class="tp-quick__btn" type="button" data-tp-drink="Café" data-tp-ml="150">☕<span>Café 150</span></button>
+          <button class="tp-quick__btn tp-quick__btn--more" type="button" data-lt-toggle="tp-water-dialog" aria-haspopup="dialog"><i class="bi bi-plus-lg"></i><span>Otra</span></button>
+        </div>
+        <p class="tp-card__foot">Meta 2.000 ml · vas al ritmo de ayer</p><div class="lt-progress tp-water-bar"><span style="width:45%" data-tp-water-bar></span></div>
+      </article>
+
+      <article class="tp-card tp-card--mood">
+        <header class="tp-card__head"><i class="bi bi-emoji-smile-fill"></i><h2>Ánimo</h2><small data-tp-mood-last>🙂 07:10</small><button class="tp-more" type="button" data-lt-toggle="tp-mood-dialog" aria-haspopup="dialog" aria-label="Más emociones"><i class="bi bi-three-dots"></i></button></header>
+        <div class="tp-moods">{% for e, t in moods[:5] %}<button class="tp-emoji{% if loop.index == 2 %} is-selected{% endif %}" type="button" data-tp-mood="{{ e }} {{ t }}" aria-label="{{ t }}">{{ e }}</button>{% endfor %}</div>
+        <button class="tp-trend" type="button" data-lt-toggle="tp-mood-dialog" aria-haspopup="dialog" aria-label="Tendencia de ánimo y energía de 7 días">{% for d, e, energy in mood_week %}<span class="tp-trend__day"><span class="tp-trend__bar" style="--value:{{ energy * 20 }}%"></span><b>{{ e }}</b><small>{{ d }}</small></span>{% endfor %}</button>
+      </article>
+
+      <article class="tp-card tp-card--focus">
+        <header class="tp-card__head"><i class="bi bi-flag-fill"></i><h2>Foco y objetivos</h2><button class="tp-more" type="button" data-lt-toggle="tp-goal-dialog" aria-haspopup="dialog" aria-label="Registrar avance de un objetivo"><i class="bi bi-three-dots"></i></button></header>
+        <button class="tp-focus-btn" type="button" data-tp-focus-start><i class="bi bi-play-fill"></i><span><b>Iniciar foco · 25 min</b><small>Revisión sprint SGX</small></span></button>
+        {% for id, name, sub, pct in goals %}<button class="tp-goal" type="button" data-lt-toggle="tp-goal-dialog" aria-haspopup="dialog"><span><b>{{ name }}</b><small data-tp-goal-sub="{{ id }}">{{ sub }}</small></span><span class="lt-progress"><span style="width:{{ pct }}%" data-tp-goal-bar="{{ id }}"></span></span></button>{% endfor %}
+      </article>
+
+      <article class="tp-card tp-card--side">
+        <button class="tp-side" type="button" data-lt-toggle="tp-shop-dialog" aria-haspopup="dialog"><i class="bi bi-cart3"></i><span><b data-tp-shop-count>6 compras</b><small>Huevos · Leche · Tomate…</small></span></button>
+        <button class="tp-side" type="button" data-lt-toggle="tp-avoid-dialog" aria-haspopup="dialog"><i class="bi bi-shield-check"></i><span><b>12 días</b><small>sin redes antes de dormir</small></span></button>
+        <button class="tp-side" type="button" data-lt-toggle="tp-journal-dialog" aria-haspopup="dialog"><i class="bi bi-journal-text"></i><span><b>Diario</b><small>Una línea de hoy</small></span></button>
+      </article>
+    </section>
+  </main>
+
+  <nav class="tp-rail" aria-label="Navegación de MiSo">
+    <button class="tp-rail__item tp-rail__item--create" type="button" data-lt-toggle="tp-create-dialog" aria-haspopup="dialog" aria-label="Crear"><i class="bi bi-plus-lg"></i></button>
+    {% for label, gicon, items in module_groups %}
+    <div class="tp-rail__group">
+      <button class="tp-rail__item{% if loop.first %} is-active{% endif %}" type="button" data-lt-toggle="tp-flyout-{{ loop.index }}" aria-haspopup="menu" aria-expanded="false" aria-label="{{ label }}"><i class="bi {{ gicon }}"></i></button>
+      <div class="tp-flyout" id="tp-flyout-{{ loop.index }}" role="menu" hidden><span class="tp-flyout__title">{{ label }}</span>{% if loop.first %}<button class="tp-flyout__item is-active" type="button" role="menuitem" aria-current="page"><i class="bi bi-tablet-landscape"></i>Panel de pared</button>{% endif %}{% for nav_label, nav_icon, nav_module in items %}<button class="tp-flyout__item" type="button" role="menuitem" data-lt-static-nav><i class="bi {{ nav_icon }}"></i>{{ nav_label }}</button>{% endfor %}</div>
+    </div>
+    {% endfor %}
+    <span class="tp-rail__spacer"></span>
+    <button class="tp-rail__item" type="button" data-tp-night aria-pressed="false" aria-label="Modo noche"><i class="bi bi-moon"></i></button>
+    <button class="tp-rail__clock" type="button" data-tp-ambient aria-label="Modo ambiente"><span>07</span><span>42</span></button>
+  </nav>
+
+  <button class="tp-ambient" type="button" data-tp-ambient hidden aria-label="Salir del modo ambiente">
+    <strong>07:42</strong><span>Miércoles 21 de octubre</span>
+    <em>Lo próximo: Revisión sprint SGX · 09:30</em><em class="tp-ambient__sub">Hábito pendiente: Tender la cama</em>
+  </button>
+
+  <div class="tp-focus" data-tp-focus hidden role="dialog" aria-modal="true" aria-label="Sesión de foco">
+    <small>Foco · Revisión sprint SGX</small>
+    <strong data-tp-focus-time>25:00</strong>
+    <div class="tp-focus__actions"><button type="button" data-tp-focus-pause>Pausar</button><button type="button" data-tp-focus-stop>Terminar</button></div>
+  </div>
+
+  <div class="tp-toast" role="status" hidden data-tp-toast><span data-tp-toast-text></span><button type="button" data-tp-undo>Deshacer</button></div>
+
+  {% call dialog('tp-habits-dialog', 'Hábitos de hoy', icon='bi-check2-square', close_only=True) %}
+  {% for key, label, items in habit_blocks %}
+  <p class="lt-section-label">{{ label }}{% if key == 'morning' %} · ahora{% endif %}</p>
+  <div class="tp-sheet-list">{% for id, name, icon, time, done, streak in items %}<button class="tp-sheet-row{% if done %} is-done{% endif %}" type="button" data-tp-habit="{{ id }}" aria-pressed="{{ 'true' if done else 'false' }}"><span class="tp-sheet-row__check"><i class="bi bi-check-lg"></i></span><i class="bi {{ icon }}"></i><span>{{ name }}</span><small>{{ time or 'Sin hora' }} · 🔥 {{ streak }}</small></button>{% endfor %}</div>
+  {% endfor %}
+  {% endcall %}
+
+  {% call dialog('tp-water-dialog', 'Registrar bebida', 'Registrar', 'bi-droplet', submit_action='tp-water-save') %}
+  <p class="lt-section-label">Bebida</p>
+  <div class="tp-option-grid">{% for e, t in drinks %}<button class="tp-option{% if loop.first %} is-selected{% endif %}" type="button" data-tp-pick="drink" data-value="{{ t }}"><span>{{ e }}</span>{{ t }}</button>{% endfor %}</div>
+  <p class="lt-section-label">Cantidad</p>
+  <div class="tp-option-row">{% for ml in [150, 250, 330, 500, 750] %}<button class="tp-option{% if ml == 250 %} is-selected{% endif %}" type="button" data-tp-pick="ml" data-value="{{ ml }}">{{ ml }} ml</button>{% endfor %}<label class="lt-field tp-custom"><span>Otra</span><input type="number" inputmode="numeric" placeholder="ml"></label></div>
+  <p class="lt-section-label">Hoy</p>
+  <ul class="tp-log"><li>07:05 · 💧 Agua 500 ml</li><li>07:30 · ☕ Café 150 ml</li><li>07:35 · 💧 Agua 250 ml</li></ul>
+  {% endcall %}
+
+  {% call dialog('tp-mood-dialog', '¿Cómo te sientes?', 'Guardar', 'bi-emoji-smile', submit_action='tp-mood-save') %}
+  <div class="tp-option-grid">{% for e, t in moods %}<button class="tp-option{% if loop.index == 2 %} is-selected{% endif %}" type="button" data-tp-pick="mood" data-value="{{ e }} {{ t }}"><span>{{ e }}</span>{{ t }}</button>{% endfor %}</div>
+  <p class="lt-section-label">Energía</p>
+  <div class="tp-option-row">{% for n in range(1, 6) %}<button class="tp-option{% if n == 4 %} is-selected{% endif %}" type="button" data-tp-pick="energy" data-value="{{ n }}">⚡ {{ n }}</button>{% endfor %}</div>
+  <label class="lt-field"><span>Nota (opcional)</span><textarea rows="2" placeholder="¿Qué influyó?"></textarea></label>
+  <p class="lt-section-label">Últimos 7 días</p>
+  <p class="lt-prose">La energía baja los domingos y sube los días con ejercicio en la mañana.</p>
+  {% endcall %}
+
+  {% call dialog('tp-task-dialog', 'Revisión sprint SGX', 'Completar', 'bi-check2-circle', submit_action='tp-task-done') %}
+  <dl class="lt-dl"><div><dt>Cuándo</dt><dd>Hoy · 09:30–10:30</dd></div><div><dt>Categoría</dt><dd>Trabajo · Siigo</dd></div><div><dt>Estado</dt><dd>Listo</dd></div><div><dt>Prioridad</dt><dd>Alta</dd></div></dl>
+  <p class="lt-section-label">Posponer</p>
+  <div class="tp-option-row">{% for s in ['+1 h','Esta tarde','Mañana','Próx. semana'] %}<button class="tp-option" type="button" data-tp-snooze="{{ s }}">{{ s }}</button>{% endfor %}</div>
+  {% endcall %}
+
+  {% call dialog('tp-plan-dialog', 'Cena de cumpleaños', 'Registrar visita', 'bi-map', submit_action='tp-plan-visit') %}
+  <dl class="lt-dl"><div><dt>Cuándo</dt><dd>Sáb 24 oct · 20:00</dd></div><div><dt>Lugar</dt><dd>Andrés DC · Bogotá</dd></div><div><dt>Con</dt><dd>Laura, Caro · Amigos</dd></div><div><dt>Estado</dt><dd>Programado</dd></div></dl>
+  <p class="lt-section-label">Última visita</p><p class="lt-prose">Hace 8 meses · «Pedir la picada para compartir».</p>
+  {% endcall %}
+
+  {% call dialog('tp-person-dialog', 'Laura Gómez', icon='bi-heart', close_only=True) %}
+  <dl class="lt-dl"><div><dt>Evento</dt><dd>Cumpleaños · cumple 31</dd></div><div><dt>Círculo</dt><dd>Amigos</dd></div><div><dt>Último contacto</dt><dd>Hace 3 semanas</dd></div><div><dt>Plan</dt><dd>Cena de cumpleaños · Sáb 20:00</dd></div></dl>
+  <p class="lt-section-label">Ideas guardadas</p><p class="lt-prose">Le gustan las plantas y el café de especialidad.</p>
+  {% endcall %}
+
+  {% call dialog('tp-meal-dialog', 'Comidas del día', icon='bi-egg-fried', close_only=True) %}
+  <div class="tp-sheet-list"><div class="tp-sheet-row is-done"><i class="bi bi-sunrise"></i><span>Desayuno · Huevos y arepa</span><small>Consumido</small></div><div class="tp-sheet-row"><i class="bi bi-sun"></i><span>Almuerzo · Arroz con pollo</span><small>Preparación lista · 2 porciones</small></div><div class="tp-sheet-row"><i class="bi bi-moon"></i><span>Cena · Ensalada</span><small>Falta: tomate</small></div></div>
+  {% endcall %}
+
+  {% call dialog('tp-day-dialog', 'Agenda', icon='bi-calendar-day', close_only=True) %}
+  <div class="tp-sheet-list" data-tp-day-body></div>
+  {% endcall %}
+
+  {% call dialog('tp-goal-dialog', 'Registrar avance', 'Guardar', 'bi-flag', submit_action='tp-goal-save') %}
+  <p class="lt-section-label">Objetivo</p>
+  <div class="tp-option-row">{% for id, name, sub, pct in goals %}<button class="tp-option{% if loop.first %} is-selected{% endif %}" type="button" data-tp-pick="goal" data-value="{{ id }}">{{ name }}</button>{% endfor %}</div>
+  <label class="lt-field"><span>Avance</span><input type="number" inputmode="decimal" value="1" data-tp-goal-amount></label>
+  {% endcall %}
+
+  {% call dialog('tp-focus-dialog', 'Foco de hoy', icon='bi-stopwatch', close_only=True) %}
+  <p class="lt-prose">Meta diaria: 100 min. Ayer: 80 min en 3 sesiones.</p>
+  <button class="tp-focus-btn" type="button" data-tp-focus-start><i class="bi bi-play-fill"></i><span><b>Iniciar foco · 25 min</b><small>Revisión sprint SGX</small></span></button>
+  {% endcall %}
+
+  {% call dialog('tp-shop-dialog', 'Lista de compras', icon='bi-cart3', close_only=True) %}
+  <div class="tp-checklist">{% for item in ['Huevos x30','Leche deslactosada','Tomate chonto','Café molido','Avena en hojuelas','Detergente'] %}<label class="tp-check"><input type="checkbox" data-tp-shop-item><span>{{ item }}</span></label>{% endfor %}</div>
+  <label class="lt-field"><span>Agregar producto</span><input type="text" placeholder="Ej. Pan tajado"></label>
+  {% endcall %}
+
+  {% call dialog('tp-avoid-dialog', 'Sin redes antes de dormir', 'Registrar recaída', 'bi-shield-check', submit_action='tp-avoid-log') %}
+  <p class="lt-prose">Llevas <b>12 días</b>. Tu mejor racha fue de 19 días.</p>
+  <p class="lt-prose">Registrar una recaída no borra tu progreso: te ayuda a ver qué la provoca.</p>
+  {% endcall %}
+
+  {% call dialog('tp-journal-dialog', 'Una línea de hoy', 'Guardar', 'bi-journal-text', submit_action='tp-journal-save') %}
+  <label class="lt-field"><span>¿Qué quieres recordar de hoy?</span><textarea rows="4" placeholder="Escribe una línea…"></textarea></label>
+  {% endcall %}
+
+  {% call dialog('tp-create-dialog', 'Crear', icon='bi-plus-lg', close_only=True) %}
+  <div class="tp-option-grid">
+    {% for label, icon, target in [('Tarea','bi-list-task','tp-new-task'),('Plan','bi-map','tp-new-task'),('Compra','bi-cart-plus','tp-shop-dialog'),('Bebida','bi-droplet','tp-water-dialog'),('Ánimo','bi-emoji-smile','tp-mood-dialog'),('Diario','bi-journal-text','tp-journal-dialog'),('Avance de objetivo','bi-flag','tp-goal-dialog'),('Hábito','bi-check2-square','tp-habits-dialog')] %}<button class="tp-option" type="button" data-tp-open="{{ target }}"><span><i class="bi {{ icon }}"></i></span>{{ label }}</button>{% endfor %}
+  </div>
+  {% endcall %}
+
+  {% call dialog('tp-new-task', 'Nueva tarea', 'Crear', 'bi-list-task', submit_action='tp-task-create') %}
+  <div class="lt-form"><label class="lt-field lt-form--full"><span>Título</span><input type="text" placeholder="Ej. Comprar regalo para Laura"></label><label class="lt-field"><span>Fecha</span><input type="date" value="2026-10-23"></label><label class="lt-field"><span>Hora</span><input type="time" value="18:00"></label></div>
+  {% endcall %}
+</div>

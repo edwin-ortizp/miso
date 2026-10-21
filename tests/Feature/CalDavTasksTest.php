@@ -6,6 +6,7 @@ use App\Livewire\Settings\SettingsPage;
 use App\Models\IntegrationToken;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\DefaultTaskCategories;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -13,6 +14,15 @@ use Tests\TestCase;
 class CalDavTasksTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        User::created(function (User $user) {
+            DefaultTaskCategories::createFor($user);
+            $user->taskCategories()->create(['key' => 'trabajo', 'name' => 'Trabajo']);
+        });
+    }
 
     public function test_user_can_generate_rotate_and_revoke_a_caldav_password(): void
     {

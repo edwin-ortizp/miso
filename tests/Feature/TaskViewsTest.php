@@ -3,13 +3,14 @@
 namespace Tests\Feature;
 
 use App\Livewire\Task\TaskCalendar;
-use App\Livewire\Task\TaskFlow;
 use App\Livewire\Task\TaskEditor;
+use App\Livewire\Task\TaskFlow;
 use App\Livewire\Task\TaskGantt;
 use App\Livewire\Task\TaskList;
 use App\Livewire\Task\TaskPlanning;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\DefaultTaskCategories;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -18,6 +19,15 @@ use Tests\TestCase;
 class TaskViewsTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        User::created(function (User $user) {
+            DefaultTaskCategories::createFor($user);
+            $user->taskCategories()->create(['key' => 'trabajo', 'name' => 'Trabajo']);
+        });
+    }
 
     public function test_existing_tasks_open_description_preview_on_every_open(): void
     {

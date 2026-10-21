@@ -25,7 +25,7 @@
                                     <button wire:click="openForm('{{ $task->id }}')" class="task-flow-card-main" aria-label="Editar tarea: {{ $task->title }}">
                                         <span class="task-flow-position">{{ $loop->iteration }}</span>
                                         <span class="task-flow-card-content">
-                                            <span class="task-flow-card-title">{{ $task->title }}</span>
+                                            <span class="task-flow-card-title"><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>
                                             @if ($task->size || $task->estimated_time)
                                                 <span class="task-flow-card-meta">
                                                     @if ($task->size)<span>{{ $task->size }}</span>@endif
@@ -63,7 +63,7 @@
                             <li class="task-flow-history-item" wire:key="flow-history-task-{{ $task->id }}">
                                 <button wire:click="openForm('{{ $task->id }}')" class="task-flow-history-main" aria-label="Editar tarea completada: {{ $task->title }}">
                                     <i class="bi bi-check2-circle"></i>
-                                    <span>{{ $task->title }}</span>
+                                    <span><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>
                                     @if ($task->completed_at)<time datetime="{{ $task->completed_at->toDateString() }}">{{ $task->completed_at->translatedFormat('d M Y') }}</time>@endif
                                 </button>
                                 <button wire:click="toggleComplete('{{ $task->id }}')" class="md-btn-icon" title="Marcar pendiente" aria-label="Marcar pendiente {{ $task->title }}"><i class="bi bi-arrow-counterclockwise"></i></button>

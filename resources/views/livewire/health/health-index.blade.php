@@ -267,7 +267,7 @@
                             <li class="health-pending {{ $pending->completed ? 'is-done' : '' }}" wire:key="health-pending-{{ $pending->id }}">
                                 <i class="bi {{ $pending->completed ? 'bi-check-circle-fill' : 'bi-circle' }} health-pending__status" aria-hidden="true"></i>
                                 <div class="health-pending__body">
-                                    <strong>{{ $pending->title }}</strong>
+                                    <x-ui.task-code :code="$pending->code" /> <strong>{{ $pending->title }}</strong>
                                     <span>{{ $pendingMeta }}</span>
                                 </div>
                                 <x-ui.menu :label="'Más opciones de '.$pending->title">

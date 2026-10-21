@@ -21,6 +21,7 @@ class CreateTaskTool extends Tool
     public function handle(Request $request, TaskRecurrenceService $recurrence): Response
     {
         $data = $request->validate([
+            'code' => ['prohibited'],
             'title' => ['required', 'string', 'max:255'],
             ...$this->fieldRules(),
         ]);
@@ -40,7 +41,7 @@ class CreateTaskTool extends Tool
             'external_refs' => (new Task)->mergeExternalRefs($data['add_external_refs'] ?? []),
         ]);
 
-        $message = "Tarea creada: \"{$task->title}\" (id: {$task->id}) en estado \"{$task->status?->name}\".";
+        $message = "Tarea creada: \"{$task->title}\" (code: {$task->code}, id: {$task->id}) en estado \"{$task->status?->name}\".";
         if (! $task->category) {
             $message .= ' Quedó sin categoría.';
         }

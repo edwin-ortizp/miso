@@ -14,12 +14,13 @@ use InvalidArgumentException;
  */
 class ManageTaskCategories
 {
-    public function create(User $user, string $name, ?string $icon = null, ?string $parentId = null): TaskCategory
+    public function create(User $user, string $name, ?string $icon = null, ?string $parentId = null, ?string $codePrefix = null): TaskCategory
     {
         $name = $this->validName($user, $name);
 
         return $user->taskCategories()->create([
             'parent_id' => $parentId,
+            'code_prefix' => $codePrefix,
             'key' => TaskCategory::uniqueKey($name, $user->id),
             'name' => $name,
             'icon' => $icon ?: 'bi-tag',
@@ -27,9 +28,10 @@ class ManageTaskCategories
         ]);
     }
 
-    public function update(TaskCategory $category, string $name, ?string $icon = null, ?string $parentId = null): TaskCategory
+    public function update(TaskCategory $category, string $name, ?string $icon = null, ?string $parentId = null, ?string $codePrefix = null): TaskCategory
     {
         $category->update([
+            'code_prefix' => $codePrefix ?? $category->code_prefix,
             'parent_id' => func_num_args() >= 4 ? $parentId : $category->parent_id,
             'name' => $this->validName($category->user, $name, $category),
             'icon' => $icon ?: $category->icon,

@@ -2,6 +2,7 @@
 
 namespace App\Mcp\Tools\Task;
 
+use App\Services\TaskCodeService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Mcp\Request;
@@ -26,8 +27,10 @@ class ListTaskCategoriesTool extends Tool
                     'parent_id' => $category->parent_id,
                     'key' => $category->key,
                     'name' => $category->name,
+                    'code_prefix' => $category->code_prefix,
                     'pending_tasks' => (int) ($pending[$category->key] ?? 0),
                 ])->all(),
+            'global_code_prefix' => app(TaskCodeService::class)->globalPrefix($user->id),
             'uncategorized_pending_tasks' => (int) ($pending[''] ?? 0),
         ]);
     }

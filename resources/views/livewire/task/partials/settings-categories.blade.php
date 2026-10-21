@@ -1,3 +1,7 @@
+<form wire:submit="saveGlobalPrefix" class="d-flex flex-wrap align-items-end gap-2 mb-3">
+    <x-ui.field name="globalCodePrefix" label="Prefijo para tareas sin categoría" maxlength="5" wire:model="globalCodePrefix" />
+    <button type="submit" class="md-btn-text">Guardar prefijo</button>
+</form>
 @php
     use App\Support\Ui\DataState;
 
@@ -12,6 +16,7 @@
             <thead>
                 <tr>
                     <th scope="col">Nombre</th>
+                    <th scope="col">Prefijo</th>
                     <th scope="col">Pendientes</th>
                     <th scope="col">Total</th>
                     <th scope="col" class="md-table__actions"><span class="visually-hidden">Acciones</span></th>
@@ -26,6 +31,7 @@
                     @endphp
                     <tr wire:key="task-category-{{ $category->id }}">
                         <td data-label="Nombre" class="md-table__title"><i class="bi {{ $category->icon ?: 'bi-tag' }}" aria-hidden="true"></i> {{ $category->path_label }}</td>
+                        <td data-label="Prefijo"><code>{{ $category->code_prefix }}</code></td>
                         <td data-label="Pendientes" class="md-table__nowrap">{{ $pending }}</td>
                         <td data-label="Total" class="md-table__nowrap">{{ $total }}</td>
                         <td data-label="Acciones" class="md-table__actions">
@@ -69,6 +75,7 @@
                   :submit="$editingId ? 'Actualizar' : 'Crear categoría'">
     <div class="d-flex flex-column gap-3">
         <x-ui.field name="name" label="Nombre" :required="true" maxlength="60" wire:model="name" />
+        <x-ui.field name="codePrefix" label="Prefijo" maxlength="5" help="Deja vacío para sugerirlo a partir del nombre. Los códigos existentes se conservan." wire:model="codePrefix" />
         <x-ui.category-parent model="TaskCategory" :editing-id="$editingId" />
         <x-ui.select name="icon" label="Icono" :selected="$icon" :options="$icons" :icon="$icon" wire:model.live="icon" />
     </div>

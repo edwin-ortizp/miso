@@ -3,6 +3,7 @@
 namespace App\Mcp\Tools\Task;
 
 use App\Models\Task;
+use App\Models\TaskCategory;
 use App\Models\TaskStatus;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Carbon;
@@ -60,13 +61,14 @@ class ListTasksTool extends Tool
         if (! empty($data['uncategorized'])) {
             $query->where(fn ($query) => $query->whereNull('category')->orWhere('category', ''));
         } elseif (! empty($data['category'])) {
-            $query->whereIn('category', \App\Models\TaskCategory::expandSelection([$data['category']], Auth::id(), 'key'));
+            $query->whereIn('category', TaskCategory::expandSelection([$data['category']], Auth::id(), 'key'));
         }
 
         if (filled($data['search'] ?? null)) {
             $term = '%'.addcslashes(trim($data['search']), '%_').'%';
             $query->where(fn ($query) => $query
-                ->where('title', 'like', $term)
+                ->where('code', 'like', $term)
+                ->orWhere('title', 'like', $term)
                 ->orWhere('description', 'like', $term)
                 ->orWhere('external_refs', 'like', $term));
         }
@@ -93,6 +95,7 @@ class ListTasksTool extends Tool
         return Response::structured([
             'tasks' => $tasks->map(fn ($task) => [
                 'id' => $task->id,
+                'code' => $task->code,
                 'title' => $task->title,
                 'category' => $task->category,
                 'priority' => $task->priority,

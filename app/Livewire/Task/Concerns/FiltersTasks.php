@@ -193,7 +193,8 @@ trait FiltersTasks
         if (trim($this->search) !== '') {
             $term = '%'.trim($this->search).'%';
             $query->where(fn ($q) => $q
-                ->where('title', 'like', $term)
+                ->where('code', 'like', $term)
+                ->orWhere('title', 'like', $term)
                 ->orWhere('description', 'like', $term)
             );
         }

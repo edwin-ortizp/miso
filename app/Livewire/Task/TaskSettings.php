@@ -5,10 +5,13 @@ namespace App\Livewire\Task;
 use App\Actions\ManageTaskCategories;
 use App\Actions\ManageTaskStatuses;
 use App\Livewire\Concerns\WithManagementCard;
+use App\Models\ModuleSetting;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskStatus;
+use App\Services\TaskCodeService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use InvalidArgumentException;
 use Livewire\Attributes\Layout;
@@ -67,6 +70,10 @@ class TaskSettings extends Component
 
     public string $name = '';
 
+    public string $codePrefix = '';
+
+    public string $globalCodePrefix = 'MSO';
+
     public string $icon = 'bi-tag';
 
     public ?string $deletingId = null;
@@ -79,6 +86,25 @@ class TaskSettings extends Component
     {
         abort_unless(in_array($section, self::SECTIONS, true), 404);
         $this->section = $section;
+        $this->globalCodePrefix = app(TaskCodeService::class)->globalPrefix(auth()->id());
+    }
+
+    public function saveGlobalPrefix(): void
+    {
+        $this->resetValidation('globalCodePrefix');
+        try {
+            DB::transaction(function () {
+                $codes = app(TaskCodeService::class);
+                $codes->lock(auth()->id());
+                $prefix = $codes->validatePrefix(auth()->id(), $this->globalCodePrefix, global: true);
+                $setting = ModuleSetting::firstOrCreate(['module' => 'tasks']);
+                $setting->update(['settings' => [...($setting->settings ?? []), 'code_prefix' => $prefix]]);
+                $this->globalCodePrefix = $prefix;
+                $this->message = 'Prefijo guardado. Los códigos existentes se conservan.';
+            }, 3);
+        } catch (InvalidArgumentException $e) {
+            $this->addError('globalCodePrefix', $e->getMessage());
+        }
     }
 
     public function updatedQ(): void
@@ -99,11 +125,13 @@ class TaskSettings extends Component
         $this->message = '';
         $this->editingId = null;
         $this->name = '';
+        $this->codePrefix = '';
         $this->icon = 'bi-tag';
 
         if ($id && ($category = TaskCategory::find($id))) {
             $this->editingId = $category->id;
             $this->name = $category->name;
+            $this->codePrefix = $category->code_prefix ?? '';
             $this->parent_id = $category->parent_id ?? '';
             $this->icon = $category->icon ?: 'bi-tag';
         }
@@ -129,14 +157,14 @@ class TaskSettings extends Component
 
         try {
             if ($category) {
-                $categories->update($category, $this->name, $this->icon, $this->parent_id ?: null);
+                $categories->update($category, $this->name, $this->icon, $this->parent_id ?: null, $this->codePrefix ?: null);
                 $this->message = "“{$category->name}” actualizada. Sus tareas la conservan.";
             } else {
-                $category = $categories->create(auth()->user(), $this->name, $this->icon, $this->parent_id ?: null);
+                $category = $categories->create(auth()->user(), $this->name, $this->icon, $this->parent_id ?: null, $this->codePrefix ?: null);
                 $this->message = "“{$category->name}” ya está disponible al crear tareas.";
             }
         } catch (InvalidArgumentException $exception) {
-            $this->addError('name', $exception->getMessage());
+            $this->addError(str_contains($exception->getMessage(), 'prefijo') ? 'codePrefix' : 'name', $exception->getMessage());
 
             return;
         }
@@ -162,6 +190,7 @@ class TaskSettings extends Component
 
         if ($category->children()->exists()) {
             $this->message = 'Mueve primero las subcategorías antes de eliminar esta categoría.';
+
             return;
         }
         if (Task::where('category', $category->key)->exists()) {

@@ -113,6 +113,7 @@ class TaskRecurrenceService
     private function completeAt(Task $task, Carbon $nextDate, TaskGamificationService $gamification, ?Carbon $completedAt = null): array
     {
         return DB::transaction(function () use ($task, $nextDate, $gamification, $completedAt): array {
+            app(TaskCodeService::class)->lock($task->user_id);
             $current = Task::query()->lockForUpdate()->findOrFail($task->id);
 
             if ($current->completed || ! $current->is_recurrent) {
@@ -123,7 +124,7 @@ class TaskRecurrenceService
             $previousXp = (int) Task::where('completed', true)->sum('completion_xp');
             $seriesId = $current->recurrence_series_id ?: (string) Str::uuid();
 
-            Task::create([
+            $current->user->tasks()->create([
                 'task_code' => $current->task_code,
                 'title' => $current->title,
                 'description' => $current->description,
@@ -170,7 +171,7 @@ class TaskRecurrenceService
                 'levelUp' => $gamification->levelForXp($previousXp) < $gamification->levelForXp($totalXp),
                 'streakMilestone' => in_array($streaks['current'], [3, 7, 14, 30, 100], true),
             ];
-        });
+        }, 3);
     }
 
     /** @return array{start_date: Carbon|null, end_date: Carbon|null} */

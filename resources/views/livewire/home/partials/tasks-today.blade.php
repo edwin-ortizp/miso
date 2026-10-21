@@ -35,7 +35,7 @@
                     @if ($task->priority && isset($priorityBadges[$task->priority]))
                         <span title="{{ $priorityBadges[$task->priority]['label'] }}">{{ $priorityBadges[$task->priority]['emoji'] }}</span>
                     @endif
-                    {{ $task->title }}
+                    <x-ui.task-code :code="$task->code" /> {{ $task->title }}
                     @if ($task->is_recurrent)
                         <i class="bi bi-arrow-repeat" style="color: var(--md-sys-color-on-surface-variant);" title="Recurrente"></i>
                     @endif

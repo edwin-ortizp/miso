@@ -3,15 +3,35 @@
 namespace App\Models;
 
 use App\Models\Traits\BelongsToUser;
+use App\Services\TaskCodeService;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class TaskCategory extends Model
 {
-    use BelongsToUser, HasUuids, \App\Models\Traits\HasCategoryHierarchy;
+    use \App\Models\Traits\HasCategoryHierarchy, BelongsToUser, HasUuids;
 
-    protected $fillable = ['parent_id', 'key', 'name', 'icon', 'sort_order'];
+    public function save(array $options = [])
+    {
+        $this->user_id ??= auth()->id();
+        if (! $this->user_id) {
+            throw new \InvalidArgumentException('La categoría necesita un propietario.');
+        }
+
+        return $this->getConnection()->transaction(function () use ($options) {
+            $codes = app(TaskCodeService::class);
+            $codes->lock($this->user_id);
+            if (! $this->exists || $this->isDirty('code_prefix')) {
+                $this->code_prefix = $codes->validatePrefix($this->user_id,
+                    $this->code_prefix ?: $codes->suggest($this->user_id, $this->name), $this->exists ? $this->id : null);
+            }
+
+            return parent::save($options);
+        }, $this->getConnection()->transactionLevel() === 0 ? 3 : 1);
+    }
+
+    protected $fillable = ['code_prefix', 'parent_id', 'key', 'name', 'icon', 'sort_order'];
 
     /** Catálogo del usuario autenticado como key => nombre, en su orden. */
     public static function options(): array

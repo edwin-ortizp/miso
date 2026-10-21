@@ -11,6 +11,7 @@ use App\Models\HealthLog;
 use App\Models\Task;
 use App\Models\TaskAssociation;
 use App\Models\User;
+use App\Support\DefaultTaskCategories;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,6 +21,15 @@ use Tests\TestCase;
 class HealthModuleTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        User::created(function (User $user) {
+            DefaultTaskCategories::createFor($user);
+            $user->taskCategories()->create(['key' => 'trabajo', 'name' => 'Trabajo']);
+        });
+    }
 
     public function test_future_medical_appointment_creates_a_linked_task_visible_in_task_views(): void
     {

@@ -88,7 +88,7 @@
                     <div class="goal-section-heading"><div><span class="goal-section-heading__eyebrow">Ejecución</span><h2>Tareas relacionadas</h2></div></div>
                     <div class="goal-task-list">
                         @forelse ($goal->tasks as $task)
-                            <a href="{{ route('tasks.list', ['edit' => $task->id]) }}" class="goal-task-row" wire:navigate wire:key="task-{{ $task->id }}"><i class="bi {{ $task->completed ? 'bi-check-circle-fill' : 'bi-circle' }}"></i><span>{{ $task->title }}</span>@if ($task->end_date)<time>{{ $task->end_date->format('d M') }}</time>@endif<i class="bi bi-arrow-up-right"></i></a>
+                            <a href="{{ route('tasks.list', ['edit' => $task->id]) }}" class="goal-task-row" wire:navigate wire:key="task-{{ $task->id }}"><i class="bi {{ $task->completed ? 'bi-check-circle-fill' : 'bi-circle' }}"></i><span><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>@if ($task->end_date)<time>{{ $task->end_date->format('d M') }}</time>@endif<i class="bi bi-arrow-up-right"></i></a>
                         @empty
                             <p class="goal-history__empty">Aún no hay tareas vinculadas. Crea la primera acción concreta para este objetivo.</p>
                         @endforelse

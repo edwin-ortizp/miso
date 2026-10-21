@@ -48,7 +48,7 @@
                         <tr wire:key="relationship-task-{{ $task->id }}" @class(['is-done' => $task->completed])>
                             <td class="md-table__check">@unless ($task->is_recurrent && ! $task->completed)<button type="button" class="md-table__check-button" wire:click="toggleTask('{{ $task->id }}')" aria-label="{{ $task->completed ? 'Reabrir' : 'Completar' }} {{ $task->title }}" title="{{ $task->completed ? 'Reabrir' : 'Completar' }}"><i class="bi {{ $task->completed ? 'bi-check-circle-fill' : 'bi-circle' }}" aria-hidden="true"></i></button>@endunless</td>
                             <td class="md-table__title">
-                                <a href="{{ $editUrl }}" wire:navigate>{{ $task->title }}</a>
+                                <a href="{{ $editUrl }}" wire:navigate><x-ui.task-code :code="$task->code" /> {{ $task->title }}</a>
                                 @if ($task->is_recurrent)
                                     <span class="md-table__meta">Recurrente</span>
                                 @endif
