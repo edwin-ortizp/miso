@@ -49,6 +49,18 @@ for (const [width, height] of [[1440,900],[1280,800],[768,1024],[390,844]]) {
   await expect(page.getByRole('heading',{name:'Panel de pared',exact:true})).toBeAttached();
   expect(await page.evaluate(()=>document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   if(width>=1200) expect(await page.evaluate(()=>document.documentElement.scrollHeight <= innerHeight + 1)).toBe(true);
+  await expect(page.locator('.wall-day')).toHaveCount(5);
+  expect(await page.locator('.wall-card').first().evaluate(el=>getComputedStyle(el).borderRadius)).toBe('12px');
+  expect(await page.locator('.wall-goal').first().evaluate(el=>getComputedStyle(el).borderRadius)).toBe('0px');
+  await page.locator('.wall-day__head').first().click();
+  const agenda=page.getByRole('dialog',{name:'Agenda',exact:true});
+  await expect(agenda.locator('.md-form-dialog__head')).toBeVisible();
+  await expect(agenda.locator('.md-form-dialog__actions')).toBeVisible();
+  await agenda.getByRole('button',{name:'Expandir',exact:true}).click();
+  await expect(agenda).toHaveClass(/is-expanded/);
+  await agenda.getByRole('button',{name:'Restaurar',exact:true}).click();
+  await agenda.getByRole('button',{name:'Cerrar',exact:true}).first().click();
+  await expect(agenda).toBeHidden();
   await page.getByRole('button',{name:'Modo noche',exact:true}).click();
   await expect(page.locator('body')).toHaveAttribute('data-panel-night','');
   const nightResult=await new AxeBuilder({page}).exclude('.phpdebugbar').analyze();
@@ -208,4 +220,28 @@ test('manual refresh preserves drafts, reports failure and allows retry',async({
  await expect.poll(stamp).not.toBe(before);
  await expect(dialog.getByRole('textbox',{name:'¿Qué quieres recordar de hoy?'})).toHaveValue('Borrador que debe conservarse');
  await dialog.getByRole('button',{name:'Cancelar',exact:true}).click();expect(errors).toEqual([]);
+});
+
+test('panel consultation dialogs keep canonical chrome and keyboard access', async ({page}) => {
+ await login(page);
+ const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const goal=page.locator('.wall-goal').first();
+ await goal.locator('b').evaluate(el=>el.textContent='Un objetivo con un título suficientemente largo para ocupar varias líneas completas sin perder palabras');
+ expect(await goal.evaluate(el=>el.scrollWidth<=el.clientWidth && el.scrollHeight<=el.clientHeight)).toBe(true);
+ await page.getByRole('button',{name:'Ver ánimo y energía',exact:true}).click();
+ let dialog=page.getByRole('dialog',{name:'Ánimo y energía',exact:true});
+ await expect(dialog).toBeVisible();
+ await dialog.getByRole('button',{name:'Más emociones',exact:true}).click();
+ dialog=page.getByRole('dialog',{name:'Más emociones',exact:true});
+ await expect(dialog.locator('.md-form-dialog__head')).toBeVisible();
+ await page.keyboard.press('Escape');await expect(dialog).toBeHidden();
+ await page.locator('.wall-emoji').first().click();
+ await page.getByRole('button',{name:'Añadir contexto',exact:true}).click();
+ dialog=page.getByRole('dialog',{name:'Añadir contexto',exact:true});
+ await expect(dialog.locator('.md-form-dialog__actions')).toBeVisible();
+ await dialog.getByRole('textbox',{name:'¿Qué pasó?',exact:true}).fill('Contexto conservado al expandir');
+ await dialog.getByRole('button',{name:'Expandir',exact:true}).click();
+ await expect(dialog.getByRole('textbox',{name:'¿Qué pasó?',exact:true})).toHaveValue('Contexto conservado al expandir');
+ await dialog.getByRole('button',{name:'Cerrar',exact:true}).click();
+ await expect(dialog).toBeHidden();expect(errors).toEqual([]);
 });

@@ -52,7 +52,7 @@ class WallPanelTest extends TestCase
         $meal->items()->create(['name' => 'Lentejas', 'position' => 0]);
         Plan::create(['title' => 'Salida', 'type' => 'activity', 'status' => 'scheduled', 'scheduled_on' => today()]);
         $data = app(WallPanelData::class)->forToday();
-        $this->assertCount(7, $data['week']);
+        $this->assertCount(5, $data['week']);
         $rows = collect($data['week'][0]['rows'])->keyBy('title');
         $this->assertSame('09:00', $rows['Con hora']['time']);
         $this->assertNull($rows['Sin hora']['time']);
@@ -161,13 +161,25 @@ class WallPanelTest extends TestCase
 
     public function test_birthdays_last_day_meals_and_sensitive_events_are_respected(): void
     {
-        Relationship::create(['category' => 'friends', 'full_name' => 'Cumpleañera', 'birthday_month' => 10, 'birthday_day' => 29]);
-        $meal = MealPlanEntry::create(['date' => today()->addDays(6), 'meal_type' => 'cena']);
+        Relationship::create(['category' => 'friends', 'full_name' => 'Cumpleañera', 'birthday_month' => 10, 'birthday_day' => 27]);
+        $meal = MealPlanEntry::create(['date' => today()->addDays(4), 'meal_type' => 'cena']);
         $meal->items()->create(['name' => 'Cena del último día', 'position' => 0]);
         $data = app(WallPanelData::class)->forToday();
-        $titles = collect($data['week'][6]['rows'])->pluck('title')->all();
+        $titles = collect($data['week'][4]['rows'])->pluck('title')->all();
         $this->assertContains('Cumpleaños · Cumpleañera', $titles);
         $this->assertContains('Cena · Cena del último día', $titles);
+    }
+
+    public function test_five_day_agenda_crosses_year_boundary_and_uses_spanish_dates(): void
+    {
+        $this->travelTo(\Carbon\Carbon::parse('2026-12-30 12:00:00'));
+        config(['app.locale' => 'en']);
+        \Carbon\Carbon::setLocale('en');
+        $data = app(WallPanelData::class)->forToday();
+        $this->assertCount(5, $data['week']);
+        $this->assertSame('2026-12-30', $data['week'][0]['date']->toDateString());
+        $this->assertSame('2027-01-03', $data['week'][4]['date']->toDateString());
+        Livewire::test(WallPanel::class)->assertSee('30 dic')->assertSee('03 ene')->assertDontSee('30 Dec');
     }
 
     public function test_last_update_timestamp_advances_after_loading_fresh_data(): void

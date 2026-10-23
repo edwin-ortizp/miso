@@ -22,7 +22,7 @@
 }
 .wall-panel { min-height: 100dvh; padding: max(14px, env(safe-area-inset-top)) calc(14px + var(--lt-navigation-space, 0px) + env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); }
 .wall-grid { display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(260px, 1fr); gap: 12px; max-width: 2000px; margin-inline: auto; }
-.wall-now, .wall-next, .wall-week, .wall-card { min-width: 0; background: var(--md-sys-color-surface-container-lowest); border: 1px solid var(--md-sys-color-outline-variant); border-radius: 20px; padding: 16px; }
+.wall-now, .wall-next, .wall-week, .wall-card { min-width: 0; background: var(--md-sys-color-surface-container-lowest); border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-medium); padding: 16px; }
 .wall-now {
   --md-sys-color-primary: var(--md-custom-color-panel-on-hero);
   --md-sys-color-on-surface: var(--md-custom-color-panel-on-hero);
@@ -33,7 +33,7 @@
   --md-sys-color-outline-variant: color-mix(in srgb, var(--md-custom-color-panel-on-hero) 20%, transparent);
   --md-sys-color-surface-container-highest: color-mix(in srgb, var(--md-custom-color-panel-on-hero) 16%, transparent);
   background: linear-gradient(120deg, var(--md-custom-color-panel-hero), var(--md-custom-color-panel-hero-end));
-  color: var(--md-custom-color-panel-on-hero); border: 0; border-radius: 26px;
+  color: var(--md-custom-color-panel-on-hero); border: 0; border-radius: var(--md-sys-shape-corner-medium);
   display: grid; grid-template-columns: minmax(190px, 1fr) auto; gap: 16px; }
 .wall-clock { display: flex; flex-direction: column; gap: 4px; text-transform: capitalize; }
 .wall-clock strong { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.1; font-weight: 600; font-variant-numeric: tabular-nums; }
@@ -56,7 +56,7 @@
   --md-sys-color-on-secondary-container: var(--md-custom-color-panel-on-hero);
   --md-sys-color-on-primary: var(--md-custom-color-panel-next);
   --md-sys-color-primary: var(--md-custom-color-panel-on-hero);
-  border: 0; border-radius: 26px;
+  border: 0; border-radius: var(--md-sys-shape-corner-medium);
 }
 .wall-next strong { font-size: 1.3rem; }
 .wall-next p { margin: 0; }
@@ -66,10 +66,10 @@
 .wall-week, .wall-cards { grid-column: 1 / -1; }
 .wall-section-head { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
 .wall-layer-rail { margin-left: auto; --md-sys-color-secondary-container: var(--md-custom-color-panel-ink); --md-sys-color-on-secondary-container: var(--md-custom-color-panel-background); }
-.wall-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-.wall-day { display: flex; flex-direction: column; border-radius: 20px; background: var(--md-sys-color-surface-container-lowest); padding: 8px; min-width: 0; min-height: 0; overflow: hidden; }
+.wall-days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.wall-day { display: flex; flex-direction: column; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container-lowest); padding: 8px; min-width: 0; min-height: 0; overflow: hidden; }
 .wall-day.is-today { box-shadow: inset 0 0 0 2px var(--md-sys-color-error); }
-.wall-day__head { width: 100%; color: var(--md-sys-color-on-surface); border-bottom: 1px solid var(--md-sys-color-outline-variant); display: flex; justify-content: space-between; padding-inline: 6px; }
+.wall-day__head { border-radius: var(--md-sys-shape-corner-none); width: 100%; color: var(--md-sys-color-on-surface); border-bottom: 1px solid var(--md-sys-color-outline-variant); display: flex; justify-content: space-between; padding-inline: 6px; }
 .wall-day__head b { font-size: 1.5rem; }
 .wall-day__items { display: flex; flex: 1; flex-direction: column; min-height: 210px; gap: 4px; overflow: hidden; }
 .wall-row { flex: none; color: var(--md-sys-color-on-surface); min-height: 44px; height: auto; text-align: left; padding: 5px; display: flex; gap: 4px; justify-content: start; border-left: 3px solid var(--md-sys-color-primary); border-radius: 4px; font-size: .75rem; }
@@ -92,7 +92,7 @@
 .wall-emoji { font-size: 1.5rem; min-width: 44px; }
 .wall-trend { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .wall-trend > div { display: flex; flex-direction: column; text-align: center; font-size: .75rem; }
-.wall-goal { color: var(--md-sys-color-on-surface); width: 100%; display: flex; flex-direction: column; align-items: start; white-space: normal; height: auto; text-align: left; padding: 8px 0; }
+.wall-goal { border-radius: var(--md-sys-shape-corner-none); overflow: visible; overflow-wrap: anywhere; flex-shrink: 0; color: var(--md-sys-color-on-surface); width: 100%; display: flex; flex-direction: column; align-items: start; white-space: normal; height: auto; text-align: left; padding: 8px 0; }
 .wall-side { display: flex; flex-direction: column; justify-content: space-around; align-items: stretch; }
 .wall-side > a, .wall-side > button { height: auto; min-height: 48px; white-space: normal; text-align: left; }
 .wall-sheet-row { display: flex; width: 100%; min-height: 48px; height: auto; gap: 12px; align-items: center; justify-content: space-between; white-space: normal; text-align: left; padding: 10px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
@@ -111,7 +111,7 @@
   .wall-side { padding: 8px 8px 76px; gap: 8px; justify-content: flex-start; }
 }
 
-@media (max-width: 1199.98px) { .wall-grid { grid-template-columns: minmax(0, 1fr); } .wall-next { grid-row: 2; } .wall-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wall-side { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; } .wall-days { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 1199.98px) { .wall-grid { grid-template-columns: minmax(0, 1fr); } .wall-next { grid-row: 2; } .wall-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wall-side { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }  }
 @media (max-width: 767.98px) { .wall-panel { padding: 72px 12px 160px; } .wall-now { grid-template-columns: 1fr; } .wall-rings { flex-wrap: wrap; justify-content: center; } .wall-ring { width: 60px; height: 60px; } .wall-cards { grid-template-columns: minmax(0, 1fr); } .wall-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wall-side { flex-direction: column; } .wall-layer-rail { margin-left: 0; } .wall-timeline { gap: 0; } .wall-timeline__body { padding-inline: 0; } }
 
 .wall-control, .wall-emoji { min-height: 44px; }

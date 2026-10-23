@@ -19,11 +19,8 @@
 @endif
 
 @if ($showMoodCatalog)
-    <div>
-        <div class="md-dialog-scrim" wire:click="closeMoodCatalog"></div>
-        <div class="md-dialog" style="max-width: 520px;">
-            <h2 class="md-dialog-headline md-headline-small">Más emociones</h2>
-            <div class="md-dialog-content">
+    <x-ui.dialog state="$wire.showMoodCatalog" title="Más emociones" :standard="$panelDialogs ?? false" close-expression="$wire.closeMoodCatalog()" :size="($panelDialogs ?? false) ? 'lg' : 'md'">
+
                 <div class="md-search-bar mb-3">
                     <i class="bi bi-search md-search-bar__icon"></i>
                     <input type="text" wire:model.live.debounce.200ms="moodCatalogSearch"
@@ -43,22 +40,16 @@
                         </p>
                     @endforelse
                 </div>
-            </div>
-            <div class="md-dialog-actions">
+
+        <x-slot:actions>
                 <button type="button" wire:click="closeMoodCatalog" class="md-btn-text">Cerrar</button>
-            </div>
-        </div>
-    </div>
+            </x-slot:actions>
+    </x-ui.dialog>
 @endif
 
 @if ($showMoodContext && $contextEntry)
-    <div>
-        <div class="md-dialog-scrim" wire:click="closeMoodContext"></div>
-        <div class="md-dialog md-mood-sheet">
-            <h2 class="md-dialog-headline md-headline-small">
-                {{ $contextEntry->emoji }} Añadir contexto
-            </h2>
-            <div class="md-dialog-content">
+    <x-ui.dialog state="$wire.showMoodContext" title="Añadir contexto" :standard="$panelDialogs ?? false" close-expression="$wire.closeMoodContext()" :size="($panelDialogs ?? false) ? 'lg' : 'md'">
+
                 <p class="md-body-small" style="color: var(--md-sys-color-on-surface-variant);">
                     Todo esto es opcional. Puedes guardar solo lo que quieras.
                 </p>
@@ -107,13 +98,12 @@
                         Se vincula solo lo que selecciones.
                     </p>
                 </fieldset>
-            </div>
-            <div class="md-dialog-actions">
+
+        <x-slot:actions>
                 <button type="button" wire:click="closeMoodContext" class="md-btn-text">Cancelar</button>
                 <button type="button" wire:click="saveMoodContext" class="md-btn-filled">
                     <i class="bi bi-check-lg"></i> Guardar contexto
                 </button>
-            </div>
-        </div>
-    </div>
+            </x-slot:actions>
+    </x-ui.dialog>
 @endif

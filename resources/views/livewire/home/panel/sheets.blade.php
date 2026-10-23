@@ -1,6 +1,6 @@
-<x-ui.dialog state="agendaOpen" title="Agenda" size="lg" icon="bi-calendar-day">
+<x-ui.dialog standard state="agendaOpen" title="Agenda" size="lg" icon="bi-calendar-day">
     @foreach ($week as $i => $day)
-        <section x-show="dayIndex === {{ $i }}"><h3 class="md-title-medium">{{ $day['date']->translatedFormat('l d F') }}</h3>
+        <section x-show="dayIndex === {{ $i }}"><h3 class="md-title-medium">{{ $day['date']->locale('es')->translatedFormat('l d F') }}</h3>
             @forelse ($day['rows'] as $row)
                 <button type="button" class="md-btn-text wall-sheet-row {{ $row['done'] ? 'is-done' : '' }}" x-show="layers.{{ $row['kind'] }}" @click="agendaOpen = false" wire:click="openDetail('{{ $row['kind'] }}', '{{ $row['id'] }}')"><b>{{ $row['time'] ?? 'Sin hora' }}</b><span>{{ $row['title'] }}</span></button>
             @empty <p>Día libre: nada programado.</p>@endforelse
@@ -8,7 +8,7 @@
     @endforeach
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="agendaOpen = false">Cerrar</x-ui.action></x-slot:actions>
 </x-ui.dialog>
-<x-ui.dialog state="habitsOpen" title="Hábitos de hoy" size="lg" icon="bi-check2-square">
+<x-ui.dialog standard state="habitsOpen" title="Hábitos de hoy" size="lg" icon="bi-check2-square">
     @foreach (\App\Livewire\Habit\HabitSettings::TIMES_OF_DAY as $key => $label)
         <h3 class="md-title-medium">{{ $label }}</h3>
         @forelse ($habits->where('time_of_day', $key) as $habit)
@@ -17,35 +17,35 @@
     @endforeach
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="habitsOpen = false">Cerrar</x-ui.action></x-slot:actions>
 </x-ui.dialog>
-<x-ui.dialog state="waterOpen" title="Hidratación de hoy" size="lg" icon="bi-droplet">
+<x-ui.dialog standard state="waterOpen" title="Hidratación de hoy" size="lg" icon="bi-droplet">
     <p>{{ number_format($waterTotal, 0, ',', '.') }} ml efectivos · Meta {{ $waterGoal }} ml</p>
     <h3 class="md-title-medium">Últimos registros</h3>
     @forelse ($waterLogs as $log)<p>{{ $log->time }} · {{ $log->drink_type }} · {{ $log->amount }} ml</p>@empty<p>Sin bebidas registradas hoy.</p>@endforelse
     <div class="wall-drinks">@foreach ($drinkTypes as $drink)<section><h3 class="md-title-medium">{{ $drink->icon }} {{ $drink->name }}</h3><div class="d-flex flex-wrap gap-2">@foreach ([150, 250, 500] as $ml)<button type="button" class="md-btn-tonal wall-control" wire:click="quickAddWater('{{ $drink->id }}', {{ $ml }})" wire:loading.attr="disabled">{{ $ml }} ml</button>@endforeach</div></section>@endforeach</div>
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="waterOpen = false">Cerrar</x-ui.action></x-slot:actions>
 </x-ui.dialog>
-<x-ui.dialog state="moodOpen" title="Ánimo y energía" size="lg" icon="bi-emoji-smile">
+<x-ui.dialog standard state="moodOpen" title="Ánimo y energía" size="lg" icon="bi-emoji-smile">
     <div class="wall-quick">@foreach ($moodStates as $state)<button type="button" class="md-btn-tonal" wire:click="saveMood('{{ $state->id }}')" wire:loading.attr="disabled">{{ $state->emoji }} {{ $state->text }}</button>@endforeach</div>
     <x-ui.action class="wall-control" variant="text" wire:click="openMoodCatalog" @click="moodOpen = false">Más emociones</x-ui.action>
     <h3 class="md-title-medium">Energía</h3><div class="wall-quick">@foreach ([1 => 'Muy baja', 2 => 'Baja', 3 => 'Media', 4 => 'Alta', 5 => 'Muy alta'] as $value => $label)<button type="button" class="md-btn-outlined" wire:click="saveEnergy({{ $value }})" wire:loading.attr="disabled">{{ $value }} · {{ $label }}</button>@endforeach</div>
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="moodOpen = false">Cerrar</x-ui.action></x-slot:actions>
 </x-ui.dialog>
-<x-ui.dialog state="goalsOpen" title="Objetivos activos" size="lg" icon="bi-flag">
-    @forelse ($goals as $goal)<x-ui.action class="wall-control" variant="text" @click="goalsOpen = false; $dispatch('panel-goal', {id: {{ \Illuminate\Support\Js::from($goal->id) }}})">{{ $goal->title }}</x-ui.action>@empty<p>Sin objetivos activos.</p>@endforelse
+<x-ui.dialog standard state="goalsOpen" title="Objetivos activos" size="lg" icon="bi-flag">
+    @forelse ($goals as $goal)<x-ui.action class="wall-control wall-goal" variant="text" @click="goalsOpen = false; $dispatch('panel-goal', {id: {{ \Illuminate\Support\Js::from($goal->id) }}})">{{ $goal->title }}</x-ui.action>@empty<p>Sin objetivos activos.</p>@endforelse
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="goalsOpen = false">Cerrar</x-ui.action></x-slot:actions>
 </x-ui.dialog>
-<x-ui.dialog state="shoppingOpen" title="Lista de compras" size="lg" icon="bi-cart3">
+<x-ui.dialog standard state="shoppingOpen" title="Lista de compras" size="lg" icon="bi-cart3">
     @forelse ($shopping as $item)<div class="wall-sheet-row"><span>{{ $item->name }} · {{ $item->to_buy }}</span><x-ui.action class="wall-control" variant="text" @click="shoppingOpen = false; $dispatch('panel-shopping', {id: {{ \Illuminate\Support\Js::from($item->id) }}})">Marcar comprado</x-ui.action></div>@empty<p>Sin compras pendientes.</p>@endforelse
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="shoppingOpen = false">Cerrar</x-ui.action></x-slot:actions>
 </x-ui.dialog>
-<x-ui.dialog state="avoidOpen" title="Hábitos a evitar" size="lg" icon="bi-shield-check">
+<x-ui.dialog standard state="avoidOpen" title="Hábitos a evitar" size="lg" icon="bi-shield-check">
     @forelse ($negativeHabits as $habit)
         <div class="wall-sheet-row"><span><b>{{ $habit->name }}</b><small class="d-block">{{ isset($lastRelapses[$habit->id]) ? floor(\Carbon\Carbon::createFromTimestamp($lastRelapses[$habit->id])->diffInDays(now())).' días desde el último registro' : 'Sin recaídas registradas' }}</small></span><x-ui.action class="wall-control" variant="text" @click="avoidOpen = false; $dispatch('panel-quick', {kind: 'avoid', id: {{ \Illuminate\Support\Js::from((string) $habit->id) }}})">Registrar recaída</x-ui.action></div>
     @empty<p>Sin hábitos a evitar configurados.</p>@endforelse
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="avoidOpen = false">Cerrar</x-ui.action></x-slot:actions>
 </x-ui.dialog>
 @if ($detail)
-    <x-ui.dialog state="$wire.showDetail" title="Detalle de agenda" size="lg">
+    <x-ui.dialog standard state="$wire.showDetail" title="Detalle de agenda" size="lg">
         <h3 class="md-title-large">{{ $detailKind === 'person' ? $detail->displayName() : ($detail->title ?? 'Comidas del día') }}</h3>
         @if ($detailKind === 'task')
             <p>{{ $detail->status?->name }} · {{ $detail->category }}</p><p>{{ $detail->start_date?->format($detail->start_is_date ? 'd/m/Y' : 'd/m/Y H:i') }} → {{ $detail->end_date?->format($detail->end_is_date ? 'd/m/Y' : 'd/m/Y H:i') }}</p>

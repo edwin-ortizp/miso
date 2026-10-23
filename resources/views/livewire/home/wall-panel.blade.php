@@ -39,7 +39,7 @@
                     <div class="wall-timeline__scale"><template x-for="offset in [0, 120, 240, 360, 480]"><span x-text="formatMinute(start + offset)"></span></template></div>
                 </div>
                 <x-ui.icon-action icon="bi-chevron-right" label="Horas siguientes" @click="shift(240)" />
-                <x-ui.dialog state="clusterOpen" title="En este momento" size="lg">
+                <x-ui.dialog standard state="clusterOpen" title="En este momento" size="lg">
                     <template x-for="item in cluster"><p><b x-text="item.time"></b> <span x-text="item.title"></span> <span x-text="item.done ? ' · Hecho' : ''"></span></p></template>
                     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="clusterOpen = false">Cerrar</x-ui.action></x-slot:actions>
                 </x-ui.dialog>
@@ -60,7 +60,7 @@
             @endif
         </section>
         <section class="wall-week" aria-labelledby="panel-week-title">
-            <header class="wall-section-head"><h2 id="panel-week-title">Esta semana</h2><span>{{ today()->format('d M') }} – {{ today()->addDays(6)->format('d M') }}</span><div class="md-chip-rail wall-layer-rail" role="group" aria-label="Capas del calendario">
+            <header class="wall-section-head"><h2 id="panel-week-title">Próximos días</h2><span>{{ $week[0]['date']->locale('es')->translatedFormat('d M') }} – {{ $week[4]['date']->locale('es')->translatedFormat('d M') }}</span><div class="md-chip-rail wall-layer-rail" role="group" aria-label="Capas del calendario">
                 @foreach (['task' => 'Tareas', 'plan' => 'Planes', 'person' => 'Personas', 'meal' => 'Comidas'] as $key => $label)
                     <x-ui.chip variant="filter" x-bind:class="{selected: layers.{{ $key }}}" x-bind:aria-pressed="layers.{{ $key }}" @click="layers.{{ $key }} = !layers.{{ $key }}">{{ $label }}</x-ui.chip>
                 @endforeach
@@ -68,7 +68,7 @@
             <div class="wall-days">
                 @foreach ($week as $i => $day)
                     <article class="wall-day {{ $i === 0 ? 'is-today' : '' }}" wire:key="day-{{ $day['date']->toDateString() }}">
-                        <button type="button" class="md-btn-text wall-day__head" @click="dayIndex = {{ $i }}; agendaOpen = true" aria-label="Ver agenda del {{ $day['date']->translatedFormat('l d F') }}"><span>{{ $i === 0 ? 'Hoy' : $day['date']->translatedFormat('D') }}</span><b>{{ $day['date']->day }}</b></button>
+                        <button type="button" class="md-btn-text wall-day__head" @click="dayIndex = {{ $i }}; agendaOpen = true" aria-label="Ver agenda del {{ $day['date']->locale('es')->translatedFormat('l d F') }}"><span>{{ $i === 0 ? 'Hoy' : $day['date']->locale('es')->translatedFormat('D') }}</span><b>{{ $day['date']->day }}</b></button>
                         <div class="wall-day__items" x-data="wallDay({{ \Illuminate\Support\Js::from($day['rows']) }})" wire:key="rows-{{ md5(json_encode($day['rows'])) }}">
                             @forelse ($day['rows'] as $index => $row)
                                 <button type="button" class="md-btn-text wall-row wall-row--{{ $row['kind'] }} {{ $row['done'] ? 'is-done' : '' }}" x-show="layers.{{ $row['kind'] }} && rows.filter(row => layers[row.kind]).findIndex(row => row.kind === {{ \Illuminate\Support\Js::from($row['kind']) }} && row.id === {{ \Illuminate\Support\Js::from($row['id']) }} && row.title === {{ \Illuminate\Support\Js::from($row['title']) }}) < limit" wire:click="openDetail('{{ $row['kind'] }}', '{{ $row['id'] }}')" title="{{ $row['title'] }}"><small>{{ $row['time'] ?? 'Día' }}</small><span>{{ $row['title'] }}</span></button>
@@ -104,7 +104,7 @@
             <article class="wall-card wall-card--mood">
                 <header><h2><i class="bi bi-emoji-smile" aria-hidden="true"></i> Ánimo</h2><x-ui.icon-action icon="bi-three-dots" label="Ver ánimo y energía" @click="moodOpen = true" /></header>
                 <div class="wall-quick">@foreach ($moodStates->take(5) as $state)<button type="button" class="md-btn-text wall-emoji" wire:click="saveMood('{{ $state->id }}')" aria-label="{{ $state->text }}" wire:loading.attr="disabled">{{ $state->emoji }}</button>@endforeach</div>
-                <div class="wall-trend" aria-label="Tendencia de los últimos siete días">@foreach ($trend as $point)<div><b>{{ $point['mood']?->emoji ?? '—' }}</b><small>{{ $point['date']->translatedFormat('D') }}</small><small>{{ $point['energy'] ? $point['energy'].'/5' : '—' }}</small></div>@endforeach</div>
+                <div class="wall-trend" aria-label="Tendencia de los últimos siete días">@foreach ($trend as $point)<div><b>{{ $point['mood']?->emoji ?? '—' }}</b><small>{{ $point['date']->locale('es')->translatedFormat('D') }}</small><small>{{ $point['energy'] ? $point['energy'].'/5' : '—' }}</small></div>@endforeach</div>
             </article>
             <article class="wall-card wall-card--focus">
                 <header><h2><i class="bi bi-flag" aria-hidden="true"></i> Foco y objetivos</h2></header>
@@ -144,8 +144,8 @@
     @include('livewire.habit.partials.completion-feedback')
     @include('livewire.task.partials.completion-celebration')
     <div x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
-        @include('livewire.task.partials.recurring-completion-dialog')
+        @include('livewire.task.partials.recurring-completion-dialog', ['panelDialogs' => true])
     </div>
     @include('livewire.habit.partials.action-prompt-dialog')
-    @include('livewire.mood.partials.progressive')
+    @include('livewire.mood.partials.progressive', ['panelDialogs' => true])
 </div>

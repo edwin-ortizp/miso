@@ -29,7 +29,7 @@ class WallPanelData
     {
         abort_unless(auth()->check(), 403);
         $today = today();
-        $end = $today->copy()->addDays(6)->endOfDay();
+        $end = $today->copy()->addDays(4)->endOfDay();
         $tasks = Task::with('status')->where(fn ($q) => $q
             ->whereRaw('COALESCE(start_date, end_date) <= ?', [$end])
             ->whereRaw('COALESCE(end_date, start_date) >= ?', [$today]))->get();
@@ -41,7 +41,7 @@ class WallPanelData
             ->whereRaw('COALESCE(starts_on, event_date) <= ?', [$end->toDateString()])
             ->whereRaw('COALESCE(ends_on, starts_on, event_date) >= ?', [$today->toDateString()])->get();
         $week = [];
-        for ($i = 0; $i < 7; $i++) {
+        for ($i = 0; $i < 5; $i++) {
             $day = $today->copy()->addDays($i);
             $rows = [];
             foreach ($tasks as $task) {
