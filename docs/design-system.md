@@ -250,3 +250,13 @@ Toda pantalla cuyo propósito principal sea consultar y administrar varios regis
 | Ánimo | `Mood/MoodTracker` | Pendiente | Dos cards (estados y energía) con paginación independiente; promedio sobre todo el día |
 | Diario | `Journal/JournalEntries` | Pendiente | Entradas recientes junto al editor; campo «Resumen del día» |
 | Diario | `Journal/JournalSummary` | Estándar | Solo entradas con resumen, fecha desc; periodo 1 mes / 6 meses / 1 año / todo / personalizado; clic abre la entrada completa |
+
+### Panel de pared
+
+`/panel` es una pantalla autenticada con marco compacto propio y el menú compartido `x-app-navigation`, alimentado desde `config/modules.php` y situado a la derecha. Usa una sola estructura responsive. Por decisión de producto, sus controles de registro rápido de bebidas, ánimo y energía permiten guardar con un toque; el resto de altas usa el FAB y `x-ui.form-dialog`. Los indicadores siempre se calculan con datos del usuario y las reglas de cada módulo.
+
+Su paleta contextual usa los tokens `--md-custom-color-panel-*`: crema para el fondo, índigo para «Ahora», verde para «Lo próximo» y cuatro acentos para los anillos. El catálogo de Cards muestra los modos claro y noche; estos tokens no cambian los demás módulos.
+
+El marco declara `--md-sys-layout-inset-inline-end` cuando la navegación ocupa el borde derecho; el posicionamiento canónico del FAB suma ese espacio a su separación habitual.
+
+El panel consulta datos cada cinco minutos mientras está visible, al cambiar de día y después de guardar. El botón «Actualizar panel» permite consultar antes; la hora de última actualización solo avanza tras una carga correcta. El reloj es local y no genera peticiones por segundo.

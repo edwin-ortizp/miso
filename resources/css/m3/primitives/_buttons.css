@@ -133,7 +133,7 @@
   transition: all var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
   text-decoration: none;
   position: fixed;
-  right: var(--md-sys-fab-offset-inline);
+  right: calc(var(--md-sys-fab-offset-inline) + var(--md-sys-layout-inset-inline-end));
   bottom: var(--md-sys-fab-offset-block);
   z-index: var(--md-sys-z-fab-floating, 90);
 }

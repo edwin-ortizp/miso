@@ -1,0 +1,28 @@
+<?php
+use App\Models\{DrinkType, Goal, HabitDefinition, JournalEntry, MealPlanEntry, MoodState, NegativeHabitDefinition, Plan, Relationship, ShoppingItem, Store, Task, User};
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Support\Facades\Artisan;
+require __DIR__.'/../../../vendor/autoload.php';
+$app = require __DIR__.'/../../../bootstrap/app.php';
+$app->make(Kernel::class)->bootstrap();
+$path = str_replace('\\', '/', (string) config('database.connections.sqlite.database'));
+if (config('database.default') !== 'sqlite' || !str_ends_with($path, '/storage/framework/testing/panel-browser.sqlite')) throw new RuntimeException('Dedicated panel browser SQLite required');
+Artisan::call('migrate:fresh', ['--force' => true]);
+$user = User::factory()->create(['email' => 'panel-browser@example.test', 'password' => 'browser-test-password']);
+auth()->login($user);
+DrinkType::create(['name' => 'Agua', 'hydration_factor' => 1, 'icon' => '💧']);
+MoodState::create(['text' => 'Bien', 'emoji' => '🙂', 'value' => 4, 'is_active' => true]);
+HabitDefinition::create(['name' => 'Leer 20 minutos', 'icon' => '📚', 'time_of_day' => 'anytime', 'base_time' => '16:00']);
+for ($i = 0; $i < 9; $i++) Task::create(['title' => 'Panel tarea '.($i+1), 'start_date' => today()->setTime(min(23, now()->hour + 1), $i * 5), 'end_date' => today()->setTime(min(23, now()->hour + 2), $i * 5), 'start_is_date' => false, 'end_is_date' => false]);
+Task::create(['title' => 'Panel sin hora', 'end_date' => today(), 'end_is_date' => true]);
+$person = Relationship::create(['category' => 'friends', 'full_name' => 'Persona del panel', 'birthday_month' => today()->month, 'birthday_day' => today()->day, 'general_notes' => 'Notas de prueba']);
+$plan = Plan::create(['title' => 'Salida del panel', 'type' => 'activity', 'status' => 'scheduled', 'scheduled_on' => today(), 'city' => 'Bogotá']);
+$plan->relationships()->attach($person->id);
+$meal = MealPlanEntry::create(['date' => today(), 'meal_type' => 'almuerzo', 'status' => 'planned']);
+$meal->items()->create(['name' => 'Lentejas del panel', 'position' => 0]);
+Goal::create(['title' => 'Lecturas del panel', 'status' => 'active', 'numeric_goal' => ['enabled' => true, 'unit' => 'libros', 'startValue' => 0, 'targetValue' => 12]]);
+Goal::create(['title' => 'Aprender del panel', 'status' => 'active']);
+ShoppingItem::create(['status' => 'available', 'name' => 'Pan del panel', 'base_unit' => 'unit', 'next_purchase' => true, 'to_buy' => 2, 'stock' => 0]);
+Store::create(['name' => 'Tienda del panel']);
+NegativeHabitDefinition::create(['name' => 'Redes antes de dormir']);
+JournalEntry::create(['date' => today(), 'text' => 'Texto existente del panel', 'summary' => 'Resumen existente']);

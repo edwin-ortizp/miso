@@ -18,3 +18,14 @@
 <x-catalog.example title="Sin encabezado" description="Una card puede ser solo contenido.">
     <x-ui.card variant="outlined">Sin encabezado ni acciones.</x-ui.card>
 </x-catalog.example>
+
+<x-catalog.example title="Panel de pared: paleta contextual" description="Tokens exclusivos del panel aprobado: fondo crema, superficie cálida, cabecera índigo y siguiente acción verde. El modo noche conserva la jerarquía y el contraste.">
+    @foreach ([false => 'Claro', true => 'Noche'] as $night => $label)
+        <div class="wall-frame" @if($night) data-panel-night @endif>
+            <h3 class="md-title-medium">{{ $label }}</h3>
+            <div class="wall-now"><strong>Ahora · 07:42</strong><span>Hábitos, hidratación, tareas y foco</span></div>
+            <div class="wall-next"><strong>Lo próximo</strong><span>Una tarea programada</span></div>
+            <x-ui.card variant="outlined" title="Seguimiento">Los formularios y controles conservan sus componentes canónicos.</x-ui.card>
+        </div>
+    @endforeach
+</x-catalog.example>

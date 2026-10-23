@@ -52,26 +52,7 @@
      de Alpine solo decide comportamiento (que hace el boton de menu, que
      etiqueta accesible le corresponde). No hay variante por dispositivo. --}}
 <body class="lt-frame"
-      x-data="{
-          sidebarOpen: false,
-          sidebarRail: localStorage.getItem('lt-sidebar-rail') === '1',
-          compact: window.matchMedia('(max-width: 767.98px)').matches,
-          search: '',
-          searchOpen: false,
-          removeMediaListener: null,
-          destroy() { this.removeMediaListener?.(); },
-          init() {
-              const mq = window.matchMedia('(max-width: 767.98px)');
-              const handler = (e) => { this.compact = e.matches; if (!this.compact) { this.sidebarOpen = false; this.searchOpen = false; } };
-              mq.addEventListener('change', handler);
-              this.removeMediaListener = () => mq.removeEventListener('change', handler);
-              this.$watch('sidebarRail', (v) => localStorage.setItem('lt-sidebar-rail', v ? '1' : '0'));
-          },
-          toggleNav() {
-              if (this.compact) { this.sidebarOpen = !this.sidebarOpen; return; }
-              this.sidebarRail = !this.sidebarRail;
-          },
-      }"
+      x-data="ltNavigation()"
       :class="{ 'is-rail': sidebarRail }">
 
     {{-- Aviso de conexion: la aplicacion sirve datos cacheados por el service
@@ -80,33 +61,7 @@
         Sin conexión — se muestran los datos guardados
     </div>
 
-    {{-- Sidebar: expandida, raíl o superpuesta en compacto, según config('modules.navigation') --}}
-    <aside class="lt-sidebar" :class="{ 'is-open': sidebarOpen }" aria-label="Módulos de MiSo">
-        <div class="lt-sidebar__brand">
-            <span class="lt-sidebar__mark" aria-hidden="true"><i class="bi bi-activity"></i></span>
-            <span class="lt-sidebar__name">MiSo</span>
-        </div>
-        <nav class="lt-sidebar__scroll">
-            @foreach (config('modules.navigation', []) as $section)
-                <div class="lt-nav-group">
-                    <span class="lt-nav-group__label">{{ $section['label'] }}</span>
-                    @foreach ($section['items'] as $item)
-                        @php($active = request()->routeIs(...$item['active']))
-                        <a href="{{ route($item['route']) }}" wire:navigate class="lt-nav-item {{ $active ? 'is-active' : '' }}"
-                           @isset($item['module']) data-module="{{ $item['module'] }}" @endisset
-                           @if($active) aria-current="page" @endif
-                           @click="sidebarOpen = false">
-                            <span class="lt-nav-item__icon"><i class="bi {{ $item['icon'] }}" aria-hidden="true"></i></span>
-                            <span class="lt-nav-item__label">{{ $item['label'] }}</span>
-                        </a>
-                    @endforeach
-                </div>
-            @endforeach
-        </nav>
-    </aside>
-    {{-- Solo existe mientras la sidebar esta superpuesta; por encima de 768px el
-         CSS lo oculta, porque ahi la sidebar no tapa nada. --}}
-    <button type="button" class="lt-scrim" x-show="sidebarOpen" x-cloak aria-label="Cerrar los módulos" @click="sidebarOpen = false"></button>
+    <x-app-navigation />
 
     <div class="lt-frame__body">
         <header class="lt-topbar">

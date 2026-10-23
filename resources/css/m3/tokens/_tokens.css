@@ -253,6 +253,7 @@
   --md-sys-z-dialog: 1210;
 
   /* FAB: posición, tamaño y FAB dividido. Ninguna pantalla los redefine. */
+  --md-sys-layout-inset-inline-end: 0px;
   --md-sys-fab-offset-inline: 28px;
   --md-sys-fab-offset-block: 28px;
   --md-sys-fab-height: 56px;
@@ -305,3 +306,32 @@ body {
 [data-module='plans'] { --md-module-accent: var(--md-accent-magenta); }
 [data-module='mood'] { --md-module-accent: var(--md-accent-grape); }
 [data-module='vehicles'] { --md-module-accent: var(--md-accent-slate); }
+
+/* Panel de pared: paleta del prototipo aprobado, aislada del resto de módulos. */
+:root {
+  --md-custom-color-panel-background: #F5EFE6;
+  --md-custom-color-panel-card: #FFFDF9;
+  --md-custom-color-panel-ink: #2A2420;
+  --md-custom-color-panel-muted: #6E6258;
+  --md-custom-color-panel-outline: #E6DCCD;
+  --md-custom-color-panel-hero: #24345C;
+  --md-custom-color-panel-hero-end: #3B3F8C;
+  --md-custom-color-panel-next: #2E7D52;
+  --md-custom-color-panel-on-hero: #FFFFFF;
+  --md-custom-color-panel-rail: #EDE3D4;
+  --md-custom-color-panel-habits: #7FD9A0;
+  --md-custom-color-panel-water: #7EC3FF;
+  --md-custom-color-panel-tasks: #FFC56E;
+  --md-custom-color-panel-focus: #E5A3FF;
+  --md-custom-color-panel-people: #C2185B;
+  --md-custom-color-panel-plans: #00897B;
+  --md-custom-color-panel-study: #7B5EA7;
+  --md-custom-color-panel-night-background: #15161B;
+  --md-custom-color-panel-night-card: #1F2128;
+  --md-custom-color-panel-night-ink: #E8E2D9;
+  --md-custom-color-panel-night-muted: #B8AEA2;
+  --md-custom-color-panel-night-outline: #555762;
+  --md-custom-color-panel-night-hero: #1A2340;
+  --md-custom-color-panel-night-next: #1F5E3C;
+  --md-custom-color-panel-night-rail: #101115;
+}

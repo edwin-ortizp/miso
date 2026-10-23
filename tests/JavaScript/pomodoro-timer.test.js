@@ -85,3 +85,11 @@ test('restores a running timer and saves an expired cycle once', async () => {
     assert.equal(timer.timeLeft, 1500);
     assert.equal(timer.pendingCompletion, false);
 });
+
+test('finishes partial focus excluding paused time and rejects sub-minute entries', async () => {
+ const {timer,advance,savedSessions}=harness();
+ timer.start(); advance(30000); await timer.finishEarly(); assert.equal(savedSessions.length,0);
+ advance(60000); timer.pause(); advance(120000); await timer.finishEarly();
+ assert.equal(savedSessions.length,1);assert.equal(savedSessions[0][1]-savedSessions[0][0],90);
+ await timer.finishEarly();assert.equal(savedSessions.length,1);
+});

@@ -3,6 +3,7 @@
 return [
     'navigation' => [
         'overview' => ['label' => 'Vista general', 'icon' => 'bi-grid-1x2', 'items' => [
+            ['label' => 'Panel de pared', 'route' => 'panel', 'module' => 'home', 'icon' => 'bi-tablet-landscape', 'active' => ['panel']],
             ['label' => 'Mi día', 'route' => 'home', 'module' => 'home', 'icon' => 'bi-sunrise', 'active' => ['home']],
             ['label' => 'Estadísticas', 'route' => 'statistics', 'module' => 'statistics', 'icon' => 'bi-bar-chart', 'active' => ['statistics*']],
             ['label' => 'Ajustes', 'route' => 'settings', 'module' => 'settings', 'icon' => 'bi-gear', 'active' => ['settings*']],
@@ -37,7 +38,7 @@ return [
         'title' => 'Mi día',
         'subtitle' => 'Una vista coordinada de lo que importa hoy.',
         'icon' => 'bi-sunrise',
-        'patterns' => ['home'],
+        'patterns' => ['home', 'panel'],
         'preserve' => ['date'],
     ],
     'water' => [

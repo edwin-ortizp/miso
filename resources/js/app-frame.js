@@ -31,6 +31,35 @@ export function registerPageTransitions() {
 }
 
 export function registerAppFrame(Alpine) {
+    Alpine.data('ltNavigation', (defaultRail = false) => ({
+        sidebarOpen: false,
+        sidebarRail: defaultRail,
+        compact: window.matchMedia('(max-width: 767.98px)').matches,
+        search: '',
+        searchOpen: false,
+        removeMediaListener: null,
+        init() {
+            try {
+                const saved = localStorage.getItem('lt-sidebar-rail');
+                this.sidebarRail = saved === null ? defaultRail : saved === '1';
+            } catch {}
+            const mq = window.matchMedia('(max-width: 767.98px)');
+            const handler = event => {
+                this.compact = event.matches;
+                if (!this.compact) { this.sidebarOpen = false; this.searchOpen = false; }
+            };
+            mq.addEventListener('change', handler);
+            this.removeMediaListener = () => mq.removeEventListener('change', handler);
+            this.$watch('sidebarRail', value => {
+                try { localStorage.setItem('lt-sidebar-rail', value ? '1' : '0'); } catch {}
+            });
+        },
+        toggleNav() {
+            if (this.compact) { this.sidebarOpen = !this.sidebarOpen; return; }
+            this.sidebarRail = !this.sidebarRail;
+        },
+        destroy() { this.removeMediaListener?.(); },
+    }));
     Alpine.data('ltConnection', () => ({
         offline: !navigator.onLine,
 

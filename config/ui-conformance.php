@@ -143,6 +143,18 @@ return [
 
     'exceptions' => [
         [
+            'path' => 'resources/views/components/app-navigation.blade.php',
+            'rules' => ['local-component-substitution'],
+            'reason' => 'Menú de navegación canónico compartido por ambos layouts; el scrim pertenece al marco de aplicación.',
+            'scope' => 'Solo el chrome del menú y su overlay.',
+        ],
+        [
+            'path' => 'resources/views/livewire/home/wall-panel.blade.php',
+            'rules' => ['create-action-pattern'],
+            'reason' => 'El panel de pared permite registros rápidos con un toque por decisión explícita de producto.',
+            'scope' => 'Solo registros rápidos de hidratación, ánimo y energía; las demás altas usan FAB y form-dialog.',
+        ],
+        [
             'path' => 'resources/views/components/ui/*',
             'rules' => ['inline-style', 'local-component-substitution'],
             'reason' => 'Estas vistas definen los componentes canónicos y sus clases se resuelven desde props semánticas.',

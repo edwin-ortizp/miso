@@ -20,7 +20,7 @@
 @media (min-width: 768px) {
   .md-responsive-actions--fab-always .md-module-primary-fab,
   .md-responsive-actions--fab-always .md-module-primary-inline {
-    position: fixed; right: var(--md-sys-fab-offset-inline); bottom: var(--md-sys-fab-offset-block); z-index: var(--md-sys-z-fab-floating, 90);
+    position: fixed; right: calc(var(--md-sys-fab-offset-inline) + var(--md-sys-layout-inset-inline-end)); bottom: var(--md-sys-fab-offset-block); z-index: var(--md-sys-z-fab-floating, 90);
   }
 }
 
@@ -116,7 +116,7 @@
 @media (max-width: 767.98px) {
   .md-responsive-actions__desktop { display: none; }
   .md-responsive-actions__mobile { display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-  .md-module-primary-fab { position: fixed; right: var(--md-sys-fab-offset-inline); bottom: var(--md-sys-fab-offset-block); z-index: var(--md-sys-z-fab-floating, 90); }
+  .md-module-primary-fab { position: fixed; right: calc(var(--md-sys-fab-offset-inline) + var(--md-sys-layout-inset-inline-end)); bottom: var(--md-sys-fab-offset-block); z-index: var(--md-sys-z-fab-floating, 90); }
   .md-module-tabs { margin-inline: 0; }
   .md-context-rail { grid-template-columns: 1fr; }
   .md-date-navigator { width: auto; max-width: 100%; justify-content: space-between; }
@@ -129,14 +129,14 @@
 
 /* El FAB teletransportado vive fuera del shell; su capa no ocupa espacio y solo transmite el módulo. */
 .md-fab-layer { display: contents; }
-.md-fab-layer > .md-module-primary-fab { position: fixed; right: var(--md-sys-fab-offset-inline); bottom: var(--md-sys-fab-offset-block); z-index: var(--md-sys-z-fab-floating, 90); }
+.md-fab-layer > .md-module-primary-fab { position: fixed; right: calc(var(--md-sys-fab-offset-inline) + var(--md-sys-layout-inset-inline-end)); bottom: var(--md-sys-fab-offset-block); z-index: var(--md-sys-z-fab-floating, 90); }
 
 /* ===== FAB canónico de creación (x-ui.fab) =====
  * Única implementación de las acciones crear / registrar / agregar. Fijo abajo a la
  * derecha, extendido en escritorio y solo ícono en móvil. Queda sobre acordeones,
  * menús (z-menu), ⋮ y la barra inferior, pero bajo los diálogos (z-scrim) y se oculta
  * mientras un modal está abierto. */
-.md-fab-host { position: fixed; right: var(--md-sys-fab-offset-inline); bottom: var(--md-sys-fab-offset-block); z-index: var(--md-sys-z-fab-floating, 90); display: flex; flex-direction: column; align-items: flex-end; gap: var(--md-sys-fab-menu-gap); }
+.md-fab-host { position: fixed; right: calc(var(--md-sys-fab-offset-inline) + var(--md-sys-layout-inset-inline-end)); bottom: var(--md-sys-fab-offset-block); z-index: var(--md-sys-z-fab-floating, 90); display: flex; flex-direction: column; align-items: flex-end; gap: var(--md-sys-fab-menu-gap); }
 /* Ninguna pieza dentro del host se posiciona sola: el host es el único punto fijo. */
 .md-fab-host .md-fab { position: static; inset: auto; }
 .md-create-fab i { transition: transform var(--md-sys-motion-duration-short2, .15s) ease; }

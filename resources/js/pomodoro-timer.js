@@ -147,6 +147,20 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
             }
         },
 
+        async finishEarly() {
+            if (this.isCompleting || this.pendingCompletion || this.mode !== 'work') return;
+            if (this.isRunning) this.syncTime();
+            if (this.pendingCompletion || this.isCompleting) return;
+            const elapsed = this.totalTime - this.timeLeft;
+            if (elapsed < 60) {
+                this.errorMessage = 'Registra al menos un minuto de foco antes de finalizar.';
+                return;
+            }
+            this.endsAt = now();
+            this.startedAt = this.endsAt - elapsed * 1000;
+            await this.complete();
+        },
+
         async complete() {
             if (this.isCompleting) return;
 

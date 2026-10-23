@@ -91,6 +91,7 @@ Route::view('/offline', 'offline')->name('offline');
 
 Route::middleware('auth')->group(function () {
     Route::get('/', Dashboard::class)->name('home');
+    Route::get('/panel', \App\Livewire\Home\WallPanel::class)->name('panel');
     Route::redirect('/water', '/water/daily')->name('water');
     Route::get('/water/daily', WaterDaily::class)->name('water.daily');
     Route::get('/water/calendar', WaterCalendar::class)->name('water.calendar');

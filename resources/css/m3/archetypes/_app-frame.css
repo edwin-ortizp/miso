@@ -553,3 +553,19 @@
   from { opacity: 1; transform: none; }
   to { opacity: 0; transform: translateX(-12px); }
 }
+
+/* Mismo menú, anclado a la derecha en el panel de pared. */
+.lt-frame--navigation-right { --lt-navigation-space: var(--lt-sidebar-width); --md-sys-layout-inset-inline-end: var(--lt-navigation-space); }
+.lt-sidebar--right { inset: 0 0 0 auto; border-right: 0; border-left: 1px solid var(--md-sys-color-outline-variant); }
+.lt-navigation-toggle { width: 44px; height: 44px; position: fixed; top: max(10px, var(--lt-safe-top)); right: calc(24px + var(--lt-safe-right)); z-index: calc(var(--md-sys-z-navigation) + 1); }
+.lt-frame--navigation-right .lt-sidebar__scroll { padding-bottom: 100px; }
+@media (min-width: 768px) {
+  .lt-frame--navigation-right.is-rail { --lt-navigation-space: var(--lt-sidebar-rail); }
+}
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .lt-frame--navigation-right { --lt-navigation-space: var(--lt-sidebar-rail); }
+}
+@media (max-width: 767.98px) {
+  .lt-frame--navigation-right { --lt-navigation-space: 0px; }
+  .lt-sidebar--right { transform: translateX(100%); padding-left: 0; padding-right: var(--lt-safe-right); }
+}
