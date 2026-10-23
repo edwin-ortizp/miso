@@ -50,7 +50,7 @@
             </h2>
         </div>
 
-        @if ($search || $hasSort || $hasFilters || $hasMenu)
+        @if ($search || $hasSort || $hasFilters || $hasMenu || isset($tools))
             <span class="md-mcard__divider" aria-hidden="true"></span>
             <div class="md-mcard__tools">
                 @if ($search)
@@ -68,6 +68,8 @@
                         <i class="bi bi-search" aria-hidden="true"></i>
                     </button>
                 @endif
+
+                {{ $tools ?? '' }}
 
                 @if ($hasSort)
                     {{-- Ordenar: mismo aspecto que Filtros, a su izquierda. --}}

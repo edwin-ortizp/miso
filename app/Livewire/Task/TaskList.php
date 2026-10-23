@@ -39,14 +39,15 @@ class TaskList extends Component
     protected ?\Illuminate\Support\Collection $statusCatalog = null;
 
     public const SORTS = [
+        'updated' => 'Última actualización',
         'chronological' => 'Cronológico',
         'priority' => 'Prioridad',
         'recent' => 'Más recientes',
         'title' => 'Título (A–Z)',
     ];
 
-    #[Url(as: 'sort', history: true, except: 'chronological')]
-    public string $sort = 'chronological';
+    #[Url(as: 'sort', history: true, except: 'updated')]
+    public string $sort = 'updated';
 
     #[Url(as: 'edit')]
     public ?string $editTask = null;
@@ -107,7 +108,7 @@ class TaskList extends Component
 
     public function updatedSort(): void
     {
-        $this->sort = array_key_exists($this->sort, self::SORTS) ? $this->sort : 'chronological';
+        $this->sort = array_key_exists($this->sort, self::SORTS) ? $this->sort : 'updated';
         $this->resetPage();
     }
 
@@ -387,6 +388,7 @@ class TaskList extends Component
         $query = $this->applyTaskFilters(Task::query()->with('status'));
 
         match ($this->sort) {
+            'updated' => $query->orderByDesc('updated_at'),
             'priority' => $query->orderByRaw("CASE WHEN priority = 'urgent-important' THEN 1 WHEN priority = 'not-urgent-important' THEN 2 WHEN priority = 'urgent-not-important' THEN 3 ELSE 4 END"),
             'recent' => $query->orderByDesc('created_at'),
             'title' => $query->orderBy('title'),

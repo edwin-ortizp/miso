@@ -4,6 +4,7 @@ namespace App\Livewire\Task;
 
 use App\Livewire\Concerns\HandlesRecurringTaskCompletion;
 use App\Models\Task;
+use App\Models\TaskStatus;
 use App\Services\TaskGamificationService;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
@@ -43,7 +44,7 @@ class TaskCalendar extends Component
         $rangeStart = Carbon::parse($start);
         $rangeEnd = Carbon::parse($end);
 
-        return Task::query()
+        return Task::query()->with('status')
             ->where(fn ($query) => $query->whereNotNull('start_date')->orWhereNotNull('end_date'))
             ->where(fn ($query) => $query->whereRaw('COALESCE(start_date, end_date) < ?', [$rangeEnd])
                 ->whereRaw('COALESCE(end_date, start_date) >= ?', [$rangeStart->copy()->startOfDay()]))
@@ -102,6 +103,39 @@ class TaskCalendar extends Component
         $this->dispatch('task-calendar-refresh');
     }
 
+    public function changeStatus(string $id, string $statusId, TaskGamificationService $gamification): array
+    {
+        abort_unless(auth()->check(), 403);
+        $task = Task::where('user_id', auth()->id())->findOrFail($id);
+        $status = TaskStatus::where('user_id', auth()->id())->findOrFail($statusId);
+
+        if ($task->status_id === $status->id) {
+            return $this->statusData($task);
+        }
+
+        if ($status->type === TaskStatus::DONE) {
+            $this->toggleComplete($task->id, $gamification);
+
+            return $this->statusData($task->refresh());
+        }
+
+        if ($task->completed) {
+            $gamification->reopen($task);
+        }
+        $task->update(['status_id' => $status->id]);
+        $this->dispatch('task-calendar-refresh');
+
+        return $this->statusData($task->refresh());
+    }
+
+    private function statusData(Task $task): array
+    {
+        return [
+            'status' => ['id' => $task->status->id, 'name' => $task->status->name, 'icon' => $task->status->icon],
+            'completed' => (bool) $task->completed,
+        ];
+    }
+
     public function confirmRecurringCompletion(TaskGamificationService $gamification): ?array
     {
         $taskId = $this->recurringTaskId;
@@ -148,6 +182,7 @@ class TaskCalendar extends Component
             'end' => $allDay ? $end->copy()->addDay()->toDateString() : ($end->gt($start) ? $end->toIso8601String() : null),
             'allDay' => $allDay,
             'extendedProps' => [
+                'status' => $task->status ? ['id' => $task->status->id, 'name' => $task->status->name, 'icon' => $task->status->icon] : null,
                 'completed' => (bool) $task->completed,
                 'recurrent' => (bool) $task->is_recurrent,
                 'category' => $task->category,
@@ -166,6 +201,7 @@ class TaskCalendar extends Component
     public function render()
     {
         return view('livewire.task.task-calendar', [
+            'statuses' => TaskStatus::where('user_id', auth()->id())->ordered()->get(),
             'unscheduledTasks' => Task::query()->whereNull('start_date')->whereNull('end_date')->where('completed', false)->orderByDesc('created_at')->get(),
         ]);
     }

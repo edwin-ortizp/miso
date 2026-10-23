@@ -19,34 +19,114 @@ const compact = () => matchMedia('(max-width: 767.98px)').matches;
 export function registerTaskCalendar(Alpine) {
     Alpine.data('taskCalendar', (wire) => ({
         calendar: null,
+        calendarLoading: false,
+        mobileDate: '',
+        mobileView: 'Día',
         refresh: null,
         goto: null,
         quickOpen: false,
         selected: null,
+        latestProps: {},
         busy: false,
+        statusOpen: false,
+        statusError: '',
+        closeStatusMenu() {
+            this.statusOpen = false;
+            this.$refs.statusTrigger.focus();
+        },
+        async openStatusMenu() {
+            this.statusOpen = !this.statusOpen;
+            if (!this.statusOpen) return;
+            await this.$nextTick();
+            const menu = this.$refs.statusMenu;
+            const rect = this.$refs.statusTrigger.getBoundingClientRect();
+            menu.style.right = `${Math.max(8, innerWidth - rect.right)}px`;
+            menu.style.bottom = `${innerHeight - rect.top + 4}px`;
+            menu.style.maxHeight = `${Math.max(44, rect.top - 12)}px`;
+            menu.querySelector('button:not([disabled])')?.focus();
+        },
+        moveStatusFocus(event, direction) {
+            const items = [...this.$refs.statusMenu.querySelectorAll('button:not([disabled])')];
+            const index = items.indexOf(event.target);
+            items[(index + direction + items.length) % items.length]?.focus();
+        },
         // Ancla el popover junto al evento (en escritorio); en móvil el CSS lo convierte en hoja inferior.
         openQuick(event, el) {
+            if (this.busy) return;
             const rect = el.getBoundingClientRect();
             const width = 360;
             const left = rect.right + 8 + width <= innerWidth ? rect.right + 8 : Math.max(8, rect.left - width - 8);
-            const top = Math.min(Math.max(8, rect.top), innerHeight - 260);
+            const top = Math.max(8, Math.min(rect.top, innerHeight - 360));
             this.$refs.anchor.style.setProperty('--quick-top', `${top}px`);
             this.$refs.anchor.style.setProperty('--quick-left', `${left}px`);
-            this.selected = { id: event.id, title: event.title, ...event.extendedProps };
+            this.statusOpen = false;
+            this.statusError = '';
+            this.selected = { id: event.id, title: event.title, ...(this.latestProps[event.id] ?? event.extendedProps) };
             this.quickOpen = true;
         },
         edit() {
             this.quickOpen = false;
             this.$dispatch('task-editor', { action: 'openForm', id: this.selected.id });
         },
-        async toggleComplete() {
+        async changeStatus(statusId) {
+            if (this.busy || !this.selected || this.selected.status?.id === statusId) return;
             this.busy = true;
+            this.statusError = '';
+            this.statusOpen = false;
             try {
-                await wire.toggleComplete(this.selected.id);
+                const result = await wire.changeStatus(this.selected.id, statusId);
+                if (result) this.latestProps[this.selected.id] = { ...this.selected, ...result };
+                const event = this.calendar?.getEventById(this.selected.id);
+                if (result && event) {
+                    event.setExtendedProp('status', result.status);
+                    event.setExtendedProp('completed', result.completed);
+                }
                 this.quickOpen = false;
+            } catch {
+                this.statusError = 'No se pudo cambiar el estado. Inténtalo de nuevo.';
             } finally {
                 this.busy = false;
+                if (this.statusError) {
+                    await this.$nextTick();
+                    this.$refs.statusTrigger.focus();
+                }
             }
+        },
+        goToNow(now = new Date()) {
+            if (!this.calendar) return;
+            if (this.calendar.view.type.startsWith('timeGrid')) this.calendar.gotoDate(now);
+            else this.calendar.changeView('timeGridDay', now);
+            // Esperar al montaje de la nueva rejilla antes de mover su scroll interno.
+            cancelAnimationFrame(this.nowFrame);
+            this.nowFrame = requestAnimationFrame(() => {
+                const minutes = Math.max(0, now.getHours() * 60 + now.getMinutes() - 30);
+                this.calendar?.scrollToTime({ minutes });
+                // En ventanas bajas puede caber menos de media hora: mantener «ahora» visible.
+                const line = this.$refs.calendar?.querySelector('.fc-timegrid-now-indicator-line');
+                const scroller = line?.closest('.fc-scroller');
+                if (scroller) {
+                    const offset = line.getBoundingClientRect().bottom - scroller.getBoundingClientRect().bottom + 16;
+                    if (offset > 0) scroller.scrollTop += offset;
+                    const styles = getComputedStyle(this.$refs.calendar);
+                    const reserve = compact() ? (parseFloat(styles.getPropertyValue('--calendar-bottom-reserve')) || 80) + 24 + (parseFloat(styles.getPropertyValue('--lt-safe-bottom')) || 0) : 24;
+                    const bottom = innerHeight - reserve;
+                    const hidden = line.getBoundingClientRect().bottom - bottom + 8;
+                    if (hidden > 0) window.scrollBy({ top: hidden, behavior: 'instant' });
+                }
+            });
+        },
+        fitCalendar() {
+            if (!this.calendar) return;
+            const surface = this.$refs.calendar;
+            const styles = getComputedStyle(surface);
+            const reserve = (parseFloat(styles.getPropertyValue('--calendar-bottom-reserve')) || 24) + (compact() ? 24 + (parseFloat(styles.getPropertyValue('--lt-safe-bottom')) || 0) : 0);
+            const viewport = window.visualViewport;
+            const bottom = viewport ? viewport.height + viewport.offsetTop : innerHeight;
+            const toolbar = surface.querySelector('.fc-header-toolbar')?.getBoundingClientRect().height || 0;
+            const height = this.calendar.view.type.startsWith('timeGrid')
+                ? Math.round(Math.max(toolbar + 140, bottom - surface.getBoundingClientRect().top - reserve))
+                : 'auto';
+            if (this.calendar.getOption('height') !== height) this.calendar.setOption('height', height);
         },
         async init() {
             const { Calendar, locale, plugins } = await loadFullCalendar();
@@ -63,13 +143,12 @@ export function registerTaskCalendar(Alpine) {
                 locale,
                 firstDay: 1,
                 height: 'auto',
-                initialView: compact() ? 'listWeek' : 'timeGridWeek',
-                headerToolbar: compact()
-                    ? { left: 'prev,next', center: 'title', right: 'refresh today' }
-                    : { left: 'prev,next today refresh', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
-                footerToolbar: compact() ? { center: 'dayGridMonth,timeGridWeek,listWeek' } : false,
+                initialView: compact() ? 'timeGridDay' : 'timeGridWeek',
+                headerToolbar: { left: 'prev,next today now refresh', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+                footerToolbar: false,
                 // Recarga eventos y la lista «Sin fecha» sin recargar la página, como «Actualizar tabla» en las vistas de gestión.
                 customButtons: {
+                    now: { text: 'Ahora', hint: 'Ir a hoy y a la hora actual', click: () => this.goToNow() },
                     refresh: {
                         icon: 'arrow-clockwise',
                         hint: 'Actualizar calendario',
@@ -77,6 +156,7 @@ export function registerTaskCalendar(Alpine) {
                     },
                 },
                 loading: (isLoading) => {
+                    this.calendarLoading = isLoading;
                     const button = this.$refs.calendar.querySelector('.fc-refresh-button');
                     if (button) button.disabled = isLoading;
                 },
@@ -90,14 +170,22 @@ export function registerTaskCalendar(Alpine) {
                 eventMinHeight: 26,
                 // La rejilla horaria necesita altura fija para desplazarse por dentro; mes y lista crecen con su contenido.
                 datesSet: ({ view }) => {
-                    const height = view.type.startsWith('timeGrid')
-                        ? Math.max(480, innerHeight - this.$refs.calendar.getBoundingClientRect().top - 24)
-                        : 'auto';
-                    if (this.calendar && this.calendar.getOption('height') !== height) this.calendar.setOption('height', height);
+                    const date = this.calendar?.getDate() || view.currentStart;
+                    this.mobileView = { timeGridDay: 'Día', timeGridWeek: 'Semana', dayGridMonth: 'Mes', listWeek: 'Agenda' }[view.type];
+                    const format = new Intl.DateTimeFormat('es', view.type === 'dayGridMonth' ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short' });
+                    if (view.type === 'timeGridWeek' || view.type === 'listWeek') {
+                        const end = new Date(view.currentEnd);
+                        end.setDate(end.getDate() - 1);
+                        this.mobileDate = `${view.currentStart.getDate()}–${format.format(end)}`;
+                    } else this.mobileDate = format.format(date);
+                    this.fitCalendar();
                 },
                 editable: true,
                 dayMaxEvents: 3,
-                events: (info, success, failure) => wire.events(info.startStr, info.endStr).then(success, failure),
+                events: (info, success, failure) => wire.events(info.startStr, info.endStr).then(events => {
+                    this.latestProps = Object.fromEntries(events.map(event => [event.id, event.extendedProps]));
+                    success(events);
+                }, failure),
                 eventClick: (info) => this.openQuick(info.event, info.el),
                 // El clic en otro evento no debe contar como «clic afuera» del popover abierto.
                 eventDidMount: (info) => { info.el.dataset.popoverTrigger = ''; },
@@ -111,6 +199,13 @@ export function registerTaskCalendar(Alpine) {
                 eventResize: persist,
             });
             this.calendar.render();
+            this.resize = () => {
+                cancelAnimationFrame(this.resizeFrame);
+                this.resizeFrame = requestAnimationFrame(() => this.fitCalendar());
+            };
+            window.addEventListener('resize', this.resize);
+            window.visualViewport?.addEventListener('resize', this.resize);
+            this.resize();
 
             this.refresh = () => this.calendar?.refetchEvents();
             window.addEventListener('task-calendar-refresh', this.refresh);
@@ -118,6 +213,10 @@ export function registerTaskCalendar(Alpine) {
             window.addEventListener('task-calendar-goto', this.goto);
         },
         destroy() {
+            cancelAnimationFrame(this.nowFrame);
+            cancelAnimationFrame(this.resizeFrame);
+            window.removeEventListener('resize', this.resize);
+            window.visualViewport?.removeEventListener('resize', this.resize);
             window.removeEventListener('task-calendar-refresh', this.refresh);
             window.removeEventListener('task-calendar-goto', this.goto);
             this.calendar?.destroy();

@@ -8,6 +8,14 @@
 @endphp
 <x-ui.management-card id="task-filters" title="{{ $title ?? 'Tareas' }}" icon="{{ $icon ?? 'bi-funnel' }}" class="task-filter-bar"
                       search="search" search-placeholder="Buscar tareas" :active-filters="$taskFilterCount" :refreshable="false">
+    @if ($showGrouping ?? false)
+        <x-slot:tools>
+            <div class="task-kanban-group">
+                <x-ui.select class="task-kanban-group__control" label="Agrupar por" id="kanban-group" wire:model.live="groupBy"
+                             :options="['state' => 'Estado', 'priority' => 'Prioridad']" :selected="$groupBy" />
+            </div>
+        </x-slot:tools>
+    @endif
     <x-slot:filters>
         @include('livewire.task.partials.filter-fields')
     </x-slot:filters>

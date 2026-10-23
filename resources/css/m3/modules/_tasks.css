@@ -171,6 +171,7 @@
 /* Calendario (FullCalendar): sus variables --fc-* se resuelven con tokens M3. */
 .md-task-calendar { padding: 16px; }
 .md-task-calendar__surface {
+  --calendar-bottom-reserve: 24px;
   --fc-border-color: var(--md-sys-color-outline-variant);
   --fc-page-bg-color: var(--md-sys-color-surface);
   --fc-neutral-bg-color: var(--md-sys-color-surface-container);
@@ -189,6 +190,9 @@
   --fc-button-active-border-color: transparent;
   color: var(--md-sys-color-on-surface);
 }
+.md-task-calendar__surface .fc-header-toolbar { display: flex; flex-wrap: wrap; gap: 12px; }
+.md-task-calendar__surface .fc-toolbar-chunk { min-width: 0; }
+.md-task-calendar__surface .fc-button { min-height: 48px; min-width: 48px; }
 .md-task-calendar__surface .fc-toolbar-title { font-size: 1.25rem; font-weight: 500; text-transform: capitalize; }
 .md-task-calendar__surface .fc-button { border-radius: 999px; padding: 6px 14px; font-weight: 500; text-transform: capitalize; box-shadow: none !important; }
 .md-task-calendar__surface .fc-button-primary:not(:disabled).fc-button-active { color: var(--md-sys-color-on-secondary-container); }
@@ -207,6 +211,8 @@
 .md-task-calendar__surface .fc-event.is-completed .fc-list-event-title { text-decoration: line-through; }
 @media (max-width: 767.98px) {
   .md-task-calendar { padding: 8px; }
+  .md-task-calendar__surface { --calendar-bottom-reserve: var(--md-sys-layout-nav-bar-height); }
+  .md-task-calendar__surface .fc-header-toolbar { display: none; }
   .md-task-calendar__surface .fc-toolbar-title { font-size: 1rem; }
   .md-task-calendar__surface .fc-button { padding: 4px 10px; }
 }
@@ -227,3 +233,39 @@
  * la card de gestión sin cuerpo, solo cabecera con búsqueda/Filtros y la franja de filtros aplicados. */
 .task-filter-bar { margin-bottom: 16px; }
 .task-filter-bar .md-mcard__body { display: none; }
+
+/* Vista rápida: divisores y selector de estado, también en la hoja móvil. */
+.md-task-calendar-popover .md-popover__head { border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-right: 0; }
+.md-task-calendar-popover .md-popover__actions { border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 12px; flex-wrap: wrap; }
+.md-task-calendar-popover { max-height: calc(100dvh - 16px); overflow-y: auto; }
+.md-task-status-split { display: inline-flex; min-width: 0; max-width: 100%; }
+.md-task-status-split__label { border-radius: var(--md-sys-shape-corner-small) 0 0 var(--md-sys-shape-corner-small); min-width: 0; cursor: default; }
+.md-task-status-split__label span { overflow-wrap: anywhere; }
+.md-task-status-split__toggle { border-radius: 0 var(--md-sys-shape-corner-small) var(--md-sys-shape-corner-small) 0; margin-left: -1px; padding-inline: 12px; flex: none; }
+.md-task-status-split__menu { position: fixed; top: auto; overflow-y: auto; max-width: calc(100vw - 16px); }
+.md-task-status-split__menu .md-menu__item { white-space: normal; overflow-wrap: anywhere; }
+@media (max-width: 767.98px) {
+  .md-task-calendar-anchor .md-task-calendar-popover { inset: auto 0 0; max-height: 85dvh; overflow: visible; }
+  .md-task-calendar-popover .md-popover__body { padding-top: 12px; }
+  .md-task-status-split > .md-btn { min-height: 48px; }
+}
+
+/* Kanban: agrupación en cabecera y acciones compactas por tarjeta. */
+.task-kanban-group { width: 120px; flex: none; }
+.task-kanban-group__control { min-height: 40px; height: 40px; padding-top: 10px; padding-bottom: 4px; font-size: 13px; }
+.task-kanban-card__category { margin-top: 6px; }
+.task-kanban-category { max-width: 100%; height: auto; min-height: 22px; padding: 2px 6px; font-size: 11px; white-space: normal; overflow-wrap: anywhere; }
+.task-kanban-card__actions { display: flex; align-items: center; justify-content: space-between; gap: 4px; margin: 8px -12px -8px; padding: 4px 8px; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.task-kanban-card__status { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--md-sys-color-on-surface-variant); }
+@media (max-width: 639px) { .task-kanban-group { width: 92px; } }
+
+.md-calendar-mobile-toolbar { display: none; }
+@media (max-width: 767.98px) {
+  .md-calendar-mobile-toolbar { display: grid; grid-template-columns: 48px minmax(0, 1fr) repeat(3, 48px); align-items: center; margin-bottom: 8px; }
+  .md-calendar-mobile-toolbar .md-btn-icon { width: 48px; height: 48px; min-width: 48px; min-height: 48px; }
+  .md-calendar-view-picker { position: relative; min-width: 0; }
+  .md-calendar-view-picker > .md-menu { width: 100%; }
+  .md-calendar-view-picker .md-menu__trigger { display: flex; width: 100%; justify-content: flex-end; padding: 0 4px; border-radius: 8px; }
+  .md-calendar-view-picker__label { position: absolute; inset: 0 24px 0 4px; display: block; line-height: 48px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; font-size: 12px; font-weight: 500; }
+  .md-calendar-mobile-toolbar .md-menu__surface { z-index: var(--md-sys-z-menu, 1100); }
+}
