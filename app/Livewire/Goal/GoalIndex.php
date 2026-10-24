@@ -14,6 +14,7 @@ use Livewire\Attributes\Url;
 #[Title('Objetivos')]
 class GoalIndex extends Component
 {
+    use \App\Livewire\Concerns\HasReminderDraft;
     use WithManagementCard;
     #[Url(as: 'status', history: true, keep: true)]
     public string $statusFilter = 'active'; // active, completed, abandoned, all
@@ -68,6 +69,7 @@ class GoalIndex extends Component
             $goal = Goal::find($id);
             if ($goal) {
                 $this->editingId = $id;
+                $this->loadReminders($goal);
                 $this->title = $goal->title;
                 $this->description = $goal->description ?? '';
                 $this->formStatus = $goal->status;
@@ -95,7 +97,13 @@ class GoalIndex extends Component
 
     public function save()
     {
+        return \Illuminate\Support\Facades\DB::transaction(fn () => $this->persistGoalWithReminders());
+    }
+
+    private function persistGoalWithReminders()
+    {
         $data = $this->validatedGoalData();
+        $this->validateReminders($this->dueDate);
 
         if ($this->editingId) {
             $goal = Goal::query()->findOrFail($this->editingId);
@@ -105,15 +113,17 @@ class GoalIndex extends Component
             }
             $goal->update($data);
         } else {
-            Goal::create($data);
+            $goal = Goal::create($data);
         }
+
+        $this->saveReminders($goal);
 
         $this->closeForm();
     }
 
     public function updateStatus(string $id, string $status)
     {
-        Goal::where('id', $id)->update(['status' => $status]);
+        Goal::findOrFail($id)->update(['status' => $status]);
     }
 
     public function delete(string $id)
@@ -124,6 +134,7 @@ class GoalIndex extends Component
 
     private function resetForm()
     {
+        $this->reminders = [];
         $this->title = '';
         $this->description = '';
         $this->formStatus = 'active';

@@ -105,6 +105,8 @@ class WallPanelData
 
         return compact('week', 'habits', 'completions', 'habitStreaks', 'block', 'negativeHabits', 'lastRelapses', 'trend') + [
             'timeline' => $timeline->sortBy('time')->values()->all(),
+            'currentTask' => $tasks->first(fn ($task) => ! $task->completed && $task->start_date && ! $task->start_is_date
+                && $task->start_date->lte(now()) && ($task->end_date ?? $task->start_date)->gte(now())),
             'nextTasks' => collect($week[0]['rows'])->where('kind', 'task')->where('done', false)->whereNotNull('time')->filter(fn ($r) => $r['time'] >= now()->format('H:i'))->values(),
             'waterTotal' => DrinkLog::whereDate('date', $today)->sum('hydration_value'),
             'waterLogs' => DrinkLog::whereDate('date', $today)->orderByDesc('timestamp')->limit(8)->get(),

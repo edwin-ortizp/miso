@@ -5,7 +5,7 @@
     $groups = [
         null => [['profile', 'Perfil público', 'bi-person'], ['body', 'Datos físicos', 'bi-rulers']],
         'Acceso' => [['security', 'Contraseña y seguridad', 'bi-shield-lock'], ['oauth', 'Aplicaciones OAuth', 'bi-key']],
-        'Integraciones' => [['integrations', 'Calendario y notas', 'bi-plug'], ['mcp', 'Servidor MCP', 'bi-robot']],
+        'Integraciones' => [['integrations', 'Calendario y notas', 'bi-plug'], ['notifications', 'Notificaciones', 'bi-bell'], ['mcp', 'Servidor MCP', 'bi-robot']],
         'Sistema' => array_values(array_filter([
             $canViewLogs ? ['logs', 'Logs de la aplicación', 'bi-journal-text'] : null,
             ['about', 'Acerca de', 'bi-info-circle'],

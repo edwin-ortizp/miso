@@ -23,3 +23,11 @@ $plan = SavePlan::handle(new Plan, ['title' => 'Cena programada', 'type' => 'res
 SavePlan::handle(new Plan, ['title' => 'Plan vencido', 'type' => 'activity', 'scheduled_on' => today()->subDay()->toDateString()]);
 $done = SavePlan::handle(new Plan, ['title' => 'Plan realizado', 'type' => 'dessert']);
 foreach ([1440, 390] as $width) RecordPlanVisit::handle($done, today()->subDay()->toDateString(), collect([$person->id]), 'Comentario de visita '.$width);
+
+$longCircle = \App\Models\Circle::factory()->for($user)->create(['name' => str_repeat('Circulo', 20)]);
+$longPlan = Plan::factory()->for($user)->create([
+    'title' => 'Evento extenso '.str_repeat('Titulo', 20), 'status' => 'scheduled',
+    'scheduled_on' => today()->subDays(3), 'ends_on' => today()->addDays(3),
+]);
+$longPlan->circles()->attach($longCircle);
+Plan::factory()->for($user)->count(12)->create(['status' => 'pending']);

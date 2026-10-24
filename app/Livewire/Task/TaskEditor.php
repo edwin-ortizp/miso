@@ -12,6 +12,7 @@ class TaskEditor extends TaskList
     public string $sizeFilter = '';
     public string $search = '';
     public ?string $editTask = null;
+    public bool $expanded = false;
 
     public function mount(): void
     {
@@ -32,7 +33,7 @@ class TaskEditor extends TaskList
 
     protected function formDefaults(): array
     {
-        $fields = ['editingId', 'title', 'description', 'descriptionMode', 'category', 'statusId', 'priority', 'size', 'startDate', 'startTime', 'endDate', 'endTime', 'estimatedTime', 'isPrivate', 'isRecurrent', 'recurrenceIntervalDays', 'nativeRecurrenceRule', 'bulkTitles', 'editTask', 'relations'];
+        $fields = ['editingId', 'title', 'description', 'descriptionMode', 'category', 'statusId', 'priority', 'size', 'startDate', 'startTime', 'endDate', 'endTime', 'estimatedTime', 'isPrivate', 'isRecurrent', 'recurrenceIntervalDays', 'nativeRecurrenceRule', 'bulkTitles', 'editTask', 'relations', 'reminders'];
 
         return array_intersect_key(get_class_vars(self::class), array_flip($fields));
     }

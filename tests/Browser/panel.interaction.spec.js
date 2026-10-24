@@ -56,7 +56,7 @@ for (const [width, height] of [[1440,900],[1280,800],[768,1024],[390,844]]) {
   const agenda=page.getByRole('dialog',{name:'Agenda',exact:true});
   await expect(agenda.locator('.md-form-dialog__head')).toBeVisible();
   await expect(agenda.locator('.md-form-dialog__actions')).toBeVisible();
-  await agenda.getByRole('button',{name:'Expandir',exact:true}).click();
+  // En el panel los diálogos abren ampliados.
   await expect(agenda).toHaveClass(/is-expanded/);
   await agenda.getByRole('button',{name:'Restaurar',exact:true}).click();
   await agenda.getByRole('button',{name:'Cerrar',exact:true}).first().click();
@@ -98,7 +98,7 @@ test('panel actions and editors persist without navigation',async({page})=>{
  dialog=page.getByRole('dialog',{name:'Foco de hoy',exact:true});await expect(dialog).toBeVisible();
  await expect(dialog.getByRole('button',{name:'Pausar',exact:true})).toBeVisible();
  await dialog.getByRole('button',{name:'Volver al panel',exact:true}).click();await expect(dialog).toBeHidden();
- await page.getByRole('button',{name:'Crear tarea',exact:true}).click();
+ await page.getByRole('button',{name:'Crear',exact:true}).click();
  await page.getByRole('menuitem',{name:'Crear tarea',exact:true}).click();
  dialog=page.locator('#task-editor');await expect(dialog).toBeVisible();await dialog.getByRole('button',{name:'Cancelar',exact:true}).click();await expect(dialog).toBeHidden();
  expect(new URL(page.url()).pathname).toBe('/panel');expect(errors).toEqual([]);
@@ -106,7 +106,7 @@ test('panel actions and editors persist without navigation',async({page})=>{
 
 test('all isolated editors work and drafts survive parent refresh',async({page})=>{
  const errors=[];page.on('pageerror',e=>errors.push(e.message));await login(page);
- async function fab(name){await page.getByRole('button',{name:'Crear tarea',exact:true}).click();await page.getByRole('menuitem',{name,exact:true}).click();}
+ async function fab(name){await page.getByRole('button',{name:'Crear',exact:true}).click();await page.getByRole('menuitem',{name,exact:true}).click();}
  await fab('Agregar plan');let dialog=page.getByRole('dialog',{name:'Agregar plan',exact:true});await expect(dialog).toBeVisible();
  await dialog.getByRole('textbox',{name:'Nombre',exact:true}).fill('Plan creado en panel');
  await page.evaluate(()=>{const root=document.querySelector('.wall-panel');window.Livewire.find(root.getAttribute('wire:id')).$call('refreshPanel');});

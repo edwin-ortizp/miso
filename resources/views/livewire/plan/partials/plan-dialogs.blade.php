@@ -8,6 +8,7 @@
                   :title="$editingPlanId ? 'Editar plan' : 'Agregar plan'" icon="bi-map"
                   :sections="[
                       'basic' => ['label' => 'Información básica', 'icon' => 'bi-file-earmark-text', 'error' => $basicErrors],
+                      'reminders' => ['label' => 'Recordatorios', 'icon' => 'bi-bell', 'error' => $errors->hasAny(['reminders', 'reminders.*'])],
                       'images' => ['label' => 'Imágenes', 'icon' => 'bi-images', 'error' => $imageErrors],
                       'people' => ['label' => 'Personas y círculos', 'icon' => 'bi-people'],
                       'links' => ['label' => 'Enlaces', 'icon' => 'bi-link-45deg', 'error' => $linkErrors],
@@ -32,6 +33,9 @@
         </div>
     </x-ui.form-dialog-section>
 
+    <x-ui.form-dialog-section name="reminders" title="Recordatorios">
+        @include('livewire.notifications.reminder-fields')
+    </x-ui.form-dialog-section>
     <x-ui.form-dialog-section name="images" title="Imágenes" description="Pega la URL de cada imagen; no se descarga. La primera es la principal y es la que se muestra en listados y detalle.">
         <div class="plan-images-form">
             @foreach ($planImages as $index => $url)

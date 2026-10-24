@@ -69,7 +69,7 @@
 .wall-days { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .wall-day { display: flex; flex-direction: column; border-radius: var(--md-sys-shape-corner-medium); background: var(--md-sys-color-surface-container-lowest); padding: 8px; min-width: 0; min-height: 0; overflow: hidden; }
 .wall-day.is-today { box-shadow: inset 0 0 0 2px var(--md-sys-color-error); }
-.wall-day__head { border-radius: var(--md-sys-shape-corner-none); width: 100%; color: var(--md-sys-color-on-surface); border-bottom: 1px solid var(--md-sys-color-outline-variant); display: flex; justify-content: space-between; padding-inline: 6px; }
+.wall-day__head { border-radius: var(--md-sys-shape-corner-none); width: calc(100% + 16px); margin: -8px -8px 6px; padding-block: 4px; min-height: 40px; color: var(--md-sys-color-on-surface); border-bottom: 1px solid var(--wall-divider); display: flex; justify-content: space-between; padding-inline: 6px; }
 .wall-day__head b { font-size: 1.5rem; }
 .wall-day__items { display: flex; flex: 1; flex-direction: column; min-height: 210px; gap: 4px; overflow: hidden; }
 .wall-row { flex: none; color: var(--md-sys-color-on-surface); min-height: 44px; height: auto; text-align: left; padding: 5px; display: flex; gap: 4px; justify-content: start; border-left: 3px solid var(--md-sys-color-primary); border-radius: 4px; font-size: .75rem; }
@@ -84,7 +84,27 @@
 .wall-card--water h2 > i { color: var(--md-sys-color-primary); }
 .wall-card--mood h2 > i { color: var(--md-custom-color-warning); }
 .wall-card--focus h2 > i { color: var(--md-custom-color-panel-study); }
-.wall-card header { display: flex; justify-content: space-between; align-items: center; gap: 4px; margin-bottom: 8px; }
+.wall-card:not(.wall-side) { display: flex; flex-direction: column; }
+.wall-panel { --wall-divider: color-mix(in srgb, var(--md-sys-color-on-surface) 12%, transparent); }
+/* Header y footer de tarjeta: compactos y con separador a todo el ancho (anulan el padding de la tarjeta). */
+.wall-card > header { display: flex; justify-content: space-between; align-items: center; gap: 4px; min-height: 40px; margin: -12px -12px 8px; padding: 4px 8px 4px 12px; border-bottom: 1px solid var(--wall-divider); }
+.wall-card > header .md-btn-icon { width: 32px; height: 32px; min-height: 32px; }
+.wall-card__foot { margin: auto -12px -12px; padding: 8px 12px; border-top: 1px solid var(--wall-divider); display: flex; justify-content: center; align-items: center; }
+.wall-day > .wall-card__foot { margin: auto -8px -8px; padding: 4px 8px; }
+.wall-card__foot--stack { flex-direction: column; align-items: stretch; gap: 6px; }
+.wall-card__foot--stack > * { width: 100%; }
+.wall-card__foot .wall-trend { width: 100%; }
+.wall-energy { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; font-size: .8rem; color: var(--md-sys-color-on-surface-variant); }
+.wall-energy > span { margin-right: 4px; }
+.wall-energy__level { min-width: 36px; height: 36px; padding: 0; border-radius: 50%; }
+.wall-energy__level.is-selected { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+.wall-now__side { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+.wall-now__side .wall-view-controls { justify-content: flex-end; }
+.wall-now__side .wall-update-status { flex: none; text-align: right; }
+.wall-next__title { font-size: 1.6rem !important; line-height: 1.2; }
+.wall-next__after { display: flex; flex-direction: column; gap: 2px; margin-top: auto !important; padding-top: 8px; border-top: 1px solid color-mix(in srgb, currentColor 25%, transparent); }
+.wall-next__after > span { font-size: .75rem; opacity: .8; text-transform: uppercase; letter-spacing: .04em; }
+.wall-card__foot .wall-muted { margin: 0; }
 .wall-habits, .wall-quick { display: flex; gap: 6px; flex-wrap: wrap; margin-block: 10px; }
 .wall-habit { height: auto; text-align: left; min-height: 44px; padding: 6px 10px; }
 .wall-row.is-done, .wall-habit.is-done, .wall-sheet-row.is-done, .wall-pin.is-done { text-decoration: line-through; }
@@ -93,8 +113,9 @@
 .wall-trend { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
 .wall-trend > div { display: flex; flex-direction: column; text-align: center; font-size: .75rem; }
 .wall-goal { border-radius: var(--md-sys-shape-corner-none); overflow: visible; overflow-wrap: anywhere; flex-shrink: 0; color: var(--md-sys-color-on-surface); width: 100%; display: flex; flex-direction: column; align-items: start; white-space: normal; height: auto; text-align: left; padding: 8px 0; }
-.wall-side { display: flex; flex-direction: column; justify-content: space-around; align-items: stretch; }
-.wall-side > a, .wall-side > button { height: auto; min-height: 48px; white-space: normal; text-align: left; }
+.wall-side { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; padding: 0; overflow: hidden; }
+.wall-side > a, .wall-side > button { height: auto; min-height: 48px; white-space: normal; text-align: left; justify-content: flex-start; border-radius: 0; padding: 8px 12px; width: 100%; }
+.wall-side > :not(:last-child) { border-bottom: 1px solid var(--wall-divider); }
 .wall-sheet-row { display: flex; width: 100%; min-height: 48px; height: auto; gap: 12px; align-items: center; justify-content: space-between; white-space: normal; text-align: left; padding: 10px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
 .wall-preserve { white-space: pre-wrap; overflow-wrap: anywhere; }
 .wall-drinks { display: flex; flex-direction: column; gap: 16px; }
@@ -108,13 +129,27 @@
   .wall-clock strong { line-height: .95; }
   .wall-clock > span { font-size: .9rem; }
   .wall-day__items { min-height: 0; }
-  .wall-side { padding: 8px 8px 76px; gap: 8px; justify-content: flex-start; }
+  .wall-side { padding: 0 0 76px; }
 }
 
 @media (max-width: 1199.98px) { .wall-grid { grid-template-columns: minmax(0, 1fr); } .wall-next { grid-row: 2; } .wall-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wall-side { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }  }
-@media (max-width: 767.98px) { .wall-panel { padding: 72px 12px 160px; } .wall-now { grid-template-columns: 1fr; } .wall-rings { flex-wrap: wrap; justify-content: center; } .wall-ring { width: 60px; height: 60px; } .wall-cards { grid-template-columns: minmax(0, 1fr); } .wall-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wall-side { flex-direction: column; } .wall-layer-rail { margin-left: 0; } .wall-timeline { gap: 0; } .wall-timeline__body { padding-inline: 0; } }
+@media (max-width: 767.98px) { .wall-panel { padding: 72px 12px 160px; } .wall-now { grid-template-columns: 1fr; } .wall-rings { flex-wrap: wrap; justify-content: center; } .wall-ring { width: 60px; height: 60px; } .wall-cards { grid-template-columns: minmax(0, 1fr); } .wall-days { grid-template-columns: repeat(2, minmax(0, 1fr)); } .wall-side { flex-direction: column; } .wall-now__side { align-items: center; } .wall-layer-rail { margin-left: 0; } .wall-timeline { gap: 0; } .wall-timeline__body { padding-inline: 0; } }
 
 .wall-control, .wall-emoji { min-height: 44px; }
 
 .wall-view-controls { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
 .wall-update-status { flex: 1; min-width: 100px; font-size: .72rem; line-height: 1.3; text-transform: none; }
+.wall-agenda td:first-child { white-space: nowrap; font-weight: 600; font-variant-numeric: tabular-nums; }
+.wall-agenda tr.is-done td:nth-child(2) { text-decoration: line-through; color: var(--md-sys-color-on-surface-variant); }
+.wall-agenda__kind { display: inline-block; padding-left: 8px; border-left: 3px solid var(--md-sys-color-primary); white-space: nowrap; }
+.wall-agenda__kind--plan { border-color: var(--md-custom-color-panel-plans); }
+.wall-agenda__kind--person { border-color: var(--md-custom-color-panel-people); }
+.wall-agenda__kind--meal { border-color: var(--md-custom-color-success); }
+.wall-next { overflow: hidden; }
+.wall-next__actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.wall-quick--mood { margin-block: 2px 6px; gap: 2px; }
+.wall-quick--mood .wall-emoji { min-width: 40px; min-height: 40px; font-size: 1.35rem; }
+.wall-energy { flex-wrap: nowrap; gap: 4px; margin-bottom: 6px; }
+.wall-energy__level { min-width: 30px; width: 30px; height: 30px; font-size: .8rem; }
+.wall-card__foot .wall-trend > div { font-size: .68rem; line-height: 1.25; }
+.wall-card__foot .wall-trend b { font-size: .9rem; }

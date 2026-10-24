@@ -3,6 +3,7 @@
     'title',
     'placement' => 'bottom',
     'describedBy' => null,
+    'persistent' => false,
 ])
 
 @php
@@ -11,7 +12,11 @@
     $headingId = 'sheet-'.\Illuminate\Support\Str::slug($title);
 @endphp
 
+@if ($persistent)
+<div x-show="{{ $state }}" x-cloak>
+@else
 <template x-if="{{ $state }}">
+@endif
     <div>
         <div class="md-sheet-scrim" @click="{{ $state }} = false"></div>
         <div {{ $attributes->class(['md-sheet', 'md-sheet--side' => $placement === 'side']) }}
@@ -19,7 +24,7 @@
              aria-modal="true"
              aria-labelledby="{{ $headingId }}"
              @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif
-             x-md-surface
+             x-md-surface="{{ $persistent ? $state : '' }}"
              @md-surface-close="{{ $state }} = false"
              @click.stop>
             <span class="md-sheet__handle" aria-hidden="true"></span>
@@ -36,4 +41,8 @@
             @endisset
         </div>
     </div>
+@if ($persistent)
+</div>
+@else
 </template>
+@endif

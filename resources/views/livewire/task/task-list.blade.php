@@ -88,7 +88,7 @@
                         @if (!$task->start_date && !$task->end_date)
                             <span class="md-chip-tonal">Sin fecha</span>
                         @else
-                            @if (!$task->completed && ($task->end_date ?? $task->start_date)->isPast())
+                            @if ($task->isOverdue())
                                 <span class="md-chip-tonal md-chip-tonal--error"><i class="bi bi-exclamation-circle" style="font-size: 0.625rem;"></i> Vencida</span>
                             @endif
                             <span class="md-chip-tonal">

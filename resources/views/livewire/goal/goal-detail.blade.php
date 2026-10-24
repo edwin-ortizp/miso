@@ -107,6 +107,7 @@
                       title="Editar objetivo" icon="bi-flag" submit="Guardar cambios"
                       :sections="[
                           'basic' => ['label' => 'Información básica', 'icon' => 'bi-flag', 'error' => $errors->hasAny(['title', 'startDate', 'dueDate'])],
+                          'reminders' => ['label' => 'Recordatorios', 'icon' => 'bi-bell', 'error' => $errors->hasAny(['reminders', 'reminders.*'])],
                           'kpi' => ['label' => 'Indicador (KPI)', 'icon' => 'bi-graph-up-arrow', 'error' => $errors->hasAny(['kpiName', 'kpiUnit', 'kpiStartValue', 'kpiTargetValue'])],
                       ]">
         <x-ui.form-dialog-section name="basic" title="Información básica">
@@ -120,6 +121,9 @@
                     <x-ui.field name="dueDate" label="Fecha límite" type="date" wire:model="dueDate" />
                 </div>
             </div>
+        </x-ui.form-dialog-section>
+        <x-ui.form-dialog-section name="reminders" title="Recordatorios">
+            @include('livewire.notifications.reminder-fields')
         </x-ui.form-dialog-section>
         <x-ui.form-dialog-section name="kpi" title="Indicador (KPI)">
             <div class="d-flex flex-column gap-3">

@@ -52,7 +52,7 @@ class SettingsPage extends Component
 
     public ?string $aiIntegrationToken = null;
 
-    public const SECTIONS = ['profile', 'body', 'security', 'oauth', 'integrations', 'mcp', 'logs', 'about'];
+    public const SECTIONS = ['profile', 'body', 'security', 'oauth', 'integrations', 'notifications', 'mcp', 'logs', 'about'];
 
     public string $section = 'profile';
 

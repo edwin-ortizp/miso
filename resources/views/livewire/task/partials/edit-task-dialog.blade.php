@@ -4,13 +4,14 @@
 @endphp
 <x-ui.form-dialog :open="$showForm" :state="$localEditor ? 'showDialog' : null"
     :id="$dialogId" :title="$dialogTitle ?? 'Editar tarea'" icon="bi-list-task" module="tasks"
-    class="task-properties-dialog" close="closeForm" submit-action="save"
+    :expanded="$expandedDialog ?? false" class="task-properties-dialog" close="closeForm" submit-action="save"
     :validation-state="$localEditor ? 'submitted' : null"
     :title-expression="$localEditor && ! $bulkEditor ? '$wire.editingId ? \'Editar tarea\' : \'Nueva tarea\'' : null"
     :sections="[
         'basic' => ['label' => 'Información básica', 'icon' => 'bi-file-earmark-text', 'error' => $errors->hasAny(['title', 'bulkTitles'])],
         'privacy' => ['label' => 'Privacidad', 'icon' => 'bi-lock'],
         'schedule' => ['label' => 'Programación', 'icon' => 'bi-calendar3', 'error' => $errors->hasAny(['startDate', 'endDate', 'startTime', 'endTime'])],
+        ...(! $bulkEditor ? ['reminders' => ['label' => 'Recordatorios', 'icon' => 'bi-bell', 'error' => $errors->hasAny(['reminders', 'reminders.*'])]] : []),
         ...(isset($relationOptions) && ! $bulkEditor ? ['relations' => ['label' => 'Relacionado', 'icon' => 'bi-link-45deg']] : []),
     ]">
     <div class="task-properties-layout">
@@ -29,6 +30,11 @@
             <x-ui.select name="size" label="Tamaño" :id="$dialogId.'-size'" :options="$sizes" placeholder="Sin tamaño" wire:model="size" />
         </aside>
         <div class="task-properties-content">
+            @unless ($bulkEditor)
+                <x-ui.form-dialog-section name="reminders" title="Recordatorios">
+                    @include('livewire.notifications.reminder-fields')
+                </x-ui.form-dialog-section>
+            @endunless
             <x-ui.form-dialog-section name="basic" title="Información básica">
                 <div class="lt-cm-form">
                     @if ($bulkEditor)

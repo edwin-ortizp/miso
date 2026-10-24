@@ -181,6 +181,37 @@ class PlanModuleTest extends TestCase
         $this->assertSame(0, Plan::query()->count());
     }
 
+    public function test_overdue_badge_respects_the_inclusive_end_date(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $plan = Plan::factory()->create([
+            'title' => 'Pizza Master', 'status' => 'scheduled',
+            'scheduled_on' => '2026-10-19', 'ends_on' => '2026-10-25',
+        ]);
+
+        foreach (['2026-10-18 12:00:00', '2026-10-22 12:00:00', '2026-10-25 23:59:59', '2026-10-26 00:00:00'] as $instant) {
+            $this->travelTo(\Illuminate\Support\Carbon::parse($instant));
+            $view = Livewire::test(PlanIndex::class);
+            if ($instant >= '2026-10-26') {
+                $view->assertSee('Vencido');
+            } else {
+                $view->assertDontSee('Vencido');
+            }
+        }
+
+        $this->travelTo(\Illuminate\Support\Carbon::parse('2026-10-24 23:59:59'));
+        foreach (['2026-10-23' => true, '2026-10-24' => false, '2026-10-25' => false, '' => false] as $date => $overdue) {
+            $plan->update(['ends_on' => null, 'scheduled_on' => $date ?: null]);
+            $view = Livewire::test(PlanIndex::class);
+            $overdue ? $view->assertSee('Vencido') : $view->assertDontSee('Vencido');
+        }
+        foreach (['pending', 'done', 'archived'] as $status) {
+            $plan->update(['status' => $status, 'scheduled_on' => '2026-10-19']);
+            Livewire::test(PlanIndex::class)->set('status', $status)->assertSee('Pizza Master')->assertDontSee('Vencido');
+        }
+        $this->travelBack();
+    }
+
     public function test_a_dated_plan_starts_as_scheduled(): void
     {
         $this->actingAs(User::factory()->create());

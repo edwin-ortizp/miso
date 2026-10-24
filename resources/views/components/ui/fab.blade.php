@@ -8,6 +8,7 @@
     'actions' => [],
     'module' => null,
     'split' => false,
+    'compact' => false,
 ])
 
 @php
@@ -16,6 +17,7 @@
      * - Escritorio: extendido (ícono + texto). Móvil: solo ícono.
      * - Con `actions`: menú FAB (speed dial) con la acción principal y las secundarias.
      * - Con `actions` y `split`: FAB dividido; el segmento principal ejecuta la acción y el chevron despliega las demás.
+     * - Con `actions` y `compact`: el disparador del menú es solo un ícono «+» (sin texto) para ahorrar espacio.
      * - Se teletransporta a <body> para quedar sobre acordeones, menús y paneles.
      */
     $actions = collect($actions)->filter()->values();
@@ -83,9 +85,9 @@
                     </{{ $tag($item) }}>
                 @endforeach
             </div>
-            <button type="button" class="md-fab md-fab-extended md-create-fab md-module-primary-fab" @click="fabOpen = !fabOpen"
-                    :aria-expanded="fabOpen.toString()" aria-haspopup="menu" aria-label="{{ $label }}" title="{{ $label }}">
-                <i class="bi" :class="fabOpen ? 'bi-x-lg' : @js($icon)" aria-hidden="true"></i><span>{{ $label }}</span>
+            <button type="button" class="md-fab {{ $compact ? '' : 'md-fab-extended' }} md-create-fab md-module-primary-fab" @click="fabOpen = !fabOpen"
+                    :aria-expanded="fabOpen.toString()" aria-haspopup="menu" aria-label="{{ $compact ? 'Crear' : $label }}" title="{{ $compact ? 'Crear' : $label }}">
+                <i class="bi" :class="fabOpen ? 'bi-x-lg' : @js($icon)" aria-hidden="true"></i>@unless ($compact)<span>{{ $label }}</span>@endunless
             </button>
         @endif
     </div>

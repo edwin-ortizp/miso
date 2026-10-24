@@ -20,6 +20,11 @@ class Relationship extends Model
 
     use BelongsToUser, HasFactory, HasUuids;
 
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(UserNotification::class, 'source');
+    }
+
     protected $fillable = [
         'circle_id',
         'full_name',

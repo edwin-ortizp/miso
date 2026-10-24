@@ -56,6 +56,9 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Task::observe(TaskCalDavObserver::class);
+        foreach ([Task::class, \App\Models\Plan::class, Goal::class, Relationship::class] as $source) {
+            $source::observe(\App\Observers\NotificationSourceObserver::class);
+        }
 
         // Clientes OAuth de MCP: access tokens cortos y refresh rotativo de un mes.
         Passport::tokensExpireIn(now()->addHour());
@@ -84,6 +87,7 @@ class AppServiceProvider extends ServiceProvider
             'relationship' => Relationship::class,
             'health-event' => HealthEvent::class,
             'task' => Task::class,
+            'plan' => \App\Models\Plan::class,
             // Registros que puede crear un hábito al completarse, para poder deshacerlos.
             'drink-log' => DrinkLog::class,
             'exercise-log' => ExerciseLog::class,

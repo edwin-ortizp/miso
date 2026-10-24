@@ -36,3 +36,28 @@ for(const width of [1440,390]) test(`plans real interactions ${width}`,async({pa
  await deletionRow.locator('.md-row-actions__more').click();page.once('dialog',dialog=>dialog.accept());await page.getByRole('menuitem',{name:'Eliminar del historial'}).click();await expect(deletionRow).toHaveCount(0);
  await nav().getByRole('link',{name:'Todos',exact:true}).click();await expect(page.getByRole('link',{name:'Plan realizado',exact:true})).toBeVisible();expect(errors).toEqual([]);
 });
+
+for (const width of [320, 375, 390, 768, 1440]) test(`plans fit viewport ${width}`, async ({page}) => {
+ await page.setViewportSize({width,height:1000});
+ await page.goto('/login');
+ await page.getByLabel('Correo electrónico',{exact:true}).fill('plan-browser@example.test');
+ await page.getByLabel('Contraseña',{exact:true}).fill('browser-test-password');
+ await page.getByRole('button',{name:'Iniciar Sesión'}).click();
+ await page.waitForURL(url=>!url.pathname.includes('/login'));
+ await page.goto('/plans?sort=name');
+ const row=page.locator('.plan-row').filter({hasText:'Evento extenso'});
+ await expect(row).toBeVisible();await expect(row.getByText('Vencido',{exact:true})).toHaveCount(0);
+ const assertFit=async()=>{
+  expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  const outside=await page.locator('.plan-row, .plan-row__aside, .plan-row__stats, .plan-row > :last-child, .plan-card, .md-mcard__head, .md-mcard__foot').evaluateAll(elements=>elements.filter(el=>{const r=el.getBoundingClientRect();return r.width>0&&(r.left < -1 || r.right > innerWidth+1);}).map(el=>el.className));
+  expect(outside).toEqual([]);
+ };
+ await assertFit();await page.screenshot({path:`storage/framework/testing/playwright/plans/fit-${width}.png`,fullPage:true});
+ await row.getByRole('button',{name:/Más opciones/}).click();await expect(page.getByRole('menuitem',{name:'Ver detalle',exact:true})).toBeVisible();await page.keyboard.press('Escape');
+ await page.getByRole('button',{name:/Filtros/}).first().click();await expect(page.getByLabel('Ciudad',{exact:true})).toBeVisible();await assertFit();await page.keyboard.press('Escape');
+ const search=page.getByPlaceholder('Buscar planes');
+ if(!await search.isVisible()) await page.getByRole('button',{name:'Buscar',exact:true}).click();
+ await search.fill('Evento extenso');await expect(page.locator('.plan-row')).toHaveCount(1);await assertFit();
+ await search.fill('');await expect(page.locator('.plan-row')).toHaveCount(10);
+ await page.getByRole('button',{name:/Siguiente/}).click();await expect(page.locator('.plan-row')).toHaveCount(6);await assertFit();
+});

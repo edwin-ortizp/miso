@@ -16,6 +16,16 @@ class Task extends Model
 {
     use BelongsToUser, HasUuids;
 
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(UserNotification::class, 'source');
+    }
+
+    public function reminders(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Reminder::class, 'source');
+    }
+
     public function save(array $options = [])
     {
         if ($this->exists) {
@@ -202,6 +212,35 @@ class Task extends Model
         $minutes = $this->estimated_time % 60;
 
         return $hours ? $hours.' h'.($minutes ? ' '.$minutes.' min' : '') : $minutes.' min';
+    }
+
+    /** Midnight represents an all-day deadline, inclusive of that day. */
+    public function isOverdue(): bool
+    {
+        $deadline = $this->end_date ?? $this->start_date;
+        if ($this->completed || ! $deadline) {
+            return false;
+        }
+
+        $now = now();
+
+        return $deadline->format('H:i:s') === '00:00:00'
+            ? $deadline->lt($now->copy()->startOfDay())
+            : $deadline->lt($now);
+    }
+
+    public function scopeOverdue(Builder $query): Builder
+    {
+        $now = now();
+        $deadline = 'COALESCE(end_date, start_date)';
+
+        return $query->where('completed', false)->where(function (Builder $query) use ($now, $deadline) {
+            $query->whereRaw("$deadline < ?", [$now->copy()->startOfDay()])
+                ->orWhere(function (Builder $query) use ($now, $deadline) {
+                    $query->whereRaw("TIME($deadline) <> ?", ['00:00:00'])
+                        ->whereRaw("$deadline < ?", [$now]);
+                });
+        });
     }
 
     public function scopeChronological(Builder $query): Builder

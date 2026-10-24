@@ -175,10 +175,7 @@ trait FiltersTasks
 
         match ($this->dateFilter) {
             'sin-fecha' => $query->whereNull('start_date')->whereNull('end_date'),
-            'vencidas' => $query->where('completed', false)->where(fn ($q) => $q
-                ->where('end_date', '<', now())
-                ->orWhere(fn ($q2) => $q2->whereNull('end_date')->where('start_date', '<', now()))
-            ),
+            'vencidas' => $query->overdue(),
             'hoy' => $query->where(fn ($q) => $q
                 ->whereDate('start_date', today())
                 ->orWhereDate('end_date', today())

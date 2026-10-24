@@ -34,7 +34,7 @@
     </div>
 
     <div class="plan-row__aside">
-        @if ($plan->status === 'scheduled' && $plan->scheduled_on?->lt(today()))<x-ui.chip tone="warning" variant="tonal" icon="bi-exclamation-circle">Vencido</x-ui.chip>@endif
+        @if ($plan->status === 'scheduled' && ($plan->ends_on ?? $plan->scheduled_on)?->lt(today()))<x-ui.chip tone="warning" variant="tonal" icon="bi-exclamation-circle">Vencido</x-ui.chip>@endif
         <div class="plan-row__line">
             @if ($plan->scheduled_on)
                 <span class="plan-row__date"><i class="bi bi-calendar-event" aria-hidden="true"></i> {{ \Illuminate\Support\Str::ucfirst($plan->scheduled_on->translatedFormat('D, j M Y')) }}</span>

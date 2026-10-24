@@ -6,6 +6,7 @@
     'describedBy' => null,
     'standard' => false,
     'closeExpression' => null,
+    'expanded' => false,
 ])
 
 @php
@@ -26,7 +27,7 @@
     @teleport('body')
         <template x-if="{{ $state }}">
             <div class="md-form-dialog-layer" data-module="{{ \App\Support\Ui\ModuleContext::current() }}" x-dialog-viewport
-                 x-data="{ expanded: {{ $size === 'fullscreen' ? 'true' : 'false' }} }">
+                 x-data="{ expanded: {{ $size === 'fullscreen' || $expanded ? 'true' : 'false' }} }">
                 <div class="md-dialog-scrim" @click="{{ $closeAction }}"></div>
                 <section {{ $attributes->class(['md-form-dialog']) }} :class="{ 'is-expanded': expanded }"
                          role="dialog" aria-modal="true" aria-labelledby="{{ $headingId }}"

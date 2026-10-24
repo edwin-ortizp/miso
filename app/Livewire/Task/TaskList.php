@@ -23,6 +23,7 @@ use App\Livewire\Concerns\WithManagementCard;
 #[Title('Tareas')]
 class TaskList extends Component
 {
+    use \App\Livewire\Concerns\HasReminderDraft;
     use InteractsWithTaskRelations, LoadsTaskCategories;
     use HandlesRecurringTaskCompletion, InteractsWithTaskSchedule;
     use WithManagementCard, FiltersTasks {
@@ -129,6 +130,7 @@ class TaskList extends Component
                 $this->statusId = $task->status && $task->status->type !== \App\Models\TaskStatus::DONE ? $task->status_id : '';
                 $this->size = $task->size ?? '';
                 $this->loadTaskSchedule($task);
+                $this->loadReminders($task);
                 $this->isPrivate = $task->is_private;
                 $this->isRecurrent = $task->is_recurrent;
                 $this->recurrenceIntervalDays = max(1, (int) (($task->recurrence ?? [])['customDays'] ?? 7));
@@ -238,6 +240,11 @@ class TaskList extends Component
 
     public function save()
     {
+        return DB::transaction(fn () => $this->persistTaskWithReminders());
+    }
+
+    private function persistTaskWithReminders()
+    {
         if (empty(trim($this->title))) {
             return;
         }
@@ -263,6 +270,8 @@ class TaskList extends Component
                 : null,
         ];
 
+        $this->validateReminders($this->endDate, $this->endTime);
+
         // Solo estados no terminados: completar sigue pasando por la casilla (XP y recurrencias).
         if ($this->statusId !== '' && \App\Models\TaskStatus::whereKey($this->statusId)->where('type', '!=', \App\Models\TaskStatus::DONE)->exists()) {
             $data['status_id'] = $this->statusId;
@@ -278,6 +287,7 @@ class TaskList extends Component
 
         if ($task) {
             $this->syncTaskRelations($task);
+            $this->saveReminders($task);
         }
 
         $this->closeForm();
@@ -359,6 +369,7 @@ class TaskList extends Component
 
     private function resetForm()
     {
+        $this->reminders = [];
         $this->title = '';
         $this->description = '';
         $this->category = '';
@@ -400,15 +411,13 @@ class TaskList extends Component
 
         // `CURDATE()` y `NOW()` no existen en SQLite: se pasan como parámetros.
         $today = today()->toDateString();
-        $now = now()->toDateTimeString();
 
         $stats = Task::selectRaw('
             SUM(CASE WHEN completed = 0 THEN 1 ELSE 0 END) as pending_count,
             SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as completed_count,
             SUM(CASE WHEN completed = 1 AND DATE(completed_at) = ? THEN 1 ELSE 0 END) as completed_today,
-            SUM(CASE WHEN completed = 0 AND (DATE(start_date) = ? OR DATE(end_date) = ?) THEN 1 ELSE 0 END) as planned_today,
-            SUM(CASE WHEN completed = 0 AND (end_date < ? OR (end_date IS NULL AND start_date < ?)) THEN 1 ELSE 0 END) as overdue_count
-        ', [$today, $today, $today, $now, $now])->first();
+            SUM(CASE WHEN completed = 0 AND (DATE(start_date) = ? OR DATE(end_date) = ?) THEN 1 ELSE 0 END) as planned_today
+        ', [$today, $today, $today])->first();
 
         $categoryBreakdown = Task::where('completed', true)
             ->whereDate('completed_at', today())
@@ -429,7 +438,7 @@ class TaskList extends Component
             'completedCount' => (int) $stats->completed_count,
             'completedToday' => (int) $stats->completed_today,
             'plannedToday' => (int) $stats->planned_today,
-            'overdueCount' => (int) $stats->overdue_count,
+            'overdueCount' => Task::query()->overdue()->count(),
             'categoryBreakdown' => $categoryBreakdown,
         ]);
     }

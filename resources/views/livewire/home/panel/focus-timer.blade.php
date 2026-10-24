@@ -4,7 +4,7 @@
         storageKey: 'life-tracker:pomodoro:{{ auth()->id() }}',
         saveSession: (start, end, description, token) => $wire.saveSession(start, end, description, token)
     })" @panel-focus.window="focusOpen = true; if ($event.detail.start && !isRunning && !pendingCompletion && !startedAt) { description = $event.detail.description || ''; setMode('work'); start(); }">
-        <x-ui.dialog standard state="focusOpen" title="Foco de hoy" size="fullscreen" icon="bi-stopwatch">
+        <x-ui.dialog standard expanded state="focusOpen" title="Foco de hoy" size="fullscreen" icon="bi-stopwatch">
             <div class="wall-focus">
                 <strong x-text="displayTime" role="timer" aria-live="off"></strong>
                 <p x-text="description || 'Tiempo de enfoque'"></p>

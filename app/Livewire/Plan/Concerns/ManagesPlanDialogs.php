@@ -20,6 +20,7 @@ use Illuminate\Validation\Rule;
  */
 trait ManagesPlanDialogs
 {
+    use \App\Livewire\Concerns\HasReminderDraft;
     public bool $showPlanForm = false;
 
     public ?string $editingPlanId = null;
@@ -82,6 +83,7 @@ trait ManagesPlanDialogs
             $plan = Plan::query()->with(['circles', 'relationships', 'tags', 'links', 'images'])->findOrFail($id);
 
             $this->editingPlanId = $plan->id;
+            $this->loadReminders($plan);
             $this->planTitle = $plan->title;
             $this->planType = $plan->type;
             $this->planCategory = $plan->category ?? '';
@@ -151,6 +153,11 @@ trait ManagesPlanDialogs
 
     public function savePlan(): void
     {
+        \Illuminate\Support\Facades\DB::transaction(fn () => $this->persistPlanWithReminders());
+    }
+
+    private function persistPlanWithReminders(): void
+    {
         $this->planLinks = collect($this->planLinks)
             ->filter(fn ($link) => trim($link['url'] ?? '') !== '' || trim($link['label'] ?? '') !== '')
             ->values()
@@ -194,7 +201,8 @@ trait ManagesPlanDialogs
             'planEndsOn' => 'hasta',
         ]);
 
-        SavePlan::handle(
+        $this->validateReminders($this->planScheduledOn);
+        $savedPlan = SavePlan::handle(
             $this->editingPlanId ? Plan::query()->findOrFail($this->editingPlanId) : new Plan,
             [
                 'title' => trim($this->planTitle),
@@ -213,6 +221,8 @@ trait ManagesPlanDialogs
             $this->planImages,
             $this->planTags,
         );
+
+        $this->saveReminders($savedPlan);
 
         $this->closePlanForm();
     }
@@ -322,6 +332,7 @@ trait ManagesPlanDialogs
 
     private function resetPlanForm(): void
     {
+        $this->reminders = [];
         $this->reset(['editingPlanId', 'planTitle', 'planType', 'planCategory', 'planCategoryId', 'planCity', 'planAddress', 'planScheduledOn', 'planEndsOn', 'planNotes', 'planCircles', 'planPeople', 'planTags', 'planLinks', 'planImages']);
         $this->resetValidation();
     }

@@ -12,6 +12,16 @@ class Goal extends Model
 {
     use BelongsToUser, HasUuids;
 
+    public function notifications(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(UserNotification::class, 'source');
+    }
+
+    public function reminders(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Reminder::class, 'source');
+    }
+
     protected $fillable = [
         'title',
         'description',

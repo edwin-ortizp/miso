@@ -1,6 +1,6 @@
 /* Planes: listado, detalle y pestaña Planes de una relación. Compone tokens y componentes x-ui. */
 
-.plans-section { display: grid; gap: 12px; }
+.plans-section { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 12px; }
 .plans-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
 .plans-toolbar__title { display: flex; align-items: center; gap: 10px; margin: 0; color: var(--md-sys-color-on-surface); font-size: 1.2rem; font-weight: 700; }
 .plans-toolbar__title > i { color: var(--md-module-accent); }
@@ -14,7 +14,7 @@
 .plans-notice { display: flex; align-items: center; gap: 8px; margin: 0; padding: 10px 14px; border-radius: 12px; background: var(--md-custom-color-info-container); color: var(--md-custom-color-on-info-container); font-size: .85rem; }
 .plans-muted { margin: 0; color: var(--md-sys-color-on-surface-variant); font-size: .82rem; }
 
-.plans-list { display: grid; gap: 8px; }
+.plans-list { display: grid; grid-template-columns: minmax(0, 1fr); min-width: 0; gap: 8px; }
 .plan-row {
   display: grid; grid-template-columns: 64px minmax(0, 1fr) auto 40px; align-items: center; gap: 14px;
   padding: 8px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 16px; background: var(--md-sys-color-surface-container-lowest);
@@ -28,7 +28,7 @@
 .plan-row__person { display: inline-flex; align-items: center; gap: 5px; color: var(--md-sys-color-on-surface); font-weight: 600; }
 .plan-row__avatar { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: color-mix(in srgb, var(--md-module-accent) 16%, var(--md-sys-color-surface-container-lowest)); color: var(--md-module-accent); font-size: .66rem; font-weight: 700; }
 .plan-row__tag { display: inline-flex; align-items: center; min-height: 22px; padding: 0 8px; border-radius: var(--md-sys-shape-corner-full); background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant); font-size: .7rem; font-weight: 600; }
-.plan-row__aside { display: grid; justify-items: end; gap: 3px; text-align: right; }
+.plan-row__aside { min-width: 0; display: grid; justify-items: end; gap: 3px; text-align: right; }
 .plan-row__line { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; }
 .plan-row__date { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 10px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-full); color: var(--md-sys-color-on-surface); font-size: .74rem; font-weight: 600; white-space: nowrap; }
 .plan-row__left { color: var(--md-custom-color-warning); font-size: .74rem; font-weight: 700; }
@@ -91,8 +91,11 @@
   .plans-search { grid-template-columns: minmax(0, 1fr); }
   .plan-row { grid-template-columns: 48px minmax(0, 1fr) 40px; gap: 10px; }
   .plan-row__media { width: 48px; height: 48px; font-size: 1.15rem; }
-  .plan-row__aside { grid-column: 2 / 3; grid-row: 2; justify-items: start; text-align: left; }
-  .plan-row__line { justify-content: flex-start; }
+  .plan-row__aside { grid-column: 1 / -1; grid-row: 2; justify-items: start; text-align: left; }
+  .plan-row__line { justify-content: flex-start; min-width: 0; }
+  .plan-row__stats { white-space: normal; overflow-wrap: anywhere; }
+  .plan-row__person, .plan-row__tag { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
+  .plan-row__avatar { flex-shrink: 0; }
   .plan-row > :last-child { grid-column: 3; grid-row: 1; }
   .plan-metrics { gap: 8px; }
   .plan-metrics > div { padding: 12px; }

@@ -12,6 +12,7 @@
     'submitExpression' => null,
     'id' => null,
     'module' => null,
+    'expanded' => false,
 ])
 
 @php
@@ -36,7 +37,7 @@
     @teleport('body')
         <div class="md-form-dialog-layer" data-module="{{ $moduleKey }}" x-dialog-viewport="{{ $state ?? '' }}"
              @if($state) x-show="{{ $state }}" x-cloak :class="{'lt-editor-pristine': !submitted}" @endif
-             x-data="{ section: @js($firstSection), navCollapsed: window.matchMedia('(max-width: 767.98px)').matches, expanded: false }" @if($state) x-effect="if ({{ $state }}) { section = @js($firstSection); expanded = false; navCollapsed = window.matchMedia('(max-width: 767.98px)').matches }" @endif>
+             x-data="{ section: @js($firstSection), navCollapsed: window.matchMedia('(max-width: 767.98px)').matches, expanded: @js((bool) $expanded) }" @if($state) x-effect="if ({{ $state }}) { section = @js($firstSection); expanded = @js((bool) $expanded); navCollapsed = window.matchMedia('(max-width: 767.98px)').matches }" @endif>
             <div class="md-dialog-scrim" @if($state) x-on:click="closeEditor()" @else wire:click="{{ $close }}" @endif></div>
             <section {{ $attributes->class(['md-form-dialog', 'md-form-dialog--sections' => $sections !== []]) }}
                      id="{{ $dialogId }}"
@@ -47,7 +48,7 @@
                      x-md-surface="{{ $state ?? '' }}"
                      @md-surface-close="{{ $state ? 'closeEditor()' : '$refs.cancel.click()' }}">
                 <form class="md-form-dialog__form" novalidate @if($state) @submit="submitted = true" @endif @if ($submitExpression) @submit.prevent="{{ $submitExpression }}" @elseif ($submitAction) wire:submit="{{ $submitAction }}" @else @submit.prevent @endif>
-                    <header class="md-form-dialog__head">
+                    <header class="md-form-dialog__head" role="presentation">
                         @if ($sections !== [])
                             <button type="button" class="md-btn-icon" @click="navCollapsed = !navCollapsed"
                                     :aria-expanded="(!navCollapsed).toString()" aria-controls="{{ $dialogId }}-nav"

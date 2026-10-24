@@ -49,12 +49,12 @@ export function createPanelRefresh({ request, now = () => Date.now() }) {
 
 export function registerWallPanel(Alpine) {
     Alpine.data('wallDay', rows => ({
-        rows, limit: 5, observer: null,
+        rows, limit: 4, observer: null,
         init() {
             this.observer = new ResizeObserver(() => {
-                this.limit = Math.max(1, Math.floor((this.$el.clientHeight - 44) / 48));
+                this.limit = Math.min(4, Math.max(1, Math.floor((this.$refs.items.clientHeight + 4) / 48)));
             });
-            this.observer.observe(this.$el);
+            this.observer.observe(this.$refs.items);
         },
         destroy() { this.observer?.disconnect(); },
     }));

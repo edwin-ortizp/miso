@@ -100,6 +100,7 @@
                       :submit="$editingId ? 'Actualizar' : 'Guardar'"
                       :sections="[
                           'basic' => ['label' => 'Información básica', 'icon' => 'bi-flag', 'error' => $errors->hasAny(['title', 'startDate', 'dueDate'])],
+                          'reminders' => ['label' => 'Recordatorios', 'icon' => 'bi-bell', 'error' => $errors->hasAny(['reminders', 'reminders.*'])],
                           'kpi' => ['label' => 'Indicador (KPI)', 'icon' => 'bi-graph-up-arrow', 'error' => $errors->hasAny(['kpiName', 'kpiUnit', 'kpiStartValue', 'kpiTargetValue'])],
                       ]">
         <x-ui.form-dialog-section name="basic" title="Información básica">
@@ -116,6 +117,9 @@
             </div>
         </x-ui.form-dialog-section>
 
+        <x-ui.form-dialog-section name="reminders" title="Recordatorios">
+            @include('livewire.notifications.reminder-fields')
+        </x-ui.form-dialog-section>
         <x-ui.form-dialog-section name="kpi" title="Indicador (KPI)" description="Opcional: compara el avance real con el ritmo esperado.">
             <div class="d-flex flex-column gap-3">
                 <label class="goal-kpi-toggle">

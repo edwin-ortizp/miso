@@ -17,6 +17,7 @@ use Livewire\Component;
 #[Title('Detalle del objetivo')]
 class GoalDetail extends Component
 {
+    use \App\Livewire\Concerns\HasReminderDraft;
     public string $goalId;
 
     public bool $showGoalForm = false;
@@ -77,6 +78,7 @@ class GoalDetail extends Component
     public function openGoalForm(): void
     {
         $goal = $this->goal();
+        $this->loadReminders($goal);
         $kpi = GoalProgress::configuration($goal->numeric_goal);
 
         $this->title = $goal->title;
@@ -95,7 +97,13 @@ class GoalDetail extends Component
 
     public function saveGoal(): void
     {
+        DB::transaction(fn () => $this->persistGoalWithReminders());
+    }
+
+    private function persistGoalWithReminders(): void
+    {
         $data = $this->validatedGoalData();
+        $this->validateReminders($this->dueDate);
         $goal = $this->goal();
 
         if ($data['numeric_goal']) {
@@ -105,6 +113,7 @@ class GoalDetail extends Component
         }
 
         $goal->update($data);
+        $this->saveReminders($goal);
         $this->showGoalForm = false;
     }
 
