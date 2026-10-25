@@ -39,7 +39,7 @@ trait FiltersTasks
     public string $priorityFilter = '';
 
     #[Url(as: 'date', history: true, keep: true)]
-    public string $dateFilter = '';
+    public $dateFilter = [];
 
     #[Url(as: 'size', history: true, keep: true)]
     public string $sizeFilter = '';
@@ -62,7 +62,8 @@ trait FiltersTasks
     public function updatedFiltersTasks(string $property): void
     {
         if (! in_array($property, ['statusQuery', 'filter', 'categoryFilter', 'priorityFilter', 'dateFilter', 'sizeFilter', 'search'], true)
-            && ! str_starts_with($property, 'filter.') && ! str_starts_with($property, 'categoryFilter.')) {
+            && ! str_starts_with($property, 'filter.') && ! str_starts_with($property, 'categoryFilter.')
+            && ! str_starts_with($property, 'dateFilter.')) {
             return;
         }
 
@@ -84,7 +85,7 @@ trait FiltersTasks
     public function removeFilter(string $key, ?string $value = null): void
     {
         match ($key) {
-            'date' => $this->dateFilter = '',
+            'date' => $this->dateFilter = $value === null ? [] : array_values(array_diff($this->dateFilter, [$value])),
             'priority' => $this->priorityFilter = '',
             'size' => $this->sizeFilter = '',
             'category' => $this->categoryFilter = array_values(array_diff($this->categoryFilter, [$value])),
@@ -119,8 +120,8 @@ trait FiltersTasks
     public function taskFilterChips(): array
     {
         $filters = [];
-        if ($this->dateFilter !== '') {
-            $filters[] = ['key' => 'date', 'value' => null, 'label' => 'Cuándo: '.self::FILTER_DATES[$this->dateFilter], 'icon' => 'bi-calendar-event'];
+        foreach ($this->dateFilter as $date) {
+            $filters[] = ['key' => 'date', 'value' => $date, 'label' => 'Cuándo: '.self::FILTER_DATES[$date], 'icon' => 'bi-calendar-event'];
         }
 
         $statuses = $this->taskStatuses();
@@ -173,19 +174,20 @@ trait FiltersTasks
             $query->where('size', $this->sizeFilter);
         }
 
-        match ($this->dateFilter) {
-            'sin-fecha' => $query->whereNull('start_date')->whereNull('end_date'),
-            'vencidas' => $query->overdue(),
-            'hoy' => $query->where(fn ($q) => $q
-                ->whereDate('start_date', today())
-                ->orWhereDate('end_date', today())
-            ),
-            'proximas' => $query->where(fn ($q) => $q
-                ->where('start_date', '>', now())
-                ->orWhere(fn ($q2) => $q2->whereNull('start_date')->where('end_date', '>', now()))
-            ),
-            default => null,
-        };
+        // Las opciones de «Cuándo» se combinan con O: basta con cumplir una.
+        if ($this->dateFilter) {
+            $query->where(function ($q) {
+                foreach ($this->dateFilter as $date) {
+                    $q->orWhere(fn ($q2) => match ($date) {
+                        'sin-fecha' => $q2->whereNull('start_date')->whereNull('end_date'),
+                        'vencidas' => $q2->overdue(),
+                        'hoy' => $q2->whereDate('start_date', today())->orWhereDate('end_date', today()),
+                        'proximas' => $q2->where('start_date', '>', now())
+                            ->orWhere(fn ($q3) => $q3->whereNull('start_date')->where('end_date', '>', now())),
+                    });
+                }
+            });
+        }
 
         if (trim($this->search) !== '') {
             $term = '%'.trim($this->search).'%';
@@ -222,9 +224,10 @@ trait FiltersTasks
             $this->priorityFilter = '';
         }
 
-        if ($this->dateFilter !== '' && ! array_key_exists($this->dateFilter, self::FILTER_DATES)) {
-            $this->dateFilter = '';
-        }
+        // Acepta también el valor único de las URLs anteriores (?date=hoy).
+        $values = is_array($this->dateFilter) ? $this->dateFilter : [$this->dateFilter];
+        $this->dateFilter = array_values(array_unique(array_filter($values,
+            fn ($value) => is_string($value) && array_key_exists($value, self::FILTER_DATES))));
 
         if ($this->sizeFilter !== '' && ! array_key_exists($this->sizeFilter, self::FILTER_SIZES)) {
             $this->sizeFilter = '';

@@ -49,7 +49,7 @@ class TaskOverdueTest extends TestCase
         $this->assertEqualsCanonicalizing($expected, Task::query()->overdue()->pluck('id')->all());
         Livewire::test(TaskList::class)
             ->assertViewHas('overdueCount', count($expected))
-            ->set('dateFilter', 'vencidas')
+            ->set('dateFilter', ['vencidas'])
             ->assertViewHas('tasks', fn ($tasks) => $tasks->total() === count($expected)
                 && $tasks->pluck('id')->sort()->values()->all() === collect($expected)->sort()->values()->all());
 

@@ -8,7 +8,7 @@ class TaskEditor extends TaskList
     public $filter = [];
     public $categoryFilter = [];
     public string $priorityFilter = '';
-    public string $dateFilter = '';
+    public $dateFilter = [];
     public string $sizeFilter = '';
     public string $search = '';
     public ?string $editTask = null;

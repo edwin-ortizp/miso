@@ -43,12 +43,12 @@ class TaskListFiltersTest extends TestCase
             ->set('filter', [$ready->id, $done->id])
             ->assertViewHas('tasks', fn ($tasks) => $tasks->total() === 2)
             ->set('priorityFilter', 'urgent-important')->set('sizeFilter', 'M')
-            ->set('dateFilter', 'sin-fecha')
+            ->set('dateFilter', ['sin-fecha'])
             ->assertViewHas('tasks', fn ($tasks) => $tasks->total() === 2)
             ->set('sizeFilter', 'XS')
             ->assertViewHas('tasks', fn ($tasks) => $tasks->total() === 0)
             ->call('clearFilters')->assertSet('filter', $pending)
-            ->assertSet('sizeFilter', '')->assertSet('priorityFilter', '')->assertSet('dateFilter', '')
+            ->assertSet('sizeFilter', '')->assertSet('priorityFilter', '')->assertSet('dateFilter', [])
             ->set('filter', [$done->id])
             ->assertViewHas('tasks', fn ($tasks) => $tasks->total() === 1 && $tasks->first()->completed)
             ->set('filter', [])->assertSet('statusQuery', 'all')
@@ -71,6 +71,33 @@ class TaskListFiltersTest extends TestCase
         $ids = $statuses->take(2)->pluck('id')->all();
         Livewire::withQueryParams(['status' => $ids])->test(TaskList::class)->assertSet('filter', $ids);
         Livewire::withQueryParams(['status' => ''])->test(TaskList::class)->assertSet('filter', []);
+    }
+
+    public function test_date_filter_combines_several_options(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+        $ready = TaskStatus::firstOfType($user->id, TaskStatus::READY);
+        foreach ([
+            'Hoy' => [now()->startOfDay()->addHours(23), now()->endOfDay()],
+            'Vencida' => [now()->subDays(3), now()->subDays(2)],
+            'Próxima' => [now()->addDays(2), now()->addDays(3)],
+            'Sin fecha' => [null, null],
+        ] as $title => [$start, $end]) {
+            Task::create(['title' => $title, 'status_id' => $ready->id, 'start_date' => $start, 'end_date' => $end]);
+        }
+        $titles = fn ($tasks) => $tasks->pluck('title')->sort()->values()->all();
+
+        Livewire::test(TaskList::class)
+            ->set('dateFilter', ['hoy', 'vencidas', 'sin-fecha'])
+            ->assertViewHas('tasks', fn ($tasks) => $titles($tasks) === ['Hoy', 'Sin fecha', 'Vencida'])
+            ->assertSee('Cuándo: Vencidas')
+            ->call('removeFilter', 'date', 'vencidas')
+            ->assertSet('dateFilter', ['hoy', 'sin-fecha'])
+            ->assertViewHas('tasks', fn ($tasks) => $titles($tasks) === ['Hoy', 'Sin fecha'])
+            ->set('dateFilter', ['proximas', 'invalida'])
+            ->assertSet('dateFilter', ['proximas']);
+
+        Livewire::withQueryParams(['date' => 'hoy'])->test(TaskList::class)->assertSet('dateFilter', ['hoy']);
     }
 
     public function test_status_options_and_filter_ids_are_user_scoped(): void
