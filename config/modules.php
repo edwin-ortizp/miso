@@ -137,7 +137,7 @@ return [
             ['label' => 'Ingredientes', 'route' => 'meals.ingredients', 'icon' => 'bi-basket', 'active' => ['meals.ingredients', 'meals.compare']],
             ['label' => 'Compras', 'route' => 'meals.shopping', 'icon' => 'bi-cart3', 'active' => ['meals.shopping']],
             ['label' => 'Historial de compras', 'route' => 'meals.purchases', 'icon' => 'bi-receipt', 'active' => ['meals.purchases', 'meals.purchases.show']],
-            ['label' => 'Ajustes', 'route' => 'meals.settings', 'archetype' => 'settings', 'icon' => 'bi-gear', 'active' => ['meals.settings', 'meals.settings.categories']],
+            ['label' => 'Ajustes', 'route' => 'meals.settings', 'archetype' => 'settings', 'icon' => 'bi-gear', 'active' => ['meals.settings', 'meals.settings.categories', 'meals.settings.locations']],
         ],
     ],
     'tasks' => [

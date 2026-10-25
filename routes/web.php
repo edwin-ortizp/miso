@@ -129,6 +129,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/meals/ingredients', MealIngredients::class)->name('meals.ingredients');
     Route::get('/meals/settings', MealSettings::class)->name('meals.settings');
     Route::get('/meals/settings/categories', MealSettings::class)->defaults('section', 'categories')->name('meals.settings.categories');
+    Route::get('/meals/settings/locations', MealSettings::class)->defaults('section', 'locations')->name('meals.settings.locations');
     Route::get('/meals/shopping', MealShopping::class)->name('meals.shopping');
     Route::get('/meals/purchases', MealPurchases::class)->name('meals.purchases');
     Route::get('/meals/purchases/{purchase}', MealPurchaseShow::class)->name('meals.purchases.show');

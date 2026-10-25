@@ -42,6 +42,7 @@ class ShoppingItem extends Model
         'min_stock',
         'to_buy',
         'category_id',
+        'storage_location_id',
         'consume_by',
         'status',
         'next_purchase',
@@ -76,7 +77,18 @@ class ShoppingItem extends Model
                     throw \Illuminate\Validation\ValidationException::withMessages(['category_id' => 'Selecciona una categoría de tu catálogo.']);
                 }
             }
+            if ($item->storage_location_id !== null && ($item->isDirty('storage_location_id') || $item->isDirty('user_id'))) {
+                $userId = $item->user_id ?? auth()->id();
+                if (! StorageLocation::withoutGlobalScopes()->where('user_id', $userId)->whereKey($item->storage_location_id)->exists()) {
+                    throw \Illuminate\Validation\ValidationException::withMessages(['storage_location_id' => 'Selecciona una ubicación de tu catálogo.']);
+                }
+            }
         });
+    }
+
+    public function storageLocation()
+    {
+        return $this->belongsTo(StorageLocation::class);
     }
 
     public function category()

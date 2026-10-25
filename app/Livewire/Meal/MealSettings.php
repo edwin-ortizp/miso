@@ -5,6 +5,7 @@ namespace App\Livewire\Meal;
 use App\Livewire\Concerns\WithManagementCard;
 use App\Models\MealCategory;
 use App\Models\ShoppingItem;
+use App\Models\StorageLocation;
 use App\Models\Store;
 use App\Services\Meal\CatalogNames;
 use App\Services\Meal\StoreCatalogManager;
@@ -40,9 +41,12 @@ class MealSettings extends Component
     public string $mergeSourceId = '';
     public string $mergeTargetId = '';
 
+    #[Url(as: 'archived')]
+    public bool $showArchived = false;
+
     public function mount(string $section = 'stores'): void
     {
-        abort_unless(in_array($section, ['stores', 'categories'], true), 404);
+        abort_unless(in_array($section, ['stores', 'categories', 'locations'], true), 404);
         $this->section = $section;
     }
 
@@ -62,8 +66,7 @@ class MealSettings extends Component
         $this->parent_id = '';
         $this->reset(['editingId', 'name', 'confirmSimilar', 'message']);
         if ($id) {
-            $model = $this->section === 'stores' ? Store::class : MealCategory::class;
-            $record = $model::where('user_id', auth()->id())->findOrFail($id);
+            $record = $this->model()::where('user_id', auth()->id())->findOrFail($id);
             $this->editingId = $record->id;
             $this->name = $record->name;
             $this->parent_id = $record->parent_id ?? '';
@@ -95,6 +98,15 @@ class MealSettings extends Component
                 return;
             }
             $this->dispatch('stores-updated');
+        } elseif ($this->section === 'locations') {
+            $location = $this->editingId ? StorageLocation::where('user_id', auth()->id())->findOrFail($this->editingId) : new StorageLocation;
+            try {
+                $location->fill(['parent_id' => $this->parent_id ?: null, 'name' => $this->name])->save();
+            } catch (ValidationException $exception) {
+                $this->setErrorBag($exception->validator->errors());
+
+                return;
+            }
         } else {
             $normalized = CatalogNames::normalize($this->name);
             if ($normalized === '') {
@@ -117,6 +129,7 @@ class MealSettings extends Component
 
     public function delete(string $id): void
     {
+        abort_if($this->section === 'locations', 404);
         $this->resetValidation();
         if ($this->section === 'stores') {
             try {
@@ -140,6 +153,52 @@ class MealSettings extends Component
         }
         $this->message = 'Registro eliminado.';
         $this->resetPage();
+    }
+
+    public function archive(string $id): void
+    {
+        abort_unless($this->section === 'locations', 404);
+        StorageLocation::where('user_id', auth()->id())->findOrFail($id)->archive();
+        $this->message = 'Ubicación archivada. Los productos asignados la conservan.';
+    }
+
+    public function restore(string $id): void
+    {
+        abort_unless($this->section === 'locations', 404);
+        try {
+            StorageLocation::where('user_id', auth()->id())->findOrFail($id)->restore();
+        } catch (ValidationException $exception) {
+            $this->message = collect($exception->errors())->flatten()->first();
+
+            return;
+        }
+        $this->message = 'Ubicación restaurada.';
+    }
+
+    public function updatedShowArchived(): void
+    {
+        $this->resetPage();
+    }
+
+    /** Active root locations; empty when the edited location already has children (it must stay a root). */
+    private function locationParents(): array
+    {
+        $locations = StorageLocation::where('user_id', auth()->id());
+        if ($this->editingId && (clone $locations)->where('parent_id', $this->editingId)->exists()) {
+            return [];
+        }
+
+        return $locations->active()->whereNull('parent_id')->when($this->editingId, fn ($q) => $q->whereKeyNot($this->editingId))
+            ->orderBy('name')->pluck('name', 'id')->all();
+    }
+
+    private function model(): string
+    {
+        return match ($this->section) {
+            'stores' => Store::class,
+            'locations' => StorageLocation::class,
+            default => MealCategory::class,
+        };
     }
 
     public function openMerge(string $id): void
@@ -172,17 +231,22 @@ class MealSettings extends Component
 
     public function render()
     {
-        $model = $this->section === 'stores' ? Store::class : MealCategory::class;
-        $query = $model::where('user_id', auth()->id())->when($this->search !== '', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'));
+        $query = $this->model()::where('user_id', auth()->id())->when($this->search !== '', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'));
         if ($this->section === 'stores') {
             $query->withCount(['prices', 'purchases']);
         }
         if ($this->section === 'categories') {
             $query->with('parent')->orderByRaw('COALESCE((SELECT parent.name FROM meal_categories AS parent WHERE parent.id = meal_categories.parent_id), name)')->orderByRaw('parent_id IS NOT NULL');
         }
+        if ($this->section === 'locations') {
+            $query->with('parent')->when($this->showArchived, fn ($q) => $q->whereNotNull('archived_at'), fn ($q) => $q->whereNull('archived_at'))
+                ->orderByRaw('COALESCE((SELECT parent.name FROM storage_locations AS parent WHERE parent.id = storage_locations.parent_id), name)')->orderByRaw('parent_id IS NOT NULL');
+        }
         return view('livewire.meal.meal-settings', [
             'records' => $query->orderBy('name')->paginate($this->perPage()),
             'categoryCounts' => ShoppingItem::where('user_id', auth()->id())->selectRaw('category_id, count(*) as total')->groupBy('category_id')->pluck('total', 'category_id'),
+            'locationCounts' => $this->section === 'locations' ? ShoppingItem::where('user_id', auth()->id())->whereNotNull('storage_location_id')->selectRaw('storage_location_id, count(*) as total')->groupBy('storage_location_id')->pluck('total', 'storage_location_id') : collect(),
+            'locationParents' => $this->section === 'locations' ? $this->locationParents() : [],
             'storeOptions' => Store::where('user_id', auth()->id())->where('id', '!=', $this->mergeSourceId)->orderBy('name')->pluck('name', 'id')->all(),
         ]);
     }

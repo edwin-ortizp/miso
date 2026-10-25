@@ -11,6 +11,7 @@
                           :paginator="$ingredients" noun="ingredientes" alpine="openMenu: null">
         <x-slot:filters>
             <x-ui.multi-select name="categoryFilter" label="Categoría" :options="$this->categoryOptions" all-label="Todas las categorías" icon="bi-tag" />
+            <x-ui.multi-select name="locationFilter" label="Ubicación" :options="$this->locationFilterOptions()" all-label="Todas las ubicaciones" icon="bi-geo-alt" />
             <x-ui.select name="filterStore" label="Tienda" placeholder="Todas" icon="bi-shop" :selected="$storeFilter" wire:model.live="storeFilter"
                          :options="['__none' => 'Sin tienda'] + $stores->all()" />
             <x-ui.select name="filterPrice" label="Precio" placeholder="Todos" icon="bi-currency-dollar" :selected="$priceFilter" wire:model.live="priceFilter"
@@ -195,6 +196,7 @@
                                  :help="$baseUnitLocked ? 'La unidad base no cambia una vez definida.' : 'Todo lo de este producto se guarda en esta unidad.'"
                                  wire:model.live="baseUnit" />
                 </div>
+                <x-ui.category-select name="storageLocationId" label="Ubicación habitual" placeholder="Sin ubicación" icon="bi-geo-alt" :options="$this->storageLocationOptions()" :selected="$storageLocationId" wire:model="storageLocationId" />
                 @if ($baseUnit === 'g')
                     <x-ui.field name="gramsPerPiece" label="Gramos por pieza (opcional)" type="number" step="0.001" min="0"
                                 help="Para productos que se compran por peso pero se cuentan por pieza, como el aguacate." wire:model="gramsPerPiece" />

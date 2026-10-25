@@ -10,6 +10,7 @@ use App\Models\PurchaseLine;
 use App\Models\ShoppingItem;
 use App\Models\ShoppingItemPrice;
 use App\Models\ShoppingItemVariant;
+use App\Models\StorageLocation;
 use App\Models\Store;
 use App\Services\Meal\CatalogNames;
 use App\Services\Meal\IngredientImportService;
@@ -48,6 +49,10 @@ class MealIngredients extends Component
     /** Categorías seleccionadas (varias); vacío = todas. */
     #[Url(as: 'categories', history: true, keep: true)]
     public array $categoryFilter = [];
+
+    /** Ubicaciones seleccionadas (varias; '__none' = sin ubicación); vacío = todas. */
+    #[Url(as: 'locations', history: true, keep: true)]
+    public array $locationFilter = [];
 
     // '' todas, '__none' sin ningún precio, o el id de la tienda.
     #[Url(as: 'store', history: true, keep: true)]
@@ -100,6 +105,8 @@ class MealIngredients extends Component
     public $toBuy = 0;
 
     public string $categoryId = '';
+
+    public string $storageLocationId = '';
 
     public ?string $consumeBy = null;
 
@@ -161,7 +168,7 @@ class MealIngredients extends Component
 
     public function clearFilters(): void
     {
-        $this->reset(['ingredientId', 'categoryFilter', 'storeFilter', 'priceFilter', 'cartFilter', 'dataFilter', 'usageFilter']);
+        $this->reset(['ingredientId', 'categoryFilter', 'locationFilter', 'storeFilter', 'priceFilter', 'cartFilter', 'dataFilter', 'usageFilter']);
         $this->resetPage();
     }
 
@@ -191,6 +198,7 @@ class MealIngredients extends Component
             $this->minStock = $item->min_stock;
             $this->toBuy = $item->to_buy ?? 0;
             $this->categoryId = $item->category_id ?? '';
+            $this->storageLocationId = $item->storage_location_id ?? '';
             $this->consumeBy = $item->consume_by?->format('Y-m-d');
             $this->status = $item->status ?? 'available';
             $this->nextPurchase = $item->next_purchase ?? false;
@@ -227,7 +235,7 @@ class MealIngredients extends Component
                 'alias' => $alias->alias,
             ])->toArray();
         } else {
-            $this->reset(['editingId', 'name', 'baseUnit', 'baseUnitLocked', 'gramsPerPiece', 'stock', 'minStock', 'toBuy', 'categoryId', 'consumeBy', 'status', 'nextPurchase', 'kcal', 'protein', 'carbs', 'fat', 'variants', 'prices', 'aliases']);
+            $this->reset(['editingId', 'name', 'baseUnit', 'baseUnitLocked', 'gramsPerPiece', 'stock', 'minStock', 'toBuy', 'categoryId', 'storageLocationId', 'consumeBy', 'status', 'nextPurchase', 'kcal', 'protein', 'carbs', 'fat', 'variants', 'prices', 'aliases']);
         }
 
         $this->showForm = true;
@@ -300,6 +308,7 @@ class MealIngredients extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'categoryId' => ['nullable', \Illuminate\Validation\Rule::in(array_keys($this->categoryOptions))],
+            'storageLocationId' => ['nullable', Rule::in(array_keys($this->storageLocationOptions()))],
             'baseUnit' => ['required', Rule::in(array_keys(ShoppingItem::BASE_UNITS))],
             'gramsPerPiece' => 'nullable|numeric|gt:0',
             'stock' => 'required|numeric|min:0',
@@ -324,6 +333,7 @@ class MealIngredients extends Component
             'aliases.*.alias' => 'nullable|string|max:255',
         ], attributes: [
             'baseUnit' => 'unidad base',
+            'storageLocationId' => 'ubicación',
             'prices.*.variant_key' => 'variante',
             'prices.*.store_id' => 'tienda',
             'prices.*.amount' => 'precio',
@@ -340,6 +350,7 @@ class MealIngredients extends Component
             'min_stock' => $nullable($this->minStock),
             'to_buy' => $this->toBuy,
             'category_id' => $this->categoryId ?: null,
+            'storage_location_id' => $this->storageLocationId ?: null,
             'consume_by' => $this->consumeBy ?: null,
             'status' => $this->status,
             'next_purchase' => $this->nextPurchase,
@@ -497,6 +508,7 @@ class MealIngredients extends Component
         match ($key) {
             'ingredient' => $this->ingredientId = '',
             'category' => $this->categoryFilter = array_values(array_diff($this->categoryFilter, [$value])),
+            'location' => $this->locationFilter = array_values(array_diff($this->locationFilter, [$value])),
             'store' => $this->storeFilter = '',
             'price' => $this->priceFilter = '',
             'cart' => $this->cartFilter = '',
@@ -516,6 +528,10 @@ class MealIngredients extends Component
         }
         foreach ($this->categoryFilter as $category) {
             $chips[] = ['key' => 'category', 'value' => $category, 'label' => 'Categoría: '.($this->categoryOptions[$category] ?? 'no disponible'), 'icon' => 'bi-tag'];
+        }
+        $locations = $this->locationFilterOptions();
+        foreach ($this->locationFilter as $location) {
+            $chips[] = ['key' => 'location', 'value' => $location, 'label' => 'Ubicación: '.($locations[$location] ?? 'no disponible'), 'icon' => 'bi-geo-alt'];
         }
         if ($this->storeFilter !== '') {
             $chips[] = ['key' => 'store', 'value' => null, 'label' => 'Tienda: '.($this->storeFilter === '__none' ? 'Sin tienda' : ($stores[$this->storeFilter] ?? 'no disponible')), 'icon' => 'bi-shop'];
@@ -556,6 +572,19 @@ class MealIngredients extends Component
         // The event is enough to trigger a fresh render of the catalog.
     }
 
+    /** Ubicaciones activas para asignar, más la actual del producto aunque esté archivada. */
+    public function storageLocationOptions(): array
+    {
+        $current = $this->editingId ? ShoppingItem::whereKey($this->editingId)->value('storage_location_id') : null;
+
+        return StorageLocation::options(include: [$current]);
+    }
+
+    public function locationFilterOptions(): array
+    {
+        return [StorageLocation::NONE => 'Sin ubicación'] + StorageLocation::options(include: StorageLocation::where('user_id', auth()->id())->pluck('id')->all());
+    }
+
     private function defaultContentUnit(): string
     {
         return array_key_first(self::CONTENT_UNITS[$this->baseUnit] ?? ['' => '']);
@@ -567,6 +596,11 @@ class MealIngredients extends Component
             ->when($this->ingredientId, fn ($q, $id) => $q->whereKey($id))
             ->when($this->search, fn ($q, $s) => $q->where('name', 'like', "%{$s}%"))
             ->when($this->categoryFilter, fn ($q, $c) => $q->whereIn('category_id', \App\Models\MealCategory::expandSelection($c, auth()->id())))
+            ->when($this->locationFilter, function ($q, $selected) {
+                $ids = StorageLocation::expandSelection(array_values(array_diff($selected, [StorageLocation::NONE])), auth()->id());
+                $q->where(fn ($lq) => $lq->whereIn('storage_location_id', $ids)
+                    ->when(in_array(StorageLocation::NONE, $selected, true), fn ($none) => $none->orWhereNull('storage_location_id')));
+            })
             ->when($this->storeFilter === '__none', fn ($q) => $q->whereDoesntHave('prices'))
             ->when($this->storeFilter !== '' && $this->storeFilter !== '__none', fn ($q) => $q->whereHas('prices', fn ($pq) => $pq->where('store_id', $this->storeFilter)))
             ->when($this->priceFilter === 'with', fn ($q) => $q->whereHas('prices'))
