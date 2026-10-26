@@ -57,6 +57,7 @@
             <a href="{{ route('meals.settings') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'stores' ? 'is-active' : '' }}" @if ($section === 'stores') aria-current="page" @endif><i class="bi bi-shop" aria-hidden="true"></i> Tiendas</a>
             <a href="{{ route('meals.settings.categories') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'categories' ? 'is-active' : '' }}" @if ($section === 'categories') aria-current="page" @endif><i class="bi bi-tags" aria-hidden="true"></i> Categorías de productos</a>
             <a href="{{ route('meals.settings.locations') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'locations' ? 'is-active' : '' }}" @if ($section === 'locations') aria-current="page" @endif><i class="bi bi-geo-alt" aria-hidden="true"></i> Ubicaciones</a>
+            <a href="{{ route('meals.settings.schedules') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'schedules' ? 'is-active' : '' }}" @if ($section === 'schedules') aria-current="page" @endif><i class="bi bi-clock" aria-hidden="true"></i> Horarios</a>
         </nav>
     </div>
     <x-ui.form-dialog :open="$showForm" close="closeForm" submit-action="save" id="meal-settings-form" :title="($editingId ? 'Editar ' : 'Crear ').$labels['one']" :icon="$labels['icon']" :submit="$confirmSimilar ? 'Crear de todos modos' : 'Guardar'">

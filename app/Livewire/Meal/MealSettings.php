@@ -30,6 +30,8 @@ class MealSettings extends Component
     #[Url(as: 'q')]
     public string $search = '';
 
+    public array $schedules = [];
+
     public bool $showForm = false;
     public ?string $editingId = null;
     public string $parent_id = '';
@@ -46,8 +48,25 @@ class MealSettings extends Component
 
     public function mount(string $section = 'stores'): void
     {
-        abort_unless(in_array($section, ['stores', 'categories', 'locations'], true), 404);
+        abort_unless(in_array($section, ['stores', 'categories', 'locations', 'schedules'], true), 404);
         $this->section = $section;
+        $this->schedules = app(\App\Services\Meal\MealSchedule::class)->profiles((int) auth()->id());
+    }
+
+    public function saveSchedules(): void
+    {
+        abort_unless(auth()->check() && $this->section === 'schedules', 403);
+        $rules = [];
+        foreach (['weekday', 'weekend'] as $profile) {
+            foreach (array_keys(\App\Services\Meal\MealSchedule::TYPES) as $type) {
+                $rules["schedules.$profile.$type.time"] = ['required', 'date_format:H:i'];
+                $rules["schedules.$profile.$type.duration"] = ['required', 'integer', 'between:1,1440'];
+            }
+        }
+        $validated = $this->validate($rules);
+        $setting = \App\Models\ModuleSetting::where('user_id', auth()->id())->firstOrCreate(['module' => 'meals']);
+        $setting->update(['settings' => array_merge($setting->settings ?? [], ['schedules' => $validated['schedules']])]);
+        $this->message = 'Horarios guardados.';
     }
 
     public function updatedSearch(): void
@@ -231,6 +250,9 @@ class MealSettings extends Component
 
     public function render()
     {
+        if ($this->section === 'schedules') {
+            return view('livewire.meal.meal-schedules');
+        }
         $query = $this->model()::where('user_id', auth()->id())->when($this->search !== '', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'));
         if ($this->section === 'stores') {
             $query->withCount(['prices', 'purchases']);

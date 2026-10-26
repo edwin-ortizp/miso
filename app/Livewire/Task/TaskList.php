@@ -293,6 +293,56 @@ class TaskList extends Component
         $this->closeForm();
     }
 
+    public function completeTask(string $id, TaskGamificationService $gamification): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        DB::transaction(function () use ($id, $gamification): void {
+            $task = Task::where('user_id', auth()->id())->where('completed', false)->lockForUpdate()->find($id);
+            if (! $task || $this->prepareRecurringCompletion($task)) {
+                return;
+            }
+
+            $result = $gamification->toggle($task);
+            if ($result['completed']) {
+                $this->dispatch('task-completed', ...$result);
+            }
+        });
+    }
+
+    public function moveToDay(string $id, int $daysFromToday): void
+    {
+        if (! auth()->check() || ! in_array($daysFromToday, [0, 1], true)) {
+            return;
+        }
+
+        DB::transaction(function () use ($id, $daysFromToday): void {
+            $task = Task::where('user_id', auth()->id())->where('completed', false)->lockForUpdate()->find($id);
+            if (! $task) {
+                return;
+            }
+
+            $target = today()->addDays($daysFromToday);
+            $reference = $task->end_date ?? $task->start_date;
+            if (! $reference) {
+                $task->update(['end_date' => $target, 'end_is_date' => true]);
+
+                return;
+            }
+
+            $shift = (int) $reference->copy()->startOfDay()->diffInDays($target, false);
+            $dates = [];
+            foreach (['start_date', 'end_date'] as $field) {
+                if ($task->{$field}) {
+                    $dates[$field] = $task->{$field}->copy()->addDays($shift);
+                }
+            }
+            $task->update($dates);
+        });
+    }
+
     public function toggleComplete(string $id, TaskGamificationService $gamification): void
     {
         $task = Task::find($id);

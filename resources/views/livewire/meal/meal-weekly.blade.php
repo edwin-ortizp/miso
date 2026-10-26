@@ -133,6 +133,7 @@
                       icon="bi-egg-fried" submit-action="save" :submit="$editingId ? 'Actualizar' : 'Guardar'"
                       :sections="[
                           'composition' => ['label' => 'Composición', 'icon' => 'bi-basket', 'error' => $errors->has('formItems') || $errors->has('formItems.*')],
+                          'schedule' => ['label' => 'Horario', 'icon' => 'bi-clock', 'error' => $errors->has('formTime') || $errors->has('formDuration')],
                           'nutrition' => ['label' => 'Resumen nutricional', 'icon' => 'bi-heart-pulse', 'error' => $errors->has('formCalories')],
                           'notes' => ['label' => 'Notas', 'icon' => 'bi-journal-text', 'error' => $errors->has('formNotes')],
                       ]">
@@ -237,6 +238,14 @@
             </fieldset>
         </x-ui.form-dialog-section>
 
+        <x-ui.form-dialog-section name="schedule" title="Horario de esta comida">
+            <p>Perfil: {{ $effectiveSchedule['time'] ?? '' }} · {{ $effectiveSchedule['duration'] ?? '' }} minutos. Deja un campo vacío para usar su valor del perfil.</p>
+            <x-ui.field type="time" name="formTime" label="Hora puntual" wire:model="formTime" :help="'Hora del perfil: '.($effectiveSchedule['time'] ?? '')" />
+            <x-ui.field type="number" name="formDuration" label="Duración puntual (minutos)" wire:model="formDuration" min="1" max="1440" :help="'Duración del perfil: '.($effectiveSchedule['duration'] ?? '')" />
+            <button type="button" class="md-btn md-btn-text" wire:click="resetSchedule">Volver al perfil</button>
+            @if ($editingId)<button type="button" class="md-btn md-btn-outlined" wire:click="saveSchedule" wire:loading.attr="disabled">Guardar solo horario</button>@endif
+            @if ($scheduleMessage)<p role="status">{{ $scheduleMessage }}</p>@endif
+        </x-ui.form-dialog-section>
         <x-ui.form-dialog-section name="nutrition" title="Resumen nutricional">
             <div class="meal-calorie-summary">
                 <div><span>Total efectivo</span><strong>{{ $formCalories ?? $this->calculatedFormCalories() }} kcal</strong></div>

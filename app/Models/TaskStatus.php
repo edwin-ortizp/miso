@@ -43,7 +43,7 @@ class TaskStatus extends Model
         ['name' => 'Done', 'type' => self::DONE],
     ];
 
-    protected $fillable = ['name', 'type', 'sort_order'];
+    protected $fillable = ['color', 'name', 'type', 'sort_order'];
 
     protected function casts(): array
     {

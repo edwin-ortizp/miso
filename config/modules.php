@@ -119,7 +119,10 @@ return [
     'pomodoro' => [
         'archetype' => 'daily-log',
         'title' => 'Pomodoro', 'subtitle' => 'Tiempo de enfoque, pausas y constancia.', 'icon' => 'bi-stopwatch',
-        'patterns' => ['pomodoro*'], 'preserve' => ['date'],
+        'patterns' => ['pomodoro*'], 'preserve' => ['date', 'q', 'sort', 'month'],
+        // El temporizador muestra meta del día y calendario de cumplimiento en el panel contextual.
+        'rail' => true,
+        'rail_routes' => ['pomodoro'],
         'tabs' => [
             ['label' => 'Temporizador', 'route' => 'pomodoro', 'icon' => 'bi-stopwatch', 'active' => ['pomodoro']],
             ['label' => 'Ajustes', 'route' => 'pomodoro.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['pomodoro.settings']],
@@ -137,7 +140,7 @@ return [
             ['label' => 'Ingredientes', 'route' => 'meals.ingredients', 'icon' => 'bi-basket', 'active' => ['meals.ingredients', 'meals.compare']],
             ['label' => 'Compras', 'route' => 'meals.shopping', 'icon' => 'bi-cart3', 'active' => ['meals.shopping']],
             ['label' => 'Historial de compras', 'route' => 'meals.purchases', 'icon' => 'bi-receipt', 'active' => ['meals.purchases', 'meals.purchases.show']],
-            ['label' => 'Ajustes', 'route' => 'meals.settings', 'archetype' => 'settings', 'icon' => 'bi-gear', 'active' => ['meals.settings', 'meals.settings.categories', 'meals.settings.locations']],
+            ['label' => 'Ajustes', 'route' => 'meals.settings', 'archetype' => 'settings', 'icon' => 'bi-gear', 'active' => ['meals.settings', 'meals.settings.categories', 'meals.settings.locations', 'meals.settings.schedules']],
         ],
     ],
     'tasks' => [

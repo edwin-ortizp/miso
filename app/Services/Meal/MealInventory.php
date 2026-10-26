@@ -148,7 +148,7 @@ class MealInventory
 
     public function plan(int $userId, array $data, ?string $key = null): array
     {
-        Validator::make($data, ['date' => ['required', 'date'], 'meal_type' => ['required', Rule::in(self::TYPES)], 'mode' => ['nullable', Rule::in(['append', 'replace'])], 'notes' => ['nullable', 'string', 'max:5000'], 'calories' => ['nullable', 'integer', 'min:0'], 'entry_id' => ['nullable', 'integer']])->validate();
+        Validator::make($data, ['date' => ['required', 'date'], 'meal_type' => ['required', Rule::in(self::TYPES)], 'mode' => ['nullable', Rule::in(['append', 'replace'])], 'notes' => ['nullable', 'string', 'max:5000'], 'calories' => ['nullable', 'integer', 'min:0'], 'scheduled_time' => ['nullable', 'date_format:H:i'], 'duration_minutes' => ['nullable', 'integer', 'between:1,1440'], 'entry_id' => ['nullable', 'integer']])->validate();
 
         return $this->operation($userId, 'plan', $data, $key, function () use ($userId, $data) {
             $date = Carbon::parse($data['date'])->toDateString();
@@ -161,6 +161,7 @@ class MealInventory
             } else {
                 $entry = MealPlanEntry::create(['user_id' => $userId, 'date' => $date, 'meal_type' => $data['meal_type'], 'status' => 'planned']);
             }
+            $entry->fill(array_intersect_key($data, array_flip(['scheduled_time', 'duration_minutes'])))->save();
             $rows = $this->normalizeItems($userId, $data['items']);
             $replace = ($data['mode'] ?? 'append') === 'replace';
             $old = $entry->items()->where('user_id', $userId)->get()->keyBy('id');
@@ -432,8 +433,8 @@ class MealInventory
                 foreach ($allItems as $item) {
                     MealPlanEntryItem::where('user_id', $userId)->whereKey($item->id)->update(['recipe_id' => $item->recipe_id]);
                 }
-                $header = $source->only(['notes', 'calories']);
-                $source->update($destination->only(['notes', 'calories']));
+                $header = $source->only(['notes', 'calories', 'scheduled_time', 'duration_minutes']);
+                $source->update($destination->only(['notes', 'calories', 'scheduled_time', 'duration_minutes']));
                 $destination->update($header);
             } elseif (! $destination && $action === 'move') {
                 $source->update(['date' => $date, 'meal_type' => $target['meal_type']]);
@@ -441,6 +442,9 @@ class MealInventory
             } else {
                 $newDestination = ! $destination;
                 $destination ??= MealPlanEntry::create(['user_id' => $userId, 'date' => $date, 'meal_type' => $target['meal_type'], 'status' => 'planned']);
+                if ($newDestination) {
+                    $destination->update($source->only(['scheduled_time', 'duration_minutes']));
+                }
                 $offset = $destination->items()->count();
                 foreach ($source->items as $index => $item) {
                     $attributes = $item->only(['recipe_id', 'preparation_id', 'name', 'portions', 'calories', 'ingredients']);

@@ -15,6 +15,13 @@ trait LoadsTaskCategories
 {
     public array $categories = [];
 
+    protected array $categoryColors = [];
+
+    public function categoryColor(?string $key): ?string
+    {
+        return $this->categoryColors[$key] ?? null;
+    }
+
     public function bootLoadsTaskCategories(): void
     {
         $this->categories = $this->taskCategoryOptions();
@@ -27,6 +34,8 @@ trait LoadsTaskCategories
 
     private function taskCategoryOptions(): array
     {
+        $this->categoryColors = auth()->id()
+            ? TaskCategory::where('user_id', auth()->id())->pluck('color', 'key')->all() : [];
         $options = TaskCategory::options();
 
         Task::query()->whereNotNull('category')->where('category', '!=', '')

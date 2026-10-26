@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { registerTaskCalendar } from '../../resources/js/task-calendar.js';
+import { registerTaskCalendar, readCalendarLayers } from '../../resources/js/task-calendar.js';
 
 function calendar(wire) {
     let factory;
@@ -12,6 +12,71 @@ function calendar(wire) {
         $refs: { statusTrigger: { focus() {} } },
     });
 }
+
+test('layer preferences validate stored values and tolerate inaccessible storage', () => {
+    const original = globalThis.localStorage;
+    try {
+        for (const value of [null, '{', '{}', '{"tasks":false,"plans":true,"birthdays":"true"}']) {
+            globalThis.localStorage = { getItem: () => value };
+            assert.deepEqual(readCalendarLayers(), { tasks: true, plans: true, birthdays: true, meals: true });
+        }
+        globalThis.localStorage = { getItem: () => '{"tasks":false,"plans":true,"birthdays":false,"extra":42}' };
+        assert.deepEqual(readCalendarLayers(), { tasks: false, plans: true, birthdays: false, meals: true });
+        globalThis.localStorage = { getItem() { throw Error('blocked'); } };
+        assert.deepEqual(readCalendarLayers(), { tasks: true, plans: true, birthdays: true, meals: true });
+    } finally { globalThis.localStorage = original; }
+});
+
+test('layers filter mounted events without requests and persist even an empty selection', () => {
+    const original = globalThis.localStorage;
+    const values = new Map();
+    try {
+        globalThis.localStorage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
+        const state = calendar({ events() { assert.fail('No request expected'); } });
+        const events = ['tasks', 'plans', 'birthdays'].map(type => ({ extendedProps: { type }, setProp(key, value) { this[key] = value; } }));
+        state.calendar = { batchRendering: fn => fn(), getEvents: () => events };
+        state.fitCalendar = () => {};
+        for (const type of ['tasks', 'plans', 'birthdays']) state.toggleLayer(type);
+        assert.deepEqual(events.map(event => event.display), ['none', 'none', 'none']);
+        assert.deepEqual(readCalendarLayers(), { tasks: false, plans: false, birthdays: false, meals: true });
+        state.toggleLayer('meals');
+        assert.equal(readCalendarLayers().meals, false);
+        state.toggleLayer('plans');
+        assert.deepEqual(events.map(event => event.display), ['none', 'auto', 'none']);
+        assert.equal(state.quickOpen, false);
+        globalThis.localStorage.setItem = () => { throw Error('blocked'); };
+        state.toggleLayer('tasks');
+        assert.equal(events[0].display, 'auto');
+    } finally { globalThis.localStorage = original; }
+});
+
+test('only task events can be persisted and failures revert the drag', async () => {
+    const calls = [];
+    const state = calendar({ moveTask: async (...args) => calls.push(args) });
+    let reverted = 0;
+    for (const type of ['plans', 'birthdays', 'meals', 'tasks']) {
+        await state.persistEvent({ event: { id: type, startStr: '2026-10-05', endStr: '', allDay: true, extendedProps: { type } }, revert: () => reverted++ });
+    }
+    assert.equal(reverted, 3);
+    assert.deepEqual(calls, [['tasks', '2026-10-05', null, true]]);
+    await calendar({ moveTask: async () => { throw Error('offline'); } }).persistEvent({ event: { extendedProps: { type: 'tasks' } }, revert: () => reverted++ });
+    assert.equal(reverted, 4);
+});
+
+test('clicks route new layers to detail and keep task quick view', () => {
+    const original = globalThis.window;
+    const urls = [];
+    try {
+        globalThis.window = { location: { assign: url => urls.push(url) } };
+        const state = calendar({});
+        let opened = false;
+        state.openQuick = () => { opened = true; };
+        state.clickEvent({ event: { extendedProps: { type: 'tasks' } } });
+        assert.equal(opened, true);
+        for (const type of ['plans', 'birthdays']) state.clickEvent({ event: { extendedProps: { type, detailUrl: `/${type}/id` } } });
+        assert.deepEqual(urls, ['/plans/id', '/birthdays/id']);
+    } finally { globalThis.window = original; }
+});
 
 test('failed status requests preserve the popover and allow retry', async () => {
     let focused = false;

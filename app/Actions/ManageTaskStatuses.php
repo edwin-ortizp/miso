@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Models\User;
+use App\Support\Ui\CatalogColors;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -16,8 +17,9 @@ use InvalidArgumentException;
  */
 class ManageTaskStatuses
 {
-    public function create(User $user, string $name, string $type): TaskStatus
+    public function create(User $user, string $name, string $type, ?string $color = null): TaskStatus
     {
+        CatalogColors::validate($color);
         $this->assertType($type);
         if ($type === TaskStatus::DONE) {
             throw new InvalidArgumentException('Solo puede haber un estado de tipo terminado; renombra el que ya existe.');
@@ -28,6 +30,7 @@ class ManageTaskStatuses
         $this->assertNameAvailable($user->id, $name);
 
         $status = new TaskStatus([
+            'color' => $color,
             'name' => $name,
             'type' => $type,
             'sort_order' => (int) $statuses->where('type', $type)->max('sort_order') + 1,
@@ -38,7 +41,7 @@ class ManageTaskStatuses
         return $status;
     }
 
-    public function update(TaskStatus $status, string $name, ?string $type = null): TaskStatus
+    public function update(TaskStatus $status, string $name, ?string $type = null, ?string $color = null): TaskStatus
     {
         $name = $this->cleanName($name);
         $this->assertNameAvailable($status->user_id, $name, $status->id);
@@ -53,6 +56,10 @@ class ManageTaskStatuses
             }
             $status->type = $type;
             $status->sort_order = (int) TaskStatus::withoutGlobalScopes()->where('user_id', $status->user_id)->where('type', $type)->max('sort_order') + 1;
+        }
+
+        if (func_num_args() >= 4) {
+            $status->color = CatalogColors::validate($color);
         }
 
         $status->name = $name;

@@ -63,7 +63,7 @@
                             <span class="md-chip-tonal {{ $priorityChipClass }}">{{ $priorities[$task->priority] ?? $task->priority }}</span>
                         @endif
                         @if ($task->category)
-                            <span class="md-chip-tonal md-chip-tonal--primary">{{ $categories[$task->category] ?? $task->category }}</span>
+                            <x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="primary">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>
                         @endif
                         @if ($task->size)
                             <span class="md-chip-tonal">{{ $task->size }}</span>
@@ -100,12 +100,18 @@
                 </button>
                 <div class="task-row__status">
                     @if ($task->status)
-                        <span class="md-chip-tonal {{ $task->completed ? 'md-chip-tonal--success' : '' }}" title="Estado"><i class="bi {{ $task->status->icon }}" aria-hidden="true"></i> {{ $task->status->name }}</span>
+                        <x-ui.catalog-chip :color="$task->status->color" :tone="$task->completed ? 'success' : 'neutral'" :icon="$task->status->icon" title="Estado">{{ $task->status->name }}</x-ui.catalog-chip>
                     @endif
                 </div>
                 <div class="md-list-item-trailing">
                     <x-ui.row-actions :label="'Más acciones de '.$task->title">
                         <x-slot:primary wire:click.stop="advanceStatus('{{ $task->id }}')">{{ $this->advanceLabel($task) }}</x-slot:primary>
+                        @unless ($task->completed)
+                            <x-ui.menu-item icon="bi-check2-circle" tone="success" wire:click="completeTask('{{ $task->id }}')" wire:loading.attr="disabled">Completar</x-ui.menu-item>
+                            <x-ui.menu-item icon="bi-calendar-event" wire:click="moveToDay('{{ $task->id }}', 0)" wire:loading.attr="disabled">Mover para hoy</x-ui.menu-item>
+                            <x-ui.menu-item icon="bi-calendar-plus" wire:click="moveToDay('{{ $task->id }}', 1)" wire:loading.attr="disabled">Mover para mañana</x-ui.menu-item>
+                            <x-ui.menu-divider />
+                        @endunless
                         <x-ui.menu-item icon="bi-pencil" x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})">Editar</x-ui.menu-item>
                         <x-ui.menu-divider />
                         <x-ui.menu-item icon="bi-trash" tone="danger" wire:click="delete('{{ $task->id }}')" wire:confirm="La tarea «{{ $task->title }}» se elimina de forma permanente.">Eliminar</x-ui.menu-item>

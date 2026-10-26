@@ -170,6 +170,30 @@
 
 /* Calendario (FullCalendar): sus variables --fc-* se resuelven con tokens M3. */
 .md-task-calendar { padding: 16px; }
+.md-calendar-layers { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.md-calendar-layer { min-height: 48px; color: var(--md-sys-color-on-surface); }
+.md-calendar-layer:hover { color: var(--md-sys-color-on-surface); }
+.md-calendar-layer--task { --calendar-layer-color: var(--md-sys-color-primary); }
+.md-calendar-layer--plan { --calendar-layer-color: var(--md-sys-color-tertiary); }
+.md-calendar-layer--birthday { --calendar-layer-color: var(--md-sys-color-secondary); }
+.md-calendar-layer i { color: var(--calendar-layer-color); }
+.md-calendar-layer[aria-pressed="true"] { background: var(--md-sys-color-surface-container-high); border-color: var(--calendar-layer-color); }
+.md-calendar-layer[aria-pressed="false"] { border-style: dashed; }
+.md-task-calendar__surface .md-calendar-plan {
+  --fc-event-bg-color: var(--md-sys-color-tertiary-container);
+  --fc-event-border-color: var(--md-sys-color-tertiary-container);
+  --fc-event-text-color: var(--md-sys-color-on-tertiary-container);
+}
+.md-task-calendar__surface .md-calendar-birthday {
+  --fc-event-bg-color: var(--md-sys-color-secondary-container);
+  --fc-event-border-color: var(--md-sys-color-secondary-container);
+  --fc-event-text-color: var(--md-sys-color-on-secondary-container);
+}
+.md-task-calendar__surface .md-calendar-task { --calendar-event-icon: '\F271'; }
+.md-task-calendar__surface .md-calendar-plan { --calendar-event-icon: '\F47F'; }
+.md-task-calendar__surface .md-calendar-birthday { --calendar-event-icon: '\F6ED'; }
+.md-task-calendar__surface .fc-event-title::before,
+.md-task-calendar__surface .fc-list-event-title a::before { content: var(--calendar-event-icon); font-family: 'bootstrap-icons'; margin-right: 4px; }
 .md-task-calendar__surface {
   --calendar-bottom-reserve: 24px;
   --fc-border-color: var(--md-sys-color-outline-variant);
@@ -269,3 +293,6 @@
   .md-calendar-view-picker__label { position: absolute; inset: 0 24px 0 4px; display: block; line-height: 48px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; font-size: 12px; font-weight: 500; }
   .md-calendar-mobile-toolbar .md-menu__surface { z-index: var(--md-sys-z-menu, 1100); }
 }
+
+.md-calendar-meal { --fc-event-bg-color: var(--md-sys-color-secondary-container); --fc-event-border-color: var(--md-sys-color-secondary); --fc-event-text-color: var(--md-sys-color-on-secondary-container); }
+.md-calendar-layer--meal { color: var(--md-sys-color-secondary); }

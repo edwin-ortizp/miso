@@ -32,7 +32,7 @@
                             || ($status->type === TaskStatus::TODO && $todoStatusCount === 1);
                     @endphp
                     <tr wire:key="task-status-{{ $status->id }}">
-                        <td data-label="Nombre" class="md-table__title"><i class="bi {{ $status->icon }}" aria-hidden="true"></i> {{ $status->name }}</td>
+                        <td data-label="Nombre" class="md-table__title"><x-ui.catalog-chip :color="$status->color" :icon="$status->icon">{{ $status->name }}</x-ui.catalog-chip></td>
                         <td data-label="Tipo" class="md-table__nowrap"><x-ui.chip variant="tonal" :tone="$tones[$status->type] ?? 'neutral'" :icon="$status->icon">{{ $status->type_label }}</x-ui.chip></td>
                         <td data-label="Tareas" class="md-table__nowrap">{{ $total ?: 'Sin tareas' }}</td>
                         <td data-label="Acciones" class="md-table__actions">
@@ -72,6 +72,7 @@
                   :submit="$editingStatusId ? 'Actualizar' : 'Crear estado'">
     <div class="d-flex flex-column gap-3">
         <x-ui.field name="statusName" label="Nombre" :required="true" maxlength="60" wire:model="statusName" />
+        <x-ui.catalog-color-select name="statusColor" :selected="$statusColor" :preview="$statusName" :icon="\App\Models\TaskStatus::TYPES[$statusType]['icon'] ?? 'bi-circle'" />
         @if ($editingStatus && $editingStatus->type === TaskStatus::DONE)
             <p class="md-body-small mb-0">Tipo: {{ $statusTypes[TaskStatus::DONE] }}. Es el único estado terminado y no cambia de tipo.</p>
         @else

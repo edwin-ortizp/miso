@@ -12,7 +12,6 @@ use App\Models\ShoppingItem;
 use App\Models\Store;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\Schema;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -80,8 +79,8 @@ class MealSettingsTest extends TestCase
         $other = User::factory()->create();
         $this->actingAs($other);
         $this->assertArrayNotHasKey($category->id, MealCategory::options());
-        $this->assertThrows(fn () => Livewire::test(MealSettings::class)->assertDontSee('Tienda privada')->call('openForm', $store->id), ModelNotFoundException::class);
-        $this->assertThrows(fn () => Livewire::test(MealSettings::class, ['section' => 'categories'])->assertDontSee('Categoría privada')->call('delete', $category->id), ModelNotFoundException::class);
+        Livewire::test(MealSettings::class)->assertDontSee('Tienda privada')->call('openForm', $store->id)->assertNotFound();
+        Livewire::test(MealSettings::class, ['section' => 'categories'])->assertDontSee('Categoría privada')->call('delete', $category->id)->assertNotFound();
         Livewire::test(MealShopping::class)->call('openForm')->set('itemName', 'No válido')->set('itemBaseUnit', 'g')->set('itemCategory', $category->id)->call('save')->assertHasErrors('itemCategory');
         $this->assertDatabaseHas('meal_categories', ['id' => $category->id]);
         $this->assertDatabaseHas('stores', ['id' => $store->id]);

@@ -30,7 +30,7 @@
                         $total = (int) ($row->total ?? 0);
                     @endphp
                     <tr wire:key="task-category-{{ $category->id }}">
-                        <td data-label="Nombre" class="md-table__title"><i class="bi {{ $category->icon ?: 'bi-tag' }}" aria-hidden="true"></i> {{ $category->path_label }}</td>
+                        <td data-label="Nombre" class="md-table__title"><x-ui.catalog-chip :color="$category->color" :icon="$category->icon ?: 'bi-tag'">{{ $category->path_label }}</x-ui.catalog-chip></td>
                         <td data-label="Prefijo"><code>{{ $category->code_prefix }}</code></td>
                         <td data-label="Pendientes" class="md-table__nowrap">{{ $pending }}</td>
                         <td data-label="Total" class="md-table__nowrap">{{ $total }}</td>
@@ -77,6 +77,7 @@
         <x-ui.field name="name" label="Nombre" :required="true" maxlength="60" wire:model="name" />
         <x-ui.field name="codePrefix" label="Prefijo" maxlength="5" help="Deja vacío para sugerirlo a partir del nombre. Los códigos existentes se conservan." wire:model="codePrefix" />
         <x-ui.category-parent model="TaskCategory" :editing-id="$editingId" />
+        <x-ui.catalog-color-select name="color" :selected="$color" :preview="$name" :icon="$icon" />
         <x-ui.select name="icon" label="Icono" :selected="$icon" :options="$icons" :icon="$icon" wire:model.live="icon" />
     </div>
 </x-ui.form-dialog>

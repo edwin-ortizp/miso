@@ -15,10 +15,54 @@ function loadFullCalendar() {
 }
 
 const compact = () => matchMedia('(max-width: 767.98px)').matches;
+const layerStorageKey = 'miso.task-calendar.layers.v1';
+const defaultLayers = () => ({ tasks: true, plans: true, birthdays: true, meals: true });
+
+export function readCalendarLayers() {
+    try {
+        const value = JSON.parse(localStorage.getItem(layerStorageKey));
+        if (value && ['tasks', 'plans', 'birthdays'].every(key => typeof value[key] === 'boolean')) {
+            return Object.fromEntries(Object.keys(defaultLayers()).map(key => [key, typeof value[key] === 'boolean' ? value[key] : true]));
+        }
+    } catch { /* El calendario funciona también sin almacenamiento local. */ }
+    return defaultLayers();
+}
 
 export function registerTaskCalendar(Alpine) {
     Alpine.data('taskCalendar', (wire) => ({
         calendar: null,
+        layers: readCalendarLayers(),
+        toggleLayer(layer) {
+            if (!Object.hasOwn(this.layers, layer)) return;
+            this.layers[layer] = !this.layers[layer];
+            try { localStorage.setItem(layerStorageKey, JSON.stringify(this.layers)); } catch { /* Preferencia solo en memoria. */ }
+            this.quickOpen = false;
+            this.statusOpen = false;
+            this.calendar?.batchRendering(() => {
+                for (const event of this.calendar.getEvents()) {
+                    event.setProp('display', this.layers[event.extendedProps.type] ? 'auto' : 'none');
+                }
+            });
+            this.fitCalendar();
+        },
+        async persistEvent(info) {
+            if (info.event.extendedProps.type !== 'tasks') {
+                info.revert();
+                return;
+            }
+            try {
+                await wire.moveTask(info.event.id, info.event.startStr, info.event.endStr || null, info.event.allDay);
+            } catch {
+                info.revert();
+            }
+        },
+        clickEvent(info) {
+            if (info.event.extendedProps.type === 'tasks') this.openQuick(info.event, info.el);
+            else if (info.event.extendedProps.detailUrl) {
+                this.quickOpen = false;
+                window.location.assign(info.event.extendedProps.detailUrl);
+            }
+        },
         calendarLoading: false,
         mobileDate: '',
         mobileView: 'Día',
@@ -130,13 +174,6 @@ export function registerTaskCalendar(Alpine) {
         },
         async init() {
             const { Calendar, locale, plugins } = await loadFullCalendar();
-            const persist = async (info) => {
-                try {
-                    await wire.moveTask(info.event.id, info.event.startStr, info.event.endStr || null, info.event.allDay);
-                } catch {
-                    info.revert();
-                }
-            };
 
             this.calendar = new Calendar(this.$refs.calendar, {
                 plugins,
@@ -184,19 +221,19 @@ export function registerTaskCalendar(Alpine) {
                 dayMaxEvents: 3,
                 events: (info, success, failure) => wire.events(info.startStr, info.endStr).then(events => {
                     this.latestProps = Object.fromEntries(events.map(event => [event.id, event.extendedProps]));
-                    success(events);
+                    success(events.map(event => ({ ...event, display: this.layers[event.extendedProps.type] ? 'auto' : 'none' })));
                 }, failure),
-                eventClick: (info) => this.openQuick(info.event, info.el),
+                eventClick: (info) => this.clickEvent(info),
                 // El clic en otro evento no debe contar como «clic afuera» del popover abierto.
-                eventDidMount: (info) => { info.el.dataset.popoverTrigger = ''; },
+                eventDidMount: (info) => { info.el.dataset.popoverTrigger = ''; if (info.event.extendedProps.type === 'meals') { info.el.title = `${info.event.extendedProps.timeLabel} · ${info.event.title}`; info.el.setAttribute('aria-label', info.el.title); } },
                 dateClick: (info) => this.$dispatch('task-editor', {
                     action: 'openForm',
                     prefill: info.allDay
                         ? { startDate: info.dateStr }
                         : { startDate: info.dateStr.slice(0, 10), startTime: info.dateStr.slice(11, 16) },
                 }),
-                eventDrop: persist,
-                eventResize: persist,
+                eventDrop: info => this.persistEvent(info),
+                eventResize: info => this.persistEvent(info),
             });
             this.calendar.render();
             this.resize = () => {

@@ -43,6 +43,42 @@ async function taskSection(dialog, name) {
     await nav.getByRole('button', { name: new RegExp('^' + name) }).click();
 }
 
+for (const width of [390, 1440]) {
+    for (const theme of ['light', 'dark']) {
+        test(`acciones rápidas de tareas ${width}px ${theme}`, async ({ page }) => {
+            await page.setViewportSize({ width, height: 1000 });
+            await page.goto('/tasks/list');
+            await page.evaluate(theme => document.documentElement.dataset.theme = theme, theme);
+            const row = page.locator('.task-row').filter({ hasText: 'Tarea de prueba de distribución' });
+            const trigger = row.getByRole('button', { name: 'Más acciones de Tarea de prueba de distribución', exact: true });
+            await trigger.focus();
+            await page.keyboard.press('Enter');
+            await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+            const complete = row.getByRole('menuitem', { name: 'Completar', exact: true });
+            await expect(complete).toBeVisible();
+            await expect(row.getByRole('menuitem', { name: 'Mover para hoy', exact: true })).toBeVisible();
+            await expect(row.getByRole('menuitem', { name: 'Mover para mañana', exact: true })).toBeVisible();
+            await expect(row.getByRole('menuitem', { name: 'Editar', exact: true })).toBeVisible();
+            await expect(row.getByRole('menuitem', { name: 'Eliminar', exact: true })).toBeVisible();
+            const colors = await complete.evaluate(el => ({ text: getComputedStyle(el).color, icon: getComputedStyle(el.querySelector('i')).color }));
+            expect(colors.text).toBe(colors.icon);
+            const box = await row.getByRole('menu').boundingBox();
+            expect(box.x).toBeGreaterThanOrEqual(0);
+            expect(box.x + box.width).toBeLessThanOrEqual(width);
+            const a11y = await new AxeBuilder({ page }).include('.task-row .md-menu__surface').withRules(['color-contrast']).analyze();
+            expect(a11y.violations).toEqual([]);
+            await complete.focus();
+            await page.keyboard.press('Escape');
+            await expect(trigger).toBeFocused();
+            await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+            await trigger.click();
+            await row.getByRole('menuitem', { name: 'Mover para mañana', exact: true }).click();
+            await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+            await expect(row).toBeVisible();
+        });
+    }
+}
+
 for (const width of [390, 768, 1440, 1920, 2560]) {
     test(`Salud y Tareas a ${width}px`, async ({ page }) => {
         await page.setViewportSize({ width, height: 1000 });

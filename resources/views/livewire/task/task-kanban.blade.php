@@ -35,7 +35,7 @@
                                             <x-ui.task-code :code="$task->code" /> {{ $task->title }}
                                         </span>
                                         @if ($task->category)
-                                            <div class="task-kanban-card__category"><span class="md-chip md-chip-tonal task-kanban-category"><i class="bi bi-tag" aria-hidden="true"></i>{{ $categories[$task->category] ?? $task->category }}</span></div>
+                                            <div class="task-kanban-card__category"><x-ui.catalog-chip :color="$this->categoryColor($task->category)" icon="bi-tag" class="task-kanban-category">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip></div>
                                         @endif
                                     </div>
                                 </div>

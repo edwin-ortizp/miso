@@ -5,6 +5,7 @@ namespace App\Actions;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\User;
+use App\Support\Ui\CatalogColors;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -14,11 +15,13 @@ use InvalidArgumentException;
  */
 class ManageTaskCategories
 {
-    public function create(User $user, string $name, ?string $icon = null, ?string $parentId = null, ?string $codePrefix = null): TaskCategory
+    public function create(User $user, string $name, ?string $icon = null, ?string $parentId = null, ?string $codePrefix = null, ?string $color = null): TaskCategory
     {
         $name = $this->validName($user, $name);
+        CatalogColors::validate($color);
 
         return $user->taskCategories()->create([
+            'color' => $color,
             'parent_id' => $parentId,
             'code_prefix' => $codePrefix,
             'key' => TaskCategory::uniqueKey($name, $user->id),
@@ -28,8 +31,12 @@ class ManageTaskCategories
         ]);
     }
 
-    public function update(TaskCategory $category, string $name, ?string $icon = null, ?string $parentId = null, ?string $codePrefix = null): TaskCategory
+    public function update(TaskCategory $category, string $name, ?string $icon = null, ?string $parentId = null, ?string $codePrefix = null, ?string $color = null): TaskCategory
     {
+        if (func_num_args() >= 6) {
+            $category->color = CatalogColors::validate($color);
+        }
+
         $category->update([
             'code_prefix' => $codePrefix ?? $category->code_prefix,
             'parent_id' => func_num_args() >= 4 ? $parentId : $category->parent_id,

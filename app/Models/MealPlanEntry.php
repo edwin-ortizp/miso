@@ -13,6 +13,8 @@ class MealPlanEntry extends Model
         'user_id',
         'date',
         'meal_type',
+        'scheduled_time',
+        'duration_minutes',
         'notes',
         'calories',
         'status',
@@ -26,6 +28,7 @@ class MealPlanEntry extends Model
     {
         return [
             'date' => 'date',
+            'duration_minutes' => 'integer',
             'consumed_at' => 'datetime',
             'consumption' => 'array',
         ];

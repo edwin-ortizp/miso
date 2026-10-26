@@ -161,6 +161,7 @@
 .md-menu__item i { color: var(--md-sys-color-on-surface-variant); font-size: 1rem; }
 .md-menu__item:hover, .md-menu__item:focus-visible { background: var(--md-sys-color-surface-container); outline: none; }
 .md-menu__item--danger, .md-menu__item--danger i { color: var(--md-sys-color-error); }
+.md-menu__item--success, .md-menu__item--success i { color: var(--md-custom-color-success); }
 .md-menu__divider { margin: 4px 0; border: 0; border-top: 1px solid var(--md-sys-color-outline-variant); opacity: 1; }
 
 /* ===== Acciones por fila (x-ui.row-actions) =====

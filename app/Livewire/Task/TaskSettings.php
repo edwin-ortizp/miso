@@ -10,6 +10,7 @@ use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskStatus;
 use App\Services\TaskCodeService;
+use App\Support\Ui\CatalogColors;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -76,6 +77,10 @@ class TaskSettings extends Component
 
     public string $icon = 'bi-tag';
 
+    public string $color = '';
+
+    public string $statusColor = '';
+
     public ?string $deletingId = null;
 
     public string $reassignTo = '';
@@ -127,6 +132,7 @@ class TaskSettings extends Component
         $this->name = '';
         $this->codePrefix = '';
         $this->icon = 'bi-tag';
+        $this->color = '';
 
         if ($id && ($category = TaskCategory::find($id))) {
             $this->editingId = $category->id;
@@ -134,6 +140,7 @@ class TaskSettings extends Component
             $this->codePrefix = $category->code_prefix ?? '';
             $this->parent_id = $category->parent_id ?? '';
             $this->icon = $category->icon ?: 'bi-tag';
+            $this->color = $category->color ?? '';
         }
 
         $this->showForm = true;
@@ -151,16 +158,17 @@ class TaskSettings extends Component
         $this->validate([
             'name' => ['required', 'string', 'max:60'],
             'icon' => ['required', Rule::in(array_keys(self::ICONS))],
+            'color' => ['nullable', Rule::in(array_keys(CatalogColors::OPTIONS))],
         ], [], ['name' => 'nombre', 'icon' => 'icono']);
 
         $category = $this->editingId ? TaskCategory::find($this->editingId) : null;
 
         try {
             if ($category) {
-                $categories->update($category, $this->name, $this->icon, $this->parent_id ?: null, $this->codePrefix ?: null);
+                $categories->update($category, $this->name, $this->icon, $this->parent_id ?: null, $this->codePrefix ?: null, $this->color ?: null);
                 $this->message = "“{$category->name}” actualizada. Sus tareas la conservan.";
             } else {
-                $category = $categories->create(auth()->user(), $this->name, $this->icon, $this->parent_id ?: null, $this->codePrefix ?: null);
+                $category = $categories->create(auth()->user(), $this->name, $this->icon, $this->parent_id ?: null, $this->codePrefix ?: null, $this->color ?: null);
                 $this->message = "“{$category->name}” ya está disponible al crear tareas.";
             }
         } catch (InvalidArgumentException $exception) {
@@ -241,11 +249,13 @@ class TaskSettings extends Component
         $this->editingStatusId = null;
         $this->statusName = '';
         $this->statusType = TaskStatus::TODO;
+        $this->statusColor = '';
 
         if ($id && ($status = TaskStatus::find($id))) {
             $this->editingStatusId = $status->id;
             $this->statusName = $status->name;
             $this->statusType = $status->type;
+            $this->statusColor = $status->color ?? '';
         }
 
         $this->showStatusForm = true;
@@ -263,16 +273,17 @@ class TaskSettings extends Component
         $this->validate([
             'statusName' => ['required', 'string', 'max:60'],
             'statusType' => ['required', Rule::in(array_keys(TaskStatus::TYPES))],
+            'statusColor' => ['nullable', Rule::in(array_keys(CatalogColors::OPTIONS))],
         ], [], ['statusName' => 'nombre', 'statusType' => 'tipo']);
 
         $status = $this->editingStatusId ? TaskStatus::find($this->editingStatusId) : null;
 
         try {
             if ($status) {
-                $statuses->update($status, $this->statusName, $this->statusType);
+                $statuses->update($status, $this->statusName, $this->statusType, $this->statusColor ?: null);
                 $this->message = "Estado “{$status->name}” actualizado.";
             } else {
-                $status = $statuses->create(auth()->user(), $this->statusName, $this->statusType);
+                $status = $statuses->create(auth()->user(), $this->statusName, $this->statusType, $this->statusColor ?: null);
                 $this->message = "Estado “{$status->name}” creado como {$status->type_label}.";
             }
         } catch (InvalidArgumentException $exception) {

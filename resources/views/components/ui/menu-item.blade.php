@@ -5,9 +5,9 @@
 ])
 
 @php
-    abort_unless(in_array($tone, ['neutral', 'danger'], true), 500, "Tono de opción de menú no soportado: {$tone}");
+    abort_unless(in_array($tone, ['neutral', 'danger', 'success'], true), 500, "Tono de opción de menú no soportado: {$tone}");
 
-    $classes = ['md-menu__item', 'md-menu__item--danger' => $tone === 'danger'];
+    $classes = ['md-menu__item', 'md-menu__item--danger' => $tone === 'danger', 'md-menu__item--success' => $tone === 'success'];
 @endphp
 
 @if ($href)

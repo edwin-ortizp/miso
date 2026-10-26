@@ -23,6 +23,14 @@ class MealWeekly extends Component
 {
     use HasUrlDate;
 
+    #[\Livewire\Attributes\Url(as: 'meal')]
+    public ?int $detailMeal = null;
+
+    public ?string $formTime = null;
+    public ?int $formDuration = null;
+    public string $scheduleMessage = '';
+    public array $effectiveSchedule = [];
+
     public bool $showForm = false;
     public string $formDate = '';
     public string $formMealType = '';
@@ -59,6 +67,11 @@ class MealWeekly extends Component
     public function mount(): void
     {
         $this->initializeSelectedDate();
+        if ($this->detailMeal !== null) {
+            $entry = MealPlanEntry::where('user_id', auth()->id())->findOrFail($this->detailMeal);
+            $this->selectedDate = $entry->date->toDateString();
+            $this->openForm($this->selectedDate, $entry->meal_type);
+        }
     }
 
     public function previousWeek(): void
@@ -87,6 +100,11 @@ class MealWeekly extends Component
             ->first();
 
         $this->editingId = $existing?->id;
+        $this->formTime = $existing?->scheduled_time ? substr($existing->scheduled_time, 0, 5) : null;
+        $this->formDuration = $existing?->duration_minutes;
+        $this->scheduleMessage = '';
+        $profiles = app(\App\Services\Meal\MealSchedule::class)->profiles((int) auth()->id());
+        $this->effectiveSchedule = $profiles[Carbon::parse($date)->isWeekend() ? 'weekend' : 'weekday'][$mealType];
         $this->formStatus = $existing?->status ?? 'planned';
         $this->consumption = $existing?->consumption ?? [];
         $this->consumptionMode = $existing?->consumption_mode ?? '';
@@ -108,8 +126,33 @@ class MealWeekly extends Component
     public function closeForm(): void
     {
         $this->showForm = false;
+        $this->detailMeal = null;
         $this->editingId = null;
         $this->resetValidation();
+    }
+
+    private function validateSchedule(): void
+    {
+        $this->formTime = $this->formTime === '' ? null : $this->formTime;
+        $this->validate([
+            'formTime' => ['nullable', 'date_format:H:i'],
+            'formDuration' => ['nullable', 'integer', 'between:1,1440'],
+        ]);
+    }
+
+    public function resetSchedule(): void
+    {
+        $this->formTime = null;
+        $this->formDuration = null;
+    }
+
+    public function saveSchedule(): void
+    {
+        abort_unless(auth()->check() && $this->editingId, 403);
+        $this->validateSchedule();
+        MealPlanEntry::where('user_id', auth()->id())->findOrFail($this->editingId)
+            ->update(['scheduled_time' => $this->formTime, 'duration_minutes' => $this->formDuration]);
+        $this->scheduleMessage = 'Horario guardado.';
     }
 
     /** Fila vacía del compositor: Tipo · Elemento · Cantidad · Unidad. */
@@ -230,6 +273,7 @@ class MealWeekly extends Component
 
     public function save(): void
     {
+        $this->validateSchedule();
         $this->validate([
             'formDate' => ['required', 'date'],
             'formMealType' => ['required', Rule::in(array_keys($this->mealTypes))],
@@ -281,6 +325,7 @@ class MealWeekly extends Component
     private function planData(): array
     {
         return ['entry_id' => $this->editingId, 'date' => $this->formDate, 'meal_type' => $this->formMealType, 'mode' => 'replace',
+            'scheduled_time' => $this->formTime, 'duration_minutes' => $this->formDuration,
             'notes' => trim($this->formNotes) ?: null, 'calories' => $this->formCalories,
             'items' => collect($this->formItems)->map(fn ($row) => $this->itemFromRow($row))->values()->all()];
     }

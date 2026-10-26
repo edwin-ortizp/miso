@@ -3,6 +3,8 @@
 namespace App\Livewire\Task;
 
 use App\Livewire\Concerns\HandlesRecurringTaskCompletion;
+use App\Models\Plan;
+use App\Models\Relationship;
 use App\Models\Task;
 use App\Models\TaskStatus;
 use App\Services\TaskGamificationService;
@@ -41,10 +43,11 @@ class TaskCalendar extends Component
      */
     public function events(string $start, string $end): array
     {
+        abort_unless(auth()->check(), 403);
         $rangeStart = Carbon::parse($start);
         $rangeEnd = Carbon::parse($end);
 
-        return Task::query()->with('status')
+        $events = Task::query()->where('user_id', auth()->id())->with('status')
             ->where(fn ($query) => $query->whereNotNull('start_date')->orWhereNotNull('end_date'))
             ->where(fn ($query) => $query->whereRaw('COALESCE(start_date, end_date) < ?', [$rangeEnd])
                 ->whereRaw('COALESCE(end_date, start_date) >= ?', [$rangeStart->copy()->startOfDay()]))
@@ -52,6 +55,51 @@ class TaskCalendar extends Component
             ->map(fn (Task $task) => $this->toEvent($task))
             ->values()
             ->all();
+
+        $plans = Plan::where('user_id', auth()->id())->whereNotNull('scheduled_on')
+            ->where('scheduled_on', '<', $rangeEnd->toDateString())
+            ->whereRaw('COALESCE(ends_on, scheduled_on) >= ?', [$rangeStart->toDateString()])
+            ->get();
+
+        foreach ($plans as $plan) {
+            $events[] = [
+                'id' => 'plan:'.$plan->id,
+                'title' => $plan->title,
+                'start' => $plan->scheduled_on->toDateString(),
+                'end' => ($plan->ends_on ?? $plan->scheduled_on)->copy()->addDay()->toDateString(),
+                'allDay' => true,
+                'editable' => false,
+                'classNames' => ['md-calendar-plan'],
+                'extendedProps' => ['type' => 'plans', 'detailUrl' => route('plans.show', $plan)],
+            ];
+        }
+
+        $people = Relationship::where('user_id', auth()->id())->active()->withBirthday()->get();
+        foreach ($people as $person) {
+            $birthday = $person->birthday();
+            if (! $birthday) {
+                continue;
+            }
+            for ($year = $rangeStart->year; $year <= $rangeEnd->year; $year++) {
+                $date = $birthday->occurrenceIn($year);
+                if ($date->lt($rangeStart) || $date->gte($rangeEnd) || ($birthday->year !== null && $year < $birthday->year)) {
+                    continue;
+                }
+                $age = $birthday->year !== null ? $year - $birthday->year : null;
+                $events[] = [
+                    'id' => 'birthday:'.$person->id.':'.$year,
+                    'title' => $person->full_name.($age !== null ? ' · '.$age.' años' : ''),
+                    'start' => $date->toDateString(),
+                    'end' => $date->copy()->addDay()->toDateString(),
+                    'allDay' => true,
+                    'editable' => false,
+                    'classNames' => ['md-calendar-birthday'],
+                    'extendedProps' => ['type' => 'birthdays', 'detailUrl' => route('relationships.show', $person)],
+                ];
+            }
+        }
+
+        return array_merge($events, app(\App\Services\Meal\MealSchedule::class)->events((int) auth()->id(), $rangeStart, $rangeEnd));
     }
 
     public function moveTask(string $id, string $start, ?string $end, bool $allDay): void
@@ -182,6 +230,7 @@ class TaskCalendar extends Component
             'end' => $allDay ? $end->copy()->addDay()->toDateString() : ($end->gt($start) ? $end->toIso8601String() : null),
             'allDay' => $allDay,
             'extendedProps' => [
+                'type' => 'tasks',
                 'status' => $task->status ? ['id' => $task->status->id, 'name' => $task->status->name, 'icon' => $task->status->icon] : null,
                 'completed' => (bool) $task->completed,
                 'recurrent' => (bool) $task->is_recurrent,

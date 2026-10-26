@@ -1,5 +1,13 @@
 <x-module-shell module="tasks" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
-    <section class="md-card-elevated md-task-calendar" aria-label="Calendario de tareas" x-data="taskCalendar($wire)">
+    <section class="md-card-elevated md-task-calendar" aria-label="Calendario de tareas, planes, cumpleaños y comidas" x-data="taskCalendar($wire)">
+        <div class="md-calendar-layers" role="group" aria-label="Capas del calendario" wire:ignore>
+            @foreach (['tasks' => ['Tareas', 'bi-check2-square', 'task'], 'plans' => ['Planes', 'bi-map', 'plan'], 'birthdays' => ['Cumpleaños', 'bi-cake2', 'birthday'], 'meals' => ['Comidas', 'bi-egg-fried', 'meal']] as $layer => [$label, $icon, $class])
+                <button type="button" class="md-btn md-btn-outlined md-calendar-layer md-calendar-layer--{{ $class }}"
+                        :aria-pressed="layers.{{ $layer }}.toString()" @click="toggleLayer('{{ $layer }}')">
+                    <i class="bi {{ $icon }}" aria-hidden="true"></i> {{ $label }}
+                </button>
+            @endforeach
+        </div>
         <div wire:ignore class="md-calendar-mobile-toolbar" aria-label="Navegación del calendario">
             <h2 class="visually-hidden">Calendario: <span x-text="mobileDate"></span></h2>
             <button type="button" class="md-btn-icon" aria-label="Periodo anterior" @click="calendar.prev()"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>

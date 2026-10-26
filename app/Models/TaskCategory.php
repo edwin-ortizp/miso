@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Traits\BelongsToUser;
+use App\Models\Traits\HasCategoryHierarchy;
 use App\Services\TaskCodeService;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
@@ -10,7 +11,7 @@ use Illuminate\Support\Str;
 
 class TaskCategory extends Model
 {
-    use \App\Models\Traits\HasCategoryHierarchy, BelongsToUser, HasUuids;
+    use BelongsToUser, HasCategoryHierarchy, HasUuids;
 
     public function save(array $options = [])
     {
@@ -31,7 +32,7 @@ class TaskCategory extends Model
         }, $this->getConnection()->transactionLevel() === 0 ? 3 : 1);
     }
 
-    protected $fillable = ['code_prefix', 'parent_id', 'key', 'name', 'icon', 'sort_order'];
+    protected $fillable = ['color', 'code_prefix', 'parent_id', 'key', 'name', 'icon', 'sort_order'];
 
     /** Catálogo del usuario autenticado como key => nombre, en su orden. */
     public static function options(): array
