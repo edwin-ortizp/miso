@@ -1,6 +1,6 @@
 @props([
     'monthData',
-    'goal',
+    'goal' => null,
     'format',
     'route',
     'label' => 'Cumplimiento de la meta diaria',
@@ -24,7 +24,7 @@
                     $dateLabel = $day['date']->translatedFormat('j \d\e F');
                     $dayLabel = $isEmpty
                         ? $dateLabel.': sin registros'
-                        : $dateLabel.': '.$format($day['total']).' de '.$format($goal).' ('.$day['raw_percentage'].' %)';
+                        : $dateLabel.': '.$format($day['total']).' de '.$format($day['goal'] ?? $goal).' ('.$day['raw_percentage'].' %)';
                 @endphp
                 <a href="{{ route($route, ['date' => $day['date']->toDateString()]) }}" wire:navigate
                    @class([

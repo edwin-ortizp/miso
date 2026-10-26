@@ -31,13 +31,14 @@ class PomodoroTimerTest extends TestCase
         Livewire::actingAs($user)
             ->test(PomodoroTimer::class)
             ->set('selectedDate', '2026-07-10')
+            ->call('openForm')
             ->set('manualStart', '2026-07-13T08:30')
             ->set('manualEnd', '2026-07-13T10:00')
             ->set('manualDescription', 'Preparar entrega')
             ->assertSee('Duración calculada:')
             ->call('saveManualSession')
             ->assertSet('selectedDate', '2026-07-13')
-            ->assertSee('90 min')
+            ->assertSee('1 h 30 min')
             ->assertSee('30%');
 
         $session = PomodoroSession::firstOrFail();
@@ -196,6 +197,83 @@ class PomodoroTimerTest extends TestCase
         $migration->up();
 
         $this->assertSame(1800, $session->fresh()->duration);
+    }
+
+    public function test_session_can_be_edited_from_dialog_keeping_its_origin(): void
+    {
+        Carbon::setTestNow('2026-07-13 12:00:00');
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $token = 'e59067e6-7051-4b66-9e64-2f39e467a7b8';
+        $session = PomodoroSession::create([
+            'date' => '2026-07-13',
+            'start_time' => ['timestamp' => Carbon::parse('2026-07-13 09:00')->timestamp],
+            'end_time' => ['timestamp' => Carbon::parse('2026-07-13 09:25')->timestamp],
+            'duration' => 1500,
+            'completed' => true,
+            'client_token' => $token,
+        ]);
+
+        Livewire::actingAs($user)
+            ->test(PomodoroTimer::class)
+            ->call('openForm', $session->id)
+            ->assertSet('showForm', true)
+            ->assertSee('Calendario del mes')
+            ->assertSet('editingDate', '2026-07-13')
+            ->assertSet('manualStart', '09:00')
+            ->assertSet('manualEnd', '09:25')
+            ->set('manualEnd', '10:00')
+            ->set('manualDescription', 'Revisión')
+            ->call('saveManualSession')
+            ->assertHasNoErrors()
+            ->assertSet('showForm', false);
+
+        $session->refresh();
+        $this->assertDatabaseCount('pomodoro_sessions', 1);
+        $this->assertSame(3600, $session->duration);
+        $this->assertSame('Revisión', $session->description);
+        $this->assertSame($token, $session->client_token);
+    }
+
+    public function test_sessions_table_filters_by_origin_and_search(): void
+    {
+        Carbon::setTestNow('2026-07-13 12:00:00');
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        foreach ([['Informe', 'e59067e6-7051-4b66-9e64-2f39e467a7b8'], ['Lectura', null]] as [$description, $token]) {
+            PomodoroSession::create([
+                'date' => '2026-07-13',
+                'start_time' => ['timestamp' => now()->subHour()->timestamp],
+                'end_time' => ['timestamp' => now()->timestamp],
+                'duration' => 3600,
+                'completed' => true,
+                'description' => $description,
+                'client_token' => $token,
+            ]);
+        }
+
+        Livewire::actingAs($user)
+            ->test(PomodoroTimer::class)
+            ->assertSee('Informe')->assertSee('Lectura')
+            ->call('applyFilters', 'day', 'manual')
+            ->assertSee('Lectura')->assertDontSee('Informe')
+            ->call('clearFilters')
+            ->set('search', 'Inf')
+            ->assertSee('Informe')->assertDontSee('Lectura');
+    }
+
+    public function test_rail_shows_goal_calendar_with_weekday_and_weekend_goals(): void
+    {
+        Carbon::setTestNow('2026-07-13 12:00:00');
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/pomodoro')
+            ->assertOk()
+            ->assertSee('Meta de hoy')
+            ->assertSee('Calendario del mes')
+            ->assertSee('12 de julio: sin registros', false)
+            ->assertSee('Registrar tiempo');
     }
 
     public function test_user_cannot_see_another_users_sessions(): void

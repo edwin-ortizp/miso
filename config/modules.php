@@ -119,10 +119,9 @@ return [
     'pomodoro' => [
         'archetype' => 'daily-log',
         'title' => 'Pomodoro', 'subtitle' => 'Tiempo de enfoque, pausas y constancia.', 'icon' => 'bi-stopwatch',
-        'patterns' => ['pomodoro*'], 'preserve' => ['date', 'q', 'sort', 'month'],
+        'patterns' => ['pomodoro*'], 'preserve' => ['date', 'q', 'sort', 'scope', 'origin', 'month'],
         // El temporizador muestra meta del día y calendario de cumplimiento en el panel contextual.
         'rail' => true,
-        'rail_routes' => ['pomodoro'],
         'tabs' => [
             ['label' => 'Temporizador', 'route' => 'pomodoro', 'icon' => 'bi-stopwatch', 'active' => ['pomodoro']],
             ['label' => 'Ajustes', 'route' => 'pomodoro.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['pomodoro.settings']],

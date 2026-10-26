@@ -3,13 +3,17 @@
 namespace App\Livewire\Pomodoro;
 
 use App\Livewire\Concerns\HasUrlDate;
+use App\Livewire\Concerns\WithDefaultDateFilter;
+use App\Livewire\Concerns\WithManagementCard;
 use App\Models\ModuleSetting;
 use App\Models\PomodoroSession;
+use App\Support\GoalCalendar;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Validator;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
@@ -17,6 +21,20 @@ use Livewire\Component;
 class PomodoroTimer extends Component
 {
     use HasUrlDate;
+    use WithDefaultDateFilter;
+    use WithManagementCard;
+
+    public const SORTS = [
+        'recent' => 'Más reciente',
+        'oldest' => 'Más antiguo',
+        'longest' => 'Mayor duración',
+        'shortest' => 'Menor duración',
+    ];
+
+    public const ORIGINS = [
+        'timer' => 'Temporizador',
+        'manual' => 'Registro manual',
+    ];
 
     public int $workDuration = 25;
 
@@ -28,6 +46,24 @@ class PomodoroTimer extends Component
 
     public int $weekendGoal = 120;
 
+    #[Url(as: 'sort', history: true, except: 'recent')]
+    public string $sort = 'recent';
+
+    #[Url(as: 'q', history: true, except: '')]
+    public string $search = '';
+
+    #[Url(as: 'origin', history: true, except: '')]
+    public string $originFilter = '';
+
+    #[Url(as: 'month', history: true, except: '')]
+    public string $calendarMonth = '';
+
+    public bool $showForm = false;
+
+    public ?string $editingId = null;
+
+    public string $editingDate = '';
+
     public string $manualStart = '';
 
     public string $manualEnd = '';
@@ -37,6 +73,8 @@ class PomodoroTimer extends Component
     public function mount(): void
     {
         $this->initializeSelectedDate();
+        $this->setDateScope($this->dateScope);
+        $this->calendarMonth = $this->normalizeCalendarMonth($this->calendarMonth);
 
         $settings = ModuleSetting::where('module', 'pomodoro')->value('settings') ?? [];
 
@@ -85,19 +123,93 @@ class PomodoroTimer extends Component
             'description' => trim($validated['description']) ?: null,
         ]);
 
-        $this->selectedDate = $start->toDateString();
+        $this->selectDate($start->toDateString());
+    }
+
+    public function updatedSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function updatedSort(): void
+    {
+        $this->sort = array_key_exists($this->sort, self::SORTS) ? $this->sort : 'recent';
+        $this->resetPage();
+    }
+
+    public function applyFilters(string $scope, string $origin): void
+    {
+        $this->setDateScope($scope);
+        $this->originFilter = array_key_exists($origin, self::ORIGINS) ? $origin : '';
+        $this->resetPage();
+    }
+
+    public function removeFilter(string $key, ?string $value = null): void
+    {
+        $this->resetPage();
+        match ($key) {
+            'date' => $this->dateScope = 'all',
+            'origin' => $this->originFilter = '',
+            default => null,
+        };
+    }
+
+    public function clearFilters(): void
+    {
+        $this->resetPage();
+        $this->dateScope = 'all';
+        $this->originFilter = '';
+    }
+
+    public function previousMonth(): void
+    {
+        $this->calendarMonth = Carbon::parse($this->calendarMonth.'-01')->subMonthNoOverflow()->format('Y-m');
+    }
+
+    public function nextMonth(): void
+    {
+        $this->calendarMonth = Carbon::parse($this->calendarMonth.'-01')->addMonthNoOverflow()->format('Y-m');
+    }
+
+    public function openForm(?string $id = null): void
+    {
+        $this->resetErrorBag();
+        $this->editingId = null;
+        $this->manualStart = '';
+        $this->manualEnd = '';
+        $this->manualDescription = '';
+
+        // Editar solo ajusta las horas: la sesión conserva el día en que empezó.
+        if ($id && ($session = PomodoroSession::find($id))) {
+            $timezone = config('app.timezone');
+            $start = Carbon::createFromTimestamp($session->start_time['timestamp'], $timezone);
+            $this->editingId = $session->id;
+            $this->editingDate = $start->toDateString();
+            $this->manualStart = $start->format('H:i');
+            $this->manualEnd = Carbon::createFromTimestamp($session->end_time['timestamp'], $timezone)->format('H:i');
+            $this->manualDescription = (string) $session->description;
+        }
+
+        $this->showForm = true;
+    }
+
+    public function closeForm(): void
+    {
+        $this->showForm = false;
+        $this->editingId = null;
+        $this->resetErrorBag();
     }
 
     public function saveManualSession(): void
     {
+        $format = $this->editingId ? 'H:i' : 'Y-m-d\TH:i';
         $validated = $this->validate([
-            'manualStart' => ['required', 'date_format:Y-m-d\TH:i'],
-            'manualEnd' => ['required', 'date_format:Y-m-d\TH:i'],
+            'manualStart' => ['required', 'date_format:'.$format],
+            'manualEnd' => ['required', 'date_format:'.$format],
             'manualDescription' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        $start = $this->parseManualDateTime($validated['manualStart']);
-        $end = $this->parseManualDateTime($validated['manualEnd']);
+        [$start, $end] = $this->manualInterval();
 
         if ($end->lessThanOrEqualTo($start)) {
             $this->addError('manualEnd', 'La fecha y hora de fin debe ser posterior al inicio.');
@@ -119,19 +231,24 @@ class PomodoroTimer extends Component
             return;
         }
 
-        PomodoroSession::create([
+        $attributes = [
             'date' => $start->toDateString(),
             'start_time' => ['timestamp' => $start->timestamp],
             'end_time' => ['timestamp' => $end->timestamp],
             'duration' => $duration,
             'completed' => true,
-            'description' => trim($validated['manualDescription']) ?: null,
-        ]);
+            'description' => trim($validated['manualDescription'] ?? '') ?: null,
+        ];
 
-        $this->selectedDate = $start->toDateString();
+        // Editar conserva el origen (client_token) del registro.
+        $session = $this->editingId ? PomodoroSession::find($this->editingId) : null;
+        $session ? $session->update($attributes) : PomodoroSession::create($attributes);
+
+        $this->selectDate($start->toDateString());
         $this->manualStart = '';
         $this->manualEnd = '';
         $this->manualDescription = '';
+        $this->closeForm();
     }
 
     public function deleteSession(string $id): void
@@ -141,45 +258,50 @@ class PomodoroTimer extends Component
 
     public function previousDay(): void
     {
-        $this->selectedDate = Carbon::parse($this->selectedDate)->subDay()->toDateString();
+        $this->selectDate(Carbon::parse($this->selectedDate)->subDay()->toDateString());
     }
 
     public function nextDay(): void
     {
-        $this->selectedDate = Carbon::parse($this->selectedDate)->addDay()->toDateString();
+        $this->selectDate(Carbon::parse($this->selectedDate)->addDay()->toDateString());
     }
 
     public function today(): void
     {
-        $this->selectedDate = now()->toDateString();
+        $this->selectDate(now()->toDateString());
     }
 
     public function render()
     {
         $selectedDate = Carbon::parse($this->selectedDate)->startOfDay();
-        $todaySessions = PomodoroSession::whereDate('date', $selectedDate)
-            ->where('completed', true)
-            ->get()
-            ->sortByDesc(fn (PomodoroSession $session) => $session->end_time['timestamp'] ?? 0)
-            ->values();
+        $dayQuery = fn () => PomodoroSession::whereDate('date', $selectedDate)->where('completed', true);
 
-        $totalSeconds = (int) $todaySessions->sum('duration');
+        $totalSeconds = (int) $dayQuery()->sum('duration');
         $totalMinutes = intdiv($totalSeconds, 60);
-        $sessionCount = $todaySessions->count();
         $dailyGoal = $this->goalFor($selectedDate);
         $progressPercentage = $dailyGoal > 0 ? (int) round(($totalMinutes / $dailyGoal) * 100) : 0;
 
-        $weekStart = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
-        $weekDates = collect(range(0, 6))->map(fn (int $offset) => $weekStart->copy()->addDays($offset));
-        $weekSessions = PomodoroSession::query()
-            ->where('completed', true)
-            ->whereBetween('date', [$weekStart->toDateString(), $weekStart->copy()->endOfWeek()->toDateString()])
-            ->get(['date', 'duration'])
-            ->groupBy(fn (PomodoroSession $session) => $session->date->toDateString());
+        $search = trim($this->search);
+        $sessions = $this->applyDateScope(PomodoroSession::query()->where('completed', true))
+            ->when($search !== '', fn ($q) => $q->where('description', 'like', '%'.$search.'%'))
+            ->when($this->originFilter === 'timer', fn ($q) => $q->whereNotNull('client_token'))
+            ->when($this->originFilter === 'manual', fn ($q) => $q->whereNull('client_token'))
+            ->when(in_array($this->sort, ['longest', 'shortest'], true),
+                fn ($q) => $q->orderBy('duration', $this->sort === 'longest' ? 'desc' : 'asc'))
+            ->orderBy('date', $this->sort === 'oldest' ? 'asc' : 'desc')
+            ->orderBy('created_at', $this->sort === 'oldest' ? 'asc' : 'desc')
+            ->paginate($this->perPage());
 
-        $weekDays = $weekDates->map(function (Carbon $date) use ($weekSessions): array {
-            $seconds = (int) ($weekSessions->get($date->toDateString())?->sum('duration') ?? 0);
-            $minutes = intdiv($seconds, 60);
+        $activeFilters = $this->dateFilterChips();
+        if ($this->originFilter !== '') {
+            $activeFilters[] = ['key' => 'origin', 'value' => null, 'label' => 'Origen: '.self::ORIGINS[$this->originFilter], 'icon' => 'bi-stopwatch'];
+        }
+
+        $weekStart = $selectedDate->copy()->startOfWeek(Carbon::MONDAY);
+        $weekTotals = $this->minutesByDate($weekStart, $weekStart->copy()->endOfWeek());
+        $weekDays = collect(range(0, 6))->map(function (int $offset) use ($weekStart, $weekTotals): array {
+            $date = $weekStart->copy()->addDays($offset);
+            $minutes = (int) ($weekTotals[$date->toDateString()] ?? 0);
             $goal = $this->goalFor($date);
 
             return [
@@ -190,46 +312,59 @@ class PomodoroTimer extends Component
             ];
         });
 
-        $month = $selectedDate->copy()->startOfMonth();
-        $monthGridStart = $month->copy()->startOfWeek(Carbon::MONDAY);
-        $monthGridEnd = $month->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
-        $monthSessions = PomodoroSession::query()
-            ->where('completed', true)
-            ->whereBetween('date', [$monthGridStart->toDateString(), $monthGridEnd->toDateString()])
-            ->get(['date', 'duration'])
-            ->groupBy(fn (PomodoroSession $session) => $session->date->toDateString());
-        $monthDays = collect(CarbonPeriod::create($monthGridStart, $monthGridEnd))->map(function (Carbon $date) use ($month, $monthSessions, $selectedDate): array {
-            $minutes = intdiv((int) ($monthSessions->get($date->toDateString())?->sum('duration') ?? 0), 60);
-            $goal = $this->goalFor($date);
-
-            return [
-                'date' => $date->copy(),
-                'minutes' => $minutes,
-                'percentage' => $goal > 0 ? min((int) round(($minutes / $goal) * 100), 100) : 0,
-                'completed' => $goal > 0 && $minutes >= $goal,
-                'in_month' => $date->month === $month->month,
-                'selected' => $date->isSameDay($selectedDate),
-            ];
-        });
+        // Meta distinta entre semana y fin de semana: el calendario la resuelve por fecha.
+        $goalFor = fn (Carbon $date): int => $this->goalFor($date);
+        $monthStart = Carbon::parse($this->calendarMonth.'-01');
+        [$gridStart, $gridEnd] = GoalCalendar::gridBounds($selectedDate, $monthStart);
+        $monthTotals = $this->minutesByDate($gridStart, $gridEnd);
+        $monthData = GoalCalendar::month($monthTotals, $selectedDate, $goalFor, $monthStart);
+        $monthData['focus_minutes'] = (int) $monthTotals
+            ->filter(fn ($minutes, $date) => str_starts_with($date, $monthStart->format('Y-m')))
+            ->sum();
 
         return view('livewire.pomodoro.pomodoro-timer', [
-            'todaySessions' => $todaySessions,
+            'sessions' => $sessions,
+            'totalSessions' => PomodoroSession::where('completed', true)->count(),
+            'sorts' => self::SORTS,
+            'origins' => self::ORIGINS,
+            'activeFilters' => $activeFilters,
+            'dateScopes' => $this->dateScopeOptions(),
             'displayDate' => $selectedDate,
             'weekStart' => $weekStart,
             'weekDays' => $weekDays,
             'dailyGoal' => $dailyGoal,
             'totalSeconds' => $totalSeconds,
             'totalMinutes' => $totalMinutes,
-            'sessionCount' => $sessionCount,
+            'sessionCount' => $dayQuery()->count(),
             'progressPercentage' => $progressPercentage,
             'manualDurationSeconds' => $this->manualDurationSeconds(),
-            'monthData' => [
-                'label' => $month->translatedFormat('F Y'),
-                'weeks' => $monthDays->chunk(7),
-                'focus_minutes' => $monthDays->where('in_month', true)->sum('minutes'),
-                'completed_days' => $monthDays->where('in_month', true)->where('completed', true)->count(),
-            ],
+            'monthData' => $monthData,
+            'streak' => GoalCalendar::streak($this->minutesByDate(today()->subYear(), today()), $goalFor),
         ]);
+    }
+
+    /**
+     * Minutos de enfoque completados por fecha (`Y-m-d` => minutos) dentro del rango.
+     */
+    private function minutesByDate(Carbon $from, Carbon $to): Collection
+    {
+        return PomodoroSession::query()
+            ->where('completed', true)
+            ->whereBetween('date', [$from->toDateString(), $to->toDateString()])
+            ->get(['date', 'duration'])
+            ->groupBy(fn (PomodoroSession $session) => $session->date->toDateString())
+            ->map(fn (Collection $group) => intdiv((int) $group->sum('duration'), 60));
+    }
+
+    private function selectDate(string $date): void
+    {
+        $this->selectedDate = $date;
+        $this->calendarMonth = substr($date, 0, 7);
+    }
+
+    private function normalizeCalendarMonth(string $month): string
+    {
+        return preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $month) === 1 ? $month : substr($this->selectedDate, 0, 7);
     }
 
     private function goalFor(Carbon $date): int
@@ -244,13 +379,30 @@ class PomodoroTimer extends Component
         }
 
         try {
-            $start = $this->parseManualDateTime($this->manualStart);
-            $end = $this->parseManualDateTime($this->manualEnd);
+            [$start, $end] = $this->manualInterval();
 
             return $end->greaterThan($start) ? $start->diffInSeconds($end) : null;
         } catch (\Throwable) {
             return null;
         }
+    }
+
+    /**
+     * Intervalo del formulario. Al editar se reciben solo horas sobre el día de la sesión;
+     * si el fin queda antes del inicio, la sesión cruzó la medianoche.
+     *
+     * @return array{0: Carbon, 1: Carbon}
+     */
+    private function manualInterval(): array
+    {
+        if (! $this->editingId) {
+            return [$this->parseManualDateTime($this->manualStart), $this->parseManualDateTime($this->manualEnd)];
+        }
+
+        $start = $this->parseManualDateTime($this->editingDate.'T'.$this->manualStart);
+        $end = $this->parseManualDateTime($this->editingDate.'T'.$this->manualEnd);
+
+        return [$start, $end->lessThanOrEqualTo($start) ? $end->addDay() : $end];
     }
 
     private function parseManualDateTime(string $value): Carbon

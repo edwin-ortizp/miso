@@ -1,7 +1,12 @@
 @php
     use App\Support\Ui\DataState;
 
-    $sessionsState = DataState::resolve(visible: $todaySessions->count(), total: $todaySessions->count());
+    $sessionsState = $sessions->count() > 0
+        ? DataState::CONTENT
+        : ($totalSessions > 0 && (count($activeFilters) > 0 || trim($search) !== '') ? DataState::FILTERED_EMPTY : DataState::EMPTY);
+    $hoursMinutes = fn (int $seconds) => intdiv($seconds, 3600).' h '.intdiv($seconds % 3600, 60).' min';
+    $minutesLabel = fn (int $minutes) => intdiv($minutes, 60).' h '.($minutes % 60).' min';
+    $timezone = config('app.timezone');
 @endphp
 
 <x-module-shell module="pomodoro" x-data="pomodoroTimer({
@@ -11,17 +16,51 @@
     storageKey: 'life-tracker:pomodoro:{{ auth()->id() }}',
     saveSession: (startedAt, endedAt, description, clientToken) => $wire.saveSession(startedAt, endedAt, description, clientToken)
 })">
+    <x-slot:actions>
+        <x-module-actions :primary="['label' => 'Registrar tiempo', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+    </x-slot:actions>
+
     <x-slot:controls>
         <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F \d\e Y')) }}</p>
     </x-slot:controls>
 
     <x-slot:rail>
-        <x-context-widget title="{{ $monthData['label'] }}" icon="bi-calendar3">
-            @include('livewire.pomodoro.partials.month-calendar')
+        <x-context-widget :title="$displayDate->isToday() ? 'Meta de hoy' : 'Meta del '.$displayDate->translatedFormat('j \d\e F')" icon="bi-trophy">
+            <p class="goal-today"><strong>{{ $minutesLabel($totalMinutes) }} <span>/ {{ $minutesLabel($dailyGoal) }}</span></strong><b>{{ $progressPercentage }} %</b></p>
+            <x-ui.progress :value="min($progressPercentage, 100)" tone="primary" label="Avance de la meta diaria" :valueText="$progressPercentage.'% de la meta'" />
+            <p class="md-body-small mb-0">
+                @if ($totalMinutes < $dailyGoal)
+                    Faltan {{ $dailyGoal - $totalMinutes }} min para alcanzar tu meta diaria.
+                @elseif ($totalMinutes === $dailyGoal)
+                    Alcanzaste tu meta diaria.
+                @else
+                    Superaste tu meta por {{ $totalMinutes - $dailyGoal }} min.
+                @endif
+            </p>
         </x-context-widget>
+
+        <x-context-widget title="Calendario del mes" icon="bi-calendar3">
+            <x-slot:actions>
+                <div class="goal-month-nav">
+                    <x-ui.icon-action icon="bi-chevron-left" label="Mes anterior" size="sm" wire:click="previousMonth" />
+                    <span>{{ ucfirst($monthData['label']) }}</span>
+                    <x-ui.icon-action icon="bi-chevron-right" label="Mes siguiente" size="sm" wire:click="nextMonth" />
+                </div>
+            </x-slot:actions>
+            <x-goal-calendar :month-data="$monthData" :format="$minutesLabel" route="pomodoro" label="Cumplimiento de la meta de enfoque" />
+            <p class="goal-streak">
+                <span aria-hidden="true">🔥</span>
+                @if ($streak > 0)
+                    Racha actual: {{ $streak }} {{ $streak === 1 ? 'día' : 'días' }} cumpliendo la meta al 100%.
+                @else
+                    Aún no tienes racha: cumple tu meta al 100% para empezarla.
+                @endif
+            </p>
+        </x-context-widget>
+
         <x-context-widget title="Enfoque del mes" icon="bi-stopwatch" tone="success">
             <dl class="md-context-list">
-                <div><dt>Tiempo registrado</dt><dd>{{ intdiv($monthData['focus_minutes'], 60) }} h {{ $monthData['focus_minutes'] % 60 }} min</dd></div>
+                <div><dt>Tiempo registrado</dt><dd>{{ $minutesLabel($monthData['focus_minutes']) }}</dd></div>
                 <div><dt>Metas alcanzadas</dt><dd>{{ $monthData['completed_days'] }} días</dd></div>
             </dl>
         </x-context-widget>
@@ -32,13 +71,7 @@
                   :level="2">
         <x-ui.metric-grid label="Resumen de enfoque">
             <x-ui.metric label="Sesiones" icon="bi-check2-circle" tone="success" :value="$sessionCount" unit="sesiones" />
-            <x-ui.metric label="Tiempo registrado" icon="bi-stopwatch" tone="info"
-                         :value="intdiv($totalSeconds, 3600).' h '.intdiv($totalSeconds % 3600, 60).' min'" />
-            <x-ui.metric label="Avance de la meta" icon="bi-trophy" tone="primary" :value="$progressPercentage" unit="%"
-                         :support="$dailyGoal > 0 && $progressPercentage >= 100 ? 'Meta alcanzada' : null">
-                <x-ui.progress :value="min($progressPercentage, 100)" label="Avance de la meta diaria"
-                               :valueText="min($progressPercentage, 100).'%'" />
-            </x-ui.metric>
+            <x-ui.metric label="Tiempo registrado" icon="bi-stopwatch" tone="info" :value="$hoursMinutes($totalSeconds)" />
         </x-ui.metric-grid>
     </x-ui.section>
 
@@ -86,28 +119,73 @@
         </div>
     </x-ui.card>
 
-    <x-ui.section title="Registrar tiempo manual"
-                  description="Indica el intervalo trabajado; la duración se calculará automáticamente."
-                  :level="3">
-        <x-ui.card variant="outlined">
-            <form wire:submit="saveManualSession">
-                <div class="md-field-pair">
-                    <x-ui.field name="manualStart" label="Inicio" type="datetime-local" wire:model.live="manualStart" />
-                    <x-ui.field name="manualEnd" label="Fin" type="datetime-local" wire:model.live="manualEnd" />
-                </div>
+    <x-ui.management-card id="pomodoro-sessions" title="Sesiones" icon="bi-clock-history"
+                          :count="'('.$sessions->total().' / '.$totalSessions.')'" search="search" search-placeholder="Buscar por descripción"
+                          sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
+                          :active-filters="count($activeFilters)" :paginator="$sessions" noun="sesiones"
+                          alpine="draftScope: 'day', draftOrigin: ''"
+                          on-filters-open="draftScope = $wire.dateScope; draftOrigin = $wire.originFilter">
+        <x-slot:filters>
+            <x-ui.select name="filterDateScope" label="Fecha" :options="$dateScopes" :selected="$dateScope" icon="bi-calendar-event" x-model="draftScope" />
+            <x-ui.select name="filterOrigin" label="Origen" placeholder="Todos" :options="$origins"
+                         :selected="$originFilter" icon="bi-stopwatch" x-model="draftOrigin" />
+        </x-slot:filters>
+        <x-slot:filterActions>
+            <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>
+            <x-ui.action variant="filled" icon="bi-funnel-fill" x-on:click="$wire.applyFilters(draftScope, draftOrigin); filtersOpen = false">Filtrar</x-ui.action>
+        </x-slot:filterActions>
 
-                <x-ui.field name="manualDescription" label="Descripción (opcional)" wire:model="manualDescription" />
+        @if (count($activeFilters) > 0)
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$activeFilters" />
+            </x-slot:strip>
+        @endif
 
-                @if ($manualDurationSeconds !== null)
-                    <p class="md-body-medium" role="status">
-                        Duración calculada: <strong>{{ intdiv($manualDurationSeconds, 3600) }} h {{ intdiv($manualDurationSeconds % 3600, 60) }} min</strong>
-                    </p>
-                @endif
-
-                <x-ui.action variant="tonal" type="submit" icon="bi-save">Guardar registro</x-ui.action>
-            </form>
-        </x-ui.card>
-    </x-ui.section>
+        @if ($sessionsState === DataState::CONTENT)
+            <table class="md-table md-table--stack">
+                <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Inicio</th>
+                        <th scope="col">Fin</th>
+                        <th scope="col">Duración</th>
+                        <th scope="col">Descripción</th>
+                        <th scope="col">Origen</th>
+                        <th scope="col" class="md-table__actions"><span class="visually-hidden">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($sessions as $session)
+                        @php
+                            $start = \Carbon\Carbon::createFromTimestamp($session->start_time['timestamp'] ?? 0, $timezone);
+                            $end = \Carbon\Carbon::createFromTimestamp($session->end_time['timestamp'] ?? 0, $timezone);
+                        @endphp
+                        <tr wire:key="pomodoro-session-{{ $session->id }}">
+                            <td class="md-table__date">{{ $session->date->isToday() ? 'Hoy' : $session->date->translatedFormat('j M Y') }}</td>
+                            <td class="md-table__date">{{ $start->format('H:i') }}</td>
+                            <td class="md-table__date">{{ $end->format('H:i') }}</td>
+                            <td class="md-table__nowrap">{{ $hoursMinutes($session->duration) }}</td>
+                            <td class="md-table__title">{{ $session->description ?: 'Sin descripción' }}</td>
+                            <td><x-ui.chip variant="tonal">{{ $session->client_token ? $origins['timer'] : $origins['manual'] }}</x-ui.chip></td>
+                            <td class="md-table__actions">
+                                <x-ui.row-actions :label="'Más acciones de la sesión de las '.$start->format('H:i')">
+                                    <x-slot:primary wire:click="openForm('{{ $session->id }}')">Editar</x-slot:primary>
+                                    <x-ui.menu-divider />
+                                    <x-ui.menu-item icon="bi-trash" tone="danger" wire:click="deleteSession('{{ $session->id }}')"
+                                                    wire:confirm="La sesión de enfoque se elimina de forma permanente.">Eliminar</x-ui.menu-item>
+                                </x-ui.row-actions>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @elseif ($sessionsState === DataState::FILTERED_EMPTY)
+            <x-ui.state variant="{{ DataState::FILTERED_EMPTY }}" message="Quita el filtro de fecha o cambia la búsqueda para ver otras sesiones." />
+        @else
+            <x-ui.state variant="{{ DataState::EMPTY }}" icon="bi-stopwatch" title="Sin sesiones de enfoque"
+                        message="Inicia el temporizador o registra un intervalo manual." />
+        @endif
+    </x-ui.management-card>
 
     <x-ui.section title="Esta semana"
                   description="{{ $weekStart->format('d M') }} – {{ $weekStart->copy()->endOfWeek()->format('d M') }}"
@@ -120,7 +198,7 @@
                         <x-ui.action variant="text" size="sm" wire:click="$set('selectedDate', '{{ $day['date']->toDateString() }}')">
                             {{ $day['date']->translatedFormat('D d') }}
                         </x-ui.action>
-                        <span class="pomodoro-week__value md-body-small">{{ intdiv($day['minutes'], 60) }} h {{ $day['minutes'] % 60 }} min</span>
+                        <span class="pomodoro-week__value md-body-small">{{ $minutesLabel($day['minutes']) }}</span>
                         <span class="pomodoro-week__value md-body-small">Meta {{ $day['goal'] }} min</span>
                         <span class="pomodoro-week__value"><x-ui.chip variant="tonal">{{ $day['percentage'] }}%</x-ui.chip></span>
                     </div>
@@ -129,26 +207,27 @@
         </x-ui.card>
     </x-ui.section>
 
-    <x-ui.section title="Sesiones del día" :level="3">
-        @if ($sessionsState === DataState::CONTENT)
-            <x-ui.list label="Sesiones del día">
-                @foreach ($todaySessions as $session)
-                    <x-ui.list-item :headline="intdiv($session->duration, 3600).' h '.intdiv($session->duration % 3600, 60).' min'"
-                                    :supporting="$session->description"
-                                    wire:key="pomodoro-session-{{ $session->id }}">
-                        <x-slot:leading><x-ui.icon name="bi-check-circle-fill" tone="success" /></x-slot:leading>
-                        <x-slot:trailing>
-                            <x-ui.destructive-action label="Eliminar la sesión" :iconOnly="true"
-                                                     action="deleteSession('{{ $session->id }}')"
-                                                     title="Eliminar sesión"
-                                                     message="La sesión de enfoque se elimina de forma permanente." />
-                        </x-slot:trailing>
-                    </x-ui.list-item>
-                @endforeach
-            </x-ui.list>
-        @else
-            <x-ui.state variant="empty" icon="bi-stopwatch" title="Sin sesiones completadas este día"
-                        message="Inicia el temporizador o registra un intervalo manual." />
-        @endif
-    </x-ui.section>
+    <x-ui.form-dialog module="pomodoro" :open="$showForm" close="closeForm" submit-action="saveManualSession" id="pomodoro-session-dialog"
+                      :title="$editingId ? 'Editar sesión' : 'Registrar tiempo'" icon="bi-stopwatch"
+                      :submit="$editingId ? 'Actualizar' : 'Guardar'">
+        <div class="d-flex flex-column gap-3">
+            @if ($editingId)
+                <p class="md-body-small mb-0">
+                    Sesión del {{ \Carbon\Carbon::parse($editingDate)->translatedFormat('j \d\e F \d\e Y') }}. Ajusta las horas; si el fin es anterior al inicio, se entiende que cruzó la medianoche.
+                </p>
+            @else
+                <p class="md-body-small mb-0">Indica el intervalo trabajado; la duración se calcula automáticamente.</p>
+            @endif
+            <div class="md-field-pair">
+                <x-ui.field name="manualStart" label="Inicio" :type="$editingId ? 'time' : 'datetime-local'" wire:model.live="manualStart" />
+                <x-ui.field name="manualEnd" label="Fin" :type="$editingId ? 'time' : 'datetime-local'" wire:model.live="manualEnd" />
+            </div>
+            <x-ui.field name="manualDescription" label="Descripción (opcional)" wire:model="manualDescription" />
+            @if ($manualDurationSeconds !== null)
+                <p class="md-body-medium mb-0" role="status">
+                    Duración calculada: <strong>{{ $hoursMinutes($manualDurationSeconds) }}</strong>
+                </p>
+            @endif
+        </div>
+    </x-ui.form-dialog>
 </x-module-shell>

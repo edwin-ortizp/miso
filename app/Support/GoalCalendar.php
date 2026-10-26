@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Closure;
 use Illuminate\Support\Collection;
 
 /**
@@ -24,16 +25,33 @@ class GoalCalendar
         return [$month->copy()->startOfWeek(Carbon::MONDAY), $month->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY)];
     }
 
-    public static function month(Collection $totals, Carbon $selected, int $goal, ?Carbon $monthStart = null): array
+    /**
+     * Normaliza la meta: un entero fijo o un resolver por fecha (p. ej. meta distinta en fin de semana).
+     *
+     * @param  int|Closure(Carbon): int  $goal
+     * @return Closure(Carbon): int
+     */
+    private static function goalResolver(int|Closure $goal): Closure
+    {
+        return $goal instanceof Closure ? $goal : fn () => $goal;
+    }
+
+    /**
+     * @param  int|Closure(Carbon): int  $goal
+     */
+    public static function month(Collection $totals, Carbon $selected, int|Closure $goal, ?Carbon $monthStart = null): array
     {
         $month = ($monthStart ?? $selected)->copy()->startOfMonth();
         [$gridStart, $gridEnd] = self::gridBounds($selected, $monthStart);
+        $goalFor = self::goalResolver($goal);
 
-        $days = collect(CarbonPeriod::create($gridStart, $gridEnd))->map(function (Carbon $date) use ($month, $selected, $totals, $goal) {
+        $days = collect(CarbonPeriod::create($gridStart, $gridEnd))->map(function (Carbon $date) use ($month, $selected, $totals, $goalFor) {
             $total = (int) ($totals[$date->toDateString()] ?? 0);
+            $goal = (int) $goalFor($date);
 
             return [
                 'date' => $date->copy(),
+                'goal' => $goal,
                 'total' => $total,
                 'percentage' => $goal > 0 ? min((int) round(($total / $goal) * 100), 100) : 0,
                 'raw_percentage' => $goal > 0 ? (int) round(($total / $goal) * 100) : 0,
@@ -60,16 +78,22 @@ class GoalCalendar
      * Días consecutivos cumpliendo al menos el 100 % de la meta.
      * Cuenta hacia atrás desde ayer; hoy suma solo si ya alcanzó la meta y, si aún no, no rompe la racha.
      */
-    public static function streak(Collection $totals, int $goal, ?Carbon $today = null): int
+    /**
+     * @param  int|Closure(Carbon): int  $goal
+     */
+    public static function streak(Collection $totals, int|Closure $goal, ?Carbon $today = null): int
     {
-        if ($goal <= 0) {
-            return 0;
-        }
+        $goalFor = self::goalResolver($goal);
+        $met = function (Carbon $day) use ($totals, $goalFor): bool {
+            $goal = (int) $goalFor($day);
+
+            return $goal > 0 && ($totals[$day->toDateString()] ?? 0) >= $goal;
+        };
 
         $today = ($today ?? today())->copy()->startOfDay();
-        $streak = ($totals[$today->toDateString()] ?? 0) >= $goal ? 1 : 0;
+        $streak = $met($today) ? 1 : 0;
 
-        for ($day = $today->copy()->subDay(); ($totals[$day->toDateString()] ?? 0) >= $goal; $day->subDay()) {
+        for ($day = $today->copy()->subDay(); $met($day); $day->subDay()) {
             $streak++;
         }
 
