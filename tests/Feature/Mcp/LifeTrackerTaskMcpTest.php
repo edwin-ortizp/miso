@@ -118,6 +118,7 @@ class LifeTrackerTaskMcpTest extends TestCase
 
     public function test_get_task_returns_markdown_and_suggested_next_date(): void
     {
+        $this->travelTo(now()->setDate(2026, 10, 27)->setTime(15, 0));
         $user = $this->userWithCategories();
         $task = $this->taskFor($user, [
             'description' => "Notas\n- [x] Uno\n- [ ] Dos",
@@ -132,7 +133,7 @@ class LifeTrackerTaskMcpTest extends TestCase
             ->assertSee('Hogar')
             ->assertSee('- [ ] Dos')
             ->assertSee('cada semana')
-            ->assertSee('2026-09-24');
+            ->assertSee('2026-11-03');
     }
 
     public function test_list_tasks_filters_uncategorized(): void

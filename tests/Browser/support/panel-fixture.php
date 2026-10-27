@@ -13,7 +13,7 @@ auth()->login($user);
 DrinkType::create(['name' => 'Agua', 'hydration_factor' => 1, 'icon' => '💧']);
 MoodState::create(['text' => 'Bien', 'emoji' => '🙂', 'value' => 4, 'is_active' => true]);
 HabitDefinition::create(['name' => 'Leer 20 minutos', 'icon' => '📚', 'time_of_day' => 'anytime', 'base_time' => '16:00']);
-for ($i = 0; $i < 9; $i++) Task::create(['title' => 'Panel tarea '.($i+1), 'start_date' => today()->setTime(min(23, now()->hour + 1), $i * 5), 'end_date' => today()->setTime(min(23, now()->hour + 2), $i * 5), 'start_is_date' => false, 'end_is_date' => false]);
+for ($i = 0; $i < 9; $i++) Task::create(['title' => 'Panel tarea '.($i+1).' · Reunión de seguimiento de acuerdos y revisión de pendientes del equipo para preparar la próxima entrega', 'description' => "## Agenda de reunión\n\n**Acuerdos importantes**\n\n".str_repeat("- Revisar pendientes y preparar conclusiones detalladas de la sesión.\n", 60), 'start_date' => today()->setTime(min(23, now()->hour + 1), $i * 5), 'end_date' => today()->setTime(min(23, now()->hour + 2), $i * 5), 'start_is_date' => false, 'end_is_date' => false]);
 Task::create(['title' => 'Panel sin hora', 'end_date' => today(), 'end_is_date' => true]);
 $person = Relationship::create(['category' => 'friends', 'full_name' => 'Persona del panel', 'birthday_month' => today()->month, 'birthday_day' => today()->day, 'general_notes' => 'Notas de prueba']);
 $plan = Plan::create(['title' => 'Salida del panel', 'type' => 'activity', 'status' => 'scheduled', 'scheduled_on' => today(), 'city' => 'Bogotá']);

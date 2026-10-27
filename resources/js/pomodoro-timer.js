@@ -51,8 +51,47 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
         endsAt: null,
         cycleId: null,
         description: '',
+        taskId: null,
+        taskContext: null,
+        taskLoading: false,
+        taskError: '',
         errorMessage: '',
         visibilityHandler: null,
+        syncHandler: null,
+
+        async loadTaskContext() {
+            const id = this.taskId;
+            this.taskContext = null;
+            this.taskError = '';
+            this.taskLoading = false;
+            if (!id || !options.loadTask) return;
+            this.taskLoading = true;
+            try {
+                const context = await options.loadTask(id);
+                if (this.taskId === id) this.taskContext = context;
+            } catch {
+                if (this.taskId === id) this.taskError = 'No se pudo cargar la tarea. Vuelve a abrir el foco para reintentar.';
+            } finally {
+                if (this.taskId === id) this.taskLoading = false;
+            }
+        },
+
+        async openFocus(detail = {}) {
+            if (this.isRunning || this.pendingCompletion || this.startedAt || this.isCompleting || !detail.start) {
+                await this.loadTaskContext();
+                return;
+            }
+            this.taskId = typeof detail.taskId === 'string' ? detail.taskId : null;
+            this.description = detail.description || '';
+            this.setMode('work');
+            this.start();
+            const cycle = this.cycleId;
+            await this.loadTaskContext();
+            if (this.cycleId === cycle && this.taskContext && !this.description) {
+                this.description = this.taskContext.title;
+                this.persist();
+            }
+        },
 
         get displayTime() {
             return `${String(Math.floor(this.timeLeft / 60)).padStart(2, '0')}:${String(this.timeLeft % 60).padStart(2, '0')}`;
@@ -222,10 +261,14 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
                 endsAt: this.endsAt,
                 cycleId: this.cycleId,
                 description: this.description,
+                taskId: this.taskId,
             }));
+
+            // Avisa a otras instancias montadas (barra de estado, módulo, panel) para que no se desincronicen.
+            documentObject?.dispatchEvent?.(new CustomEvent('pomodoro-sync', { detail: { key: options.storageKey, source: this } }));
         },
 
-        restore() {
+        restore({ passive = false } = {}) {
             if (!storage || !options.storageKey) return;
 
             let saved;
@@ -245,12 +288,13 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
             this.startedAt = Number(saved.startedAt) || null;
             this.endsAt = Number(saved.endsAt) || null;
             this.cycleId = typeof saved.cycleId === 'string' ? saved.cycleId : null;
+            this.taskId = typeof saved.taskId === 'string' ? saved.taskId : null;
             this.description = typeof saved.description === 'string' ? saved.description : '';
             this.isRunning = Boolean(saved.isRunning && this.endsAt && this.startedAt && this.cycleId);
             this.pendingCompletion = Boolean(saved.pendingCompletion && this.startedAt && this.endsAt && this.cycleId);
 
             if (this.pendingCompletion) {
-                void this.complete();
+                if (!passive) void this.complete();
             } else if (this.isRunning) {
                 this.syncTime();
                 if (this.isRunning) this.startInterval();
@@ -259,15 +303,25 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
 
         init() {
             this.restore();
+            if (options.loadTask) void this.loadTaskContext();
             this.$watch?.('description', () => this.persist());
             this.visibilityHandler = () => this.syncTime();
             documentObject?.addEventListener('visibilitychange', this.visibilityHandler);
+            this.syncHandler = (event) => {
+                if (event.detail?.key !== options.storageKey || event.detail?.source === this) return;
+                this.clearInterval();
+                this.restore({ passive: true });
+            };
+            documentObject?.addEventListener('pomodoro-sync', this.syncHandler);
         },
 
         destroy() {
             this.clearInterval();
             if (this.visibilityHandler) {
                 documentObject?.removeEventListener('visibilitychange', this.visibilityHandler);
+            }
+            if (this.syncHandler) {
+                documentObject?.removeEventListener('pomodoro-sync', this.syncHandler);
             }
         },
     };

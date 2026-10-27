@@ -131,6 +131,33 @@
             {{ $slot }}
         </main>
 
+        {{-- Barra de estado (escritorio). El bloque de foco persiste entre
+             navegaciones; los atajos de la derecha dependen del módulo y se
+             declaran en `status` de config/modules.php. --}}
+        @auth
+            <footer class="lt-status" data-module="{{ $activeModuleKey }}" aria-label="Barra de estado">
+                @persist('status-bar')
+                    <livewire:status-bar.status-bar />
+                @endpersist
+                <div class="lt-status__group lt-status__group--end">
+                    @foreach (config("modules.{$activeModuleKey}.status", []) as $statusItem)
+                        @php
+                            $statusAction = $statusItem['action'] ?? '';
+                            $statusRoute = str_starts_with($statusAction, 'route:') ? substr($statusAction, 6) : null;
+                            $statusEvent = $statusAction === 'focus' ? 'status-focus-start' : (str_starts_with($statusAction, 'dispatch:') ? substr($statusAction, 9) : null);
+                        @endphp
+                        @if ($statusRoute)
+                            <a href="{{ route($statusRoute) }}" wire:navigate class="lt-status__item" title="{{ $statusItem['title'] ?? $statusItem['label'] }}">
+                                <i class="bi {{ $statusItem['icon'] }}" aria-hidden="true"></i><span>{{ $statusItem['label'] }}</span>
+                            </a>
+                        @elseif ($statusEvent)
+                            <x-ui.action variant="text" size="sm" :icon="$statusItem['icon']" class="lt-status__item" x-data @click="$dispatch(@js($statusEvent))" :title="$statusItem['title'] ?? $statusItem['label']">{{ $statusItem['label'] }}</x-ui.action>
+                        @endif
+                    @endforeach
+                </div>
+            </footer>
+        @endauth
+
         {{-- Destinos principales. Van siempre en el HTML: por encima de 768px los
              oculta el CSS, no una condición de JavaScript, así que no parpadean
              al cargar ni hace falta `x-cloak`. --}}

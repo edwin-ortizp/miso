@@ -255,7 +255,7 @@
   /* FAB: posición, tamaño y FAB dividido. Ninguna pantalla los redefine. */
   --md-sys-layout-inset-inline-end: 0px;
   --md-sys-fab-offset-inline: 28px;
-  --md-sys-fab-offset-block: 28px;
+  --md-sys-fab-offset-block: 58px; /* 28px + barra de estado de escritorio (30px). */
   --md-sys-fab-height: 56px;
   --md-sys-fab-radius: 16px;
   --md-sys-fab-padding-inline: 20px;

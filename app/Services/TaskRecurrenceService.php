@@ -60,6 +60,25 @@ class TaskRecurrenceService
     {
         $recurrence = $task->recurrence ?? [];
         if ($rule = $this->recurrenceRule->fromTaskRecurrence($recurrence)) {
+            // Las recurrencias simples parten del día de finalización, aunque ya
+            // tengan una RRULE persistida. Las reglas de calendario conservan su ancla.
+            $parts = [];
+            foreach (explode(';', $rule) as $part) {
+                [$key, $value] = explode('=', $part, 2);
+                $parts[$key] = $value;
+            }
+            if (array_diff(array_keys($parts), ['FREQ', 'INTERVAL']) === []
+                && in_array($parts['FREQ'], ['DAILY', 'WEEKLY', 'MONTHLY'], true)) {
+                $date = ($completedAt ?? now())->copy()->startOfDay();
+                $interval = (int) ($parts['INTERVAL'] ?? 1);
+
+                return match ($parts['FREQ']) {
+                    'DAILY' => $date->addDays($interval),
+                    'WEEKLY' => $date->addWeeks($interval),
+                    'MONTHLY' => $date->addMonthsNoOverflow($interval),
+                };
+            }
+
             $anchor = Carbon::parse($recurrence['anchor'] ?? ($task->start_date ?? $task->end_date ?? now()));
             $completed = (int) ($recurrence['occurrences_completed'] ?? 0) + 1;
             if ($next = $this->recurrenceRule->next($rule, $anchor, $completed)) {

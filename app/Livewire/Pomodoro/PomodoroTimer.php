@@ -87,6 +87,15 @@ class PomodoroTimer extends Component
 
     public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken): void
     {
+        $start = self::storeTimerSession($startedAt, $endedAt, $description, $clientToken);
+
+        $this->selectDate($start->toDateString());
+        $this->dispatch('focus-session-saved');
+    }
+
+    /** Valida y guarda una sesión del temporizador; es idempotente por client_token. */
+    public static function storeTimerSession(int $startedAt, int $endedAt, string $description, string $clientToken): Carbon
+    {
         $validated = Validator::make([
             'started_at' => $startedAt,
             'ended_at' => $endedAt,
@@ -123,7 +132,7 @@ class PomodoroTimer extends Component
             'description' => trim($validated['description']) ?: null,
         ]);
 
-        $this->selectDate($start->toDateString());
+        return $start;
     }
 
     public function updatedSearch(): void
@@ -202,7 +211,7 @@ class PomodoroTimer extends Component
 
     public function saveManualSession(): void
     {
-        $format = $this->editingId ? 'H:i' : 'Y-m-d\TH:i';
+        $format = $this->manualUsesToday() || $this->editingId ? 'H:i' : 'Y-m-d\TH:i';
         $validated = $this->validate([
             'manualStart' => ['required', 'date_format:'.$format],
             'manualEnd' => ['required', 'date_format:'.$format],
@@ -243,6 +252,7 @@ class PomodoroTimer extends Component
         // Editar conserva el origen (client_token) del registro.
         $session = $this->editingId ? PomodoroSession::find($this->editingId) : null;
         $session ? $session->update($attributes) : PomodoroSession::create($attributes);
+        $this->dispatch('focus-session-saved');
 
         $this->selectDate($start->toDateString());
         $this->manualStart = '';
@@ -254,6 +264,7 @@ class PomodoroTimer extends Component
     public function deleteSession(string $id): void
     {
         PomodoroSession::findOrFail($id)->delete();
+        $this->dispatch('focus-session-saved');
     }
 
     public function previousDay(): void
@@ -372,7 +383,7 @@ class PomodoroTimer extends Component
         return $date->isWeekend() ? $this->weekendGoal : $this->weekdayGoal;
     }
 
-    private function manualDurationSeconds(): ?int
+    protected function manualDurationSeconds(): ?int
     {
         if ($this->manualStart === '' || $this->manualEnd === '') {
             return null;
@@ -395,6 +406,12 @@ class PomodoroTimer extends Component
      */
     private function manualInterval(): array
     {
+        if ($this->manualUsesToday()) {
+            $date = today()->toDateString();
+
+            return [$this->parseManualDateTime($date.'T'.$this->manualStart), $this->parseManualDateTime($date.'T'.$this->manualEnd)];
+        }
+
         if (! $this->editingId) {
             return [$this->parseManualDateTime($this->manualStart), $this->parseManualDateTime($this->manualEnd)];
         }
@@ -408,5 +425,10 @@ class PomodoroTimer extends Component
     private function parseManualDateTime(string $value): Carbon
     {
         return Carbon::createFromFormat('!Y-m-d\TH:i', $value, config('app.timezone'));
+    }
+
+    protected function manualUsesToday(): bool
+    {
+        return false;
     }
 }

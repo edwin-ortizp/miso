@@ -1,0 +1,46 @@
+/* ==========================================================================
+ * Barra de estado (escritorio), inspirada en la de los editores de código:
+ * foco de hoy y temporizador a la izquierda, atajos del módulo a la derecha.
+ * En móvil se oculta: ahí manda la barra de destinos (.lt-bottom).
+ * ========================================================================== */
+
+:root { --lt-status-height: 30px; }
+
+.lt-status {
+  position: sticky; bottom: 0; z-index: var(--md-sys-z-sticky);
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  height: var(--lt-status-height); padding: 0 12px;
+  background: var(--md-sys-color-surface-container-high);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-sys-typescale-label-small-weight);
+  letter-spacing: var(--md-sys-typescale-label-small-tracking);
+}
+.lt-status__group { display: flex; align-items: center; gap: 2px; min-width: 0; height: 100%; }
+.lt-status__timer { display: flex; align-items: center; height: 100%; }
+
+.lt-status .lt-status__item {
+  min-height: 0; border-radius: 0;
+  display: inline-flex; align-items: center; gap: 6px; height: 100%; padding: 0 8px;
+  border: 0; background: transparent; color: inherit; font: inherit; letter-spacing: inherit;
+  text-decoration: none; white-space: nowrap; cursor: pointer;
+}
+.lt-status__item:hover { background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent); color: var(--md-sys-color-on-surface); }
+.lt-status__item:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: -2px; }
+.lt-status__item:disabled { opacity: .5; cursor: default; }
+.lt-status__item [role="timer"] { font-variant-numeric: tabular-nums; }
+.lt-status__item.is-active { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+.lt-status__item.is-active.is-break { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
+.lt-status__item.is-warning { color: var(--md-sys-color-tertiary); font-weight: 600; }
+
+.lt-status__menu .md-menu__trigger { width: 24px; height: 24px; min-width: 0; font-size: .75rem; }
+.lt-status__menu .md-menu__surface { top: auto; bottom: calc(100% + 6px); }
+.lt-status__error { padding: 0 8px; color: var(--md-sys-color-error); }
+
+/* En el propio módulo Pomodoro el temporizador ya está en pantalla. */
+.lt-status[data-module="pomodoro"] .lt-status__timer { display: none; }
+
+@media (max-width: 767.98px) {
+  .lt-status { display: none; }
+}

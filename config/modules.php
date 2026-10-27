@@ -146,6 +146,11 @@ return [
         'archetype' => 'list',
         'title' => 'Tareas', 'subtitle' => 'Decide, ordena y completa el trabajo con claridad.', 'icon' => 'bi-list-check',
         'patterns' => ['tasks*'], 'preserve' => ['date', 'status', 'category', 'priority', 'size', 'q'],
+        // Atajos de la barra de estado: action = focus | route:<nombre> | dispatch:<evento>.
+        'status' => [
+            ['label' => 'Iniciar foco', 'icon' => 'bi-play-circle', 'action' => 'focus', 'title' => 'Inicia un Pomodoro de trabajo'],
+            ['label' => 'Historial de foco', 'icon' => 'bi-clock-history', 'action' => 'route:pomodoro'],
+        ],
         'tabs' => [
             ['label' => 'Lista', 'route' => 'tasks.list', 'icon' => 'bi-list-task', 'active' => ['tasks.list']],
             ['label' => 'Gantt', 'route' => 'tasks.gantt', 'archetype' => 'dashboard', 'icon' => 'bi-bar-chart-steps', 'active' => ['tasks.gantt']],

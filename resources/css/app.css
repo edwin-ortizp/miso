@@ -68,6 +68,7 @@
 @import './m3/archetypes/_archetypes.css';
 @import './m3/archetypes/_catalog.css';
 @import './m3/archetypes/_app-frame.css';
+@import './m3/archetypes/_status-bar.css';
 
 /* 5. Modules */
 @import './m3/modules/_goals.css';

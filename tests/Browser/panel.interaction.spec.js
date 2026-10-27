@@ -32,6 +32,42 @@ test.beforeAll(async () => {
 });
 test.afterAll(() => server?.kill());
 
+for (const width of [1440, 390]) {
+ test(`manual focus session ${width}`, async ({page}) => {
+  test.setTimeout(120000);
+  await page.setViewportSize({width, height: 900});
+  await login(page);
+  const initial = await page.locator('.wall-ring--focus b').innerText();
+  async function open() {
+   await page.getByRole('button', {name:'Crear', exact:true}).click();
+   await page.getByRole('menuitem', {name:'Registrar sesión de enfoque', exact:true}).click();
+  }
+  await open();
+  const dialog = page.getByRole('dialog', {name:'Registrar sesión de enfoque', exact:true});
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('input[type=date],input[type=datetime-local]')).toHaveCount(0);
+  await dialog.getByLabel('Inicio', {exact:true}).fill('00:00');
+  await dialog.getByLabel('Fin', {exact:true}).fill('00:01');
+  await expect(dialog.getByRole('status')).toContainText('0 h 1 min');
+  await dialog.getByLabel('Descripción (opcional)', {exact:true}).fill('Enfoque manual de prueba');
+  const violations = await new AxeBuilder({page}).include('#panel-focus-manual-dialog').analyze();
+  expect(violations.violations.map(v=>v.id)).toEqual([]);
+  expect(await dialog.evaluate(el=>el.scrollWidth <= el.clientWidth)).toBe(true);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await open();
+  await expect(dialog.getByLabel('Inicio', {exact:true})).toHaveValue('');
+  await expect(dialog.getByLabel('Descripción (opcional)', {exact:true})).toHaveValue('');
+  await dialog.getByLabel('Inicio', {exact:true}).fill('00:00');
+  await dialog.getByLabel('Fin', {exact:true}).fill('00:01');
+  await expect(dialog.getByRole('status')).toContainText('0 h 1 min');
+  await dialog.getByRole('button', {name:'Guardar', exact:true}).click();
+  await expect(dialog).toBeHidden();
+  await expect(page.locator('.wall-ring--focus b')).not.toHaveText(initial);
+  expect(new URL(page.url()).pathname).toBe('/panel');
+ });
+}
+
 
 async function login(page) {
  await page.goto('/login');
@@ -245,3 +281,40 @@ test('panel consultation dialogs keep canonical chrome and keyboard access', asy
  await dialog.getByRole('button',{name:'Cerrar',exact:true}).click();
  await expect(dialog).toBeHidden();expect(errors).toEqual([]);
 });
+
+for (const width of [1440, 768, 390]) {
+ test(`focus task context ${width}`, async ({page}) => {
+  test.setTimeout(90000);
+  const errors=[];page.on('pageerror', e=>errors.push(e.message));
+  await page.setViewportSize({width,height:900});await login(page);
+  await page.getByRole('button',{name:'Iniciar foco',exact:true}).click();
+  const dialog=page.getByRole('dialog',{name:'Foco de hoy',exact:true});
+  const title=dialog.locator('.wall-focus-task h3');
+  await expect(title).toHaveText(/Panel tarea/);
+  await expect(dialog.locator('.wall-focus-task strong')).toHaveText('Acuerdos importantes');
+  const original=await title.innerText();
+  await dialog.getByLabel('Descripción del registro de foco',{exact:true}).fill('Notas independientes');
+  await dialog.getByRole('button',{name:'Pausar',exact:true}).click();
+  await dialog.getByRole('button',{name:'Volver al panel',exact:true}).click();
+  await page.reload();
+  await page.getByRole('button',{name:'Iniciar foco',exact:true}).click();
+  await expect(title).toHaveText(original);
+  await expect(dialog.getByLabel('Descripción del registro de foco',{exact:true})).toHaveValue('Notas independientes');
+  await expect(dialog.getByRole('button',{name:'Iniciar',exact:true})).toBeVisible();
+  expect(await dialog.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+  const timer=await dialog.getByRole('timer').boundingBox();
+  const heading=await title.boundingBox();
+  if(width>=1024) {
+   expect(heading.x).toBeGreaterThan(timer.x+timer.width);
+   const region=dialog.getByRole('region',{name:'Descripción de la tarea'});
+   expect(await region.evaluate(el=>el.scrollHeight>el.clientHeight)).toBe(true);
+   await region.evaluate(el=>el.scrollTop=300);
+   expect((await dialog.getByRole('timer').boundingBox()).y).toBe(timer.y);
+  }
+  else expect(heading.y).toBeGreaterThan(timer.y+timer.height);
+  expect((await new AxeBuilder({page}).include('.wall-focus-dialog').analyze()).violations.map(v=>v.id)).toEqual([]);
+  await page.screenshot({path:`storage/framework/testing/playwright/panel/focus-${width}.png`,fullPage:true});
+  await page.keyboard.press('Escape');await expect(dialog).toBeHidden();
+  expect(errors).toEqual([]);
+ });
+}

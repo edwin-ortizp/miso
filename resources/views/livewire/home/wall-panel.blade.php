@@ -53,7 +53,7 @@
             @if ($now)
                 <strong class="wall-next__title">{{ $now['title'] }}</strong><p>Hoy · {{ $now['time'] }}</p>
                 <div class="wall-next__actions">
-                    <x-ui.action class="wall-control" variant="filled" icon="bi-stopwatch" @click="$dispatch('panel-focus', {start: true, description: {{ \Illuminate\Support\Js::from($now['title']) }}})">Iniciar foco</x-ui.action>
+                    <x-ui.action class="wall-control" variant="filled" icon="bi-stopwatch" @click="$dispatch('panel-focus', {start: true, taskId: {{ \Illuminate\Support\Js::from($now['id']) }}})">Iniciar foco</x-ui.action>
                     <x-ui.icon-action emphasis="tonal" icon="bi-check2-circle" label="Completar" wire:click="toggleTask('{{ $now['id'] }}')" wire:loading.attr="disabled" />
                     <x-ui.icon-action emphasis="tonal" icon="bi-alarm" label="Posponer" @click="$dispatch('panel-quick', {kind: 'snooze', id: {{ \Illuminate\Support\Js::from($now['id']) }}})" />
                 </div>
@@ -128,6 +128,7 @@
     </main>
     <x-ui.fab compact label="Crear tarea" event="task-editor" :detail="['action' => 'openForm']" module="home" :actions="[
         ['label' => 'Agregar plan', 'icon' => 'bi-map', 'event' => 'panel-plan'],
+        ['label' => 'Registrar sesión de enfoque', 'icon' => 'bi-stopwatch', 'event' => 'panel-focus-manual'],
         ['label' => 'Agregar compra', 'icon' => 'bi-cart-plus', 'event' => 'panel-shopping'],
         ['label' => 'Registrar bebida', 'icon' => 'bi-droplet', 'event' => 'panel-quick', 'detail' => ['kind' => 'water']],
         ['label' => 'Registrar ánimo', 'icon' => 'bi-emoji-smile', 'event' => 'panel-quick', 'detail' => ['kind' => 'mood']],
