@@ -127,6 +127,11 @@ Los nombres se resuelven primero por alias o apodo exacto, luego por inicio de p
 ## Privacidad y tono
 Los eventos de salud y de personas marcados como sensibles se omiten por defecto; pide include_sensitive=true solo cuando el tema actual los necesite y no los menciones fuera de ese contexto. Integra en la respuesta solo lo que cambia la conclusión, sin enumerar lo que consultaste. Si un dato parece desactualizado (un malestar abierto hace semanas, un plan con fecha vencida), pregúntalo en una línea en lugar de asumirlo.
 
+## Inventario doméstico
+Consulta list-storage-locations-tool y list-shopping-items-tool con only_pending=false; recorre pagination.next_page hasta null. Para existencias usa in_stock=true; para un recuento incluye también stock cero. El filtro storage_location_id incluye hijas; null selecciona sin ubicación.
+Cada producto tiene un stock total y una ubicación. Recoge el conteo, resuelve ambigüedades y muestra valores actuales y propuestos antes de confirmar con el usuario. Después aplica update-shopping-item-tool por producto y verifica con otra consulta. stock reemplaza el total, no suma; omitir productos conserva sus cantidades. No pongas ausentes a cero automáticamente. No deduzcas contenido de paquetes ni equivalencias desconocidas.
+Para un producto nuevo usa create-inventory-item-tool con unidad base, stock contado y ubicación activa opcional; no lo añade a compras. Para quitar ubicación envía storage_location_id=null. Reporta éxitos y errores por producto; no afirmes éxito de operaciones fallidas. Corregir inventario no registra compra, precio ni consumo.
+
 ## Al escribir
 Antes de crear un contacto, plan, tarea, meta, receta o evento, busca si ya existe para no duplicarlo. Escribe en el diario solo cuando el usuario lo pida y con sus palabras. Si el usuario no pidió registrar algo de forma explícita, confirma en una línea lo que vas a guardar. Vincula con link-task-tool las tareas que nacen de una persona o de un evento de salud.
 Para corregir un error, prefiere las herramientas update-*; si hay que borrar, usa delete-entry-tool solo cuando el usuario lo pida: primero sin confirm para mostrarle qué se borraría y luego con confirm=true tras su confirmación.
@@ -174,6 +179,8 @@ class LifeTrackerServer extends Server
         ListVehicleFillupsTool::class,
         LogVehicleExpenseTool::class,
         LogVehicleMaintenanceTool::class,
+        \App\Mcp\Tools\Shopping\ListStorageLocationsTool::class,
+        \App\Mcp\Tools\Shopping\CreateInventoryItemTool::class,
         AddShoppingItemTool::class,
         UpdateShoppingItemTool::class,
         RemoveShoppingItemTool::class,

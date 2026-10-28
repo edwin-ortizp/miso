@@ -151,7 +151,7 @@
                                 <i class="bi {{ $statusItem['icon'] }}" aria-hidden="true"></i><span>{{ $statusItem['label'] }}</span>
                             </a>
                         @elseif ($statusEvent)
-                            <x-ui.action variant="text" size="sm" :icon="$statusItem['icon']" class="lt-status__item" x-data @click="$dispatch(@js($statusEvent))" :title="$statusItem['title'] ?? $statusItem['label']">{{ $statusItem['label'] }}</x-ui.action>
+                            <x-ui.action variant="text" size="sm" :icon="$statusItem['icon']" class="lt-status__item" x-data @click="$dispatch({{ \Illuminate\Support\Js::from($statusEvent) }})" :title="$statusItem['title'] ?? $statusItem['label']">{{ $statusItem['label'] }}</x-ui.action>
                         @endif
                     @endforeach
                 </div>

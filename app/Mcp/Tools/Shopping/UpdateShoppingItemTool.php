@@ -2,23 +2,25 @@
 
 namespace App\Mcp\Tools\Shopping;
 
+use App\Mcp\Tools\Shopping\Concerns\InteractsWithInventory;
 use App\Mcp\Tools\Shopping\Concerns\RecordsVariantPrices;
 use App\Mcp\Tools\Shopping\Concerns\ResolvesShoppingItem;
-use App\Models\ShoppingItem;
 use App\Models\MealCategory;
+use App\Models\ShoppingItem;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Actualiza un producto del catálogo de compras: unidad base, cantidad a comprar, categoría, stock, mínimo, nutrición, o registra una variante con su precio. Al cambiar base_unit, revisa y envía stock, min_stock y nutrición corregidos en la nueva unidad cuando sea necesario; revisa también el contenido de todas las variantes mediante update-variant-tool. No hay conversión automática entre peso, volumen y unidades: los números omitidos se conservan y el historial de compras mantiene sus unidades originales.')]
+#[Description('Actualiza un producto del catálogo de compras: unidad base, cantidad a comprar, categoría, stock total contado, ubicación, mínimo, nutrición, o registra una variante con su precio. Al cambiar base_unit, revisa y envía stock, min_stock y nutrición corregidos en la nueva unidad cuando sea necesario; revisa también el contenido de todas las variantes mediante update-variant-tool. No hay conversión automática entre peso, volumen y unidades: los números omitidos se conservan y el historial de compras mantiene sus unidades originales.')]
 class UpdateShoppingItemTool extends Tool
 {
-    use RecordsVariantPrices, ResolvesShoppingItem;
+    use InteractsWithInventory, RecordsVariantPrices, ResolvesShoppingItem;
 
-    public function handle(Request $request): Response
+    public function handle(Request $request): Response|ResponseFactory
     {
         $data = $request->validate([
             'item_id' => ['nullable', 'string'],
@@ -45,7 +47,10 @@ class UpdateShoppingItemTool extends Tool
             return $item;
         }
 
+        $locationData = $request->validate(['storage_location_id' => $this->storageLocationRules($item)]);
+
         $updates = collect($data)->only(['category_id', 'stock', 'min_stock', 'grams_per_piece', 'kcal', 'protein', 'carbs', 'fat'])->all();
+        $updates = [...$updates, ...$locationData];
         if (array_key_exists('quantity', $data)) {
             $updates['to_buy'] = $data['quantity'];
         }
@@ -68,7 +73,7 @@ class UpdateShoppingItemTool extends Tool
             return Response::error('No se indicó ningún campo para actualizar.');
         }
 
-        return Response::text("Ítem \"{$item->name}\" actualizado (id: {$item->id})".($recorded ? "; {$recorded}" : '').'.');
+        return Response::structured(['item' => $this->inventorySummary($item->refresh()), 'message' => "Ítem \"{$item->name}\" actualizado (id: {$item->id})".($recorded ? "; {$recorded}" : '').'.']);
     }
 
     public function schema(JsonSchema $schema): array
@@ -82,7 +87,8 @@ class UpdateShoppingItemTool extends Tool
                 ->description('Nueva cantidad de paquetes a comprar.'),
             'category_id' => $schema->string()
                 ->description('Identificador de categoría del usuario. Consulta category_options en ListShoppingItemsTool.'),
-            'stock' => $schema->number()->description('Stock en casa, en la unidad base del producto.'),
+            'storage_location_id' => $schema->string()->nullable()->description('UUID de ubicación activa propia; null para quitarla. Omitir conserva la actual, incluso archivada.'),
+            'stock' => $schema->number()->description('Total contado en casa en la unidad base. Reemplaza el stock, no suma ni registra compras. Omitir lo conserva.'),
             'min_stock' => $schema->number()->description('Stock mínimo, en la unidad base.'),
             'grams_per_piece' => $schema->number()->description('Gramos por pieza para productos por peso que se cuentan por pieza.'),
             'kcal' => $schema->number()->description('Calorías por 100 g, por 100 ml o por unidad según la unidad base.'),
