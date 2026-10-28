@@ -185,13 +185,51 @@ class TaskList extends Component
             foreach ($lines as $line) {
                 $parsed = $this->parseObsidianLine($line);
                 $data = array_filter($parsed['overrides'], fn ($v) => $v !== null) + $baseData;
-                $data['title'] = $parsed['title'];
+                [$data['title'], $continuation] = $this->splitBulkTitle($parsed['title']);
+
+                if ($continuation !== '') {
+                    $data['description'] = collect([$data['description'] ?? null, $continuation])
+                        ->filter(fn ($part) => $part !== null && $part !== '')
+                        ->implode("\n\n");
+                }
+
                 $data['task_code'] = rand(10000, 99999);
                 Task::create($data);
             }
         });
 
         $this->closeForm();
+    }
+
+    /** @return array{string, string} */
+    private function splitBulkTitle(string $title): array
+    {
+        if (mb_strlen($title, 'UTF-8') <= 255) {
+            return [$title, ''];
+        }
+
+        preg_match_all('/\\X/u', $title, $matches);
+
+        $prefix = '';
+        $characterCount = 0;
+
+        foreach ($matches[0] as $cluster) {
+            $clusterLength = mb_strlen($cluster, 'UTF-8');
+            if ($characterCount + $clusterLength > 255) {
+                break;
+            }
+
+            $prefix .= $cluster;
+            $characterCount += $clusterLength;
+        }
+
+        $spacePosition = mb_strrpos($prefix, ' ', 0, 'UTF-8');
+        $splitPosition = $spacePosition === false ? $characterCount : $spacePosition;
+
+        return [
+            rtrim(mb_substr($title, 0, $splitPosition, 'UTF-8')),
+            ltrim(mb_substr($title, $splitPosition, null, 'UTF-8')),
+        ];
     }
 
     private function parseObsidianLine(string $line): array

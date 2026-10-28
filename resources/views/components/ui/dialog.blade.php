@@ -7,6 +7,7 @@
     'standard' => false,
     'closeExpression' => null,
     'expanded' => false,
+    'persistentContent' => false,
 ])
 
 @php
@@ -25,14 +26,15 @@
 
 @if ($standard)
     @teleport('body')
-        <template x-if="{{ $state }}">
-            <div class="md-form-dialog-layer" data-module="{{ \App\Support\Ui\ModuleContext::current() }}" x-dialog-viewport
+        {{-- x-show permite actualizar con Livewire el contenido de diálogos accionables teletransportados. --}}
+        @unless ($persistentContent)<template x-if="{{ $state }}">@endunless
+            <div @if ($persistentContent) x-show="{{ $state }}" x-cloak @endif class="md-form-dialog-layer" data-module="{{ \App\Support\Ui\ModuleContext::current() }}" x-dialog-viewport
                  x-data="{ expanded: {{ $size === 'fullscreen' || $expanded ? 'true' : 'false' }} }">
                 <div class="md-dialog-scrim" @click="{{ $closeAction }}"></div>
                 <section {{ $attributes->class(['md-form-dialog']) }} :class="{ 'is-expanded': expanded }"
                          role="dialog" aria-modal="true" aria-labelledby="{{ $headingId }}"
                          @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif
-                         x-md-surface @md-surface-close="{{ $closeAction }}">
+                         x-md-surface="{{ $persistentContent ? $state : '' }}" @md-surface-close="{{ $closeAction }}">
                     <div class="md-form-dialog__form">
                         <header class="md-form-dialog__head">
                             @if ($icon)<span class="md-form-dialog__icon"><i class="bi {{ $icon }}" aria-hidden="true"></i></span>@endif
@@ -50,7 +52,7 @@
                     </div>
                 </section>
             </div>
-        </template>
+        @unless ($persistentContent)</template>@endunless
     @endteleport
 @else
 @if ($size !== 'md') @teleport('body') @endif

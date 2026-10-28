@@ -260,11 +260,13 @@ Su paleta contextual usa los tokens `--md-custom-color-panel-*`: crema para el f
 
 El marco declara `--md-sys-layout-inset-inline-end` cuando la navegación ocupa el borde derecho; el posicionamiento canónico del FAB suma ese espacio a su separación habitual.
 
+La tarjeta de hábitos muestra hasta tres chips del bloque actual y «cualquier momento»: pendientes por hora y, al final, únicamente el último completado hoy para poder deshacerlo. Sin completados muestra hasta tres pendientes. El modal permite completar y deshacer todos los hábitos sin salir del panel.
+
 El panel consulta datos cada cinco minutos mientras está visible, al cambiar de día y después de guardar. El botón «Actualizar panel» permite consultar antes; la hora de última actualización solo avanza tras una carga correcta. El reloj es local y no genera peticiones por segundo.
 
 ### Diálogos de consulta del panel
 
-En `/panel`, `x-ui.dialog standard` reutiliza la cabecera, el cuerpo desplazable y el pie del modal canónico de formulario. Incluye cierre visible y expansión/restauración también en pantalla completa, sin añadir acciones de guardado a consultas. `close-expression` permite conservar las acciones de cierre del módulo. Los editores mantienen `x-ui.form-dialog`.
+En `/panel`, `x-ui.dialog standard` reutiliza la cabecera, el cuerpo desplazable y el pie del modal canónico de formulario. Incluye cierre visible y expansión/restauración también en pantalla completa, sin añadir acciones de guardado a consultas. `close-expression` permite conservar las acciones de cierre del módulo. Los editores mantienen `x-ui.form-dialog`. Para contenido accionable que debe actualizarse con Livewire mientras sigue abierto, `persistent-content` conserva el DOM con `x-show`; el modal de hábitos utiliza esta opción.
 
 Las tarjetas del panel usan `--md-sys-shape-corner-medium` (12 px); los objetivos son filas de texto sin forma de píldora. La agenda muestra hoy y los cuatro días siguientes, con fechas en español independientes del idioma global.
 

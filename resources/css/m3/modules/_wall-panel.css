@@ -10,6 +10,10 @@
 .wall-frame[data-panel-night] {
   --md-sys-color-primary: var(--md-sys-color-inverse-primary);
   --md-sys-color-on-primary: var(--md-sys-color-on-primary-container);
+  /* Menús teletransportados: superficie y texto deben cambiar juntos. */
+  --md-sys-color-surface-container-high: var(--md-custom-color-panel-night-card);
+  --md-sys-color-secondary-container: var(--md-custom-color-panel-night-next);
+  --md-sys-color-on-secondary-container: var(--md-custom-color-panel-night-ink);
   --md-custom-color-panel-background: var(--md-custom-color-panel-night-background);
   --md-custom-color-panel-card: var(--md-custom-color-panel-night-card);
   --md-custom-color-panel-ink: var(--md-custom-color-panel-night-ink);

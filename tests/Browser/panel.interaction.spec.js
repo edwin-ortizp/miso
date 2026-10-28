@@ -318,3 +318,63 @@ for (const width of [1440, 768, 390]) {
   expect(errors).toEqual([]);
  });
 }
+
+for (const width of [1440, 390]) {
+ test(`habit dialog toggles and FAB contrast ${width}`, async ({page}) => {
+  test.setTimeout(90000);
+  const errors = []; page.on('pageerror', e => errors.push(e.message));
+  await page.setViewportSize({width, height:900});
+  await login(page);
+  await page.getByRole('button', {name:'Ver todos los hábitos', exact:true}).click();
+  const dialog = page.getByRole('dialog', {name:'Hábitos de hoy', exact:true});
+  for (const name of ['Leer 20 minutos', 'Hábito adicional 1']) {
+   const row = dialog.locator('.wall-sheet-row').filter({hasText:name});
+   await row.getByRole('button', {name:`Completar ${name}`, exact:true}).click();
+   await expect(row.getByRole('button', {name:`Deshacer ${name}`, exact:true})).toHaveAttribute('aria-pressed', 'true');
+   await expect(row).toContainText('Completado');
+   await expect(dialog).toBeVisible();
+  }
+  expect((await new AxeBuilder({page}).include('[aria-labelledby="dialog-habitos-de-hoy"]').analyze()).violations.map(v=>v.id)).toEqual([]);
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  const chips = page.locator('.wall-habit');
+  await expect(chips).toHaveCount(3);
+  await expect(chips.filter({hasText:'Hábito adicional 1'})).toHaveAttribute('aria-pressed', 'true');
+  await expect(chips.filter({hasText:'Leer 20 minutos'})).toHaveCount(0);
+  await page.reload();
+  await expect(chips.filter({hasText:'Hábito adicional 1'})).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', {name:'Ver todos los hábitos', exact:true}).click();
+  for (const name of ['Hábito adicional 1', 'Leer 20 minutos']) {
+   await dialog.getByRole('button', {name:`Deshacer ${name}`, exact:true}).click();
+   await expect(dialog.getByRole('button', {name:`Completar ${name}`, exact:true})).toHaveAttribute('aria-pressed', 'false');
+  }
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', {name:'Ver todos los hábitos', exact:true}).click();
+  await dialog.getByRole('button', {name:'Completar Ejercicio con registro', exact:true}).click();
+  const prompt = page.locator('#habit-action-prompt');
+  await expect(prompt).toBeVisible();
+  await expect(dialog).toBeHidden();
+  await prompt.getByRole('button', {name:'Omitir por esta vez', exact:true}).click();
+  await expect(prompt).toBeHidden();
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', {name:'Deshacer Ejercicio con registro', exact:true}).click();
+  await expect(dialog.getByRole('button', {name:'Completar Ejercicio con registro', exact:true})).toBeVisible();
+  await page.keyboard.press('Escape');
+  for (const night of [false, true]) {
+   if (night) await page.getByRole('button', {name:'Modo noche', exact:true}).click();
+   const fab = page.getByRole('button', {name:'Crear', exact:true});
+   await fab.focus(); await page.keyboard.press('Enter');
+   const menu = page.getByRole('menu', {name:'Crear tarea', exact:true});
+   await expect(menu).toBeVisible();
+   const check = async () => expect((await new AxeBuilder({page}).include('.md-fab-host').analyze()).violations.map(v=>({id:v.id, targets:v.nodes.map(n=>n.target)}))).toEqual([]);
+   await check();
+   await menu.getByRole('menuitem').first().hover();
+   await check();
+   await page.screenshot({path:`storage/framework/testing/playwright/panel/habits-fab-${width}-${night?'night':'day'}.png`, fullPage:true});
+   await page.keyboard.press('Escape');
+   await expect(menu).toBeHidden();
+  }
+  expect(new URL(page.url()).pathname).toBe('/panel');
+  expect(errors).toEqual([]);
+ });
+}

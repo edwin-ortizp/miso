@@ -89,8 +89,8 @@
             <article class="wall-card wall-card--habits">
                 <header><h2><i class="bi bi-check2-square" aria-hidden="true"></i> Hábitos · {{ \App\Livewire\Habit\HabitSettings::TIMES_OF_DAY[$block] }}</h2><x-ui.icon-action size="sm" icon="bi-three-dots" label="Ver todos los hábitos" @click="habitsOpen = true" /></header>
                 <div class="wall-habits">
-                    @forelse ($habits->whereIn('time_of_day', [$block, 'anytime'])->take(3) as $habit)
-                        <button type="button" class="md-btn-outlined wall-habit {{ in_array($habit->id, $completions) ? 'is-done' : '' }}" wire:click="toggleHabit({{ $habit->id }})" aria-pressed="{{ in_array($habit->id, $completions) ? 'true' : 'false' }}" wire:loading.attr="disabled">{{ $habit->icon }} {{ $habit->name }} @if(($habitStreaks[$habit->id] ?? 0) > 0)<small aria-hidden="true">🔥{{ $habitStreaks[$habit->id] }}</small>@endif</button>
+                    @forelse ($visibleHabits as $habit)
+                        <button type="button" wire:key="panel-habit-{{ $habit->id }}" class="md-btn-outlined wall-habit {{ in_array($habit->id, $completions) ? 'is-done' : '' }}" wire:click="toggleHabit({{ $habit->id }})" aria-pressed="{{ in_array($habit->id, $completions) ? 'true' : 'false' }}" wire:loading.attr="disabled">{{ $habit->icon }} {{ $habit->name }} @if(($habitStreaks[$habit->id] ?? 0) > 0)<small aria-hidden="true">🔥{{ $habitStreaks[$habit->id] }}</small>@endif</button>
                     @empty <p class="wall-muted">Sin hábitos en este momento del día.</p>@endforelse
                 </div>
                 <footer class="wall-card__foot"><p class="wall-muted">{{ count($completions) }}/{{ $habits->count() }} completados hoy</p></footer>

@@ -15,11 +15,15 @@
     @endforeach
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="agendaOpen = false">Cerrar</x-ui.action></x-slot:actions>
 </x-ui.dialog>
-<x-ui.dialog standard expanded state="habitsOpen" title="Hábitos de hoy" size="lg" icon="bi-check2-square">
+<x-ui.dialog standard expanded persistent-content state="habitsOpen && !$wire.showHabitActionPrompt" close-expression="habitsOpen = false" title="Hábitos de hoy" size="lg" icon="bi-check2-square">
     @foreach (\App\Livewire\Habit\HabitSettings::TIMES_OF_DAY as $key => $label)
         <h3 class="md-title-medium">{{ $label }}</h3>
         @forelse ($habits->where('time_of_day', $key) as $habit)
-            <button type="button" class="md-btn-text wall-sheet-row {{ in_array($habit->id, $completions) ? 'is-done' : '' }}" wire:click="toggleHabit({{ $habit->id }})" aria-pressed="{{ in_array($habit->id, $completions) ? 'true' : 'false' }}" wire:loading.attr="disabled"><span>{{ $habit->icon }} {{ $habit->name }}</span><small>{{ $habit->base_time ? substr($habit->base_time, 0, 5) : 'Sin hora' }} · Racha {{ $habitStreaks[$habit->id] ?? 0 }}</small></button>
+            @php($completed = in_array($habit->id, $completions))
+            <div class="wall-sheet-row" wire:key="panel-habit-row-{{ $habit->id }}">
+                <span><b>{{ $habit->icon }} {{ $habit->name }}</b><small class="d-block">{{ $habit->base_time ? substr($habit->base_time, 0, 5) : 'Sin hora' }} · Racha {{ $habitStreaks[$habit->id] ?? 0 }} · {{ $completed ? 'Completado' : 'Pendiente' }}</small></span>
+                <x-ui.action class="wall-control" variant="tonal" x-on:click="$wire.toggleHabit({{ $habit->id }})" aria-label="{{ $completed ? 'Deshacer' : 'Completar' }} {{ $habit->name }}" aria-pressed="{{ $completed ? 'true' : 'false' }}" wire:loading.attr="disabled">{{ $completed ? 'Deshacer' : 'Completar' }}</x-ui.action>
+            </div>
         @empty <p class="wall-muted">Sin hábitos en este bloque.</p>@endforelse
     @endforeach
     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="habitsOpen = false">Cerrar</x-ui.action></x-slot:actions>

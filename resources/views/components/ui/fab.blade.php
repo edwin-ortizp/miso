@@ -42,7 +42,7 @@
 
 @teleport('body')
     <div class="md-fab-layer md-fab-host" data-module="{{ $moduleKey }}"
-         @if ($actions->isNotEmpty()) x-data="{ fabOpen: false }" @keydown.escape.window="fabOpen = false" @click.outside="fabOpen = false" :class="{ 'is-open': fabOpen }" @endif>
+         @if ($actions->isNotEmpty()) x-data="{ fabOpen: false }" @keydown.escape.stop="fabOpen = false" @keydown.escape.window="fabOpen = false" @click.outside="fabOpen = false" :class="{ 'is-open': fabOpen }" @endif>
         @if ($actions->isEmpty())
             <{{ $tag($primary) }} @if ($tag($primary) === 'button') type="button" @endif {!! $binding($primary) !!}
                 class="md-fab md-fab-extended md-create-fab md-module-primary-fab" aria-label="{{ $label }}" title="{{ $label }}">

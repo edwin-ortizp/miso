@@ -62,6 +62,41 @@ class TaskBulkEditorTest extends TestCase
         $this->assertDatabaseHas('tasks', ['id' => $untouched->id, 'title' => 'Ajena', 'user_id' => $other->id]);
     }
 
+    public function test_long_bulk_line_keeps_one_task_and_moves_unicode_continuation_to_description(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $continuation = 'continuación con acentos y cámara 📷';
+
+        Livewire::test(TaskBulkEditor::class)
+            ->call('openForm')
+            ->set('bulkTitles', str_repeat('á', 250).' '.$continuation)
+            ->set('description', 'Descripción común')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $tasks = Task::withoutGlobalScopes()->get();
+        $this->assertCount(1, $tasks);
+        $this->assertSame(str_repeat('á', 250), $tasks->sole()->title);
+        $this->assertLessThanOrEqual(255, mb_strlen($tasks->sole()->title, 'UTF-8'));
+        $this->assertSame("Descripción común\n\n{$continuation}", $tasks->sole()->description);
+    }
+
+    public function test_unbroken_long_bulk_title_is_split_without_losing_unicode_characters(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $longWord = str_repeat('ñ', 300);
+
+        Livewire::test(TaskBulkEditor::class)
+            ->call('openForm')
+            ->set('bulkTitles', $longWord)
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $task = Task::withoutGlobalScopes()->sole();
+        $this->assertSame(str_repeat('ñ', 255), $task->title);
+        $this->assertSame(str_repeat('ñ', 45), $task->description);
+    }
+
     public function test_empty_bulk_draft_keeps_dialog_open_and_cancel_discards_it(): void
     {
         $this->actingAs(User::factory()->create());

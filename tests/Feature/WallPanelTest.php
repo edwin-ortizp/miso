@@ -10,6 +10,7 @@ use App\Livewire\Home\WallPanel;
 use App\Models\DrinkType;
 use App\Models\Goal;
 use App\Models\HabitDefinition;
+use App\Models\HabitCompletion;
 use App\Models\JournalEntry;
 use App\Models\MealPlanEntry;
 use App\Models\MoodState;
@@ -91,6 +92,48 @@ class WallPanelTest extends TestCase
         Livewire::test(WallPanel::class)->call('quickAddWater', $drink->id, 250)->assertNotFound();
         Livewire::test(GoalEditor::class)->call('openPanelGoal', $goal->id)->assertNotFound();
         Livewire::test(QuickEditor::class)->call('open', 'avoid', (string) $habit->id)->assertNotFound();
+    }
+
+    public function test_habit_chips_rotate_keep_last_completion_and_reset_next_day(): void
+    {
+        $habits = collect(range(1, 5))->map(fn ($i) => HabitDefinition::create([
+            'name' => 'Hábito '.$i, 'time_of_day' => 'anytime', 'base_time' => sprintf('08:%02d', $i),
+        ]));
+        $otherBlock = HabitDefinition::create(['name' => 'De noche', 'time_of_day' => 'night']);
+        $ids = fn () => app(WallPanelData::class)->forToday()['visibleHabits']->pluck('id')->all();
+        $this->assertSame($habits->take(3)->pluck('id')->all(), $ids());
+        $panel = Livewire::test(WallPanel::class);
+        $panel->call('toggleHabit', $habits[0]->id)->assertHasNoErrors();
+        $this->assertSame([$habits[1]->id, $habits[2]->id, $habits[0]->id], $ids());
+        $this->travel(1)->seconds();
+        $panel->call('toggleHabit', $habits[1]->id);
+        $this->assertSame([$habits[2]->id, $habits[3]->id, $habits[1]->id], $ids());
+        $panel->call('toggleHabit', $habits[1]->id);
+        $this->assertSame([$habits[1]->id, $habits[2]->id, $habits[0]->id], $ids());
+        foreach ($habits->skip(1) as $habit) {
+            $this->travel(1)->seconds();
+            $panel->call('toggleHabit', $habit->id);
+        }
+        $this->assertSame([$habits->last()->id], $ids());
+        $panel->call('toggleHabit', $otherBlock->id);
+        $this->assertSame([$habits->last()->id], $ids());
+        Livewire::test(WallPanel::class)->assertViewHas('visibleHabits', fn ($items) => $items->pluck('id')->all() === $ids());
+        $this->travel(1)->days();
+        $this->assertSame($habits->take(3)->pluck('id')->all(), $ids());
+    }
+
+    public function test_habit_completions_and_chips_are_user_scoped(): void
+    {
+        $owner = auth()->user();
+        $habit = HabitDefinition::create(['name' => 'Propio', 'time_of_day' => 'anytime']);
+        $this->actingAs(User::factory()->create());
+        $private = HabitDefinition::create(['name' => 'Ajeno', 'time_of_day' => 'anytime']);
+        HabitCompletion::create(['habit_id' => $private->id, 'date' => today(), 'completed' => true]);
+        $this->actingAs($owner);
+        $data = app(WallPanelData::class)->forToday();
+        $this->assertSame([$habit->id], $data['visibleHabits']->pluck('id')->all());
+        $this->assertSame([], $data['completions']);
+        Livewire::test(WallPanel::class)->call('toggleHabit', $private->id)->assertNotFound();
     }
 
     public function test_snooze_preserves_duration_and_due_date_only_tasks(): void

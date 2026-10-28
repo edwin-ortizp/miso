@@ -77,7 +77,9 @@ class WallPanelData
             $week[] = ['date' => $day, 'rows' => collect($rows)->sortBy(fn ($r) => ($r['done'] ? '2' : '1').($r['time'] ?? '99:99'))->values()->all()];
         }
         $habits = HabitDefinition::orderBy('base_time')->get();
-        $completions = HabitCompletion::whereDate('date', $today)->where('completed', true)->pluck('habit_id')->all();
+        $completionRecords = HabitCompletion::whereDate('date', $today)->where('completed', true)
+            ->orderByDesc('updated_at')->orderByDesc('id')->get();
+        $completions = $completionRecords->pluck('habit_id')->all();
         $habitStreaks = HabitCompletion::where('completed', true)->whereDate('date', '<=', $today)
             ->get(['habit_id', 'date'])->groupBy('habit_id')->map(fn ($history) => HabitProgress::currentStreak(
                 $history->mapWithKeys(fn ($entry) => [$entry->date->toDateString() => true])->all(), $today,
@@ -85,6 +87,12 @@ class WallPanelData
         $block = match (true) {
             now()->hour >= 6 && now()->hour < 12 => 'morning', now()->hour >= 12 && now()->hour < 18 => 'afternoon', default => 'night'
         };
+        $eligibleHabits = $habits->whereIn('time_of_day', [$block, 'anytime']);
+        $lastCompletedId = $completionRecords->first(fn ($entry) => $eligibleHabits->contains('id', $entry->habit_id))?->habit_id;
+        $visibleHabits = $eligibleHabits->whereNotIn('id', $completions)->take($lastCompletedId === null ? 3 : 2)->values();
+        if ($lastCompletedId !== null) {
+            $visibleHabits->push($eligibleHabits->firstWhere('id', $lastCompletedId));
+        }
         $timeline = collect($week[0]['rows'])->whereNotNull('time');
         foreach ($habits->whereNotNull('base_time') as $habit) {
             if ($habit->base_time) {
@@ -103,7 +111,7 @@ class WallPanelData
                 'energy' => $energies->filter(fn ($e) => Carbon::parse($e->date)->isSameDay($date))->last()?->level];
         });
 
-        return compact('week', 'habits', 'completions', 'habitStreaks', 'block', 'negativeHabits', 'lastRelapses', 'trend') + [
+        return compact('week', 'habits', 'visibleHabits', 'completions', 'habitStreaks', 'block', 'negativeHabits', 'lastRelapses', 'trend') + [
             'timeline' => $timeline->sortBy('time')->values()->all(),
             'currentTask' => $tasks->first(fn ($task) => ! $task->completed && $task->start_date && ! $task->start_is_date
                 && $task->start_date->lte(now()) && ($task->end_date ?? $task->start_date)->gte(now())),
