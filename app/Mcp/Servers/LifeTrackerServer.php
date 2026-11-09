@@ -14,6 +14,9 @@ use App\Mcp\Tools\Goal\CreateGoalTool;
 use App\Mcp\Tools\Goal\ListGoalsTool;
 use App\Mcp\Tools\Goal\LogGoalProgressTool;
 use App\Mcp\Tools\Goal\UpdateGoalTool;
+use App\Mcp\Tools\Game\GetGameDirectorContextTool;
+use App\Mcp\Tools\Game\ProposeGameSeasonTool;
+use App\Mcp\Tools\Game\ProposeGameWeekMissionsTool;
 use App\Mcp\Tools\Habit\CompleteHabitTool;
 use App\Mcp\Tools\Habit\ListHabitsTool;
 use App\Mcp\Tools\Health\ListHealthEventsTool;
@@ -228,6 +231,9 @@ class LifeTrackerServer extends Server
         LogNegativeHabitTool::class,
         ListFocusSessionsTool::class,
         LogFocusSessionTool::class,
+        GetGameDirectorContextTool::class,
+        ProposeGameSeasonTool::class,
+        ProposeGameWeekMissionsTool::class,
     ];
 
     protected array $resources = [

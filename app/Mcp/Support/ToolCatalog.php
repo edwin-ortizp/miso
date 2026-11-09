@@ -27,6 +27,7 @@ class ToolCatalog
         'Goal' => ['Objetivos', 'bi-flag'],
         'Journal' => ['Diario', 'bi-journal-text'],
         'Focus' => ['Pomodoro', 'bi-stopwatch'],
+        'Game' => ['Colección', 'bi-stars'],
         'Common' => ['Común', 'bi-tools'],
     ];
 

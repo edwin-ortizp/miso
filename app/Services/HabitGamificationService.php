@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\HabitCompletion;
 use App\Models\HabitDefinition;
+use App\Services\Game\RewardGranter;
 use App\Support\HabitProgress;
 use App\Support\Habits\HabitActionRunner;
 use Carbon\Carbon;
@@ -48,6 +49,10 @@ class HabitGamificationService
         });
 
         // Fuera de la transacción: un fallo aquí no debe deshacer el completado.
+        if ($isCompleting && $this->periodIsComplete($habit, $selected)) {
+            app(RewardGranter::class)->forHabitGroup($completion, $habit->time_of_day ?: 'anytime');
+        }
+
         $action = $isCompleting
             ? $this->actions->afterComplete($habit, $completion, $selected)
             : array_merge(HabitActionRunner::EMPTY, ['actionResult' => $this->actions->afterUncomplete($completion)]);
@@ -71,6 +76,21 @@ class HabitGamificationService
             ->firstOrFail();
 
         return ['actionResult' => $this->actions->resolve($habit, $completion, $selected, $input)];
+    }
+
+    /** ¿Quedaron completos, ese día, todos los hábitos del momento del día de este hábito? */
+    private function periodIsComplete(HabitDefinition $habit, Carbon $selected): bool
+    {
+        $period = $habit->time_of_day ?: 'anytime';
+        $periodIds = HabitDefinition::query()->get(['id', 'time_of_day'])
+            ->filter(fn (HabitDefinition $candidate) => ($candidate->time_of_day ?: 'anytime') === $period)
+            ->pluck('id')->map(fn ($id) => (int) $id);
+        $completedIds = HabitCompletion::query()
+            ->whereDate('date', $selected->toDateString())
+            ->where('completed', true)
+            ->pluck('habit_id')->map(fn ($id) => (int) $id);
+
+        return $periodIds->isNotEmpty() && $periodIds->diff($completedIds)->isEmpty();
     }
 
     /** @return array<string, mixed> El mensaje de gamificación de mayor prioridad. */

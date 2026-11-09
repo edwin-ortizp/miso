@@ -22,6 +22,7 @@ return [
             ['label' => 'Tareas', 'route' => 'tasks.list', 'module' => 'tasks', 'icon' => 'bi-list-task', 'active' => ['tasks*']],
             ['label' => 'Pomodoro', 'route' => 'pomodoro', 'module' => 'pomodoro', 'icon' => 'bi-stopwatch', 'active' => ['pomodoro*']],
             ['label' => 'Objetivos', 'route' => 'goals', 'module' => 'goals', 'icon' => 'bi-flag', 'active' => ['goals*']],
+            ['label' => 'Colección', 'route' => 'game.balls', 'module' => 'game', 'icon' => 'bi-stars', 'active' => ['game*'], 'counter' => 'App\Support\Game\TabCounters@balls'],
         ]],
         'life' => ['label' => 'Vida personal', 'icon' => 'bi-person-heart', 'items' => [
             ['label' => 'Diario', 'route' => 'journal', 'module' => 'journal', 'icon' => 'bi-journal-text', 'active' => ['journal*']],
@@ -114,6 +115,18 @@ return [
             ['label' => 'Resumen', 'route' => 'journal.summary', 'icon' => 'bi-card-list', 'active' => ['journal.summary']],
             ['label' => 'Vida', 'route' => 'journal.life', 'archetype' => 'dashboard', 'icon' => 'bi-grid-3x3-gap', 'active' => ['journal.life']],
             ['label' => 'Semana', 'route' => 'journal.life.week', 'archetype' => 'detail', 'icon' => 'bi-calendar-week', 'active' => ['journal.life.week']],
+        ],
+    ],
+    'game' => [
+        'archetype' => 'list',
+        'title' => 'Colección', 'subtitle' => 'Cada acción suma; ninguna ausencia resta.', 'icon' => 'bi-stars',
+        'patterns' => ['game*'], 'preserve' => [],
+        'tabs' => [
+            ['label' => 'Balls', 'route' => 'game.balls', 'icon' => 'bi-circle-half', 'active' => ['game.balls'], 'counter' => 'App\Support\Game\TabCounters@balls'],
+            ['label' => 'Colección', 'route' => 'game.collection', 'icon' => 'bi-grid-3x3-gap', 'active' => ['game.collection'], 'counter' => 'App\Support\Game\TabCounters@collection'],
+            ['label' => 'Semana', 'route' => 'game.week', 'icon' => 'bi-people', 'active' => ['game.week'], 'counter' => 'App\Support\Game\TabCounters@week'],
+            ['label' => 'Temporada', 'route' => 'game.season', 'icon' => 'bi-calendar-event', 'active' => ['game.season'], 'counter' => 'App\Support\Game\TabCounters@season'],
+            ['label' => 'Ajustes', 'route' => 'game.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['game.settings']],
         ],
     ],
     'pomodoro' => [

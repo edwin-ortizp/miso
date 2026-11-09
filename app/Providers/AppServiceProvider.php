@@ -56,6 +56,15 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Task::observe(TaskCalDavObserver::class);
+        Task::observe(\App\Observers\GameTaskObserver::class);
+        // Fuentes del juego (CHG-027): observan sin cambiar la lógica de cada módulo.
+        \App\Models\PomodoroSession::observe(\App\Observers\Game\FocusSourceObserver::class);
+        foreach ([Goal::class, \App\Models\GoalEntry::class, \App\Models\GoalNumericEntry::class] as $goalSource) {
+            $goalSource::observe(\App\Observers\Game\GoalSourceObserver::class);
+        }
+        foreach ([DrinkLog::class, ExerciseLog::class] as $healthSource) {
+            $healthSource::observe(\App\Observers\Game\HealthSourceObserver::class);
+        }
         foreach ([Task::class, \App\Models\Plan::class, Goal::class, Relationship::class] as $source) {
             $source::observe(\App\Observers\NotificationSourceObserver::class);
         }
@@ -87,6 +96,10 @@ class AppServiceProvider extends ServiceProvider
             'relationship' => Relationship::class,
             'health-event' => HealthEvent::class,
             'task' => Task::class,
+            'habit-completion' => \App\Models\HabitCompletion::class,
+            'pomodoro-session' => \App\Models\PomodoroSession::class,
+            'goal-entry' => \App\Models\GoalEntry::class,
+            'goal-numeric-entry' => \App\Models\GoalNumericEntry::class,
             'plan' => \App\Models\Plan::class,
             // Registros que puede crear un hábito al completarse, para poder deshacerlos.
             'drink-log' => DrinkLog::class,

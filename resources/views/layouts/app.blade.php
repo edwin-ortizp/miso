@@ -131,6 +131,13 @@
             {{ $slot }}
         </main>
 
+        {{-- Aviso global de balls del juego (CHG-023); persiste entre navegaciones. --}}
+        @auth
+            @persist('ball-notifier')
+                <livewire:game.ball-notifier />
+            @endpersist
+        @endauth
+
         {{-- Barra de estado (escritorio). El bloque de foco persiste entre
              navegaciones; los atajos de la derecha dependen del módulo y se
              declaran en `status` de config/modules.php. --}}

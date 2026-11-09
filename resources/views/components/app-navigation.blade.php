@@ -28,6 +28,10 @@
                            @click="sidebarOpen = false" :tabindex="compact && !sidebarOpen ? -1 : 0">
                             <span class="lt-nav-item__icon"><i class="bi {{ $item['icon'] }}" aria-hidden="true"></i></span>
                             <span class="lt-nav-item__label">{{ $item['label'] }}</span>
+                            @php($navCounter = \App\Support\Ui\NavCounter::resolve($item['counter'] ?? null))
+                            @if ($navCounter)
+                                <x-ui.badge tone="primary" :label="$navCounter['label']">{{ $navCounter['text'] }}</x-ui.badge>
+                            @endif
                         </a>
                     @endforeach
                 </div>
