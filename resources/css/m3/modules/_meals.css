@@ -327,3 +327,31 @@
     .meal-schedules-workspace { grid-template-columns: minmax(0, 1fr); }
     .meal-schedules-workspace .meal-settings-nav { grid-row: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
+
+/* Inventario: registro, hoja documental y kárdex de cantidades. */
+.inventory-table { table-layout: fixed; }
+.inventory-table th { white-space: normal; overflow-wrap: anywhere; }
+.inventory-table td { overflow-wrap: anywhere; }
+.inventory-table .md-btn-text { min-width: 0; max-width: 100%; padding-inline: 4px; white-space: normal; overflow-wrap: anywhere; }
+.inventory-table__id { display: block; font-size: .72rem; overflow-wrap: anywhere; }
+.inventory-table th.inventory-table__number { text-align: right; }
+.inventory-table__quantity { display: block; text-align: right; font-variant-numeric: tabular-nums; }
+.inventory-table__label { display: none; }
+.inventory-table__segment th { background: var(--md-sys-color-surface-container); padding-block: 12px; }
+.inventory-document { min-width: 0; border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-large); background: var(--md-sys-color-surface-container-lowest); overflow: hidden; }
+.inventory-document__header { display: flex; flex-wrap: wrap; align-items: start; gap: 24px; padding: 24px; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
+.inventory-document__identity { flex: 1 1 240px; min-width: 0; }
+.inventory-document__id { flex: 1 1 320px; min-width: 0; }
+.inventory-document__meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 20px; padding: 24px; margin: 0; }
+.inventory-document__meta dt { color: var(--md-sys-color-on-surface-variant); font-size: .8rem; }
+.inventory-document__meta dd { margin: 4px 0 0; overflow-wrap: anywhere; }
+.inventory-document__footer { padding: 24px; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.inventory-document__footer p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.inventory-document__notice { padding-inline: 24px; }
+.inventory-document > .md-mcard { border-inline: 0; border-radius: 0; box-shadow: none; }
+@container md-mcard (max-width: 640px) {
+    .inventory-table.md-table--stack tr { padding: 14px 0; gap: 8px; }
+    .inventory-table.md-table--stack td { flex: 1 0 100%; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 12px; align-items: baseline; }
+    .inventory-table__label { display: block; color: var(--md-sys-color-on-surface-variant); font-size: .75rem; }
+    .inventory-table__segment th { width: 100%; }
+}

@@ -6,6 +6,7 @@ use App\Models\MealInventoryMovement;
 use App\Models\PurchaseLine;
 use App\Models\RecipeIngredient;
 use App\Models\ShoppingItem;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -61,12 +62,23 @@ class IngredientMergeService
             throw ValidationException::withMessages(['mergeTargetId' => 'Los dos productos deben usar la misma unidad base ('.$source->baseUnitLabel().' y '.$target->baseUnitLabel().').']);
         }
 
-        // Recarga completa: el producto sugerido puede venir con solo algunas columnas.
-        $source = $source->fresh();
-        $target = $target->fresh();
+        // Suggested targets intentionally project only id/name/base_unit. Ownership is
+        // established again by the two scoped, locked rows below, never by that projection.
+        $userId = (int) ($source->user_id ?? auth()->id());
+        if (! $userId || (auth()->check() && $userId !== (int) auth()->id())) {
+            throw ValidationException::withMessages(['mergeTargetId' => 'Los productos deben pertenecer al mismo usuario.']);
+        }
         $flavor = trim((string) $flavor) ?: null;
-
-        DB::transaction(function () use ($source, $target, $flavor, $keepAlias) {
+        DB::transaction(function () use ($source, $target, $flavor, $keepAlias, $userId) {
+            User::withoutGlobalScopes()->whereKey($userId)->lockForUpdate()->firstOrFail();
+            $locked = ShoppingItem::withoutGlobalScopes()->where('user_id', $userId)->whereIn('id', [$source->id, $target->id])->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            if ($locked->count() !== 2) {
+                throw ValidationException::withMessages(['mergeTargetId' => 'Un producto ya no está disponible.']);
+            }
+            $source = $locked[$source->id];
+            $target = $locked[$target->id];
+            app(InventoryLedger::class)->transfer($userId, $source->id, $target->id,
+                ['reason' => 'Fusión de ingredientes', 'channel' => request()->is('mcp*', 'miso', 'life-tracker') ? 'mcp' : (app()->runningInConsole() ? 'system' : 'web')]);
             // Variantes y sus precios: el sabor nuevo va delante del que ya tuvieran.
             $variants = $source->variants()->get();
             foreach ($variants as $variant) {
@@ -98,10 +110,14 @@ class IngredientMergeService
             }
 
             PurchaseLine::where('shopping_item_id', $source->id)->update(['shopping_item_id' => $target->id]);
-            MealInventoryMovement::where('shopping_item_id', $source->id)->update(['shopping_item_id' => $target->id]);
+            foreach (MealInventoryMovement::withoutGlobalScopes()->where('user_id', $userId)->where('shopping_item_id', $source->id)->get() as $movement) {
+                if ($movement->historical_product_id === null) {
+                    $movement->update(['historical_product_id' => $source->id]);
+                }
+                $movement->update(['shopping_item_id' => null]);
+            }
 
             $target->update([
-                'stock' => (float) $target->stock + (float) $source->stock,
                 'to_buy' => max((float) $target->to_buy, (float) $source->to_buy),
                 'next_purchase' => $target->next_purchase || $source->next_purchase,
                 'base_unit' => $target->base_unit ?? $source->base_unit,

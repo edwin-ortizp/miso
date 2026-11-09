@@ -1,6 +1,6 @@
 {% from '@project/components/life-shell.html.jinja' import shell, tabs as module_tabs, header, metric %}
 {% call shell('tasks', 'Planificación', 'bi-calendar-week') %}
-{{ module_tabs([('Lista','/tasks-list','bi-list-task'),('Kanban','/tasks-kanban','bi-kanban'),('Planificación','/tasks-planning','bi-calendar-week')], '/tasks-planning') }}
+{{ module_tabs([('Lista','/tasks-list','bi-list-task'),('Gantt','/tasks-gantt','bi-bar-chart-steps',True),('Calendario','/tasks-calendar','bi-calendar3'),('Flujo','/tasks-flow','bi-signpost-split',True),('Kanban','/tasks-kanban','bi-kanban'),('Planificación','/tasks-planning','bi-calendar-week'),('Progreso','/tasks-progress','bi-trophy',True),('Ajustes','/tasks-settings','bi-sliders',True)], '/tasks-planning') }}
 <section class="lt-metrics">{{ metric('Esta semana','9 tareas') }}{{ metric('Prioridad alta','3','warning') }}{{ metric('Bloques libres','6 h','success') }}</section>
 <section class="lt-panel lt-panel--accent"><div class="lt-panel__head"><i class="bi bi-calendar-week"></i><h3>Plan de la semana</h3><small>16–22 septiembre</small></div><div class="lt-panel__body">{% for day, task, status in [('Lunes','Preparar propuesta','Alta'),('Martes','Revisar presupuesto','Media'),('Miércoles','Planificar semana','Alta'),('Jueves','Actualizar portafolio','Media'),('Viernes','Enviar seguimiento','Baja')] %}<div class="lt-planning-row"><span>{{ day }}</span><strong>{{ task }}</strong><span class="lt-chip">{{ status }}</span></div>{% endfor %}</div></section>
 {% endcall %}

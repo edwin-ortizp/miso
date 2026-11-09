@@ -3,21 +3,72 @@
 namespace Tests\Feature\Meal;
 
 use App\Livewire\Meal\MealIngredients;
+use App\Models\MealInventoryMovement;
 use App\Models\PurchaseLine;
 use App\Models\Recipe;
 use App\Models\ShoppingItem;
 use App\Models\Store;
 use App\Models\User;
 use App\Services\Meal\IngredientMergeService;
+use App\Services\Meal\MealInventory;
 use App\Services\Meal\PurchaseRecorder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
 use Tests\TestCase;
 
 class IngredientMergeTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_a_suggested_target_with_projected_columns_is_reloaded_with_ownership_under_lock(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $target = $this->product('Fresa', ['stock' => 100, 'base_unit' => 'g']);
+        $source = $this->product('Fresa congelada', ['stock' => 500, 'base_unit' => 'g']);
+        $suggestion = IngredientMergeService::suggestedTarget($source);
+        $this->assertNull($suggestion->user_id);
+        app(IngredientMergeService::class)->merge($source, $suggestion, 'congelada');
+        $this->assertSame(600.0, $target->fresh()->stock);
+        $this->assertModelMissing($source);
+    }
+
+    public function test_merge_preserves_original_identity_and_allows_meal_reversal_and_purchase_edit_afterwards(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $source = $this->product('Producto origen', ['stock' => 4]);
+        $target = $this->product('Producto destino', ['stock' => 2]);
+        $purchase = app(PurchaseRecorder::class)->record($source, null, 6)['purchase'];
+        $meal = app(MealInventory::class);
+        $mealId = $meal->plan($user->id, ['date' => '2026-11-02', 'meal_type' => 'cena', 'items' => [['name' => 'Comida', 'ingredients' => [['shopping_item_id' => $source->id, 'quantity' => 3]]]]])['meal_id'];
+        $consumed = $meal->consume($user->id, $mealId);
+        $original = MealInventoryMovement::where('operation_id', $consumed['operation_id'])->sole();
+        $snapshot = $original->only(['historical_product_id', 'name', 'unit', 'delta', 'balance_before', 'balance_after']);
+        app(IngredientMergeService::class)->merge($source, $target, null);
+        $this->assertSame(9.0, $target->fresh()->stock);
+        $this->assertNull($original->fresh()->shopping_item_id);
+        $this->assertSame($snapshot, $original->fresh()->only(array_keys($snapshot)));
+        $meal->revert($user->id, $mealId);
+        $this->assertSame(12.0, $target->fresh()->stock);
+        $line = $purchase->fresh('lines')->lines->sole();
+        app(PurchaseRecorder::class)->save(['purchased_at' => $purchase->purchased_at->toDateTimeString(), 'operation_key' => (string) Str::uuid(),
+            'lines' => [['id' => $line->id, 'shopping_item_id' => $target->id, 'packages' => 5]]], $purchase->id);
+        $this->assertSame(11.0, $target->fresh()->stock);
+        $this->assertSame($snapshot, $original->fresh()->only(array_keys($snapshot)));
+    }
+
+    public function test_merge_rejects_other_users_products_even_without_an_authenticated_scope(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $source = $this->product('Propio', ['stock' => 1]);
+        $this->actingAs(User::factory()->create());
+        $target = $this->product('Ajeno', ['stock' => 1]);
+        auth()->logout();
+        $this->expectException(ValidationException::class);
+        app(IngredientMergeService::class)->merge($source, $target, null);
+    }
 
     private function product(string $name, array $attributes = []): ShoppingItem
     {

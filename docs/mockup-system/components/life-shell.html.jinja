@@ -58,7 +58,7 @@
 {% macro metric(label, value, tone='primary') -%}<article class="lt-metric lt-metric--{{ tone }}"><span>{{ label }}</span><strong>{{ value }}</strong></article>{%- endmacro %}
 
 {#- `close_only`: diálogo de solo lectura, con un único botón «Cerrar» sin ícono. -#}
-{% macro dialog(id, title, submit='Guardar', icon=None, sections=None, submit_action=None, close_only=False) -%}
+{% macro dialog(id, title, submit='Guardar', icon=None, sections=None, submit_action=None, close_only=False, custom_footer=False, custom_header=False) -%}
 <div class="lt-dialog-layer" id="{{ id }}" hidden>
   <button class="lt-dialog-scrim" type="button" data-lt-toggle="{{ id }}" aria-label="Cerrar" tabindex="-1"></button>
   <section class="lt-dialog{% if sections %} lt-dialog--sections{% endif %}" role="dialog" aria-modal="true" aria-labelledby="{{ id }}-title">
@@ -66,14 +66,15 @@
       {% if sections %}<button class="lt-icon-button" type="button" data-lt-dialog-sidebar aria-controls="{{ id }}-nav" aria-expanded="true" aria-label="Mostrar u ocultar secciones"><i class="bi bi-layout-sidebar"></i></button>{% endif %}
       {% if icon %}<span class="lt-dialog__icon"><i class="bi {{ icon }}" aria-hidden="true"></i></span>{% endif %}
       <h2 id="{{ id }}-title">{{ title }}</h2>
+      {% if custom_header %}{{ caller('header_actions') }}{% endif %}
       <button class="lt-icon-button" type="button" data-lt-dialog-expand aria-pressed="false" aria-label="Expandir"><i class="bi bi-arrows-fullscreen"></i></button>
       <button class="lt-icon-button" type="button" data-lt-toggle="{{ id }}" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
     </header>
     <div class="lt-dialog__main">
       {% if sections %}<nav class="lt-dialog__nav" id="{{ id }}-nav" aria-label="Secciones del formulario">{% for key, label, sicon in sections %}<button class="lt-dialog__nav-item" type="button" data-lt-dialog-section="{{ key }}"{% if loop.first %} aria-current="true"{% endif %}><i class="bi {{ sicon }}" aria-hidden="true"></i><span>{{ label }}</span></button>{% endfor %}</nav>{% endif %}
-      <div class="lt-dialog__body">{{ caller() }}</div>
+      <div class="lt-dialog__body">{{ caller('body') if custom_footer or custom_header else caller() }}</div>
     </div>
-    <footer class="lt-dialog__actions">{% if close_only %}<button class="lt-button" type="button" data-lt-toggle="{{ id }}">Cerrar</button>{% else %}<button class="lt-button lt-button--text" type="button" data-lt-toggle="{{ id }}">Cancelar</button><button class="lt-button" type="button"{% if submit_action %} data-lt-action="{{ submit_action }}"{% else %} data-lt-toggle="{{ id }}"{% endif %}><i class="bi bi-floppy"></i> {{ submit }}</button>{% endif %}</footer>
+    <footer class="lt-dialog__actions">{% if custom_footer %}{{ caller('footer') }}{% elif close_only %}<button class="lt-button" type="button" data-lt-toggle="{{ id }}">Cerrar</button>{% else %}<button class="lt-button lt-button--text" type="button" data-lt-toggle="{{ id }}">Cancelar</button><button class="lt-button" type="button"{% if submit_action %} data-lt-action="{{ submit_action }}"{% else %} data-lt-toggle="{{ id }}"{% endif %}><i class="bi bi-floppy"></i> {{ submit }}</button>{% endif %}</footer>
   </section>
 </div>
 {%- endmacro %}

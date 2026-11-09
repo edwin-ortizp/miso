@@ -32,18 +32,26 @@ export function registerTaskCalendar(Alpine) {
     Alpine.data('taskCalendar', (wire) => ({
         calendar: null,
         layers: readCalendarLayers(),
-        toggleLayer(layer) {
-            if (!Object.hasOwn(this.layers, layer)) return;
-            this.layers[layer] = !this.layers[layer];
-            try { localStorage.setItem(layerStorageKey, JSON.stringify(this.layers)); } catch { /* Preferencia solo en memoria. */ }
-            this.quickOpen = false;
-            this.statusOpen = false;
+        draftLayers: defaultLayers(),
+        filtersOpen: false,
+        get hasLayerFilter() { return Object.values(this.layers).some(value => !value); },
+        openFilters() {
+            this.draftLayers = { ...this.layers };
+            this.filtersOpen = true;
+        },
+        applyLayers() {
+            this.layers = { ...this.draftLayers };
+            try { localStorage.setItem(layerStorageKey, JSON.stringify(this.layers)); } catch { /* Solo memoria. */ }
             this.calendar?.batchRendering(() => {
-                for (const event of this.calendar.getEvents()) {
-                    event.setProp('display', this.layers[event.extendedProps.type] ? 'auto' : 'none');
-                }
+                for (const event of this.calendar.getEvents()) event.setProp('display', this.layers[event.extendedProps.type] ? 'auto' : 'none');
             });
+            this.filtersOpen = false;
             this.fitCalendar();
+            this.$nextTick(() => this.$refs.filterTrigger?.focus());
+        },
+        clearLayerFilter() {
+            this.draftLayers = defaultLayers();
+            this.applyLayers();
         },
         async persistEvent(info) {
             if (info.event.extendedProps.type !== 'tasks') {
@@ -57,85 +65,17 @@ export function registerTaskCalendar(Alpine) {
             }
         },
         clickEvent(info) {
-            if (info.event.extendedProps.type === 'tasks') this.openQuick(info.event, info.el);
+            if (info.event.extendedProps.type === 'tasks') this.$dispatch('task-editor', { action: 'openForm', id: info.event.id });
             else if (info.event.extendedProps.detailUrl) {
-                this.quickOpen = false;
                 window.location.assign(info.event.extendedProps.detailUrl);
             }
         },
         calendarLoading: false,
         mobileDate: '',
         mobileView: 'Día',
+        viewType: 'timeGridWeek',
         refresh: null,
         goto: null,
-        quickOpen: false,
-        selected: null,
-        latestProps: {},
-        busy: false,
-        statusOpen: false,
-        statusError: '',
-        closeStatusMenu() {
-            this.statusOpen = false;
-            this.$refs.statusTrigger.focus();
-        },
-        async openStatusMenu() {
-            this.statusOpen = !this.statusOpen;
-            if (!this.statusOpen) return;
-            await this.$nextTick();
-            const menu = this.$refs.statusMenu;
-            const rect = this.$refs.statusTrigger.getBoundingClientRect();
-            menu.style.right = `${Math.max(8, innerWidth - rect.right)}px`;
-            menu.style.bottom = `${innerHeight - rect.top + 4}px`;
-            menu.style.maxHeight = `${Math.max(44, rect.top - 12)}px`;
-            menu.querySelector('button:not([disabled])')?.focus();
-        },
-        moveStatusFocus(event, direction) {
-            const items = [...this.$refs.statusMenu.querySelectorAll('button:not([disabled])')];
-            const index = items.indexOf(event.target);
-            items[(index + direction + items.length) % items.length]?.focus();
-        },
-        // Ancla el popover junto al evento (en escritorio); en móvil el CSS lo convierte en hoja inferior.
-        openQuick(event, el) {
-            if (this.busy) return;
-            const rect = el.getBoundingClientRect();
-            const width = 360;
-            const left = rect.right + 8 + width <= innerWidth ? rect.right + 8 : Math.max(8, rect.left - width - 8);
-            const top = Math.max(8, Math.min(rect.top, innerHeight - 360));
-            this.$refs.anchor.style.setProperty('--quick-top', `${top}px`);
-            this.$refs.anchor.style.setProperty('--quick-left', `${left}px`);
-            this.statusOpen = false;
-            this.statusError = '';
-            this.selected = { id: event.id, title: event.title, ...(this.latestProps[event.id] ?? event.extendedProps) };
-            this.quickOpen = true;
-        },
-        edit() {
-            this.quickOpen = false;
-            this.$dispatch('task-editor', { action: 'openForm', id: this.selected.id });
-        },
-        async changeStatus(statusId) {
-            if (this.busy || !this.selected || this.selected.status?.id === statusId) return;
-            this.busy = true;
-            this.statusError = '';
-            this.statusOpen = false;
-            try {
-                const result = await wire.changeStatus(this.selected.id, statusId);
-                if (result) this.latestProps[this.selected.id] = { ...this.selected, ...result };
-                const event = this.calendar?.getEventById(this.selected.id);
-                if (result && event) {
-                    event.setExtendedProp('status', result.status);
-                    event.setExtendedProp('completed', result.completed);
-                }
-                this.quickOpen = false;
-            } catch {
-                this.statusError = 'No se pudo cambiar el estado. Inténtalo de nuevo.';
-            } finally {
-                this.busy = false;
-                if (this.statusError) {
-                    await this.$nextTick();
-                    this.$refs.statusTrigger.focus();
-                }
-            }
-        },
         goToNow(now = new Date()) {
             if (!this.calendar) return;
             if (this.calendar.view.type.startsWith('timeGrid')) this.calendar.gotoDate(now);
@@ -173,6 +113,7 @@ export function registerTaskCalendar(Alpine) {
             if (this.calendar.getOption('height') !== height) this.calendar.setOption('height', height);
         },
         async init() {
+            this.$watch('filtersOpen', open => { if (!open) this.$nextTick(() => this.$refs.filterTrigger?.focus()); });
             const { Calendar, locale, plugins } = await loadFullCalendar();
 
             this.calendar = new Calendar(this.$refs.calendar, {
@@ -181,22 +122,9 @@ export function registerTaskCalendar(Alpine) {
                 firstDay: 1,
                 height: 'auto',
                 initialView: compact() ? 'timeGridDay' : 'timeGridWeek',
-                headerToolbar: { left: 'prev,next today now refresh', center: 'title', right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek' },
+                headerToolbar: false,
                 footerToolbar: false,
-                // Recarga eventos y la lista «Sin fecha» sin recargar la página, como «Actualizar tabla» en las vistas de gestión.
-                customButtons: {
-                    now: { text: 'Ahora', hint: 'Ir a hoy y a la hora actual', click: () => this.goToNow() },
-                    refresh: {
-                        icon: 'arrow-clockwise',
-                        hint: 'Actualizar calendario',
-                        click: () => { this.calendar.refetchEvents(); wire.$refresh(); },
-                    },
-                },
-                loading: (isLoading) => {
-                    this.calendarLoading = isLoading;
-                    const button = this.$refs.calendar.querySelector('.fc-refresh-button');
-                    if (button) button.disabled = isLoading;
-                },
+                loading: (isLoading) => { this.calendarLoading = isLoading; },
                 nowIndicator: true,
                 // Día y semana: cuartos de hora con altura legible, abriendo una hora antes de ahora.
                 slotDuration: '00:15:00',
@@ -208,8 +136,9 @@ export function registerTaskCalendar(Alpine) {
                 // La rejilla horaria necesita altura fija para desplazarse por dentro; mes y lista crecen con su contenido.
                 datesSet: ({ view }) => {
                     const date = this.calendar?.getDate() || view.currentStart;
+                    this.viewType = view.type;
                     this.mobileView = { timeGridDay: 'Día', timeGridWeek: 'Semana', dayGridMonth: 'Mes', listWeek: 'Agenda' }[view.type];
-                    const format = new Intl.DateTimeFormat('es', view.type === 'dayGridMonth' ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short' });
+                    const format = new Intl.DateTimeFormat('es', view.type === 'dayGridMonth' ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short', year: 'numeric' });
                     if (view.type === 'timeGridWeek' || view.type === 'listWeek') {
                         const end = new Date(view.currentEnd);
                         end.setDate(end.getDate() - 1);
@@ -220,12 +149,11 @@ export function registerTaskCalendar(Alpine) {
                 editable: true,
                 dayMaxEvents: 3,
                 events: (info, success, failure) => wire.events(info.startStr, info.endStr).then(events => {
-                    this.latestProps = Object.fromEntries(events.map(event => [event.id, event.extendedProps]));
                     success(events.map(event => ({ ...event, display: this.layers[event.extendedProps.type] ? 'auto' : 'none' })));
                 }, failure),
                 eventClick: (info) => this.clickEvent(info),
                 // El clic en otro evento no debe contar como «clic afuera» del popover abierto.
-                eventDidMount: (info) => { info.el.dataset.popoverTrigger = ''; if (info.event.extendedProps.type === 'meals') { info.el.title = `${info.event.extendedProps.timeLabel} · ${info.event.title}`; info.el.setAttribute('aria-label', info.el.title); } },
+                eventDidMount: (info) => { info.el.dataset.popoverTrigger = ''; if (info.event.extendedProps.type === 'tasks') { const color = info.event.extendedProps.categoryColor; if (['gray', 'blue', 'indigo', 'violet', 'pink', 'red', 'orange', 'yellow', 'green', 'teal'].includes(color)) info.el.classList.add(`md-catalog-chip--${color}`); } if (info.event.extendedProps.type === 'meals') { info.el.title = `${info.event.extendedProps.timeLabel} · ${info.event.title}`; info.el.setAttribute('aria-label', info.el.title); } },
                 dateClick: (info) => this.$dispatch('task-editor', {
                     action: 'openForm',
                     prefill: info.allDay

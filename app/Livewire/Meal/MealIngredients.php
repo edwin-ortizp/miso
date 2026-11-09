@@ -2,19 +2,23 @@
 
 namespace App\Livewire\Meal;
 
-use App\Livewire\Concerns\WithMealCategories;
-
 use App\Livewire\Concerns\WithManagementCard;
+use App\Livewire\Concerns\WithMealCategories;
 use App\Models\Brand;
+use App\Models\MealCategory;
+use App\Models\MealInventoryMovement;
+use App\Models\MealInventoryOperation;
 use App\Models\PurchaseLine;
 use App\Models\ShoppingItem;
 use App\Models\ShoppingItemPrice;
 use App\Models\ShoppingItemVariant;
 use App\Models\StorageLocation;
 use App\Models\Store;
+use App\Models\User;
 use App\Services\Meal\CatalogNames;
 use App\Services\Meal\IngredientImportService;
 use App\Services\Meal\IngredientMergeService;
+use App\Services\Meal\InventoryLedger;
 use App\Services\Meal\RecipeCalculator;
 use App\Services\Meal\UnitConverter;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +26,7 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -99,6 +104,14 @@ class MealIngredients extends Component
     public $gramsPerPiece = null;
 
     public $stock = 0;
+
+    #[Locked]
+    public ?string $originalStock = null;
+
+    #[Locked]
+    public string $inventoryKey = '';
+
+    public string $stockReason = '';
 
     public $minStock = null;
 
@@ -182,6 +195,9 @@ class MealIngredients extends Component
     public function openForm(?string $id = null)
     {
         $this->resetValidation();
+        $this->inventoryKey = (string) Str::uuid();
+        $this->stockReason = '';
+        $this->originalStock = null;
 
         if ($id) {
             $item = ShoppingItem::with(['variants.brand', 'variants.prices.store', 'aliases'])->find($id);
@@ -195,6 +211,7 @@ class MealIngredients extends Component
             $this->baseUnitLocked = $item->base_unit !== null;
             $this->gramsPerPiece = $item->grams_per_piece;
             $this->stock = $item->stock ?? 0;
+            $this->originalStock = number_format((float) $this->stock, 3, '.', '');
             $this->minStock = $item->min_stock;
             $this->toBuy = $item->to_buy ?? 0;
             $this->categoryId = $item->category_id ?? '';
@@ -307,11 +324,12 @@ class MealIngredients extends Component
 
         $this->validate([
             'name' => 'required|string|max:255',
-            'categoryId' => ['nullable', \Illuminate\Validation\Rule::in(array_keys($this->categoryOptions))],
+            'categoryId' => ['nullable', Rule::in(array_keys($this->categoryOptions))],
             'storageLocationId' => ['nullable', Rule::in(array_keys($this->storageLocationOptions()))],
             'baseUnit' => ['required', Rule::in(array_keys(ShoppingItem::BASE_UNITS))],
             'gramsPerPiece' => 'nullable|numeric|gt:0',
-            'stock' => 'required|numeric|min:0',
+            'stock' => 'required|numeric|min:0|max:999999999.999',
+            'stockReason' => 'nullable|string|max:1000',
             'minStock' => 'nullable|numeric|min:0',
             'toBuy' => 'required|numeric|min:0',
             'kcal' => 'nullable|numeric|min:0',
@@ -340,7 +358,10 @@ class MealIngredients extends Component
             'prices.*.observed_on' => 'fecha del precio',
         ]);
 
-        $importer->assertNameAvailable(trim($this->name), $this->editingId);
+        $replay = $this->inventoryKey !== '' && MealInventoryOperation::where('user_id', auth()->id())->where('operation_key', $this->inventoryKey)->whereNotNull('result')->exists();
+        if (! $replay) {
+            $importer->assertNameAvailable(trim($this->name), $this->editingId);
+        }
 
         $nullable = fn ($value) => $value === '' || $value === null ? null : $value;
         $data = [
@@ -360,16 +381,18 @@ class MealIngredients extends Component
             'fat' => $nullable($this->fat),
         ];
 
-        $item = DB::transaction(function () use ($data, $importer, $nullable) {
-            if ($this->editingId) {
-                $item = ShoppingItem::find($this->editingId);
-                if (! $item) {
-                    return null;
-                }
-                // Un producto no cambia de unidad base una vez definida.
-                $item->update($data + ($item->base_unit ? [] : ['base_unit' => $this->baseUnit]));
-            } else {
-                $item = ShoppingItem::create($data + ['base_unit' => $this->baseUnit]);
+        $item = DB::transaction(function () use ($data, $importer, $nullable, $replay) {
+            User::whereKey(auth()->id())->lockForUpdate()->firstOrFail();
+            $replay = $this->inventoryKey !== '' && MealInventoryOperation::where('user_id', auth()->id())->where('operation_key', $this->inventoryKey)->whereNotNull('result')->exists();
+            if ($this->editingId && $this->originalStock !== null && (float) $this->stock === (float) $this->originalStock) {
+                unset($data['stock']); // Metadata-only saves preserve stock changed while the form was open.
+            }
+            $existing = $this->editingId ? ShoppingItem::where('user_id', auth()->id())->findOrFail($this->editingId) : null;
+            $item = app(InventoryLedger::class)->saveProduct((int) auth()->id(),
+                $data + ($existing?->base_unit ? [] : ['base_unit' => $this->baseUnit]), $this->editingId,
+                $this->inventoryKey ?: null, ['channel' => 'web', 'reason' => trim($this->stockReason) ?: ($this->editingId ? 'Conteo físico' : 'Saldo de apertura'), 'request' => ['variants' => $this->variants, 'prices' => $this->prices, 'aliases' => $this->aliases]]);
+            if ($replay) {
+                return $item;
             }
 
             $keptIds = [];
@@ -553,8 +576,9 @@ class MealIngredients extends Component
 
     public function delete(string $id)
     {
-        if (\App\Models\MealInventoryMovement::where('user_id', auth()->id())->where('shopping_item_id', $id)->exists()) {
+        if (MealInventoryMovement::where('user_id', auth()->id())->where('shopping_item_id', $id)->exists()) {
             $this->addError('name', 'Este producto tiene movimientos de consumo o preparación y debe conservarse para su historial.');
+
             return;
         }
         if (PurchaseLine::where('shopping_item_id', $id)->exists()) {
@@ -595,7 +619,7 @@ class MealIngredients extends Component
         $base = ShoppingItem::where('user_id', auth()->id())
             ->when($this->ingredientId, fn ($q, $id) => $q->whereKey($id))
             ->when($this->search, fn ($q, $s) => $q->where('name', 'like', "%{$s}%"))
-            ->when($this->categoryFilter, fn ($q, $c) => $q->whereIn('category_id', \App\Models\MealCategory::expandSelection($c, auth()->id())))
+            ->when($this->categoryFilter, fn ($q, $c) => $q->whereIn('category_id', MealCategory::expandSelection($c, auth()->id())))
             ->when($this->locationFilter, function ($q, $selected) {
                 $ids = StorageLocation::expandSelection(array_values(array_diff($selected, [StorageLocation::NONE])), auth()->id());
                 $q->where(fn ($lq) => $lq->whereIn('storage_location_id', $ids)

@@ -2,7 +2,6 @@
 
 namespace App\Services\Meal;
 
-use App\Models\MealInventoryMovement;
 use App\Models\MealInventoryOperation;
 use App\Models\MealPlanEntry;
 use App\Models\MealPlanEntryItem;
@@ -244,7 +243,12 @@ class MealInventory
                 $rows = array_merge($rows, $this->recipeIngredients($userId, $recipe, (float) $item->portions, $strict));
             } else {
                 foreach ($item->ingredients ?? [] as $row) {
-                    $product = ShoppingItem::where('user_id', $userId)->find($row['shopping_item_id']);
+                    try {
+                        $product = app(InventoryLedger::class)->resolveProduct($userId, $row['shopping_item_id'], $row['unit']);
+                        $row['shopping_item_id'] = $product->id;
+                    } catch (ValidationException) {
+                        $product = null;
+                    }
                     $quantity = $product && $product->base_unit === $row['unit'] ? $row['quantity'] : null;
                     if ($strict && $quantity === null) {
                         $this->fail('Producto no disponible o unidad base modificada en '.$row['name'].'. Revisa los ingredientes antes de consumir.');
@@ -257,9 +261,10 @@ class MealInventory
         return $rows;
     }
 
-    private function debit(MealInventoryOperation $operation, array $rows): void
+    private function debit(MealInventoryOperation $operation, array $rows, array $extra = [], array $context = []): void
     {
         $errors = [];
+        $lines = [];
         foreach (collect($rows)->groupBy('shopping_item_id')->sortKeys() as $id => $ingredients) {
             $product = ShoppingItem::where('user_id', $operation->user_id)->lockForUpdate()->find($id);
             $quantity = round($ingredients->sum('quantity'), 3);
@@ -268,12 +273,14 @@ class MealInventory
             } elseif ($product->stock + 0.00001 < $quantity) {
                 $errors[] = "{$product->name}: faltan ".round($quantity - $product->stock, 3)." {$product->base_unit}";
             } else {
-                $product->update(['stock' => round($product->stock - $quantity, 3)]);
-                $operation->movements()->create(['user_id' => $operation->user_id, 'shopping_item_id' => $product->id, 'name' => $product->name, 'unit' => $product->base_unit, 'delta' => -$quantity]);
+                $lines[] = ['shopping_item_id' => $product->id, 'quantity' => -$quantity, 'unit' => $product->base_unit];
             }
         }
         if ($errors) {
             $this->fail(implode('; ', $errors));
+        }
+        if ($lines || $extra) {
+            app(InventoryLedger::class)->apply($operation, $operation->action, [...$lines, ...$extra], $context + ['channel' => app()->runningInConsole() ? 'system' : (request()->is('mcp/*') ? 'mcp' : 'web')]);
         }
     }
 
@@ -285,10 +292,11 @@ class MealInventory
             $recipe = Recipe::where('user_id', $userId)->find($data['recipe_id']) ?? $this->fail('Receta no disponible o ajena.');
             $portions = round((float) $data['portions'], 2);
             $ingredients = $this->recipeIngredients($userId, $recipe, $portions);
-            $this->debit($operation, $ingredients);
             $preparation = MealPreparation::create(['user_id' => $userId, 'recipe_id' => $recipe->id, 'operation_id' => $operation->id,
                 'name' => $recipe->name, 'cooked_at' => $data['cooked_at'] ?? now(), 'consume_by' => $data['consume_by'] ?? null,
                 'portions' => $portions, 'ingredients' => $ingredients, 'nutrition' => $recipe->nutrition]);
+
+            $this->debit($operation, $ingredients, [], ['origin' => ['type' => 'preparation', 'id' => $preparation->id], 'effective_at' => $preparation->cooked_at->toDateTimeString()]);
 
             return ['preparation_id' => $preparation->id, 'portions' => $portions, 'warnings' => $this->expiryWarnings($userId, $ingredients)];
         });
@@ -305,7 +313,7 @@ class MealInventory
             $warnings = [];
             if (! $outside) {
                 $ingredients = $this->entryIngredients($userId, $entry);
-                $this->debit($operation, $ingredients);
+                $preparationLines = [];
                 $warnings = $this->expiryWarnings($userId, $ingredients);
                 foreach ($entry->items->whereNotNull('preparation_id')->groupBy('preparation_id')->sortKeys() as $prepId => $items) {
                     $prep = MealPreparation::where('user_id', $userId)->lockForUpdate()->find($prepId) ?? $this->fail('Preparación ajena o inexistente.');
@@ -313,11 +321,12 @@ class MealInventory
                     if ($prep->cancelled || $prep->remaining() + 0.00001 < $portions) {
                         $this->fail("No hay porciones suficientes de {$prep->name}.");
                     }
-                    $operation->movements()->create(['user_id' => $userId, 'preparation_id' => $prep->id, 'name' => $prep->name, 'unit' => 'portion', 'delta' => -$portions]);
+                    $preparationLines[] = ['preparation_id' => $prep->id, 'unit' => 'portion', 'quantity' => -$portions];
                     if ($prep->consume_by && $prep->consume_by->lte(today()->addDays(7))) {
                         $warnings[] = $prep->name.': fecha límite '.$prep->consume_by->toDateString().'.';
                     }
                 }
+                $this->debit($operation, $ingredients, $preparationLines, ['origin' => ['type' => 'meal', 'id' => (string) $entry->id], 'effective_at' => $data['consumed_at'] ?? now()->toDateTimeString()]);
                 if ($entry->items->contains(fn ($item) => ! $item->recipe_id && ! $item->preparation_id && empty($item->ingredients))) {
                     $warnings[] = 'Inventario incompleto: hay elementos libres sin ingredientes enlazados; no se descontaron.';
                 }
@@ -355,16 +364,21 @@ class MealInventory
         if ($original->reversed) {
             $this->fail('La operación ya fue revertida.');
         }
-        foreach ($original->movements()->where('user_id', $operation->user_id)->orderBy('shopping_item_id')->get() as $movement) {
-            if ($movement->shopping_item_id) {
-                $product = ShoppingItem::where('user_id', $operation->user_id)->lockForUpdate()->find($movement->shopping_item_id);
-                if (! $product || $product->base_unit !== $movement->unit) {
-                    $this->fail("La unidad base de {$movement->name} cambió. Resuelve la incompatibilidad antes de revertir.");
-                }
-                $product->update(['stock' => round($product->stock - $movement->delta, 3)]);
-            }
-            $operation->movements()->create(['user_id' => $operation->user_id, 'shopping_item_id' => $movement->shopping_item_id, 'preparation_id' => $movement->preparation_id,
-                'name' => $movement->name, 'unit' => $movement->unit, 'delta' => -$movement->delta]);
+        $lines = [];
+        foreach ($original->movements()->where('user_id', $operation->user_id)->orderByDesc('sequence')->orderByDesc('id')->get() as $movement) {
+            $lines[] = [
+                'shopping_item_id' => $movement->preparation_id ? null : ($movement->historical_product_id ?? $movement->shopping_item_id),
+                'preparation_id' => $movement->preparation_id,
+                'unit' => $movement->unit, 'quantity' => -$movement->delta,
+                'compensates_movement_id' => $movement->id,
+            ];
+        }
+        if ($lines) {
+            app(InventoryLedger::class)->apply($operation, 'reversal', $lines, [
+                'corrects_operation_id' => $original->id,
+                'reason' => 'Reversión de comida o preparación',
+                'channel' => app()->runningInConsole() ? 'system' : (request()->is('mcp/*') ? 'mcp' : 'web'),
+            ]);
         }
         $original->update(['reversed' => true]);
     }

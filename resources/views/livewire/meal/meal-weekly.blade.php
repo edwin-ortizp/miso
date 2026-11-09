@@ -191,21 +191,21 @@
                         <x-ui.select id="meal-kind-{{ $index }}" name="formItems.{{ $index }}.kind" label="Tipo" placeholder="Seleccionar"
                                      :options="$kinds" wire:model.live="formItems.{{ $index }}.kind" />
 
+                        @php
+                            $elementId = 'meal-element-'.$index;
+                            $elementKey = $item['key'].'-'.$kind.'-'.$index;
+                        @endphp
                         @if ($kind === 'recipe')
-                            <x-ui.select id="meal-element-{{ $index }}" name="formItems.{{ $index }}.recipe_id" label="Receta" placeholder="Elegir receta" wire:model.live="formItems.{{ $index }}.recipe_id">
-                                @foreach ($recipeOptions as $recipe)
-                                    @continue($usedRecipes->contains($recipe->id) && $recipe->id !== $item['recipe_id'])
-                                    <option value="{{ $recipe->id }}">{{ $recipe->favorite ? '♥ ' : '' }}{{ $recipe->name }}</option>
-                                @endforeach
-                            </x-ui.select>
+                            <x-ui.combobox :id="$elementId" :wire:key="$elementKey" name="formItems.{{ $index }}.recipe_id" label="Receta" placeholder="Elegir receta"
+                                :options="$recipeOptions->reject(fn ($recipe) => $usedRecipes->contains($recipe->id) && $recipe->id !== $item['recipe_id'])->mapWithKeys(fn ($recipe) => [$recipe->id => ($recipe->favorite ? '♥ ' : '').$recipe->name])"
+                                wire:model.live="formItems.{{ $index }}.recipe_id" />
                         @elseif ($kind === 'preparation')
-                            <x-ui.select id="meal-element-{{ $index }}" name="formItems.{{ $index }}.preparation_id" label="Preparación" placeholder="Elegir preparación" wire:model.live="formItems.{{ $index }}.preparation_id">
-                                @foreach ($preparations as $prep)<option value="{{ $prep->id }}">{{ $prep->name }} · {{ $prep->remaining() - $prep->reserved() }} porciones libres</option>@endforeach
-                            </x-ui.select>
+                            <x-ui.combobox :id="$elementId" :wire:key="$elementKey" name="formItems.{{ $index }}.preparation_id" label="Preparación" placeholder="Elegir preparación"
+                                :options="$preparations->mapWithKeys(fn ($prep) => [$prep->id => $prep->name.' · '.($prep->remaining() - $prep->reserved()).' porciones libres'])"
+                                wire:model.live="formItems.{{ $index }}.preparation_id" />
                         @elseif ($kind === 'ingredient')
-                            <x-ui.select id="meal-element-{{ $index }}" name="formItems.{{ $index }}.product_id" label="Ingrediente" placeholder="Elegir ingrediente" wire:model.live="formItems.{{ $index }}.product_id">
-                                @foreach ($products as $product)<option value="{{ $product->id }}">{{ $product->name }}</option>@endforeach
-                            </x-ui.select>
+                            <x-ui.combobox :id="$elementId" :wire:key="$elementKey" name="formItems.{{ $index }}.product_id" label="Ingrediente" placeholder="Elegir ingrediente"
+                                :options="$products->pluck('name', 'id')" wire:model.live="formItems.{{ $index }}.product_id" />
                         @elseif ($kind === 'free')
                             <x-ui.field id="meal-element-{{ $index }}" name="formItems.{{ $index }}.name" label="Elemento" wire:model="formItems.{{ $index }}.name" />
                         @else

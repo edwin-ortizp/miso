@@ -3,6 +3,8 @@
 namespace App\Services\Meal;
 
 use App\Models\ShoppingItem;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Normaliza los ingredientes que llegan a una receta: producto del catálogo y cantidad en su unidad base.
@@ -12,10 +14,12 @@ class RecipeIngredientData
     /** Producto con ese nombre, o uno nuevo cuya unidad base se infiere de la unidad escrita. */
     public static function product(string $name, ?string $unit = null): ShoppingItem
     {
-        return ShoppingItem::firstOrCreate(
-            ['name' => trim($name)],
-            ['status' => 'available', 'stock' => 0, 'to_buy' => 0, 'base_unit' => UnitConverter::baseUnitOf($unit)]
-        );
+        return DB::transaction(function () use ($name, $unit) {
+            User::whereKey(auth()->id())->lockForUpdate()->firstOrFail();
+
+            return ShoppingItem::where('name', trim($name))->first()
+                ?? app(InventoryLedger::class)->saveProduct((int) auth()->id(), ['name' => trim($name), 'status' => 'available', 'stock' => 0, 'to_buy' => 0, 'base_unit' => UnitConverter::baseUnitOf($unit)]);
+        });
     }
 
     /**

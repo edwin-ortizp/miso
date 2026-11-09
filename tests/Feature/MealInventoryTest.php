@@ -11,6 +11,7 @@ use App\Models\MealPreparation;
 use App\Models\Recipe;
 use App\Models\ShoppingItem;
 use App\Models\User;
+use App\Services\Meal\InventoryLedger;
 use App\Services\Meal\MealInventory;
 use App\Services\Meal\MealNeeds;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,7 +23,25 @@ class MealInventoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_a_legacy_consumption_can_be_reversed_after_opening_without_replaying_old_history(): void
+    {
+        $product = $this->product('Huevos', 'unit', 6);
+        $original = MealInventoryOperation::create(['user_id' => $this->owner->id, 'operation_key' => 'legacy-consumption', 'action' => 'consume', 'fingerprint' => str_repeat('a', 64)]);
+        $movement = $original->movements()->create(['user_id' => $this->owner->id, 'shopping_item_id' => $product->id, 'name' => 'Huevos', 'unit' => 'unit', 'delta' => -2]);
+        $entry = MealPlanEntry::create(['user_id' => $this->owner->id, 'date' => '2026-11-02', 'meal_type' => 'cena', 'status' => 'consumed', 'consumption_mode' => 'home', 'consumption_operation_id' => $original->id]);
+        app(InventoryLedger::class)->initialize($this->owner->id, [$product->id]);
+        $result = $this->inventory->revert($this->owner->id, $entry->id, 'reverse-legacy');
+        $this->assertSame(8.0, $product->fresh()->stock);
+        $this->assertSame(-2.0, $movement->fresh()->delta);
+        $this->assertNull($movement->fresh()->balance_after);
+        $compensation = MealInventoryMovement::where('operation_id', $result['operation_id'])->sole();
+        $this->assertSame($movement->id, $compensation->compensates_movement_id);
+        $this->assertSame('6.000', $compensation->balance_before);
+        $this->assertSame('8.000', $compensation->balance_after);
+    }
+
     private User $owner;
+
     private MealInventory $inventory;
 
     protected function setUp(): void
@@ -75,7 +94,8 @@ class MealInventoryTest extends TestCase
         $this->assertSame($result, $this->inventory->consume($this->owner->id, $id, [], 'consume-test'));
         $this->assertSame(750.0, $milk->fresh()->stock);
         $this->assertSame(450.0, $cake->fresh()->stock);
-        $this->assertSame(2, MealInventoryMovement::count());
+        $this->assertSame(2, MealInventoryMovement::where('movement_type', 'consume')->count());
+        $this->assertSame(2, MealInventoryMovement::where('movement_type', 'opening')->count());
         $this->inventory->revert($this->owner->id, $id, 'revert-test');
         $this->assertSame(1000.0, $milk->fresh()->stock);
         $this->assertSame(500.0, $cake->fresh()->stock);

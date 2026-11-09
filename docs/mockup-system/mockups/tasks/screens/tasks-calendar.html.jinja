@@ -1,0 +1,46 @@
+{% from '@project/components/task-dialog.html.jinja' import task_dialog %}
+{% from '@project/components/life-shell.html.jinja' import shell, tabs as module_tabs, fab, dialog %}
+{% call shell('tasks', 'Tareas', 'bi-list-task') %}
+{{ module_tabs([('Lista','/tasks-list','bi-list-task'),('Gantt','/tasks-gantt','bi-bar-chart-steps',True),('Calendario','/tasks-calendar','bi-calendar3'),('Flujo','/tasks-flow','bi-signpost-split',True),('Kanban','/tasks-kanban','bi-kanban'),('Planificación','/tasks-planning','bi-calendar-week'),('Progreso','/tasks-progress','bi-trophy',True),('Ajustes','/tasks-settings','bi-sliders',True)], '/tasks-calendar') }}
+<section class="lt-task-calendar" aria-label="Calendario de tareas, planes, cumpleaños y comidas">
+  <header class="lt-cal-toolbar" aria-label="Controles del calendario">
+    <h2 class="lt-cal-period" data-cal-period aria-live="polite"></h2>
+    <div class="lt-cal-controls">
+      <div class="lt-cal-arrows" role="group" aria-label="Cambiar periodo">
+        <button type="button" class="lt-cal-control" data-cal-nav="prev" aria-label="Periodo anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+        <button type="button" class="lt-cal-control" data-cal-nav="next" aria-label="Periodo siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <div class="lt-cal-current"><button type="button" class="lt-cal-control lt-cal-now" data-cal-nav="now" title="Ir a hoy y a la hora actual">Ahora</button></div>
+      <div class="lt-cal-views" role="group" aria-label="Vista del calendario">{% for view, label in [('dayGridMonth','Mes'),('timeGridWeek','Semana'),('timeGridDay','Día'),('listWeek','Agenda')] %}<button type="button" class="lt-cal-control" data-cal-view="{{ view }}" aria-pressed="false">{{ label }}</button>{% endfor %}</div>
+      <label class="lt-cal-view-select"><span class="lt-cal-sr-only">Vista del calendario</span><select data-cal-view-select>{% for view, label in [('dayGridMonth','Mes'),('timeGridWeek','Semana'),('timeGridDay','Día'),('listWeek','Agenda')] %}<option value="{{ view }}">{{ label }}</option>{% endfor %}</select></label>
+      <div class="lt-filter-anchor lt-cal-filter-anchor">
+        <button type="button" class="lt-button lt-button--text lt-filter-button" data-cal-filter-open aria-haspopup="dialog" aria-expanded="false" aria-controls="calendar-filters" aria-label="Filtros"><i class="bi bi-sliders" aria-hidden="true"></i><span class="lt-filter-button__label">Filtros</span><span class="lt-badge lt-badge--corner" data-cal-filter-count aria-label="1 filtro activo" hidden>1</span></button>
+        <div class="lt-popover" id="calendar-filters" role="dialog" aria-labelledby="calendar-filters-title" hidden>
+          <span class="lt-popover__handle" aria-hidden="true"></span>
+          <div class="lt-popover__head"><h4 id="calendar-filters-title">Filtros</h4><button type="button" class="lt-icon-button" data-cal-filter-close aria-label="Cerrar filtros"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+          <fieldset class="lt-cal-filter-types"><legend>Tipos de elemento</legend>{% for key, label in [('tasks','Tareas'),('plans','Planes'),('birthdays','Cumpleaños'),('meals','Comidas')] %}<label class="lt-list-item"><input type="checkbox" data-cal-layer="{{ key }}" checked> {{ label }}</label>{% endfor %}</fieldset>
+          <div class="lt-popover__actions"><button type="button" class="lt-button lt-button--outlined" data-cal-filter-reset><i class="bi bi-eraser" aria-hidden="true"></i>Limpiar</button><button type="button" class="lt-button" data-cal-filter-apply><i class="bi bi-funnel-fill" aria-hidden="true"></i>Filtrar</button></div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="lt-chip-row lt-applied-filters lt-cal-applied" aria-label="Filtros aplicados" data-cal-applied hidden><span class="lt-chip lt-chip--input"><i class="bi bi-sliders" aria-hidden="true"></i><span data-cal-filter-label></span><button type="button" class="lt-chip__remove" data-cal-filter-remove aria-label="Quitar filtro de tipos"><i class="bi bi-x" aria-hidden="true"></i></button></span><button type="button" class="lt-link" data-cal-filter-remove>Limpiar filtros</button></div>
+  <p class="lt-cal-hint" data-cal-filter-empty role="status" hidden>No hay tipos seleccionados. Abre Filtros para mostrar elementos.</p>
+  <div data-task-calendar class="lt-task-calendar__surface"></div>
+</section>
+{{ task_dialog() }}
+<section class="lt-cal-pending" data-cal-unscheduled aria-label="Tareas sin fecha">
+  <article class="lt-mcard"><header class="lt-mcard__head"><div class="lt-mcard__title"><span class="lt-mcard__icon"><i class="bi bi-calendar-x" aria-hidden="true"></i></span><h3>Sin fecha <span class="lt-count" data-cal-pending-count></span></h3></div><label class="lt-cal-search"><i class="bi bi-search" aria-hidden="true"></i><span class="lt-cal-sr-only">Buscar tareas sin fecha</span><input type="search" data-cal-pending-search placeholder="Buscar tareas"></label></header>
+  <div class="lt-mcard__body"><table class="lt-mtable lt-mtable--stack lt-cal-pending-table"><caption class="lt-cal-sr-only">Gestión de tareas sin fecha</caption><thead><tr><th scope="col">Tarea</th><th scope="col">Categoría</th><th scope="col">Prioridad</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead><tbody data-cal-unscheduled-list></tbody></table><p data-cal-pending-empty hidden>No hay tareas sin fecha.</p></div></article>
+</section>
+<div class="lt-task-calendar-notice" data-cal-notice role="status" hidden><span data-cal-notice-text></span><button class="lt-button lt-button--text" type="button" data-cal-notice-view>Ver</button><button class="lt-icon-button" type="button" data-cal-notice-close aria-label="Cerrar aviso"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div>
+{{ fab('Nueva tarea', 'bi-plus-lg', target='task-dialog') }}
+
+{% call dialog('calendar-focus', 'Foco en la tarea', submit='Registrar foco', icon='bi-stopwatch', submit_action='calendar-focus-save') %}
+<p class="lt-cal-focus-task" data-cal-focus-task></p>
+<div class="lt-form"><label class="lt-field"><span>Duración (minutos) *</span><input type="number" min="1" max="960" data-cal-focus-minutes></label><label class="lt-field" data-cal-focus-end-field><span>Finalizó *</span><input type="datetime-local" data-cal-focus-end></label><p class="lt-form--full lt-cal-hint" data-cal-focus-hint></p><label class="lt-field lt-form--full"><span>Notas del foco</span><textarea rows="3" maxlength="1000" data-cal-focus-notes placeholder="¿En qué trabajaste?"></textarea></label></div>
+<div class="lt-cal-timer" data-cal-timer hidden><output data-cal-timer-value aria-label="Tiempo restante">00:00</output><p>La tarea sigue disponible como contexto. El tiempo trabajado se registra al finalizar.</p></div>
+<p class="lt-cal-error" data-cal-focus-error role="alert"></p>
+{% endcall %}
+{% call dialog('calendar-recurring', 'Completar esta repetición', submit='Completar repetición', icon='bi-arrow-repeat', submit_action='calendar-recurring-complete') %}<p data-cal-recurring-text></p><p>Se completará esta repetición y la tarea pasará a su próxima fecha.</p>{% endcall %}
+{% endcall %}

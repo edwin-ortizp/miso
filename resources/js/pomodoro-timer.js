@@ -55,6 +55,8 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
         taskContext: null,
         taskLoading: false,
         taskError: '',
+        customMinutes: null,
+        activeTaskMismatch: false,
         errorMessage: '',
         visibilityHandler: null,
         syncHandler: null,
@@ -76,21 +78,38 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
             }
         },
 
+        get validMinutes() { return Number.isFinite(Number(this.customMinutes)) && Number(this.customMinutes) >= 1 && Number(this.customMinutes) <= 1440; },
+
+        setSuggestedDuration(minutes) {
+            const value = Number(minutes);
+            if (this.startedAt || this.isRunning || this.pendingCompletion || !Number.isFinite(value) || value < 1 || value > 1440) return;
+            this.customMinutes = value;
+            this.totalTime = value * 60;
+            this.timeLeft = this.totalTime;
+            this.persist();
+        },
+
         async openFocus(detail = {}) {
-            if (this.isRunning || this.pendingCompletion || this.startedAt || this.isCompleting || !detail.start) {
+            if (this.isRunning || this.pendingCompletion || this.startedAt || this.isCompleting) {
+                this.activeTaskMismatch = Boolean(detail.taskId && detail.taskId !== this.taskId);
+                await this.loadTaskContext();
+                return;
+            }
+            this.activeTaskMismatch = false;
+            if (!detail.start && !detail.taskId) {
                 await this.loadTaskContext();
                 return;
             }
             this.taskId = typeof detail.taskId === 'string' ? detail.taskId : null;
             this.description = detail.description || '';
             this.setMode('work');
-            this.start();
+            this.customMinutes = Number(detail.durationMinutes) || null;
+            if (this.customMinutes) this.setSuggestedDuration(this.customMinutes);
+            if (detail.start) this.start();
             const cycle = this.cycleId;
             await this.loadTaskContext();
-            if (this.cycleId === cycle && this.taskContext && !this.description) {
-                this.description = this.taskContext.title;
-                this.persist();
-            }
+            if (detail.start && this.cycleId === cycle && this.taskContext && !this.description) this.description = this.taskContext.title;
+            this.persist();
         },
 
         get displayTime() {
@@ -223,6 +242,7 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
                         Math.floor(scheduledEnd / 1000),
                         this.description,
                         cycleId,
+                        ...(this.taskId ? [this.taskId] : []),
                     );
                 } catch (error) {
                     this.errorMessage = 'No se pudo guardar la sesión. Pulsa de nuevo para reintentar.';
@@ -233,6 +253,8 @@ export function createPomodoroTimer(options, providedDependencies = {}) {
 
                 dependencies.notify?.('Pomodoro completado', 'Tiempo de descanso.');
                 this.description = '';
+                this.taskId = null;
+                this.taskContext = null;
             } else if (completedMode !== 'work') {
                 dependencies.notify?.('Descanso terminado', 'De vuelta al trabajo.');
             }

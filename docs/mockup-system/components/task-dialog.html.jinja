@@ -1,0 +1,49 @@
+{% from '@project/components/life-shell.html.jinja' import dialog %}
+{# Una sola composición/instancia de tarea. Los modos muestran controles sin reconstruir el diálogo. #}
+{% macro task_dialog() -%}
+{% call(zone) dialog('task-dialog', 'Tarea', icon='bi-list-task', sections=[('basic','Información básica','bi-file-earmark-text'),('privacy','Privacidad','bi-lock'),('schedule','Programación','bi-calendar3'),('reminders','Recordatorios','bi-bell'),('relations','Relacionado','bi-link-45deg')], custom_header=true, submit_action='calendar-save') %}
+{% if zone == 'body' %}
+      <div class="lt-cal-detail-grid">
+        <div class="lt-task-content">
+      <h3 class="lt-cal-detail-title" data-cal-q-title data-task-view></h3>
+
+<section class="lt-dialog__section" data-section="basic"><div data-task-view><h4>Descripción</h4><p class="lt-cal-description" data-cal-q-description></p></div><div class="lt-form" data-task-edit hidden><label class="lt-field lt-form--full"><span>Título *</span><input type="text" data-cal-f-title maxlength="255" required></label><label class="lt-field lt-form--full"><span>Descripción</span><textarea data-cal-f-description rows="8"></textarea></label></div></section>
+<section class="lt-dialog__section" data-section="privacy" hidden>
+  <h4>Privacidad</h4><p data-task-view data-task-privacy-summary></p>
+  <div data-task-edit hidden><label class="lt-list-item"><input type="checkbox" data-cal-f-private><i class="bi bi-lock" aria-hidden="true"></i> Tarea privada</label></div>
+</section>
+<section class="lt-dialog__section" data-section="schedule" hidden>
+  <h4>Programación</h4><div data-task-view><p data-task-schedule-summary></p><p data-task-recurrence-summary></p></div>
+  <div data-task-edit hidden><div class="lt-form"><label class="lt-field"><span>Fecha inicio</span><input type="date" data-cal-f-date></label><label class="lt-field"><span>Hora</span><input type="time" data-cal-f-time></label><label class="lt-field"><span>Fecha fin</span><input type="date" data-cal-f-end-date></label><label class="lt-field"><span>Hora</span><input type="time" data-cal-f-end-time></label></div>
+  <div class="lt-task-duration"><span>Estimar duración</span>{% for minutes, label in [(15,'15 min'),(30,'30 min'),(60,'1 hora'),(120,'2 horas')] %}<button class="lt-chip lt-chip--filter" type="button" data-task-duration="{{ minutes }}" aria-pressed="false">{{ label }}</button>{% endfor %}</div>
+  <label class="lt-list-item"><input type="checkbox" data-cal-f-recurrent><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Tarea recurrente</label>
+  <div data-task-recurrence-fields hidden><div data-task-native-rule hidden><span class="lt-chip" data-task-native-rule-text></span><button class="lt-button lt-button--text" type="button" data-task-rule-change>Cambiar</button></div><label class="lt-field" data-task-interval-field><span>Repetir cada (días)</span><input type="number" min="1" step="1" data-cal-f-recur-days></label></div>
+  <p class="lt-cal-hint">Sin horas, la tarea ocupa el día completo. Sin fechas, aparece en «Sin fecha».</p></div>
+</section>
+<section class="lt-dialog__section" data-section="reminders" hidden>
+  <h4>Recordatorios</h4><p class="lt-cal-hint">Avisar antes de la fecha del elemento. Sin hora, se toman las 9:00 a. m. de Bogotá.</p>
+  <div data-task-view data-task-reminders-summary></div><div data-task-edit hidden><div data-task-reminder-rows></div><button class="lt-button lt-button--text" type="button" data-task-reminder-add><i class="bi bi-plus" aria-hidden="true"></i>Añadir recordatorio</button></div>
+</section>
+<section class="lt-dialog__section" data-section="relations" hidden>
+  <h4>Relacionado</h4><div data-task-view data-task-relations-summary></div><div data-task-edit hidden><div data-task-relation-rows></div><button class="lt-button lt-button--text" type="button" data-task-relation-add><i class="bi bi-plus" aria-hidden="true"></i>Añadir relación</button></div>
+</section>
+<template data-task-reminder-template><div class="lt-task-extra-row" data-task-reminder-row><label class="lt-field"><span>Anticipación</span><input type="number" min="0" max="4294967295" step="1" data-task-reminder-amount></label><label class="lt-field"><span>Unidad</span><select data-task-reminder-unit>{% for key, label in [('minutes','Minutos'),('hours','Horas'),('days','Días'),('weeks','Semanas'),('months','Meses'),('years','Años')] %}<option value="{{ key }}">{{ label }}</option>{% endfor %}</select></label><button class="lt-button lt-button--text" type="button" data-task-reminder-remove>Quitar</button></div></template>
+<template data-task-relation-template><div class="lt-task-extra-row" data-task-relation-row><label class="lt-field"><span>Módulo</span><select data-task-relation-type><option value="">Elige un módulo</option><option value="relationship">Personas</option><option value="goal">Metas</option><option value="health-event">Salud</option></select></label><label class="lt-field"><span>Relación</span><input type="text" autocomplete="off" data-task-relation-target placeholder="Sin relación"><datalist data-task-relation-options></datalist></label><button class="lt-icon-button" type="button" data-task-relation-remove aria-label="Quitar relación"><i class="bi bi-x-lg" aria-hidden="true"></i></button></div></template>
+<p class="lt-cal-error" data-cal-task-error role="alert"></p></div>
+        <aside class="lt-cal-metadata" aria-label="Propiedades de la tarea"><p data-task-view><i class="bi bi-clock" aria-hidden="true"></i> <span data-cal-q-time></span></p>
+        <label class="lt-field lt-cal-category-field"><span><i class="bi bi-tag" aria-hidden="true"></i> Categoría</span><select data-cal-q-category><option value="">Sin categoría</option></select></label><span class="lt-cal-sr-only" data-cal-category-feedback role="status"></span>
+        <p data-task-view data-cal-q-row="recurrent"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> <span></span></p>
+        <div class="lt-task-properties-fields"><label class="lt-field"><span>Estado</span><select data-cal-f-status>{% for id, label in [('todo','Borrador'),('ready','Ready'),('wip','WIP'),('done','Done')] %}<option value="{{ id }}">{{ label }}</option>{% endfor %}</select></label><label class="lt-field"><span>Prioridad</span><select data-cal-f-priority><option value="">Sin prioridad</option>{% for id, label in [('urgent-important','Urgente e importante'),('not-urgent-important','Importante, no urgente'),('urgent-not-important','Urgente, no importante'),('not-urgent-not-important','Ni urgente ni importante')] %}<option value="{{ id }}">{{ label }}</option>{% endfor %}</select></label><label class="lt-field"><span>Tamaño</span><select data-cal-f-size><option value="">Sin tamaño</option>{% for size, label in [('XS','XS (< 30 min)'),('S','S (30 min - 1h)'),('M','M (1-2h)'),('L','L (2-4h)'),('XL','XL (> 4h)')] %}<option value="{{ size }}">{{ label }}</option>{% endfor %}</select></label><label class="lt-field"><span>Tiempo estimado (min)</span><input type="number" min="1" data-cal-f-estimate></label></div>
+        <p class="lt-cal-hint">Los cambios se aplican al guardar.</p><span class="lt-cal-hint" data-cal-draft-feedback role="status"></span>
+        <section class="lt-cal-focus-summary" aria-label="Foco registrado en esta tarea"><h4>Tiempo de foco</h4><p data-cal-focus-summary>Sin registros de foco.</p>
+    <div class="lt-cal-dropdown"><button class="lt-button lt-button--outlined" type="button" data-cal-menu-toggle="focus" aria-expanded="false" aria-controls="calendar-focus-menu"><i class="bi bi-stopwatch" aria-hidden="true"></i>Foco<i class="bi bi-chevron-down" aria-hidden="true"></i></button><div id="calendar-focus-menu" class="lt-menu" data-cal-menu="focus" hidden><button type="button" data-cal-focus="timer">Iniciar temporizador</button><button type="button" data-cal-focus="manual">Registrar tiempo trabajado</button></div></div>
+        </section>
+        </aside>
+      </div>
+
+
+{% elif zone == 'header_actions' %}
+<button class="lt-icon-button" type="button" data-cal-edit data-task-view aria-label="Editar contenido" title="Editar contenido"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+{% endif %}
+{% endcall %}
+{%- endmacro %}

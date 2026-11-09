@@ -131,16 +131,25 @@ class MealPlanningTest extends TestCase
             ])->save();
         });
 
-        Livewire::test(MealWeekly::class)
+        $component = Livewire::test(MealWeekly::class)
             ->call('openForm', '2026-07-20', 'desayuno')
             ->call('addRow')
             ->set('formItems.0.kind', 'recipe')
             ->set('formItems.0.recipe_id', $selected->id)
             ->call('addRow')
             ->set('formItems.1.kind', 'recipe')
-            ->assertSeeHtml('value="'.$available->id.'"')
+            ->assertSee($available->id)
+            ->assertSee('Arepa con huevo')
             ->assertDontSee('Arepa privada')
             ->assertSet('formItems.0.name', 'Arepa de casa');
+
+        $document = new \DOMDocument;
+        @$document->loadHTML('<?xml encoding="UTF-8">'.$component->html());
+        $xpath = new \DOMXPath($document);
+        $catalog = fn (int $index) => json_decode($xpath->query('//*[@id="meal-element-'.$index.'"]/..')->item(0)->getAttribute('data-options'), true);
+        $this->assertSame([$available->id, $selected->id], array_column($catalog(0), 'value'));
+        $this->assertSame([$available->id], array_column($catalog(1), 'value'));
+        $this->assertSame('♥ Arepa con huevo', $catalog(1)[0]['label']);
     }
 
     public function test_shopping_requirements_include_all_recipes_and_multiply_portions(): void

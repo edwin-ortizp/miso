@@ -4,7 +4,9 @@ namespace App\Mcp\Tools\Shopping;
 
 use App\Mcp\Tools\Shopping\Concerns\InteractsWithInventory;
 use App\Mcp\Tools\Shopping\Concerns\ResolvesShoppingItem;
+use App\Models\MealInventoryOperation;
 use App\Models\ShoppingItem;
+use App\Services\Meal\InventoryLedger;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -24,7 +26,8 @@ class CreateInventoryItemTool extends Tool
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'base_unit' => ['required', Rule::in(array_keys(ShoppingItem::BASE_UNITS))],
-            'stock' => ['required', 'numeric', 'min:0'],
+            'stock' => ['required', 'numeric', 'min:0', 'max:999999999.999'],
+            ...$this->inventoryWriteRules(),
             'storage_location_id' => $this->storageLocationRules(),
         ]);
         $data['name'] = trim($data['name']);
@@ -35,12 +38,13 @@ class CreateInventoryItemTool extends Tool
         if ($match instanceof Response) {
             return $match;
         }
-        if ($match) {
+        $replay = ! empty($data['operation_key']) && MealInventoryOperation::where('user_id', auth()->id())->where('operation_key', $data['operation_key'])->exists();
+        if ($match && ! $replay) {
             return Response::error("Ya existe {$match->name} (id: {$match->id}). Usa update-shopping-item-tool para actualizarlo.");
         }
-        $item = Auth::user()->shoppingItems()->create([
-            ...$data, 'to_buy' => 0, 'next_purchase' => false, 'status' => 'available',
-        ]);
+        $attributes = collect($data)->except(['operation_key', 'reason'])->all() + ['to_buy' => 0, 'next_purchase' => false, 'status' => 'available'];
+        $item = app(InventoryLedger::class)->saveProduct((int) Auth::id(), $attributes, null, $data['operation_key'] ?? null,
+            ['channel' => 'mcp', 'reason' => $data['reason'] ?? 'Saldo de apertura', 'request' => $data]);
 
         return Response::structured(['item' => $this->inventorySummary($item)]);
     }
@@ -48,6 +52,7 @@ class CreateInventoryItemTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
+            ...$this->inventoryWriteSchema($schema),
             'name' => $schema->string()->description('Nombre genérico, sin marca ni presentación.')->required(),
             'base_unit' => $schema->string()->enum(array_keys(ShoppingItem::BASE_UNITS))->required(),
             'stock' => $schema->number()->description('Total contado en la unidad base, admite cero y decimales.')->required(),

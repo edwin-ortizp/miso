@@ -1,7 +1,7 @@
 {% from '@project/components/life-shell.html.jinja' import shell, tabs as module_tabs, header, metric, manage_card, fab %}
 {% call shell('tasks', 'Lista de tareas', 'bi-list-task') %}
 {{ header('Lista de tareas', 'Decide y prioriza el trabajo del día.', 'bi-list-task') }}
-{{ module_tabs([('Lista','/tasks-list','bi-list-task'),('Kanban','/tasks-kanban','bi-kanban'),('Planificación','/tasks-planning','bi-calendar-week')], '/tasks-list') }}
+{{ module_tabs([('Lista','/tasks-list','bi-list-task'),('Gantt','/tasks-gantt','bi-bar-chart-steps',True),('Calendario','/tasks-calendar','bi-calendar3'),('Flujo','/tasks-flow','bi-signpost-split',True),('Kanban','/tasks-kanban','bi-kanban'),('Planificación','/tasks-planning','bi-calendar-week'),('Progreso','/tasks-progress','bi-trophy',True),('Ajustes','/tasks-settings','bi-sliders',True)], '/tasks-list') }}
 <p><a class="lt-link" href="#/tasks-categories">Categorías de Tareas</a></p>
 <section class="lt-metrics">{{ metric('Pendientes','12','warning') }}{{ metric('En curso','4') }}{{ metric('Completadas','18','success') }}</section>
 {% call(zone) manage_card('tasks', 'Tareas priorizadas', 'bi-list-task', count='(4 / 34)', total=34, search='Buscar tareas', menu=[('Exportar CSV', 'bi-filetype-csv'), ('Imprimir', 'bi-printer')], footer={'from':1,'to':4,'total':34,'noun':'tareas','page':1,'pages':2,'per_page':25}, sort=[('chronological','Cronológico','bi-calendar-event'),('priority','Prioridad','bi-exclamation-circle'),('recent','Más recientes','bi-clock-history'),('title','Título (A–Z)','bi-sort-alpha-down')]) %}{% if zone == 'filters' %}

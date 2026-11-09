@@ -13,6 +13,9 @@
     'id' => null,
     'module' => null,
     'expanded' => false,
+    'headerActions' => null,
+    'focusErrors' => false,
+    'sectionEvent' => false,
 ])
 
 @php
@@ -37,6 +40,7 @@
     @teleport('body')
         <div class="md-form-dialog-layer" data-module="{{ $moduleKey }}" x-dialog-viewport="{{ $state ?? '' }}"
              @if($state) x-show="{{ $state }}" x-cloak :class="{'lt-editor-pristine': !submitted}" @endif
+             @if($sectionEvent) @task-editor-section.window="section = $event.detail.section" @endif
              x-data="{ section: @js($firstSection), navCollapsed: window.matchMedia('(max-width: 767.98px)').matches, expanded: @js((bool) $expanded) }" @if($state) x-effect="if ({{ $state }}) { section = @js($firstSection); expanded = @js((bool) $expanded); navCollapsed = window.matchMedia('(max-width: 767.98px)').matches }" @endif>
             <div class="md-dialog-scrim" @if($state) x-on:click="closeEditor()" @else wire:click="{{ $close }}" @endif></div>
             <section {{ $attributes->class(['md-form-dialog', 'md-form-dialog--sections' => $sections !== []]) }}
@@ -60,6 +64,7 @@
                             <span class="md-form-dialog__icon"><i class="bi {{ $icon }}" aria-hidden="true"></i></span>
                         @endif
                         <h2 id="{{ $dialogId }}-title" class="md-form-dialog__title" @if($titleExpression) x-text="{{ $titleExpression }}" @endif>{{ $title }}</h2>
+                        {{ $headerActions }}
                         <button type="button" class="md-btn-icon" @click="expanded = !expanded"
                                 :aria-pressed="expanded.toString()" :aria-label="expanded ? 'Restaurar' : 'Expandir'" :title="expanded ? 'Restaurar' : 'Expandir'">
                             <i class="bi" :class="expanded ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'" aria-hidden="true"></i>
@@ -79,7 +84,8 @@
                                         <i class="bi {{ $section['icon'] }}" aria-hidden="true"></i>
                                         <span>{{ $section['label'] }}</span>
                                         @if (! empty($section['error']))
-                                            <span class="md-form-dialog__nav-dot" role="img" aria-label="Contiene errores"></span>
+                                            <span class="md-form-dialog__nav-dot" role="img" aria-label="Contiene errores"
+                                                          @if($focusErrors) x-init="if (submitted) { section = @js($key); editingContent = true; $nextTick(() => $el.closest('.md-form-dialog').querySelector('[aria-invalid=true]')?.focus()) }" @endif></span>
                                         @endif
                                     </button>
                                 @endforeach

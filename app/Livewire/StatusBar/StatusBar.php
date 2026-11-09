@@ -36,9 +36,9 @@ class StatusBar extends Component
         $this->weekendGoal = (int) ($settings['weekend_goal_minutes'] ?? 120);
     }
 
-    public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken): void
+    public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken, ?string $taskId = null): void
     {
-        PomodoroTimer::storeTimerSession($startedAt, $endedAt, $description, $clientToken);
+        PomodoroTimer::storeTimerSession($startedAt, $endedAt, $description, $clientToken, $taskId);
         $this->dispatch('focus-session-saved');
     }
 

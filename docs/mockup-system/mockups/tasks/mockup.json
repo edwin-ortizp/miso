@@ -9,6 +9,7 @@
       "template": "pages/main.html.jinja",
       "screens": [
         "tasks-list",
+        "tasks-calendar",
         "tasks-kanban",
         "tasks-planning",
         "tasks-categories"
@@ -36,12 +37,21 @@
       "template": "screens/tasks-categories.html.jinja",
       "title": "Categorías de Tareas",
       "bodyClass": ""
+    },
+    "tasks-calendar": {
+      "template": "screens/tasks-calendar.html.jinja",
+      "title": "Calendario",
+      "bodyClass": ""
     }
   },
   "routes": [
     {
       "path": "/tasks-list",
       "screen": "tasks-list"
+    },
+    {
+      "path": "/tasks-calendar",
+      "screen": "tasks-calendar"
     },
     {
       "path": "/tasks-kanban",

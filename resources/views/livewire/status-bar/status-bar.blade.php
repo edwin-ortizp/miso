@@ -1,7 +1,7 @@
 <div class="lt-status__group" x-data="pomodoroTimer({
     workDuration: {{ $workDuration }}, shortBreak: {{ $shortBreak }}, longBreak: {{ $longBreak }},
     storageKey: 'life-tracker:pomodoro:{{ auth()->id() }}',
-    saveSession: (start, end, description, token) => $wire.saveSession(start, end, description, token)
+    saveSession: (start, end, description, token, taskId) => $wire.saveSession(start, end, description, token, taskId)
 })" @status-focus-start.window="if (!isRunning && !pendingCompletion && !startedAt) { setMode('work'); start(); } else if (!isRunning) { toggle(); }">
     <a href="{{ route('pomodoro') }}" wire:navigate @class(['lt-status__item', 'is-warning' => $goalReached])
        title="{{ $goalReached ? 'Meta de foco cumplida: considera descansar' : 'Foco registrado hoy frente a la meta' }}">
@@ -26,4 +26,5 @@
         </x-ui.menu>
         <span class="lt-status__error" x-show="errorMessage" x-text="errorMessage" role="alert"></span>
     </div>
+    <livewire:home.panel.focus-timer :task-host="true" :key="'global-task-focus-host'" />
 </div>

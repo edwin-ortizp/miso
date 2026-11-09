@@ -88,6 +88,7 @@
                         <td class="md-table__actions">
                             <x-ui.row-actions :label="'Más acciones de '.$item->name">
                                 <x-slot:primary wire:click="openForm('{{ $item->id }}')">Editar</x-slot:primary>
+                                <x-ui.menu-item icon="bi-journal-text" :href="route('meals.inventory.history', ['item' => $item->id, 'return' => ['screen' => 'ingredients', 'filters' => ['q' => $search, 'ingredient' => $ingredientId, 'categories' => $categoryFilter, 'locations' => $locationFilter, 'store' => $storeFilter, 'price' => $priceFilter, 'cart' => $cartFilter, 'data' => $dataFilter, 'usage' => $usageFilter, 'page' => $this->getPage(), 'per_page' => $perPage]]])" wire:navigate>Ver Kardex</x-ui.menu-item>
                                 @if ($item->variants->isNotEmpty())
                                     <x-ui.menu-item icon="bi-bar-chart-steps" :href="route('meals.compare', $item)" wire:navigate>Comparar precios</x-ui.menu-item>
                                 @endif
@@ -171,7 +172,7 @@
                       :submit="$editingId ? 'Actualizar' : 'Guardar'"
                       :sections="[
                           'basic' => ['label' => 'Información básica', 'icon' => 'bi-basket', 'error' => $errors->hasAny(['name', 'baseUnit', 'gramsPerPiece'])],
-                          'inventory' => ['label' => 'Inventario', 'icon' => 'bi-box-seam', 'error' => $errors->hasAny(['stock', 'minStock', 'toBuy'])],
+                          'inventory' => ['label' => 'Inventario', 'icon' => 'bi-box-seam', 'error' => $errors->hasAny(['stock', 'stockReason', 'inventory', 'minStock', 'toBuy'])],
                           'nutrition' => ['label' => 'Nutrición', 'icon' => 'bi-fire', 'error' => $errors->hasAny(['kcal', 'protein', 'carbs', 'fat'])],
                           'variants' => ['label' => 'Variantes', 'icon' => 'bi-box', 'error' => $errors->has('variants') || $errors->has('variants.*')],
                           'prices' => ['label' => 'Precios por tienda', 'icon' => 'bi-shop', 'error' => $errors->has('prices.*')],
@@ -207,7 +208,10 @@
         <x-ui.form-dialog-section name="inventory" title="Inventario" :description="$unitShort ? 'Cantidades en '.$unitShort.'.' : 'Elige primero la unidad base.'">
             <div class="d-flex flex-column gap-3">
                 <div class="md-field-pair">
-                    <x-ui.field name="stock" label="Stock en casa" type="number" step="0.001" min="0" wire:model="stock" />
+                    <x-ui.field name="stock" label="Existencias contadas" help="Reemplaza el total y registra la diferencia." type="number" step="0.001" min="0" max="999999999.999" :error="$errors->first('inventory') ?: null" wire:model.live.debounce.250ms="stock" />
+                    @if ($editingId && $originalStock !== null && (float) $stock !== (float) $originalStock)
+                        <x-ui.field name="stockReason" label="Motivo del cambio" help="Si lo dejas vacío, se registra como Conteo físico." maxlength="1000" wire:model="stockReason" />
+                    @endif
                     <x-ui.field name="minStock" label="Stock mínimo" type="number" step="0.001" min="0" wire:model="minStock" />
                 </div>
                 @if ($purchaseHistory)

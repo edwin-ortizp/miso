@@ -4,10 +4,24 @@ namespace App\Mcp\Tools\Shopping\Concerns;
 
 use App\Models\ShoppingItem;
 use App\Models\StorageLocation;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Validation\Rule;
 
 trait InteractsWithInventory
 {
+    protected function inventoryWriteRules(): array
+    {
+        return ['operation_key' => ['sometimes', 'nullable', 'uuid'], 'reason' => ['sometimes', 'nullable', 'string', 'max:1000']];
+    }
+
+    protected function inventoryWriteSchema(JsonSchema $schema): array
+    {
+        return [
+            'operation_key' => $schema->string()->description('UUID estable para reintentos de esta misma operación; con otros datos se rechaza.'),
+            'reason' => $schema->string()->description('Motivo del cambio de existencias. Por defecto: Conteo físico.'),
+        ];
+    }
+
     protected function storageLocationRules(?ShoppingItem $item = null): array
     {
         return ['sometimes', 'nullable', 'uuid', Rule::exists('storage_locations', 'id')->where(function ($query) use ($item) {

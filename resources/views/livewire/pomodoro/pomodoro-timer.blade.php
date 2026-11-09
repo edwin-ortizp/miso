@@ -14,7 +14,7 @@
     shortBreak: {{ $shortBreak }},
     longBreak: {{ $longBreak }},
     storageKey: 'life-tracker:pomodoro:{{ auth()->id() }}',
-    saveSession: (startedAt, endedAt, description, clientToken) => $wire.saveSession(startedAt, endedAt, description, clientToken)
+    saveSession: (startedAt, endedAt, description, clientToken, taskId) => $wire.saveSession(startedAt, endedAt, description, clientToken, taskId)
 })">
     <x-slot:actions>
         <x-module-actions :primary="['label' => 'Registrar tiempo', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />

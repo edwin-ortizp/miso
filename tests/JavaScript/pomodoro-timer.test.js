@@ -135,3 +135,18 @@ test('loads title separately, does not overwrite notes typed during loading, and
     await loaded.openFocus({start: true, taskId: 'meeting'});
     assert.equal(loaded.description, 'Título original');
 });
+
+test('task timer uses an editable suggestion and does not replace an active task', async () => {
+    const { timer, savedSessions, advance } = harness();
+    await timer.openFocus({ taskId: 'task-a', durationMinutes: 5, start: false });
+    assert.equal(timer.isRunning, false);
+    timer.setSuggestedDuration(2);
+    assert.equal(timer.totalTime, 120);
+    timer.start();
+    await timer.openFocus({ taskId: 'task-b', durationMinutes: 10, start: false });
+    assert.equal(timer.taskId, 'task-a');
+    assert.equal(timer.activeTaskMismatch, true);
+    advance(60_000);
+    await timer.finishEarly();
+    assert.equal(savedSessions[0][4], 'task-a');
+});

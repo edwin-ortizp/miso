@@ -1,91 +1,61 @@
-<x-module-shell module="tasks" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+<x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
     <section class="md-card-elevated md-task-calendar" aria-label="Calendario de tareas, planes, cumpleaños y comidas" x-data="taskCalendar($wire)">
-        <div class="md-calendar-layers" role="group" aria-label="Capas del calendario" wire:ignore>
-            @foreach (['tasks' => ['Tareas', 'bi-check2-square', 'task'], 'plans' => ['Planes', 'bi-map', 'plan'], 'birthdays' => ['Cumpleaños', 'bi-cake2', 'birthday'], 'meals' => ['Comidas', 'bi-egg-fried', 'meal']] as $layer => [$label, $icon, $class])
-                <button type="button" class="md-btn md-btn-outlined md-calendar-layer md-calendar-layer--{{ $class }}"
-                        :aria-pressed="layers.{{ $layer }}.toString()" @click="toggleLayer('{{ $layer }}')">
-                    <i class="bi {{ $icon }}" aria-hidden="true"></i> {{ $label }}
-                </button>
-            @endforeach
-        </div>
-        <div wire:ignore class="md-calendar-mobile-toolbar" aria-label="Navegación del calendario">
-            <h2 class="visually-hidden">Calendario: <span x-text="mobileDate"></span></h2>
-            <button type="button" class="md-btn-icon" aria-label="Periodo anterior" @click="calendar.prev()"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
-            <div class="md-calendar-view-picker">
-                <x-ui.menu label="Cambiar vista del calendario" icon="bi-chevron-down" align="start">
-                    <x-ui.menu-item @click="calendar.changeView('timeGridDay')">Día</x-ui.menu-item>
-                    <x-ui.menu-item @click="calendar.changeView('timeGridWeek')">Semana</x-ui.menu-item>
-                    <x-ui.menu-item @click="calendar.changeView('dayGridMonth')">Mes</x-ui.menu-item>
-                    <x-ui.menu-item @click="calendar.changeView('listWeek')">Agenda</x-ui.menu-item>
-                </x-ui.menu>
-                <span class="md-calendar-view-picker__label" aria-live="polite"><span x-text="mobileDate"></span> · <span x-text="mobileView"></span></span>
+        <div class="md-calendar-compact-toolbar" wire:ignore aria-label="Navegación del calendario">
+            <h2 class="md-title-medium md-calendar-period" x-text="mobileDate" aria-live="polite"></h2>
+            <div class="md-calendar-controls">
+                <div class="md-calendar-arrows" role="group" aria-label="Cambiar periodo">
+                    <button type="button" class="md-btn-icon" aria-label="Periodo anterior" @click="calendar.prev()"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                    <button type="button" class="md-btn-icon" aria-label="Periodo siguiente" @click="calendar.next()"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+                </div>
+                <button type="button" class="md-calendar-now" @click="goToNow()">Ahora</button>
+                <div class="md-calendar-views" role="group" aria-label="Vista del calendario">
+                    @foreach (['dayGridMonth' => 'Mes', 'timeGridWeek' => 'Semana', 'timeGridDay' => 'Día', 'listWeek' => 'Agenda'] as $view => $label)
+                        <button type="button" class="md-calendar-view-button" :aria-pressed="(viewType === @js($view)).toString()" @click="calendar.changeView(@js($view))">{{ $label }}</button>
+                    @endforeach
+                </div>
+                <div class="md-calendar-view-mobile"><x-ui.select label="Vista" id="calendar-view" :options="['dayGridMonth' => 'Mes', 'timeGridWeek' => 'Semana', 'timeGridDay' => 'Día', 'listWeek' => 'Agenda']" x-bind:value="viewType" x-on:change="calendar.changeView($event.target.value)" /></div>
+                <div class="md-calendar-filter-anchor">
+                    <button type="button" class="md-btn-text md-calendar-filter-button" x-ref="filterTrigger" data-popover-trigger @click="openFilters()" :aria-expanded="filtersOpen.toString()" aria-controls="calendar-filters"><i class="bi bi-sliders" aria-hidden="true"></i> Filtros <span x-show="hasLayerFilter" x-cloak>1</span></button>
+                    <x-ui.popover state="filtersOpen" title="Filtros" id="calendar-filters">
+                        <fieldset><legend class="md-title-small">Tipos de elemento</legend>
+                            @foreach (['tasks' => 'Tareas', 'plans' => 'Planes', 'birthdays' => 'Cumpleaños', 'meals' => 'Comidas'] as $layer => $label)
+                                <label class="md-checkbox"><input type="checkbox" x-model="draftLayers.{{ $layer }}"> {{ $label }}</label>
+                            @endforeach
+                        </fieldset>
+                        <x-slot:actions><button type="button" class="md-btn-text" @click="draftLayers = { tasks: true, plans: true, birthdays: true, meals: true }">Limpiar</button><button type="button" class="md-btn-filled" @click="applyLayers()">Filtrar</button></x-slot:actions>
+                    </x-ui.popover>
+                </div>
             </div>
-            <button type="button" class="md-btn-icon" aria-label="Periodo siguiente" @click="calendar.next()"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
-            <button type="button" class="md-btn-icon" aria-label="Ahora" title="Ir a hoy y a la hora actual" @click="goToNow()"><i class="bi bi-clock" aria-hidden="true"></i></button>
-            <x-ui.menu label="Más opciones del calendario">
-                <x-ui.menu-item icon="bi-calendar-event" @click="calendar.today()">Ir a hoy</x-ui.menu-item>
-                <x-ui.menu-item icon="bi-arrow-clockwise" @click="calendar.refetchEvents(); $wire.$refresh()" x-bind:disabled="calendarLoading">Actualizar</x-ui.menu-item>
-            </x-ui.menu>
+            <button type="button" class="md-chip" x-show="hasLayerFilter" x-cloak @click="clearLayerFilter()" aria-label="Quitar filtro de tipos de elemento">Tipos de elemento <i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </div>
         <div wire:ignore x-ref="calendar" class="md-task-calendar__surface"></div>
 
-        {{-- Vista rápida y cambios de estado sin abrir el editor. --}}
-        <template wire:ignore x-teleport="body">
-        <div wire:ignore class="md-task-calendar-anchor" x-ref="anchor">
-        <x-ui.popover state="quickOpen" title="Tarea" id="task-calendar-quick" class="md-task-calendar-popover">
-            <template x-if="selected">
-                <div class="md-task-calendar-popover__info">
-                    <p class="md-title-medium mb-0" :class="selected.completed && 'text-decoration-line-through'" x-text="selected.title"></p>
-                    <p class="md-body-medium mb-0"><i class="bi bi-clock" aria-hidden="true"></i> <span x-text="selected.timeLabel"></span></p>
-                    <p class="md-body-small mb-0" x-show="selected.category"><i class="bi bi-tag" aria-hidden="true"></i> <span x-text="selected.category"></span></p>
-                    <p class="md-body-small mb-0" x-show="selected.priority"><i class="bi bi-flag" aria-hidden="true"></i> <span x-text="selected.priority"></span></p>
-                    <p class="md-body-small mb-0" x-show="selected.recurrent"><i class="bi bi-arrow-repeat" aria-hidden="true"></i> Se repite</p>
-                    <p class="md-body-small mb-0"><i class="bi" :class="selected.status?.icon" aria-hidden="true"></i> Estado: <span x-text="selected.status?.name"></span></p>
-                </div>
-            </template>
-            <p x-show="statusError" x-text="statusError" role="alert" class="md-body-small mb-0"></p>
-            <x-slot:actions>
-                <button type="button" class="md-btn md-btn-text" x-on:click="edit()" :disabled="busy"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button>
-                <div class="md-task-status-split" @click.outside="statusOpen = false" @resize.window="statusOpen = false"
-                     @keydown.escape.stop="if (statusOpen) closeStatusMenu(); else quickOpen = false">
-                    <span class="md-btn md-btn-outlined md-task-status-split__label" aria-live="polite">
-                        <i class="bi" :class="selected?.status?.icon" aria-hidden="true"></i>
-                        <span x-text="selected?.status?.name"></span>
-                    </span>
-                    <button type="button" class="md-btn md-btn-outlined md-task-status-split__toggle"
-                            x-ref="statusTrigger" aria-label="Cambiar estado" aria-haspopup="menu"
-                            aria-controls="task-calendar-status-menu" :aria-expanded="(statusOpen && quickOpen).toString()"
-                            :disabled="busy" @click="openStatusMenu()" @keydown.arrow-down.prevent="if (!statusOpen) openStatusMenu()">
-                        <i class="bi bi-chevron-down" aria-hidden="true"></i>
-                    </button>
-                    <div id="task-calendar-status-menu" class="md-menu__surface md-task-status-split__menu"
-                         x-ref="statusMenu" role="menu" aria-label="Estados de la tarea" x-cloak x-show="statusOpen && quickOpen"
-                         @keydown.arrow-down.prevent="moveStatusFocus($event, 1)"
-                         @keydown.arrow-up.prevent="moveStatusFocus($event, -1)"
-                         @keydown.tab="statusOpen = false">
-                        @foreach ($statuses as $status)
-                            <button type="button" role="menuitem" class="md-menu__item"
-                                    x-show="selected?.status?.id !== @js($status->id)" :disabled="busy || selected?.status?.id === @js($status->id)"
-                                    @click="changeStatus(@js($status->id))">
-                                <i class="bi {{ $status->icon }}" aria-hidden="true"></i> {{ $status->name }}
-                            </button>
-                        @endforeach
-                    </div>
-                </div>
-            </x-slot:actions>
-        </x-ui.popover>
-        </div>
-        </template>
     </section>
 
-    @if ($unscheduledTasks->isNotEmpty())
-        <section class="md-card-filled mt-3">
-            <div class="d-flex align-items-center gap-2 mb-2"><i class="bi bi-calendar-x"></i><h2 class="md-title-medium mb-0">Sin fecha</h2></div>
-            @foreach ($unscheduledTasks as $task)
-                <div class="md-list-item px-0"><button x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-list-item-content md-task-open-button"><span class="md-list-item-headline"><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span></button></div>
-            @endforeach
-        </section>
-    @endif
+    <x-ui.management-card id="unscheduled-tasks" title="Sin fecha" icon="bi-calendar-x" search="unscheduledSearch" search-placeholder="Buscar tareas sin fecha" :refreshable="false" :paginator="$unscheduledTasks" per-page-model="perPage" noun="tareas">
+        <div class="table-responsive">
+            <table class="md-table align-middle">
+                <thead><tr><th scope="col">Tarea</th><th scope="col">Categoría</th><th scope="col">Prioridad</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+                <tbody>
+                    @forelse ($unscheduledTasks as $task)
+                        <tr wire:key="unscheduled-{{ $task->id }}">
+                            <td><x-ui.task-code :code="$task->code" /> {{ $task->title }}</td>
+                            <td>{{ $unscheduledCategories->get($task->category)?->name ?? 'Sin categoría' }}</td>
+                            <td>{{ $priorityLabels[$task->priority] ?? 'Sin prioridad' }}</td>
+                            <td>{{ $task->status?->name ?? 'Sin estado' }}</td>
+                            <td><x-ui.row-actions :label="'Acciones de '.$task->title">
+                                <x-slot:primary x-on:click="document.querySelector('#unscheduled-tasks .md-mcard__search-toggle')?.focus(); $dispatch('task-editor', {action: 'openScheduleForm', id: '{{ $task->id }}', intent: 'schedule', section: 'schedule'})">Programar</x-slot:primary>
+                                <x-ui.menu-item icon="bi-check2-circle" x-on:click="document.querySelector('#unscheduled-tasks .md-mcard__search-toggle')?.focus()" wire:click="toggleComplete('{{ $task->id }}')">Completar</x-ui.menu-item>
+                                <x-ui.menu-item icon="bi-pencil" x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}', mode: 'edit'})">Editar</x-ui.menu-item>
+                            </x-ui.row-actions></td>
+                        </tr>
+                    @empty
+                        <tr><td colspan="5">{{ $unscheduledSearch !== '' ? 'No hay tareas que coincidan con la búsqueda.' : 'No hay tareas sin fecha.' }}</td></tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </x-ui.management-card>
 
     <div class="lt-fab-zone">
         <x-module-actions fab-always

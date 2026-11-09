@@ -7,16 +7,61 @@ use App\Mcp\Tools\Shopping\CreateInventoryItemTool;
 use App\Mcp\Tools\Shopping\ListShoppingItemsTool;
 use App\Mcp\Tools\Shopping\ListStorageLocationsTool;
 use App\Mcp\Tools\Shopping\UpdateShoppingItemTool;
+use App\Models\MealInventoryMovement;
+use App\Models\MealInventoryOperation;
 use App\Models\ShoppingItem;
+use App\Models\ShoppingItemPrice;
 use App\Models\StorageLocation;
+use App\Models\Store;
 use App\Models\User;
+use App\Services\Meal\InventoryLedger;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Illuminate\Testing\Fluent\AssertableJson;
 use Tests\TestCase;
 
 class InventoryMcpTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_count_and_creation_retries_preserve_the_ledger_and_do_not_repeat_stock_or_prices(): void
+    {
+        $key = (string) Str::uuid();
+        $input = ['name' => 'Inventario idempotente', 'base_unit' => 'unit', 'stock' => 6, 'operation_key' => $key];
+        LifeTrackerServer::actingAs($this->owner)->tool(CreateInventoryItemTool::class, $input)->assertOk();
+        LifeTrackerServer::actingAs($this->owner)->tool(CreateInventoryItemTool::class, $input)->assertOk();
+        $item = ShoppingItem::where('name', $input['name'])->sole();
+        $this->assertSame(1, MealInventoryMovement::where('historical_product_id', $item->id)->count());
+        LifeTrackerServer::actingAs($this->owner)->tool(CreateInventoryItemTool::class, [...$input, 'stock' => 8])->assertHasErrors();
+        $store = Store::create(['name' => 'Tienda inventario']);
+        $update = ['item_id' => $item->id, 'stock' => 10, 'reason' => 'Conteo de nevera', 'operation_key' => (string) Str::uuid(), 'content' => 1, 'price' => 12, 'store' => $store->name];
+        LifeTrackerServer::actingAs($this->owner)->tool(UpdateShoppingItemTool::class, $update)->assertOk();
+        app(InventoryLedger::class)->adjust($this->owner->id, $item->id, -2, 'unit');
+        LifeTrackerServer::actingAs($this->owner)->tool(UpdateShoppingItemTool::class, $update)->assertOk();
+        $this->assertSame(8.0, $item->fresh()->stock);
+        $this->assertSame(1, ShoppingItemPrice::count());
+        $document = MealInventoryOperation::where('operation_key', $update['operation_key'])->sole();
+        $this->assertSame('mcp', $document->channel);
+        $this->assertSame('Conteo de nevera', $document->reason);
+        LifeTrackerServer::actingAs($this->owner)->tool(UpdateShoppingItemTool::class, [...$update, 'stock' => 20])->assertHasErrors();
+    }
+
+    public function test_unit_change_closes_the_old_segment_and_opens_a_new_one_without_implicit_conversion(): void
+    {
+        $item = $this->item('Producto reclasificado', ['stock' => 10, 'base_unit' => 'g']);
+        LifeTrackerServer::actingAs($this->owner)->tool(UpdateShoppingItemTool::class, ['item_id' => $item->id, 'base_unit' => 'ml', 'stock' => 15])->assertOk();
+        $rows = MealInventoryMovement::where('historical_product_id', $item->id)->orderBy('sequence')->get();
+        $this->assertSame(['g', 'g', 'ml'], $rows->pluck('unit')->all());
+        $this->assertSame([10.0, -10.0, 15.0], $rows->pluck('delta')->all());
+        $this->assertNotSame($rows[0]->segment_id, $rows[2]->segment_id);
+        $this->assertSame(15.0, $item->fresh()->stock);
+        LifeTrackerServer::actingAs($this->owner)->tool(UpdateShoppingItemTool::class, ['item_id' => $item->id, 'base_unit' => 'unit'])->assertOk();
+        $this->assertSame(15.0, $item->fresh()->stock);
+        $this->assertSame('unit', $item->fresh()->base_unit);
+        $before = MealInventoryMovement::count();
+        LifeTrackerServer::actingAs($this->owner)->tool(UpdateShoppingItemTool::class, ['item_id' => $item->id, 'min_stock' => 3])->assertOk();
+        $this->assertSame($before, MealInventoryMovement::count());
+    }
 
     private User $owner;
 

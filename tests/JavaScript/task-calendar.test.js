@@ -27,29 +27,6 @@ test('layer preferences validate stored values and tolerate inaccessible storage
     } finally { globalThis.localStorage = original; }
 });
 
-test('layers filter mounted events without requests and persist even an empty selection', () => {
-    const original = globalThis.localStorage;
-    const values = new Map();
-    try {
-        globalThis.localStorage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
-        const state = calendar({ events() { assert.fail('No request expected'); } });
-        const events = ['tasks', 'plans', 'birthdays'].map(type => ({ extendedProps: { type }, setProp(key, value) { this[key] = value; } }));
-        state.calendar = { batchRendering: fn => fn(), getEvents: () => events };
-        state.fitCalendar = () => {};
-        for (const type of ['tasks', 'plans', 'birthdays']) state.toggleLayer(type);
-        assert.deepEqual(events.map(event => event.display), ['none', 'none', 'none']);
-        assert.deepEqual(readCalendarLayers(), { tasks: false, plans: false, birthdays: false, meals: true });
-        state.toggleLayer('meals');
-        assert.equal(readCalendarLayers().meals, false);
-        state.toggleLayer('plans');
-        assert.deepEqual(events.map(event => event.display), ['none', 'auto', 'none']);
-        assert.equal(state.quickOpen, false);
-        globalThis.localStorage.setItem = () => { throw Error('blocked'); };
-        state.toggleLayer('tasks');
-        assert.equal(events[0].display, 'auto');
-    } finally { globalThis.localStorage = original; }
-});
-
 test('only task events can be persisted and failures revert the drag', async () => {
     const calls = [];
     const state = calendar({ moveTask: async (...args) => calls.push(args) });
@@ -63,45 +40,19 @@ test('only task events can be persisted and failures revert the drag', async () 
     assert.equal(reverted, 4);
 });
 
-test('clicks route new layers to detail and keep task quick view', () => {
+test('task clicks open the shared editor and other layers keep their detail links', () => {
     const original = globalThis.window;
     const urls = [];
     try {
         globalThis.window = { location: { assign: url => urls.push(url) } };
         const state = calendar({});
-        let opened = false;
-        state.openQuick = () => { opened = true; };
-        state.clickEvent({ event: { extendedProps: { type: 'tasks' } } });
-        assert.equal(opened, true);
-        for (const type of ['plans', 'birthdays']) state.clickEvent({ event: { extendedProps: { type, detailUrl: `/${type}/id` } } });
-        assert.deepEqual(urls, ['/plans/id', '/birthdays/id']);
+        const dispatched = [];
+        state.$dispatch = (...args) => dispatched.push(args);
+        state.clickEvent({ event: { id: 'task-1', extendedProps: { type: 'tasks' } } });
+        assert.deepEqual(dispatched, [['task-editor', { action: 'openForm', id: 'task-1' }]]);
+        for (const type of ['plans', 'birthdays', 'meals']) state.clickEvent({ event: { extendedProps: { type, detailUrl: `/${type}/id` } } });
+        assert.deepEqual(urls, ['/plans/id', '/birthdays/id', '/meals/id']);
     } finally { globalThis.window = original; }
-});
-
-test('failed status requests preserve the popover and allow retry', async () => {
-    let focused = false;
-    const state = calendar({ changeStatus: async () => { throw Error('offline'); } });
-    state.$refs.statusTrigger.focus = () => { focused = !state.busy; };
-    await state.changeStatus('wip');
-    assert.equal(state.quickOpen, true);
-    assert.equal(state.busy, false);
-    assert.ok(state.statusError);
-    assert.equal(focused, true);
-});
-
-test('duplicate and current-state requests are ignored; success closes the popover', async () => {
-    let calls = 0;
-    let resolve;
-    const state = calendar({ changeStatus: () => { calls++; return new Promise(done => { resolve = done; }); } });
-    await state.changeStatus('draft');
-    assert.equal(calls, 0);
-    const request = state.changeStatus('wip');
-    await state.changeStatus('done');
-    assert.equal(calls, 1);
-    resolve();
-    await request;
-    assert.equal(state.quickOpen, false);
-    assert.equal(state.busy, false);
 });
 
 for (const view of ['timeGridDay', 'timeGridWeek', 'dayGridMonth', 'listWeek']) {
@@ -133,3 +84,27 @@ for (const view of ['timeGridDay', 'timeGridWeek', 'dayGridMonth', 'listWeek']) 
         });
     }
 }
+
+test('layer draft applies only on confirmation and can represent no visible layers', () => {
+    const original = globalThis.localStorage;
+    const writes = [];
+    try {
+        globalThis.localStorage = { getItem: () => null, setItem: (_, value) => writes.push(value) };
+        const state = calendar({});
+        state.$refs = { filterTrigger: { focus() {} } };
+        state.$nextTick = fn => fn();
+        state.fitCalendar = () => {};
+        state.openFilters();
+        state.draftLayers.tasks = false;
+        assert.equal(state.layers.tasks, true);
+        assert.equal(writes.length, 0);
+        state.filtersOpen = false;
+        state.openFilters();
+        assert.equal(state.draftLayers.tasks, true);
+        state.draftLayers = { tasks: false, plans: false, birthdays: false, meals: false };
+        state.applyLayers();
+        assert.equal(state.hasLayerFilter, true);
+        assert.equal(writes.length, 1);
+        assert.deepEqual(JSON.parse(writes[0]), state.draftLayers);
+    } finally { globalThis.localStorage = original; }
+});

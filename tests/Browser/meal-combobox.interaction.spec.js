@@ -1,0 +1,140 @@
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import { spawn, execFileSync } from 'node:child_process';
+import { mkdirSync, closeSync, openSync } from 'node:fs';
+import path from 'node:path';
+let server;
+let serverEnv;
+test.describe.configure({ mode: 'serial' });
+test.use({ actionTimeout: 15000, hasTouch: true });
+test.setTimeout(180000);
+test.beforeAll(async () => {
+    test.setTimeout(120_000);
+    const directory = path.resolve('storage/framework/testing');
+    mkdirSync(directory, { recursive: true });
+    const database = path.join(directory, 'meal-combobox-browser.sqlite');
+    closeSync(openSync(database, 'a'));
+    const env = { ...process.env, APP_ENV: 'testing', DB_CONNECTION: 'sqlite', DB_DATABASE: database, DB_URL: '', CACHE_STORE: 'array', SESSION_DRIVER: 'file', DEBUGBAR_ENABLED: 'false', TELESCOPE_ENABLED: 'false', NIGHTWATCH_ENABLED: 'false', APP_CONFIG_CACHE: path.join(directory, 'unused-meal-combobox-config.php') };
+    serverEnv = env;
+    expect(execFileSync('php', ['tests/Browser/support/meal-combobox-fixture.php'], { env, encoding: 'utf8' })).toContain('Meal combobox fixture ready.');
+    server = spawn('php', ['-S', '127.0.0.1:8029', path.resolve('vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')], { cwd: path.resolve('public'), env, stdio: 'pipe', windowsHide: true });
+    let serverOutput = '';
+    server.stdout.on('data', data => { serverOutput += data; });
+    server.stderr.on('data', data => { serverOutput += data; });
+    for (let attempt = 0; attempt < 60; attempt++) {
+        try { if ((await fetch('http://127.0.0.1:8029/login')).ok) return; } catch {}
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+    throw new Error(`Isolated meal combobox server did not start: ${serverOutput}`);
+});
+test.afterAll(() => { server?.kill(); });
+
+
+for (const width of [375, 768, 1280]) {
+    test(`meal catalogs search and stay synchronized at ${width}px`, async ({ page }) => {
+        test.setTimeout(120_000);
+        expect(execFileSync('php', ['tests/Browser/support/meal-combobox-fixture.php'], { env: serverEnv, encoding: 'utf8' })).toContain('Meal combobox fixture ready.');
+        const errors = [];
+        page.on('pageerror', error => errors.push(error.message));
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto('http://127.0.0.1:8029/login');
+        await page.getByLabel('Correo electrónico').fill('meal-combobox@example.test');
+        await page.getByLabel('Contraseña', { exact: true }).fill('browser-test-password');
+        await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
+        await page.waitForURL(url => !url.pathname.includes('/login'));
+        await page.goto(`http://127.0.0.1:8029/meals/weekly?date=2026-11-04`);
+        const slot = page.getByRole('button', { name: /^Desayuno ·/ }).nth([375,768,1280].indexOf(width));
+        await slot.click();
+        const dialog = page.getByRole('dialog');
+        const add = () => dialog.getByRole('button', { name: 'Agregar', exact: true }).click();
+        const choose = async (index, text, label) => {
+            const input = dialog.locator(`#meal-element-${index}`);
+            await expect(input).toHaveAccessibleName(label.startsWith('Guiso') ? 'Preparación' : 'Receta');
+            await input.fill(text);
+            const option = dialog.getByRole('option', { name: label, exact: true });
+            if (width === 375) await option.tap();
+            else await option.click();
+            await expect(input).toHaveValue(label);
+        };
+        await add();
+        await dialog.locator('#meal-kind-0').selectOption('ingredient');
+        const input = dialog.locator('#meal-element-0');
+        await input.fill('qzx-no-existe');
+        await expect(dialog.locator('[role=listbox]:visible').getByText('Sin resultados', { exact: true })).toBeVisible();
+        await input.fill('PLATANO');
+        await input.press('ArrowDown');
+        await input.press('Enter');
+        await expect(input).toHaveValue('Plátano de prueba');
+        await expect(dialog.locator('#meal-unit-0')).toHaveValue('g');
+        await input.click();
+        await input.press('Escape');
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
+        await expect(dialog).toBeVisible();
+        await input.fill('otro');
+        await input.press('Tab');
+        await expect(input).toHaveValue('Plátano de prueba');
+        await dialog.locator('#meal-quantity-0').fill('25');
+        await add();
+        await dialog.locator('#meal-kind-1').selectOption('recipe');
+        await add();
+        await dialog.locator('#meal-kind-2').selectOption('recipe');
+        await expect(dialog.locator('#meal-element-2')).toHaveAccessibleName('Receta');
+        await choose(1, 'SOPA', '♥ Sopa de prueba');
+        await expect(dialog.locator('.meal-composer-row__meta')).toContainText('100 kcal', { timeout: 20000 });
+        await dialog.locator('#meal-element-2').click();
+        await expect(dialog.getByRole('option', { name: '♥ Sopa de prueba', exact: true })).toHaveCount(0);
+        await dialog.locator('#meal-element-2').press('Escape');
+        await dialog.locator('#meal-kind-2').selectOption('preparation');
+        await choose(2, 'GUISO', 'Guiso de prueba · 10 porciones libres');
+        await dialog.locator('.meal-composer-row').first().getByRole('button', { name: 'Quitar elemento' }).click();
+        await expect(dialog.locator('#meal-element-0')).toHaveValue('♥ Sopa de prueba');
+        await expect(dialog.locator('#meal-element-1')).toHaveValue('Guiso de prueba · 10 porciones libres');
+        await add();
+        await dialog.locator('#meal-kind-2').selectOption('recipe');
+        await expect(dialog.locator('#meal-element-2')).toHaveAccessibleName('Receta');
+        await dialog.locator('#meal-element-2').fill('sopa');
+        await expect(dialog.locator('[role=listbox]:visible').getByText('Sin resultados', { exact: true })).toBeVisible();
+        await dialog.locator('#meal-element-2').press('Escape');
+        await dialog.locator('.meal-composer-row').first().getByRole('button', { name: 'Quitar elemento' }).click();
+        await expect(dialog.locator('#meal-element-1')).toHaveAccessibleName('Receta');
+        await dialog.locator('#meal-element-1').fill('sopa');
+        await expect(dialog.getByRole('option', { name: '♥ Sopa de prueba', exact: true })).toBeVisible();
+        await dialog.getByRole('option', { name: '♥ Sopa de prueba', exact: true }).click();
+        await expect(dialog.locator('#meal-element-0')).toHaveValue('Guiso de prueba · 10 porciones libres');
+        await dialog.locator('#meal-element-1').click();
+        const list = dialog.locator('#meal-element-1-list');
+        await expect(list).toBeVisible();
+        expect(await list.evaluate(el => { const r = el.getBoundingClientRect(); return r.left >= 0 && r.right <= innerWidth && el.scrollWidth <= el.clientWidth; })).toBe(true);
+        await page.screenshot({ path: `storage/framework/testing/meal-combobox-${width}.png` });
+        const violations = (await new AxeBuilder({ page }).include('.md-combobox').analyze()).violations;
+        const inheritedContrast = violation => violation.id === 'color-contrast' && violation.nodes.every(node =>
+            node.html.startsWith('<label ') && node.any.every(check => check.data.fgColor === '#558b2f'));
+        if (violations.some(inheritedContrast)) test.info().annotations.push({ type: 'preexisting', description: 'Meals focus label token #558b2f has 4.1:1 contrast on white (requires 4.5:1).' });
+        expect(violations.filter(violation => !inheritedContrast(violation))).toEqual([]);
+        await dialog.locator('#meal-element-1').press('Escape');
+        await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+        await expect(dialog).not.toBeVisible();
+        await slot.click();
+        await expect(dialog.locator('#meal-element-1')).toHaveValue('♥ Sopa de prueba');
+        await expect(dialog.locator('#meal-element-0')).toHaveValue(/Guiso de prueba/);
+        const consume = dialog.getByRole('button', { name: 'Marcar como consumida', exact: true });
+        if (await consume.isVisible()) await consume.click();
+        else {
+            await dialog.getByRole('button', { name: 'Más formas de registrar el consumo' }).click();
+            await dialog.getByRole('menuitem', { name: 'Marcar como consumida', exact: true }).click();
+        }
+        await expect(dialog.locator('.meal-status-chip--lg')).toHaveText('Consumida');
+        await expect(dialog.locator('#meal-element-0')).toBeDisabled();
+        await expect(dialog.locator('#meal-element-1')).toBeDisabled();
+        await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+        await expect(dialog).not.toBeVisible();
+        await page.getByRole('button', { name: /^Onces \(mañana\) ·/ }).first().click();
+        await expect(dialog).toBeVisible();
+        await expect(dialog.locator('.meal-composer-row')).toHaveCount(0);
+        await add();
+        await dialog.locator('#meal-kind-0').selectOption('ingredient');
+        await expect(dialog.locator('#meal-element-0')).toHaveAccessibleName('Ingrediente');
+        await expect(dialog.locator('#meal-element-0')).toHaveValue('');
+        expect(errors).toEqual([]);
+    });
+}

@@ -2,6 +2,7 @@
 
 namespace App\Services\Meal;
 
+use App\Models\MealCategory;
 use App\Models\ShoppingItem;
 use App\Models\ShoppingItemAlias;
 use Illuminate\Support\Facades\DB;
@@ -162,12 +163,12 @@ class IngredientImportService
                 if ($action === 'create') {
                     $name = trim((string) ($row['new_name'] ?? ''));
                     $categoryId = trim((string) ($row['category_id'] ?? ''));
-                    if ($name === '' || ! array_key_exists($categoryId, \App\Models\MealCategory::options())) {
+                    if ($name === '' || ! array_key_exists($categoryId, MealCategory::options())) {
                         throw ValidationException::withMessages(["rows.$index.new_name" => 'Completa el nombre y la categoría.']);
                     }
 
                     $this->assertNameAvailable($name);
-                    $item = ShoppingItem::create([
+                    $item = app(InventoryLedger::class)->saveProduct((int) auth()->id(), [
                         'name' => $name,
                         'stock' => 0,
                         'to_buy' => $context === 'shopping' && $row['quantity'] !== null ? (float) $row['quantity'] : 0,
@@ -175,7 +176,7 @@ class IngredientImportService
                         'status' => 'available',
                         'next_purchase' => $context === 'shopping',
                         'base_unit' => UnitConverter::baseUnitOf($row['unit'] ?? null),
-                    ]);
+                    ], context: ['channel' => 'import', 'reason' => 'Alta por importación']);
 
                     if ($this->normalize($name) !== $row['normalized']) {
                         $this->createAlias($item, $row['term']);

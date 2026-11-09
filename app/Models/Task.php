@@ -16,6 +16,11 @@ class Task extends Model
 {
     use BelongsToUser, HasUuids;
 
+    public function focusSessions(): HasMany
+    {
+        return $this->hasMany(PomodoroSession::class);
+    }
+
     public function notifications(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {
         return $this->morphMany(UserNotification::class, 'source');

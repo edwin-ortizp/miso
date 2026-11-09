@@ -4,9 +4,9 @@ namespace App\Mcp\Tools\Shopping;
 
 use App\Mcp\Tools\Shopping\Concerns\RecordsVariantPrices;
 use App\Mcp\Tools\Shopping\Concerns\ResolvesShoppingItem;
-use App\Models\ShoppingItem;
 use App\Models\MealCategory;
 use App\Services\Meal\CatalogNames;
+use App\Services\Meal\InventoryLedger;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -70,7 +70,7 @@ class AddShoppingItemTool extends Tool
             if ($baseUnit && ! $item->base_unit) {
                 $updates['base_unit'] = $baseUnit;
             }
-            $item->update($updates);
+            $item = app(InventoryLedger::class)->saveProduct((int) auth()->id(), $updates, $item->id, context: ['channel' => 'mcp']);
         } else {
             if (! $baseUnit) {
                 $similar = CatalogNames::similar($data['name'], Auth::user()->shoppingItems()->pluck('name'));
@@ -79,7 +79,7 @@ class AddShoppingItemTool extends Tool
                     .($similar->isNotEmpty() ? ' ¿Quizás es uno de estos? '.$similar->implode(', ') : ''));
             }
 
-            $item = Auth::user()->shoppingItems()->create([
+            $item = app(InventoryLedger::class)->saveProduct((int) Auth::id(), [
                 'name' => trim($data['name']),
                 'base_unit' => $baseUnit,
                 'stock' => 0,

@@ -1,4 +1,4 @@
-<x-module-shell module="tasks">
+<x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()">
     @include('livewire.task.partials.filter-bar', ['title' => 'Tareas en el Gantt', 'icon' => 'bi-bar-chart-steps'])
     <section class="md-card-elevated md-task-gantt" aria-label="Diagrama de Gantt de tareas" x-data="taskGantt($wire)">
         <div class="md-task-gantt__toolbar">

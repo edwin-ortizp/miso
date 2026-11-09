@@ -7,6 +7,7 @@ use App\Livewire\Concerns\WithDefaultDateFilter;
 use App\Livewire\Concerns\WithManagementCard;
 use App\Models\ModuleSetting;
 use App\Models\PomodoroSession;
+use App\Models\Task;
 use App\Support\GoalCalendar;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -70,6 +71,9 @@ class PomodoroTimer extends Component
 
     public string $manualDescription = '';
 
+    #[\Livewire\Attributes\Locked]
+    public ?string $manualTaskId = null;
+
     public function mount(): void
     {
         $this->initializeSelectedDate();
@@ -85,17 +89,19 @@ class PomodoroTimer extends Component
         $this->weekendGoal = (int) ($settings['weekend_goal_minutes'] ?? 120);
     }
 
-    public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken): void
+    public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken, ?string $taskId = null): void
     {
-        $start = self::storeTimerSession($startedAt, $endedAt, $description, $clientToken);
+        $start = self::storeTimerSession($startedAt, $endedAt, $description, $clientToken, $taskId);
 
         $this->selectDate($start->toDateString());
         $this->dispatch('focus-session-saved');
     }
 
     /** Valida y guarda una sesión del temporizador; es idempotente por client_token. */
-    public static function storeTimerSession(int $startedAt, int $endedAt, string $description, string $clientToken): Carbon
+    public static function storeTimerSession(int $startedAt, int $endedAt, string $description, string $clientToken, ?string $taskId = null): Carbon
     {
+        abort_unless(auth()->check(), 403);
+        $task = $taskId ? Task::where('user_id', auth()->id())->findOrFail($taskId) : null;
         $validated = Validator::make([
             'started_at' => $startedAt,
             'ended_at' => $endedAt,
@@ -121,9 +127,18 @@ class PomodoroTimer extends Component
         $start = Carbon::createFromTimestamp($validated['started_at'], config('app.timezone'));
         $duration = $validated['ended_at'] - $validated['started_at'];
 
-        PomodoroSession::firstOrCreate([
+        $existing = PomodoroSession::withoutGlobalScopes()->where('client_token', $validated['client_token'])->first();
+        if ($existing) {
+            abort_unless((int) $existing->user_id === (int) auth()->id(), 404);
+            if ($existing->task_id !== $taskId) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['taskId' => 'La sesión ya pertenece a otra tarea.']);
+            }
+            return $start;
+        }
+        $session = PomodoroSession::firstOrCreate([
             'client_token' => $validated['client_token'],
         ], [
+            ...($task ? ['task_id' => $task->id, 'task_title' => $task->title] : []),
             'date' => $start->toDateString(),
             'start_time' => ['timestamp' => $validated['started_at']],
             'end_time' => ['timestamp' => $validated['ended_at']],
@@ -132,6 +147,10 @@ class PomodoroTimer extends Component
             'description' => trim($validated['description']) ?: null,
         ]);
 
+        abort_unless((int) $session->user_id === (int) auth()->id(), 404);
+        if ($session->task_id !== $taskId) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['taskId' => 'La sesión ya pertenece a otra tarea.']);
+        }
         return $start;
     }
 
@@ -182,14 +201,16 @@ class PomodoroTimer extends Component
 
     public function openForm(?string $id = null): void
     {
+        abort_unless(auth()->check(), 403);
         $this->resetErrorBag();
         $this->editingId = null;
         $this->manualStart = '';
         $this->manualEnd = '';
         $this->manualDescription = '';
+        $this->manualTaskId = null;
 
         // Editar solo ajusta las horas: la sesión conserva el día en que empezó.
-        if ($id && ($session = PomodoroSession::find($id))) {
+        if ($id && ($session = PomodoroSession::where('user_id', auth()->id())->findOrFail($id))) {
             $timezone = config('app.timezone');
             $start = Carbon::createFromTimestamp($session->start_time['timestamp'], $timezone);
             $this->editingId = $session->id;
@@ -250,8 +271,16 @@ class PomodoroTimer extends Component
         ];
 
         // Editar conserva el origen (client_token) del registro.
-        $session = $this->editingId ? PomodoroSession::find($this->editingId) : null;
-        $session ? $session->update($attributes) : PomodoroSession::create($attributes);
+        abort_unless(auth()->check(), 403);
+        $session = $this->editingId ? PomodoroSession::where('user_id', auth()->id())->findOrFail($this->editingId) : null;
+        abort_unless(auth()->check(), 403);
+        if ($session) {
+            abort_unless((int) $session->user_id === (int) auth()->id(), 404);
+            $session->update($attributes);
+        } else {
+            $task = $this->manualTaskId ? Task::where('user_id', auth()->id())->findOrFail($this->manualTaskId) : null;
+            PomodoroSession::create([...$attributes, ...($task ? ['task_id' => $task->id, 'task_title' => $task->title] : [])]);
+        }
         $this->dispatch('focus-session-saved');
 
         $this->selectDate($start->toDateString());
@@ -263,7 +292,8 @@ class PomodoroTimer extends Component
 
     public function deleteSession(string $id): void
     {
-        PomodoroSession::findOrFail($id)->delete();
+        abort_unless(auth()->check(), 403);
+        PomodoroSession::where('user_id', auth()->id())->findOrFail($id)->delete();
         $this->dispatch('focus-session-saved');
     }
 

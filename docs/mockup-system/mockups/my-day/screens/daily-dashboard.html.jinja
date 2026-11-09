@@ -1,6 +1,59 @@
-{% from '@project/components/life-shell.html.jinja' import shell, header, metric %}
+{% from '@project/components/life-shell.html.jinja' import shell, summary_card, fab, dialog %}
 {% call shell('home', 'Mi día', 'bi-sunrise') %}
-{{ header('Mi día', 'Una vista coordinada de lo importante hoy.', 'bi-sunrise') }}
-<section class="lt-metrics">{{ metric('Hábitos completados','4 de 6','success') }}{{ metric('Tareas prioritarias','3','warning') }}{{ metric('Hidratación','1.5 L') }}</section>
-<section class="lt-grid-2"><article class="lt-panel lt-panel--accent"><div class="lt-panel__head"><i class="bi bi-lightning-charge"></i><h3>Registro rápido</h3><small>Hoy</small></div><div class="lt-panel__body"><div class="lt-list"><div class="lt-list-item"><span class="lt-chip">Agua +250 ml</span><span class="lt-chip">Energía 7/10</span></div><div class="lt-list-item"><div class="lt-list-item__body"><strong>Así va tu día</strong><span>Continúa con el ritmo que definiste esta mañana.</span></div></div></div></div></article><article class="lt-panel"><div class="lt-panel__head"><i class="bi bi-check2-square"></i><h3>Hábitos</h3><small>4/6</small></div><div class="lt-panel__body"><div class="lt-progress"><span style="width:67%"></span></div><div class="lt-list"><div class="lt-list-item"><span class="lt-check is-done">✓</span><div class="lt-list-item__body"><strong>Meditar</strong><span>10 min · 07:30</span></div></div><div class="lt-list-item"><span class="lt-check"></span><div class="lt-list-item__body"><strong>Caminar 30 min</strong><span>Para esta tarde</span></div></div><div class="lt-list-item"><span class="lt-check"></span><div class="lt-list-item__body"><strong>Llamar a Laura</strong><span>15 min · 18:00</span></div></div></div></div></article></section>
+<div class="lt-day" data-my-day>
+  <div class="lt-toolbar lt-day__toolbar">
+    <button class="lt-icon-button" data-day-step="-1" aria-label="Día anterior"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+    <label class="lt-field"><span>Fecha</span><input type="date" data-day-date></label>
+    <button class="lt-icon-button" data-day-step="1" aria-label="Día siguiente"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+    <button class="lt-button lt-button--tonal" data-day-today>Hoy</button>
+    <span class="lt-day__weekday" data-day-label></span>
+  </div>
+  <div class="lt-day__notice" role="status" aria-live="polite" data-day-notice hidden><span></span><button class="lt-button lt-button--text" data-day-destination>Ver día</button></div>
+  <div class="lt-day__layout">
+    <section aria-label="Agenda diaria">
+      {% call summary_card('day-agenda', 'Tu agenda', 'bi-calendar3') %}
+      <p class="lt-day__muted" data-day-count></p>
+      <h4>Con hora</h4><div data-day-timed></div>
+      <h4>Sin hora</h4><div data-day-untimed></div>
+      {% endcall %}
+    </section>
+    <div class="lt-day__wellbeing">
+      {% call summary_card('day-habits', 'Hábitos del día', 'bi-check2-square') %}
+      <p data-day-habit-count></p><div data-day-habits></div>
+      {% endcall %}
+      {% call summary_card('day-wellbeing', 'Así te sientes', 'bi-heart-pulse') %}
+      <dl class="lt-day__stats"><div><dt>Agua</dt><dd data-day-water></dd></div><div><dt>Ánimo</dt><dd data-day-mood></dd></div><div><dt>Energía</dt><dd data-day-energy></dd></div></dl>
+      <p class="lt-day__muted">Usa el botón + para registrar tu bienestar.</p>
+      {% endcall %}
+      {% call summary_card('day-journal', 'Diario del día', 'bi-journal-text') %}
+      <p class="lt-day__excerpt" data-day-journal></p><button class="lt-button lt-button--text" data-day-edit-journal hidden>Continuar escribiendo</button>
+      {% endcall %}
+    </div>
+  </div>
+  {{ fab('Nueva tarea', 'bi-plus-lg', 'day-task', [('Registrar agua','bi-droplet','day-water'),('Registrar ánimo','bi-emoji-smile','day-mood'),('Registrar energía','bi-lightning-charge','day-energy'),('Escribir diario','bi-journal-text','day-journal-form')]) }}
+  {% call dialog('day-task', 'Nueva tarea', submit_action='day-save-task', icon='bi-list-task') %}
+    <form id="day-task-form" class="lt-form" novalidate>
+      <label class="lt-field lt-form--full"><span>Título</span><input name="title" required aria-describedby="day-task-error"></label>
+      <label class="lt-field"><span>Fecha de inicio</span><input name="date" type="date" required aria-describedby="day-task-error"></label>
+      <label class="lt-field"><span>Hora (opcional)</span><input name="time" type="time"><small>Vacía: tarea sin hora.</small></label>
+      <p id="day-task-error" class="lt-day__error lt-form--full" role="alert"></p>
+    </form>
+  {% endcall %}
+  {% call dialog('day-detail', 'Detalle de agenda', close_only=true, icon='bi-calendar-event') %}
+    <h3 data-day-detail-title></h3><p data-day-detail-meta></p><p data-day-detail-description></p>
+    <div class="lt-toolbar" data-day-task-actions><button class="lt-button" data-day-complete></button><button class="lt-button lt-button--tonal" data-day-reschedule>Cambiar fecha y hora</button></div>
+  {% endcall %}
+  {% call dialog('day-water', 'Registrar agua', submit_action='day-save-water', icon='bi-droplet') %}
+    <form id="day-water-form" novalidate><label class="lt-field"><span>Cantidad (ml)</span><input name="amount" type="number" min="1" step="1" value="250" required aria-describedby="day-water-error"></label><p id="day-water-error" class="lt-day__error" role="alert"></p></form>
+  {% endcall %}
+  {% call dialog('day-mood', 'Registrar ánimo', submit_action='day-save-mood', icon='bi-emoji-smile') %}
+    <form id="day-mood-form"><label class="lt-field"><span>¿Cómo te sientes?</span><select name="mood"><option>En calma</option><option>Con alegría</option><option>Con preocupación</option><option>Con tristeza</option></select></label></form>
+  {% endcall %}
+  {% call dialog('day-energy', 'Registrar energía', submit_action='day-save-energy', icon='bi-lightning-charge') %}
+    <form id="day-energy-form"><label class="lt-field"><span>Energía (1 a 5)</span><select name="energy"><option value="1">1 · Muy baja</option><option value="2">2 · Baja</option><option value="3" selected>3 · Media</option><option value="4">4 · Alta</option><option value="5">5 · Muy alta</option></select></label></form>
+  {% endcall %}
+  {% call dialog('day-journal-form', 'Diario del día', submit_action='day-save-journal', icon='bi-journal-text') %}
+    <form id="day-journal-editor" novalidate><label class="lt-field"><span>¿Cómo va tu día?</span><textarea name="text" rows="9" required aria-describedby="day-journal-error"></textarea></label><p id="day-journal-error" class="lt-day__error" role="alert"></p></form>
+  {% endcall %}
+</div>
 {% endcall %}

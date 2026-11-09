@@ -1,11 +1,12 @@
 <div x-data="{ focusOpen: false }">
-    <x-ui.form-dialog module="pomodoro" :open="$showForm" close="closeForm" submit-action="saveManualSession" id="panel-focus-manual-dialog"
+    <x-ui.form-dialog module="pomodoro" :open="$showForm" close="closeForm" submit-action="saveManualSession" :id="$taskHost ? 'task-focus-manual-dialog' : 'panel-focus-manual-dialog'"
                       title="Registrar sesión de enfoque" icon="bi-stopwatch">
         <div class="d-flex flex-column gap-3">
-            <p class="md-body-small mb-0">Registra el tiempo trabajado hoy. La duración se calcula automáticamente.</p>
+            <p class="md-body-small mb-0">{{ $taskHost ? 'Registra el tiempo trabajado en esta tarea.' : 'Registra el tiempo trabajado hoy. La duración se calcula automáticamente.' }}</p>
+            @if ($taskHost && $manualTaskTitle)<p class="md-body-medium">Tarea: {{ $manualTaskTitle }}</p>@endif
             <div class="md-field-pair">
-                <x-ui.field name="manualStart" label="Inicio" type="time" wire:model.live="manualStart" />
-                <x-ui.field name="manualEnd" label="Fin" type="time" wire:model.live="manualEnd" />
+                <x-ui.field name="manualStart" label="Inicio" :type="$taskHost ? 'datetime-local' : 'time'" wire:model.live="manualStart" />
+                <x-ui.field name="manualEnd" label="Fin" :type="$taskHost ? 'datetime-local' : 'time'" wire:model.live="manualEnd" />
             </div>
             <x-ui.field name="manualDescription" label="Descripción (opcional)" wire:model="manualDescription" />
             @if ($manualDurationSeconds !== null)
@@ -17,8 +18,8 @@
         workDuration: {{ $workDuration }}, shortBreak: {{ $shortBreak }}, longBreak: {{ $longBreak }},
         storageKey: 'life-tracker:pomodoro:{{ auth()->id() }}',
         loadTask: (id) => $wire.focusTask(id),
-        saveSession: (start, end, description, token) => $wire.saveSession(start, end, description, token)
-    })" @panel-focus.window="focusOpen = true; openFocus($event.detail)">
+        saveSession: (start, end, description, token, taskId) => $wire.saveSession(start, end, description, token, taskId)
+    })" @if($taskHost) @task-focus-timer.window="focusOpen = true; openFocus($event.detail)" @else @panel-focus.window="focusOpen = true; openFocus($event.detail)" @endif>
         <x-ui.dialog standard expanded state="focusOpen" title="Foco de hoy" size="fullscreen" icon="bi-stopwatch" class="wall-focus-dialog">
             <div class="wall-focus-layout" :class="{ 'has-task': taskId }">
                 <div class="wall-focus">
@@ -30,9 +31,12 @@
                         <x-ui.chip variant="filter" x-bind:class="{ selected: mode === 'shortBreak' }" x-bind:aria-pressed="mode === 'shortBreak'" @click="setMode('shortBreak')">Pausa corta</x-ui.chip>
                         <x-ui.chip variant="filter" x-bind:class="{ selected: mode === 'longBreak' }" x-bind:aria-pressed="mode === 'longBreak'" @click="setMode('longBreak')">Pausa larga</x-ui.chip>
                     </div>
+                    <p x-show="taskId && !startedAt && !validMinutes" role="status">Indica una duración para iniciar.</p>
+                    <p x-show="activeTaskMismatch" role="status">Hay un ciclo activo; se muestra su tarea original.</p>
+                    <label x-show="taskId && !startedAt" class="md-body-small">Duración (minutos) <input type="number" min="1" max="1440" x-model.number="customMinutes" @input="setSuggestedDuration(customMinutes)"></label>
                     <x-ui.field name="focus-description" label="Descripción del registro de foco" x-model="description" />
                     <div class="d-flex flex-wrap gap-2 justify-content-center">
-                        <x-ui.action class="wall-control" @click="toggle()" x-bind:disabled="isCompleting"><span x-text="pendingCompletion ? 'Reintentar guardado' : (isRunning ? 'Pausar' : 'Iniciar')"></span></x-ui.action>
+                        <x-ui.action class="wall-control" @click="toggle()" x-bind:disabled="isCompleting || (taskId && !startedAt && !validMinutes)"><span x-text="pendingCompletion ? 'Reintentar guardado' : (isRunning ? 'Pausar' : 'Iniciar')"></span></x-ui.action>
                         <x-ui.action class="wall-control" variant="outlined" @click="finishEarly()" x-bind:disabled="isCompleting || mode !== 'work'">Finalizar y guardar</x-ui.action>
                         <x-ui.action class="wall-control" variant="text" @click="reset()" x-bind:disabled="isCompleting || pendingCompletion">Reiniciar</x-ui.action>
                     </div>

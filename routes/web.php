@@ -127,6 +127,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/meals/suggestions', \App\Livewire\Meal\MealSuggestions::class)->name('meals.suggestions');
     Route::get('/meals/recipes', MealRecipes::class)->name('meals.recipes');
     Route::get('/meals/ingredients', MealIngredients::class)->name('meals.ingredients');
+    Route::get('/meals/inventory', \App\Livewire\Meal\MealInventoryDocuments::class)->name('meals.inventory');
+    Route::get('/meals/inventory/{operation}', \App\Livewire\Meal\MealInventoryDocumentShow::class)->name('meals.inventory.show');
+    Route::get('/meals/ingredients/{item}/inventory', \App\Livewire\Meal\MealInventoryHistory::class)->name('meals.inventory.history');
     Route::get('/meals/settings', MealSettings::class)->name('meals.settings');
     Route::get('/meals/settings/schedules', MealSettings::class)->defaults('section', 'schedules')->name('meals.settings.schedules');
     Route::get('/meals/settings/categories', MealSettings::class)->defaults('section', 'categories')->name('meals.settings.categories');

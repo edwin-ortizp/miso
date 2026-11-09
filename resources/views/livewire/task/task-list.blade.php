@@ -1,6 +1,7 @@
 <div data-module="tasks" class="lt-page" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
-    <x-page-header subtitle="Decide, ordena y completa el trabajo con claridad." :tabs="config('modules.tasks.tabs')" :preserve="config('modules.tasks.preserve')">
-    </x-page-header>
+    <div data-region="navigation">
+        <x-module-tabs :tabs="config('modules.tasks.tabs')" :preserve="config('modules.tasks.preserve')" label="Vistas del módulo" />
+    </div>
 
     <div class="lt-cols task-list-layout">
     <div class="lt-stack">
@@ -112,7 +113,7 @@
                             <x-ui.menu-item icon="bi-calendar-plus" wire:click="moveToDay('{{ $task->id }}', 1)" wire:loading.attr="disabled">Mover para mañana</x-ui.menu-item>
                             <x-ui.menu-divider />
                         @endunless
-                        <x-ui.menu-item icon="bi-pencil" x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})">Editar</x-ui.menu-item>
+                        <x-ui.menu-item icon="bi-pencil" x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}', mode: 'edit'})">Editar</x-ui.menu-item>
                         <x-ui.menu-divider />
                         <x-ui.menu-item icon="bi-trash" tone="danger" wire:click="delete('{{ $task->id }}')" wire:confirm="La tarea «{{ $task->title }}» se elimina de forma permanente.">Eliminar</x-ui.menu-item>
                     </x-ui.row-actions>

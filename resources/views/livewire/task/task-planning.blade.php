@@ -1,4 +1,4 @@
-<x-module-shell module="tasks" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+<x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
     @php
         $definitions = [
             'overdue' => ['Atrasadas', 'bi-exclamation-circle', 'is-overdue'],
@@ -21,7 +21,7 @@
                     @forelse ($columns[$key] as $task)
                         @php($scheduledDate = $task->start_date ?? $task->end_date)
                         <article class="md-planning-card" wire:key="planning-{{ $task->id }}">
-                            <button wire:click="openForm('{{ $task->id }}')" class="md-planning-card-main" aria-label="Abrir tarea: {{ $task->title }}">
+                            <button x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-planning-card-main" aria-label="Abrir tarea: {{ $task->title }}">
                                 <span class="md-planning-card-title"><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>
                                 <span class="md-planning-card-meta">
                                     @if ($task->category)<x-ui.catalog-chip :color="$this->categoryColor($task->category)">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>@endif
@@ -47,26 +47,7 @@
         @endforeach
     </div>
 
-    <template x-if="showDialog">
-        <div>
-            <div class="md-dialog-scrim" wire:click="closeForm"></div>
-            <div class="md-dialog md-dialog--wide" @click.stop>
-                <h2 class="md-dialog-headline md-headline-small">Editar tarea</h2>
-                <div class="md-dialog-content"><div class="d-flex flex-column gap-3">
-                    <div class="md-text-field"><input type="text" wire:model="title" placeholder=" " id="planning-task-title"><label for="planning-task-title">Título</label></div>
-                    @include('partials.markdown-editor', ['model' => 'description', 'mode' => 'descriptionMode', 'modeValue' => $descriptionMode, 'content' => $description, 'id' => 'planning-task-description', 'placeholder' => 'Detalles de la tarea. Admite Markdown.'])
-                    <div class="row g-3">
-                        <div class="col-md-4"><div class="md-text-field"><select wire:model="category" id="planning-task-category"><option value="">Sin categoría</option>@foreach ($categories as $key => $label)<option value="{{ $key }}">{{ $label }}</option>@endforeach</select><label for="planning-task-category">Categoría</label></div></div>
-                        <div class="col-md-4"><div class="md-text-field"><select wire:model="priority" id="planning-task-priority"><option value="">Sin prioridad</option>@foreach ($priorities as $key => $label)<option value="{{ $key }}">{{ $label }}</option>@endforeach</select><label for="planning-task-priority">Prioridad</label></div></div>
-                        <div class="col-md-4"><div class="md-text-field"><select wire:model="size" id="planning-task-size"><option value="">Sin tamaño</option>@foreach ($sizes as $key => $label)<option value="{{ $key }}">{{ $label }}</option>@endforeach</select><label for="planning-task-size">Tamaño</label></div></div>
-                    </div>
-                    @include('livewire.task.partials.schedule-fields', ['idPrefix' => 'planning-task', 'startModel' => 'startDate', 'startTimeModel' => 'startTime', 'endModel' => 'endDate', 'endTimeModel' => 'endTime', 'durationAction' => 'applyDuration'])
-                    <label class="md-checkbox"><input type="checkbox" wire:model="isPrivate"><i class="bi bi-lock"></i> Tarea privada</label>
-                </div></div>
-                <div class="md-dialog-actions"><button wire:click="closeForm" class="md-btn-text">Cancelar</button><button wire:click="save" class="md-btn-filled"><i class="bi bi-check-lg"></i> Actualizar</button></div>
-            </div>
-        </div>
-    </template>
+    <livewire:task.task-editor />
 
     @include('livewire.task.partials.recurring-completion-dialog')
 </x-module-shell>

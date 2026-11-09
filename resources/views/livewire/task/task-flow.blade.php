@@ -1,4 +1,4 @@
-<x-module-shell module="tasks" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+<x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
     @include('livewire.task.partials.filter-bar', ['title' => 'Tareas en el flujo', 'icon' => 'bi-signpost-split'])
 <section class="task-flow-page">
     @forelse ($lanes as $lane)
@@ -22,7 +22,7 @@
                         @foreach ($lane['tasks'] as $task)
                             <li class="task-flow-step" wire:key="flow-task-{{ $task->id }}">
                                 <article class="task-flow-card">
-                                    <button wire:click="openForm('{{ $task->id }}')" class="task-flow-card-main" aria-label="Editar tarea: {{ $task->title }}">
+                                    <button x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="task-flow-card-main" aria-label="Editar tarea: {{ $task->title }}">
                                         <span class="task-flow-position">{{ $loop->iteration }}</span>
                                         <span class="task-flow-card-content">
                                             <span class="task-flow-card-title"><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>
@@ -61,7 +61,7 @@
                     <ol class="task-flow-history-list">
                         @foreach ($lane['completedHistory'] as $task)
                             <li class="task-flow-history-item" wire:key="flow-history-task-{{ $task->id }}">
-                                <button wire:click="openForm('{{ $task->id }}')" class="task-flow-history-main" aria-label="Editar tarea completada: {{ $task->title }}">
+                                <button x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="task-flow-history-main" aria-label="Editar tarea completada: {{ $task->title }}">
                                     <i class="bi bi-check2-circle"></i>
                                     <span><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>
                                     @if ($task->completed_at)<time datetime="{{ $task->completed_at->toDateString() }}">{{ $task->completed_at->translatedFormat('d M Y') }}</time>@endif
@@ -82,5 +82,6 @@
     @endforelse
 </section>
 
-@include('livewire.task.partials.edit-task-dialog', ['dialogId' => 'flow-task', 'showCompletionAction' => true])
+<livewire:task.task-editor />
+@include('livewire.task.partials.recurring-completion-dialog')
 </x-module-shell>

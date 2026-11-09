@@ -4,7 +4,7 @@
 @endphp
 <x-ui.form-dialog :open="$showForm" :state="$localEditor ? 'showDialog' : null"
     :id="$dialogId" :title="$dialogTitle ?? 'Editar tarea'" icon="bi-list-task" module="tasks"
-    :expanded="$expandedDialog ?? false" class="task-properties-dialog" close="closeForm" submit-action="save"
+    :expanded="$expandedDialog ?? false" :focus-errors="$localEditor && ! $bulkEditor" :section-event="$localEditor && ! $bulkEditor" class="task-properties-dialog" close="closeForm" submit-action="save"
     :validation-state="$localEditor ? 'submitted' : null"
     :title-expression="$localEditor && ! $bulkEditor ? '$wire.editingId ? \'Editar tarea\' : \'Nueva tarea\'' : null"
     :sections="[
@@ -12,8 +12,16 @@
         'privacy' => ['label' => 'Privacidad', 'icon' => 'bi-lock'],
         'schedule' => ['label' => 'Programación', 'icon' => 'bi-calendar3', 'error' => $errors->hasAny(['startDate', 'endDate', 'startTime', 'endTime'])],
         ...(! $bulkEditor ? ['reminders' => ['label' => 'Recordatorios', 'icon' => 'bi-bell', 'error' => $errors->hasAny(['reminders', 'reminders.*'])]] : []),
-        ...(isset($relationOptions) && ! $bulkEditor ? ['relations' => ['label' => 'Relacionado', 'icon' => 'bi-link-45deg']] : []),
+        ...(isset($relationOptions) && ! $bulkEditor ? ['relations' => ['label' => 'Relacionado', 'icon' => 'bi-link-45deg', 'error' => $errors->hasAny(['relations', 'relations.*.id'])]] : []),
     ]">
+    @if ($localEditor && ! $bulkEditor)
+        <x-slot:headerActions>
+            <button type="button" class="md-btn-icon" x-show="$wire.editingId && !editingContent" @click="editingContent = true" aria-label="Editar contenido" title="Editar contenido"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+        </x-slot:headerActions>
+    @endif
+    @if ($localEditor && ! $bulkEditor)
+        <p class="md-body-small" wire:dirty wire:target="title,description,category,statusId,priority,size,estimatedTime,startDate,startTime,endDate,endTime,isPrivate,isRecurrent,recurrenceIntervalDays,relations,reminders" role="status">Cambios pendientes de guardar</p>
+    @endif
     <div class="task-properties-layout">
         <aside class="task-properties-panel lt-cm-form" aria-label="Propiedades de la tarea">
             @if (! $bulkEditor && $editingId)
@@ -28,8 +36,25 @@
             @endif
             <x-ui.select name="priority" label="Prioridad" :id="$dialogId.'-priority'" :options="$priorities" placeholder="Sin prioridad" wire:model="priority" />
             <x-ui.select name="size" label="Tamaño" :id="$dialogId.'-size'" :options="$sizes" placeholder="Sin tamaño" wire:model="size" />
+            @if (! $bulkEditor)<x-ui.field name="estimatedTime" label="Tiempo estimado (min)" type="number" min="0" :id="$dialogId.'-estimate'" wire:model="estimatedTime" />@endif
+            @if ($localEditor && ! $bulkEditor)
+                <section class="task-focus-block" aria-label="Foco">
+                    <h3 class="md-title-small">Foco</h3>
+                    @if ($focusAvailable)
+                        <p class="md-body-small">{{ $focusSummary?->sessions ?? 0 }} sesiones · {{ intdiv((int) ($focusSummary?->seconds ?? 0), 60) }} min</p>
+                    @else
+                        <p class="md-body-small">Foco estará disponible al actualizar la base de datos.</p>
+                    @endif
+                    <p class="md-body-small" x-show="!$wire.editingId">Guarda la tarea antes de usar Foco.</p>
+                    <button type="button" class="md-btn-text" x-show="!$wire.editingId" disabled><i class="bi bi-stopwatch" aria-hidden="true"></i> Foco</button>
+                    <div x-show="$wire.editingId" @if(! $focusAvailable) hidden @endif><x-ui.menu label="Opciones de foco" icon="bi-stopwatch" align="end">
+                        <x-ui.menu-item icon="bi-play-circle" x-bind:disabled="!$wire.editingId" @click="$dispatch('task-focus-timer', { taskId: $wire.editingId, durationMinutes: focusDuration(), start: false })">Iniciar temporizador</x-ui.menu-item>
+                        <x-ui.menu-item icon="bi-clock-history" x-bind:disabled="!$wire.editingId" @click="$dispatch('task-focus-manual', { taskId: $wire.editingId, durationMinutes: focusDuration() })">Registrar tiempo trabajado</x-ui.menu-item>
+                    </x-ui.menu></div>
+                </section>
+            @endif
         </aside>
-        <div class="task-properties-content">
+        <fieldset class="task-properties-content" @if($localEditor && ! $bulkEditor) :disabled="!editingContent" @endif>
             @unless ($bulkEditor)
                 <x-ui.form-dialog-section name="reminders" title="Recordatorios">
                     @include('livewire.notifications.reminder-fields')
@@ -110,6 +135,6 @@
                     </div>
                 </x-ui.form-dialog-section>
             @endif
-        </div>
+        </fieldset>
     </div>
 </x-ui.form-dialog>

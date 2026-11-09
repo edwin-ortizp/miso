@@ -6,8 +6,12 @@ use App\Mcp\Tools\Shopping\Concerns\InteractsWithInventory;
 use App\Mcp\Tools\Shopping\Concerns\RecordsVariantPrices;
 use App\Mcp\Tools\Shopping\Concerns\ResolvesShoppingItem;
 use App\Models\MealCategory;
+use App\Models\MealInventoryOperation;
 use App\Models\ShoppingItem;
+use App\Models\User;
+use App\Services\Meal\InventoryLedger;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -27,7 +31,8 @@ class UpdateShoppingItemTool extends Tool
             'name' => ['nullable', 'string'],
             'quantity' => ['sometimes', 'numeric', 'min:0'],
             'category_id' => ['sometimes', 'nullable', 'string', Rule::in(array_keys(MealCategory::options()))],
-            'stock' => ['sometimes', 'numeric', 'min:0'],
+            'stock' => ['sometimes', 'numeric', 'min:0', 'max:999999999.999'],
+            ...$this->inventoryWriteRules(),
             'min_stock' => ['sometimes', 'nullable', 'numeric', 'min:0'],
             'grams_per_piece' => ['sometimes', 'nullable', 'numeric', 'gt:0'],
             'kcal' => ['sometimes', 'nullable', 'numeric', 'min:0'],
@@ -63,11 +68,19 @@ class UpdateShoppingItemTool extends Tool
             $updates['base_unit'] = $baseUnit;
         }
 
-        if ($updates !== []) {
-            $item->update($updates);
-        }
+        [$item, $recorded] = DB::transaction(function () use ($item, $updates, $data, $store) {
+            User::whereKey(auth()->id())->lockForUpdate()->firstOrFail();
+            $prior = ! empty($data['operation_key']) ? MealInventoryOperation::where('user_id', auth()->id())->where('operation_key', $data['operation_key'])->first() : null;
+            $item = app(InventoryLedger::class)->saveProduct((int) auth()->id(), $updates, $item->id, $data['operation_key'] ?? null,
+                ['channel' => 'mcp', 'reason' => $data['reason'] ?? 'Conteo físico', 'request' => $data]);
+            $recorded = $prior ? ($prior->result['variant_summary'] ?? null) : $this->recordVariantPrice($item, $data, $store);
+            if (! $prior && ! empty($data['operation_key'])) {
+                $operation = MealInventoryOperation::where('user_id', auth()->id())->where('operation_key', $data['operation_key'])->firstOrFail();
+                $operation->update(['result' => $operation->result + ['variant_summary' => $recorded]]);
+            }
 
-        $recorded = $this->recordVariantPrice($item->refresh(), $data, $store);
+            return [$item, $recorded];
+        });
 
         if ($updates === [] && ! $recorded) {
             return Response::error('No se indicó ningún campo para actualizar.');
@@ -79,6 +92,7 @@ class UpdateShoppingItemTool extends Tool
     public function schema(JsonSchema $schema): array
     {
         return [
+            ...$this->inventoryWriteSchema($schema),
             'item_id' => $schema->string()
                 ->description('Identificador (UUID) del ítem. Alternativa a "name".'),
             'name' => $schema->string()

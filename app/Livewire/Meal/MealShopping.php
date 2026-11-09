@@ -2,15 +2,14 @@
 
 namespace App\Livewire\Meal;
 
-use App\Livewire\Concerns\WithMealCategories;
-
 use App\Livewire\Concerns\WithManagementCard;
-use App\Models\MealPlanEntryItem;
+use App\Livewire\Concerns\WithMealCategories;
 use App\Models\ShoppingItem;
 use App\Models\ShoppingItemPrice;
 use App\Models\Store;
+use App\Services\Meal\InventoryLedger;
+use App\Services\Meal\MealNeeds;
 use App\Services\Meal\PurchaseRecorder;
-use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -127,10 +126,10 @@ class MealShopping extends Component
         ], fn ($value) => $value !== null);
 
         if ($existing) {
-            $existing->update(['next_purchase' => true, ...$attributes] + ($existing->base_unit ? [] : ['base_unit' => $data['itemBaseUnit']]));
+            $existing = app(InventoryLedger::class)->saveProduct((int) auth()->id(), ['next_purchase' => true, ...$attributes] + ($existing->base_unit ? [] : ['base_unit' => $data['itemBaseUnit']]), $existing->id);
             $item = $existing;
         } else {
-            $item = ShoppingItem::create([
+            $item = app(InventoryLedger::class)->saveProduct((int) auth()->id(), [
                 'name' => $name,
                 'base_unit' => $data['itemBaseUnit'],
                 'stock' => 0,
@@ -257,7 +256,7 @@ class MealShopping extends Component
      */
     private function weeklyNeeds(): Collection
     {
-        $preview = app(\App\Services\Meal\MealNeeds::class)->preview((int) auth()->id(), today()->startOfWeek()->toDateString(), today()->endOfWeek()->toDateString());
+        $preview = app(MealNeeds::class)->preview((int) auth()->id(), today()->startOfWeek()->toDateString(), today()->endOfWeek()->toDateString());
         $products = ShoppingItem::where('user_id', auth()->id())->withOffers()->whereIn('id', collect($preview['needs'])->pluck('shopping_item_id')->filter())->get()->keyBy('id');
 
         return collect($preview['needs'])->filter(fn ($row) => $products->has($row['shopping_item_id']))

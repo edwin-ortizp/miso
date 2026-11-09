@@ -140,7 +140,7 @@ En los editores aislados de Salud y Tareas, la visibilidad y los borradores se c
 
 Patrón común y obligatorio para todo modal que crea o edita información, y destino de todo FAB de creación. Usa secciones cuando el formulario tiene más de un grupo de campos.
 
-- **Cabecera** separada del contenido por una línea divisoria. En orden: control del panel de secciones (solo si hay secciones), ícono de contexto, título, acción expandir/restaurar y cerrar. El título nunca se oculta.
+- **Cabecera** separada del contenido por una línea divisoria. En orden: control del panel de secciones (solo si hay secciones), ícono de contexto, título, acciones opcionales de cabecera, expandir/restaurar y cerrar. El título nunca se oculta.
 - **Panel de secciones** a la izquierda para formularios largos (por ejemplo: Información básica, Detalles adicionales, Archivos y adjuntos, Resumen). Es un menú, no un wizard: se entra a cualquier sección sin completar la anterior, sin números, progreso ni subtítulos. Es colapsable; al contraerlo solo desaparece la navegación y el formulario gana ancho. En móvil arranca contraído y se superpone.
 - **Información básica** contiene solo los datos esenciales; notas, contexto y adjuntos van en las demás secciones.
 - **Footer** separado por una línea divisoria: `Cancelar` (text) completamente a la izquierda y `Guardar` (filled) completamente a la derecha. Sin otras variantes de texto.
@@ -149,7 +149,9 @@ Patrón común y obligatorio para todo modal que crea o edita información, y de
 - En móvil, cabecera y acciones permanecen fuera del scroll; solo se desplaza el contenido central. La capa usa la altura y el desplazamiento de `visualViewport` mientras está abierta, con respaldo `100dvh`, y respeta las áreas seguras. El teclado no debe desplazar las acciones fuera del área visible. Este ajuste no cambia las dimensiones de escritorio.
 - `submit-action` conserva el guardado Livewire habitual. Para borradores Alpine que deben enviarse juntos, `submit-expression` declara la expresión de envío en el formulario; el servidor sigue validando y calculando los valores persistidos.
 
-Tareas usa este modal con Información básica, Privacidad y Programación, y propiedades persistentes a la derecha (apiladas en pantallas estrechas). El FAB dividido abre Nueva tarea o Crear múltiples tareas; el segundo usa un borrador independiente, un título por línea y campos comunes, sin Estado ni Recurrencia.
+El editor individual de Tareas usa Información básica, Privacidad, Programación, Recordatorios y Relacionado, con propiedades editables a la derecha (apiladas en pantallas estrechas). Una tarea existente abre en consulta y el lápiz activa la edición del contenido en el mismo modal. Los cambios de ambas áreas forman un único borrador: Guardar los aplica y vuelve a consulta; Cancelar, cerrar, overlay o Esc descartan y cierran. El FAB dividido abre Nueva tarea o Crear múltiples tareas; la creación múltiple conserva un borrador independiente, un título por línea y campos comunes, sin Estado ni Recurrencia. La columna incorpora [Foco vinculado a tareas](integrations/task-focus.md) cuando la base tiene la migración requerida. El [mockup de Tareas](mockup-system/dist/tasks.html) es una referencia visual.
+
+En el Calendario de Tareas, la cabecera reúne navegación, Ahora, vistas y Filtros. La selección de tipos se aplica con Filtrar y se guarda en el navegador; cerrar descarta la selección provisional. Las tareas usan el color de su categoría y la sección Sin fecha ofrece búsqueda y acciones de programación, estado y edición mediante el editor compartido.
 
 ### Campos (outlined, Material Design 3)
 

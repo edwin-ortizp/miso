@@ -7,6 +7,31 @@ use Livewire\Attributes\On;
 
 class FocusTimer extends PomodoroTimer
 {
+    public bool $taskHost = false;
+    #[\Livewire\Attributes\Locked]
+    public ?string $manualTaskTitle = null;
+
+    public function mount(bool $taskHost = false): void
+    {
+        $this->taskHost = $taskHost;
+        parent::mount();
+    }
+
+    #[On('task-focus-manual')]
+    public function openTaskManual(string $taskId, ?int $durationMinutes = null): void
+    {
+        if (! $this->taskHost) return;
+        $task = \App\Models\Task::where('user_id', auth()->id())->findOrFail($taskId);
+        $this->openForm();
+        $this->manualTaskId = $task->id;
+        $this->manualTaskTitle = $task->title;
+        if ($durationMinutes && $durationMinutes > 0 && $durationMinutes <= 960) {
+            $end = now()->startOfMinute();
+            $this->manualStart = $end->copy()->subMinutes($durationMinutes)->format('Y-m-d\TH:i');
+            $this->manualEnd = $end->format('Y-m-d\TH:i');
+        }
+    }
+
     public function boot(): void
     {
         abort_unless(auth()->check(), 403);
@@ -30,9 +55,9 @@ class FocusTimer extends PomodoroTimer
         ] : null;
     }
 
-    public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken): void
+    public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken, ?string $taskId = null): void
     {
-        parent::saveSession($startedAt, $endedAt, $description, $clientToken);
+        parent::saveSession($startedAt, $endedAt, $description, $clientToken, $taskId);
         $this->dispatch('panel-changed');
     }
 
@@ -46,7 +71,7 @@ class FocusTimer extends PomodoroTimer
     #[On('panel-focus-manual')]
     public function openManualForm(): void
     {
-        $this->openForm();
+        if (! $this->taskHost) $this->openForm();
     }
 
     public function saveManualSession(): void
@@ -62,6 +87,6 @@ class FocusTimer extends PomodoroTimer
 
     protected function manualUsesToday(): bool
     {
-        return true;
+        return ! $this->taskHost;
     }
 }

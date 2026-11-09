@@ -7,17 +7,21 @@ use App\Models\Plan;
 use App\Models\Relationship;
 use App\Models\Task;
 use App\Models\TaskStatus;
+use App\Models\TaskCategory;
 use App\Services\TaskGamificationService;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
+use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
 #[Title('Calendario de tareas')]
 class TaskCalendar extends Component
 {
+    use WithPagination;
+
     use HandlesRecurringTaskCompletion {
         confirmRecurringCompletion as protected completeRecurring;
     }
@@ -34,6 +38,12 @@ class TaskCalendar extends Component
     public ?string $editTask = null;
 
     // Aviso tras programar la siguiente repetición: la tarea se mueve y puede quedar fuera de la vista.
+    public string $unscheduledSearch = '';
+    public int $perPage = 25;
+
+    public function updatedUnscheduledSearch(): void { $this->resetPage('unscheduledPage'); }
+    public function updatedPerPage(): void { $this->perPage = in_array($this->perPage, [10, 25, 50, 100], true) ? $this->perPage : 25; $this->resetPage('unscheduledPage'); }
+
     public ?string $notice = null;
 
     public ?string $noticeDate = null;
@@ -47,12 +57,13 @@ class TaskCalendar extends Component
         $rangeStart = Carbon::parse($start);
         $rangeEnd = Carbon::parse($end);
 
+        $categories = TaskCategory::where('user_id', auth()->id())->get(['key', 'name', 'color'])->keyBy('key');
         $events = Task::query()->where('user_id', auth()->id())->with('status')
             ->where(fn ($query) => $query->whereNotNull('start_date')->orWhereNotNull('end_date'))
             ->where(fn ($query) => $query->whereRaw('COALESCE(start_date, end_date) < ?', [$rangeEnd])
                 ->whereRaw('COALESCE(end_date, start_date) >= ?', [$rangeStart->copy()->startOfDay()]))
             ->get()
-            ->map(fn (Task $task) => $this->toEvent($task))
+            ->map(fn (Task $task) => $this->toEvent($task, $categories->get($task->category)))
             ->values()
             ->all();
 
@@ -104,7 +115,8 @@ class TaskCalendar extends Component
 
     public function moveTask(string $id, string $start, ?string $end, bool $allDay): void
     {
-        $task = Task::findOrFail($id);
+        abort_unless(auth()->check(), 403);
+        $task = Task::where('user_id', auth()->id())->findOrFail($id);
         $newStart = Carbon::parse($start);
         $newEnd = $end ? Carbon::parse($end) : null;
 
@@ -139,7 +151,8 @@ class TaskCalendar extends Component
 
     public function toggleComplete(string $id, TaskGamificationService $gamification): void
     {
-        $task = Task::findOrFail($id);
+        abort_unless(auth()->check(), 403);
+        $task = Task::where('user_id', auth()->id())->findOrFail($id);
         if ($this->prepareRecurringCompletion($task)) {
             return;
         }
@@ -213,7 +226,7 @@ class TaskCalendar extends Component
             : $day($start).' '.$start->format('H:i').' – '.$day($end).' '.$end->format('H:i');
     }
 
-    private function toEvent(Task $task): array
+    private function toEvent(Task $task, ?TaskCategory $category = null): array
     {
         $start = $task->start_date ?? $task->end_date;
         $end = $task->end_date ?? $task->start_date;
@@ -235,6 +248,8 @@ class TaskCalendar extends Component
                 'completed' => (bool) $task->completed,
                 'recurrent' => (bool) $task->is_recurrent,
                 'category' => $task->category,
+                'categoryName' => $category?->name,
+                'categoryColor' => $category && array_key_exists($category->color ?? '', \App\Support\Ui\CatalogColors::OPTIONS) ? $category->color : null,
                 'priority' => $task->priority ? (self::PRIORITIES[$task->priority] ?? null) : null,
                 'timeLabel' => $this->timeLabel($start, $end, $allDay),
             ],
@@ -249,9 +264,20 @@ class TaskCalendar extends Component
 
     public function render()
     {
+        abort_unless(auth()->check(), 403);
+        $categories = TaskCategory::where('user_id', auth()->id())->get(['key', 'name', 'color'])->keyBy('key');
+        $search = trim($this->unscheduledSearch);
+        $categoryKeys = $categories->filter(fn ($category) => mb_stripos($category->name, $search) !== false)->keys()->all();
+        $tasks = Task::where('user_id', auth()->id())->whereNull('start_date')->whereNull('end_date')
+            ->where('completed', false)->with('status')
+            ->when($search !== '', fn ($query) => $query->where(fn ($match) => $match
+                ->where('title', 'like', '%'.$search.'%')->orWhere('code', 'like', '%'.$search.'%')
+                ->orWhereIn('category', $categoryKeys)))
+            ->orderByDesc('created_at')->paginate($this->perPage, ['*'], 'unscheduledPage');
         return view('livewire.task.task-calendar', [
             'statuses' => TaskStatus::where('user_id', auth()->id())->ordered()->get(),
-            'unscheduledTasks' => Task::query()->whereNull('start_date')->whereNull('end_date')->where('completed', false)->orderByDesc('created_at')->get(),
+            'unscheduledTasks' => $tasks, 'unscheduledCategories' => $categories,
+            'priorityLabels' => self::PRIORITIES,
         ]);
     }
 }

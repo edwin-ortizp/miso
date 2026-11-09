@@ -11,6 +11,8 @@ class PomodoroSession extends Model
     use BelongsToUser, HasUuids;
 
     protected $fillable = [
+        'task_id',
+        'task_title',
         'date',
         'start_time',
         'end_time',
@@ -21,6 +23,11 @@ class PomodoroSession extends Model
         'locked_by_device_id',
         'locked_at',
     ];
+
+    public function task(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Task::class);
+    }
 
     protected function casts(): array
     {

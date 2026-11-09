@@ -18,9 +18,22 @@
 @endphp
 
 <div class="md-text-field md-field md-combobox @if ($message) md-error @endif"
+     {{ $attributes->only('wire:key') }}
+     data-options="{{ $items->toJson() }}"
      x-data="{
-         value: {!! $model ? "\$wire.entangle('{$model}')" : "''" !!},
-         options: @js($items),
+         value: {!! $model ? "\$wire.entangle('{$model}')".($attributes->wire('model')->hasModifier('live') ? '.live' : '') : "''" !!},
+         options: [],
+         observer: null,
+         init() {
+             this.options = JSON.parse(this.$el.dataset.options);
+             this.observer = new MutationObserver(() => {
+                 this.options = JSON.parse(this.$el.dataset.options);
+                 this.active = -1;
+                 if (! this.open) this.term = this.labelFor(this.value);
+             });
+             this.observer.observe(this.$el, { attributes: true, attributeFilter: ['data-options'] });
+         },
+         destroy() { this.observer?.disconnect(); },
          fieldLabel: @js($label),
          term: '',
          open: false,

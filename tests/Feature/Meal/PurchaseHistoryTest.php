@@ -7,11 +7,14 @@ use App\Livewire\Meal\MealPurchases;
 use App\Livewire\Meal\MealPurchaseShow;
 use App\Livewire\Meal\MealShopping;
 use App\Livewire\Meal\PurchaseEditor;
+use App\Models\MealInventoryMovement;
+use App\Models\MealInventoryOperation;
 use App\Models\Purchase;
 use App\Models\ShoppingItem;
 use App\Models\ShoppingItemPrice;
 use App\Models\Store;
 use App\Models\User;
+use App\Services\Meal\InventoryLedger;
 use App\Services\Meal\PurchaseRecorder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
@@ -24,6 +27,58 @@ use Tests\TestCase;
 class PurchaseHistoryTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_ingredient_form_metadata_save_preserves_new_stock_and_count_records_the_reason(): void
+    {
+        $form = Livewire::test(MealIngredients::class)->call('openForm', $this->item->id);
+        app(InventoryLedger::class)->count((int) auth()->id(), $this->item->id, 200, 'ml');
+        $before = MealInventoryMovement::count();
+        $form->set('name', 'Leche renombrada')->call('save')->assertHasNoErrors();
+        $this->assertSame(200.0, $this->item->fresh()->stock);
+        $this->assertSame($before, MealInventoryMovement::count());
+        Livewire::test(MealIngredients::class)->call('openForm', $this->item->id)->set('stock', 175)->set('stockReason', 'Conteo de hoy')->call('save')->assertHasNoErrors();
+        $this->assertSame(175.0, $this->item->fresh()->stock);
+        $operation = MealInventoryOperation::where('reason', 'Conteo de hoy')->sole();
+        $this->assertSame('web', $operation->channel);
+        $this->assertSame(-25.0, $operation->movements()->sole()->delta);
+    }
+
+    public function test_inventory_document_retains_32_lines_and_correction_history(): void
+    {
+        $input = $this->input;
+        $input['lines'] = [];
+        for ($index = 0; $index < 32; $index++) {
+            $item = ShoppingItem::create(['name' => 'Producto '.$index, 'base_unit' => 'unit', 'stock' => 0, 'status' => 'available']);
+            $input['lines'][] = ['shopping_item_id' => $item->id, 'packages' => 2];
+        }
+        $purchase = $this->save($input);
+        $document = MealInventoryOperation::where('document_type', 'purchase')->where('origin->id', $purchase->id)->sole();
+        $snapshot = $document->getAttributes();
+        $this->assertCount(32, $document->document_lines);
+        $this->assertSame(32, $document->movements()->count());
+        $input['operation_key'] = (string) Str::uuid();
+        $input['lines'] = $purchase->lines->take(31)->map(fn ($line) => ['id' => $line->id, 'shopping_item_id' => $line->shopping_item_id, 'packages' => 3])->all();
+        $this->save($input, $purchase->id);
+        $correction = MealInventoryOperation::where('document_type', 'purchase_correction')->sole();
+        $this->assertSame($document->id, $correction->corrects_operation_id);
+        $this->assertCount(32, $correction->document_lines);
+        $this->assertSame($snapshot, $document->fresh()->getAttributes());
+        $this->save($input, $purchase->id);
+        $this->assertSame(1, MealInventoryOperation::where('document_type', 'purchase_correction')->count());
+        $changed = $input;
+        $changed['lines'][0]['packages'] = 4;
+        $this->expectException(ValidationException::class);
+        $this->save($changed, $purchase->id);
+    }
+
+    public function test_reusing_a_purchase_creation_key_with_different_content_is_rejected(): void
+    {
+        $this->save();
+        $changed = $this->input;
+        $changed['lines'][0]['packages'] = 5;
+        $this->expectException(ValidationException::class);
+        $this->save($changed);
+    }
 
     private ShoppingItem $item;
 
@@ -288,6 +343,7 @@ class PurchaseHistoryTest extends TestCase
         $this->save($input, $purchase->id);
         $this->assertSame(100.1, $this->item->fresh()->stock);
     }
+
     public function test_invoice_route_is_owned_and_requires_authentication(): void
     {
         $purchase = $this->save();
@@ -355,5 +411,4 @@ class PurchaseHistoryTest extends TestCase
         Livewire::test(MealIngredients::class)->set('ingredientId', $other->id)
             ->assertViewHas('ingredients', fn ($rows) => $rows->total() === 0);
     }
-
 }
