@@ -1008,52 +1008,122 @@ a.game-collectible:hover .game-collectible__art img { transform: translate(-50%,
     .game-collectible.is-flipping { animation: game-reveal-fade 150ms ease-out both; }
 }
 
-/* ---------- Avisos del juego (CHG-034) ---------- */
-/* La pila no usa transform: así los avisos se ubican bien (defecto de CHG-023). */
+/* ---------- Avisos del juego: tarjetas de logro arriba a la derecha (CHG-038) ---------- */
+/* La pila no usa transform (corrección de CHG-034) y queda bajo la barra superior. */
 .game-toasts {
     position: fixed;
-    right: 0;
-    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-    left: 0;
+    top: calc(var(--lt-topbar-height, 64px) + 12px);
+    right: 16px;
     z-index: 1080;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0 1rem;
+    gap: 0.625rem;
+    width: min(22rem, calc(100vw - 32px));
     pointer-events: none;
 }
 
 .game-toast {
-    display: flex;
-    align-items: center;
+    --game-toast-color: var(--md-sys-color-primary);
+    --game-toast-left: 1;
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
     gap: 0.75rem;
-    width: min(38rem, 100%);
-    padding: 0.625rem 0.5rem 0.625rem 0.875rem;
-    border-radius: 14px;
-    background: var(--md-sys-color-inverse-surface);
-    color: var(--md-sys-color-inverse-on-surface);
-    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+    padding: 0.875rem 0.5rem 1rem 0.875rem;
+    overflow: hidden;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-left: 6px solid var(--game-toast-color);
+    border-radius: 16px;
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), 0 0 0 3px color-mix(in srgb, var(--game-toast-color) 18%, transparent);
     pointer-events: auto;
-    animation: game-toast-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+    animation: game-toast-in 420ms cubic-bezier(0.2, 1.3, 0.4, 1) both;
 }
 
-.game-toast__icon { font-size: 1.35rem; color: var(--md-sys-color-inverse-primary); }
-.game-toast--goal .game-toast__icon,
-.game-toast--evolution .game-toast__icon { color: var(--game-rarity-legendary); }
-.game-toast__ball { --game-ball-size: 26px; }
-.game-toast__text { flex: 1; min-width: 0; }
-.game-toast__detail { opacity: 0.85; overflow-wrap: anywhere; }
-.game-toast__action,
-.game-toast__close { color: var(--md-sys-color-inverse-primary); }
+/* Color por tipo. */
+.game-toast--ball { --game-toast-color: var(--game-ball-top); }
+.game-toast--xp { --game-toast-color: var(--md-sys-color-primary); }
+.game-toast--level { --game-toast-color: var(--game-rarity-uncommon); }
+.game-toast--mission { --game-toast-color: var(--game-rarity-rare); }
+.game-toast--goal,
+.game-toast--evolution { --game-toast-color: var(--game-rarity-legendary); }
+
+/* Ícono grande en círculo del color del tipo. */
+.game-toast__badge {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--game-toast-color);
+    color: var(--md-sys-color-surface);
+    font-size: 1.35rem;
+    animation: game-toast-badge 700ms 120ms cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.game-toast--ball .game-toast__badge { background: var(--md-sys-color-surface); }
+.game-toast__ball { --game-ball-size: 36px; }
+
+.game-toast__text { display: grid; gap: 0.25rem; min-width: 0; }
+
+.game-toast__eyebrow {
+    color: var(--game-toast-color);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.game-toast__detail { overflow-wrap: anywhere; }
+.game-toast__action { justify-self: start; margin-top: 0.25rem; }
+.game-toast__close { color: var(--md-sys-color-on-surface-variant); }
+
+/* Barra de tiempo (JS actualiza --game-toast-left de 1 a 0; se pausa con el mouse). */
+.game-toast::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: var(--game-toast-color);
+    transform: scaleX(var(--game-toast-left));
+    transform-origin: left;
+    transition: transform 100ms linear;
+}
+
+/* Brillo de entrada en los momentos importantes. */
+.game-toast--ball::before,
+.game-toast--goal::before,
+.game-toast--evolution::before,
+.game-toast--mission::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%) 150% 0 / 250% 100% no-repeat;
+    animation: game-toast-shine 1100ms 300ms ease-out both;
+    pointer-events: none;
+}
 
 @keyframes game-toast-in {
-    from { opacity: 0; transform: translateY(16px); }
-    to { opacity: 1; transform: translateY(0); }
+    0% { opacity: 0; transform: translateX(110%); }
+    100% { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes game-toast-badge {
+    0% { transform: scale(0.3) rotate(-90deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+@keyframes game-toast-shine {
+    from { background-position: 150% 0; }
+    to { background-position: -50% 0; }
 }
 
 @media (max-width: 767.98px) {
-    .game-toasts { bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+    .game-toasts { right: 12px; left: 12px; width: auto; }
 }
 
 /* ---------- Celebraciones (CHG-034) ---------- */
@@ -1154,7 +1224,10 @@ a.game-collectible:hover .game-collectible__art img { transform: translate(-50%,
 
 @media (prefers-reduced-motion: reduce) {
     .game-celebration { display: none; }
-    .game-toast { animation: none; }
+    .game-toast,
+    .game-toast__badge,
+    .game-toast::before { animation: none; }
+    .game-toast::after { transition: none; }
 }
 
 .game-celebration-options {

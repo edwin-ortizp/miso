@@ -38,6 +38,8 @@ class GameNotifierTest extends TestCase
         $notifier->dispatch('game-check')
             ->assertSee('¡Ganaste una ball!')
             ->assertSee('Pagar arriendo')
+            ->assertSee('Abrir ball')
+            ->assertSeeHtml('game-toast game-toast--ball')
             ->assertDispatched('game-celebrate');
 
         // Sin novedades no repite.

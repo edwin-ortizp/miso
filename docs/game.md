@@ -42,6 +42,7 @@ Pantallas: menú **Productividad → Colección** (`/game`), con las pestañas B
   - subida de nivel y evolución;
   - misión (al 50 % y cumplida);
   - meta cumplida.
+- **Presentación de los avisos (CHG-038):** tarjetas de logro arriba a la derecha, bajo la barra superior (en móvil, a todo el ancho). Cada tipo tiene su color: ball roja, experiencia, nivel verde, misión azul, meta y evolución doradas. Llevan ícono grande animado, título en versalitas, el botón "Abrir ball" y una barra de tiempo de 5 s que se pausa al pasar el mouse o al enfocar. Ninguna barra inferior (Debug Bar, navegación móvil) las tapa.
 - **Cuándo se entera:** de inmediato tras cualquier acción en la app (`Livewire.hook('commit')` → `game-check`), con los eventos de tareas y hábitos, y cada 60 s para lo que llega por MCP. No repite lo ocurrido antes de cargar la página.
 - **Celebraciones:** en los momentos importantes (ball, nivel, evolución, misión o meta cumplida) sale una al azar del catálogo, sin repetir la anterior: confeti, gatitos, estrellas fugaces, globos, fuegos artificiales, burbujas, lluvia de balls y pétalos (`resources/js/game-celebrations.js`).
   - Se configuran en Ajustes → Celebraciones: mostrar sí o no, y cuáles.

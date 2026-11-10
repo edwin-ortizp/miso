@@ -43,6 +43,8 @@ _Última actualización: 2026-11-09_
 | CHG-035 | XS | Fijar APP_URL de pruebas en phpunit.xml | done | Cerrado | 1/1 |
 | CHG-036 | S | Cartas del equipo sin Pokémon cortados | in-progress | En verificación | 1/2 |
 | CHG-037 | XS | Misiones de la semana como tarjetas de aventura | done | Cerrado | 1/1 |
+| CHG-038 | S | Avisos del juego como tarjetas de logro arriba a la derecha | in-progress | En verificación | 1/2 |
+| CHG-039 | S | Ampliar bios Pokémon con movimientos verificados | in-progress | En desarrollo | 0/2 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
