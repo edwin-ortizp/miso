@@ -276,3 +276,6 @@ Las tarjetas del panel usan `--md-sys-shape-corner-medium` (12 px); los objetivo
 ### Colores de catálogos de tareas
 
 `x-ui.catalog-chip` representa etiquetas informativas de categorías y estados; admite una clave `color` de `App\Support\Ui\CatalogColors`, `icon` opcional y `tone` como fallback cuando no hay color. Usa un `span`, sin interacción ficticia. La paleta ofrece gris, azul, índigo, violeta, rosa, rojo, naranja, amarillo, verde y turquesa con tokens de fondo/texto para claro y oscuro; no admite CSS ni hexadecimales arbitrarios. `x-ui.catalog-color-select` reutiliza el select canónico con nombres accesibles, «Predeterminado» y vista previa. Cada subcategoría tiene color propio. El color personaliza la etiqueta, nunca el comportamiento del tipo de estado ni la prioridad.
+
+### Acciones en tarjetas del calendario de tareas
+Las cuatro vistas de FullCalendar ofrecen un disparador ⋮ por tarea: aparece con hover/foco y permanece visible en dispositivos táctiles o mientras su menú está abierto. Un único menú fuera de la rejilla evita recortes. Incluye el avance de estado y las acciones de la lista, con las mismas condiciones y confirmación de eliminación. Escape/exterior/cambio de vista cierran; teclado permite recorrer opciones. Las acciones conservan vista, fecha y filtros; errores permiten reintentar. Las otras capas mantienen su navegación.

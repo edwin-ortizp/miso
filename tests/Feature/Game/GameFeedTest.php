@@ -64,8 +64,33 @@ class GameFeedTest extends TestCase
         $this->assertSame(GameEvent::max('id'), $result['last_id']);
     }
 
-    public function test_daily_limit_gives_only_the_xp_toast_without_celebration(): void
+    public function test_xp_toast_carries_each_pokemon_with_its_photo(): void
     {
+        config(['game.image_base_url' => 'https://assets.test/pokemon']);
+        $this->team();
+        $this->completeTask('Pagar arriendo');
+
+        $xp = collect($this->feed()['toasts'])->firstWhere('type', 'xp');
+
+        $this->assertCount(1, $xp['members']);
+        $this->assertSame('Gotin', $xp['members'][0]['name']);
+        $this->assertSame(3, $xp['members'][0]['xp']);
+        $this->assertFalse($xp['members'][0]['affinity']);
+        $this->assertStringStartsWith('https://assets.test/pokemon/', $xp['members'][0]['image']);
+    }
+
+    public function test_xp_toast_without_image_base_keeps_the_neutral_marker(): void
+    {
+        config(['game.image_base_url' => null]);
+        $this->team();
+        $this->completeTask('Pagar arriendo');
+
+        $xp = collect($this->feed()['toasts'])->firstWhere('type', 'xp');
+
+        $this->assertNull($xp['members'][0]['image']);
+    }
+
+    public function test_daily_limit_gives_only_the_xp_toast_without_celebration(): void    {
         $this->team();
         $this->gameSettings(['daily_limit' => 0]);
         $this->completeTask('Sin cupo');

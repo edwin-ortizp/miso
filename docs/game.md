@@ -53,7 +53,7 @@ El primer registro del día de cada fuente da **+1 xp** (`consistency_xp`) a cad
 - Protección: tras **10** balls seguidas sin una línea nueva, la siguiente garantiza una especie no descubierta.
 - **Avisos y celebraciones (CHG-034):** `GameNotifier` vive en el layout y reemplaza a `BallNotifier`. Lee los eventos nuevos (`GameFeed`) y muestra hasta 3 avisos apilados, que duran 5 s y se pueden cerrar:
   - ball ganada, con su origen y el botón Abrir;
-  - experiencia del equipo, agrupada por actividad (por ejemplo "Gotin +9 (afinidad)");
+  - experiencia del equipo, agrupada por actividad, con la foto de cada Pokémon que la ganó (por ejemplo "Gotin +9 (afinidad)"; CHG-050);
   - subida de nivel y evolución;
   - misión (al 50 % y cumplida);
   - meta cumplida.

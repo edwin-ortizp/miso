@@ -108,3 +108,30 @@ test('layer draft applies only on confirmation and can represent no visible laye
         assert.deepEqual(JSON.parse(writes[0]), state.draftLayers);
     } finally { globalThis.localStorage = original; }
 });
+
+test('action errors retain the menu and block concurrent requests', async () => {
+    let calls = 0;
+    const state = calendar({ calendarAction: async () => { calls++; throw Error('offline'); } });
+    state.actionEvent = { id: 'task', title: 'Task' };
+    await state.runAction('today');
+    assert.equal(calls, 1);
+    assert.match(state.actionError, /No se pudo/);
+    assert.equal(state.actionBusy, false);
+    assert.equal(state.actionEvent.id, 'task');
+    state.actionBusy = true;
+    await state.runAction('today');
+    assert.equal(calls, 1);
+});
+
+test('dismissed delete confirmation does not call server', async () => {
+    const original = globalThis.window;
+    let calls = 0;
+    try {
+        globalThis.window = { confirm: () => false };
+        const state = calendar({ calendarAction: async () => calls++ });
+        state.actionEvent = { id: 'task', title: 'Task' };
+        await state.runAction('delete');
+        assert.equal(calls, 0);
+        assert.equal(state.actionEvent.id, 'task');
+    } finally { globalThis.window = original; }
+});

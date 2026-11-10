@@ -1,5 +1,5 @@
 <x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
-    <section class="md-card-elevated md-task-calendar" aria-label="Calendario de tareas, planes, cumpleaños y comidas" x-data="taskCalendar($wire)">
+    <section class="md-card-elevated md-task-calendar" aria-label="Calendario de tareas, planes, cumpleaños y comidas" x-data="taskCalendar($wire)" @keydown.escape.window="if (actionEvent) { $event.preventDefault(); $event.stopPropagation(); closeActions() }" @resize.window="closeActions()" @scroll.window="closeActions(false)">
         <div class="md-calendar-compact-toolbar" wire:ignore aria-label="Navegación del calendario">
             <h2 class="md-title-medium md-calendar-period" x-text="mobileDate" aria-live="polite"></h2>
             <div class="md-calendar-controls">
@@ -29,6 +29,22 @@
             <button type="button" class="md-chip" x-show="hasLayerFilter" x-cloak @click="clearLayerFilter()" aria-label="Quitar filtro de tipos de elemento">Tipos de elemento <i class="bi bi-x-lg" aria-hidden="true"></i></button>
         </div>
         <div wire:ignore x-ref="calendar" class="md-task-calendar__surface"></div>
+        <template x-teleport="body">
+            <div x-ref="actionMenu" class="md-menu__surface md-calendar-action-menu" role="menu" aria-label="Acciones de la tarea"
+                 x-cloak x-show="actionEvent"
+                 @keydown="menuKey($event)" @click.outside="if (!$event.target.closest('.md-calendar-task-actions')) closeActions()">
+                <x-ui.menu-item icon="bi-arrow-right" @click="runAction('advance')" x-bind:disabled="actionBusy"><span x-text="actionEvent?.advanceLabel"></span></x-ui.menu-item>
+                <x-ui.menu-item icon="bi-check2-circle" tone="success" x-show="!actionEvent?.completed" @click="runAction('complete')" x-bind:disabled="actionBusy">Completar</x-ui.menu-item>
+                <x-ui.menu-item icon="bi-calendar-event" x-show="!actionEvent?.completed" @click="runAction('today')" x-bind:disabled="actionBusy">Mover para hoy</x-ui.menu-item>
+                <x-ui.menu-item icon="bi-calendar-plus" x-show="!actionEvent?.completed" @click="runAction('tomorrow')" x-bind:disabled="actionBusy">Mover para mañana</x-ui.menu-item>
+                <x-ui.menu-divider />
+                <x-ui.menu-item icon="bi-pencil" @click="runAction('edit')" x-bind:disabled="actionBusy">Editar</x-ui.menu-item>
+                <x-ui.menu-divider />
+                <x-ui.menu-item icon="bi-trash" tone="danger" @click="runAction('delete')" x-bind:disabled="actionBusy">Eliminar</x-ui.menu-item>
+                <p role="alert" x-show="actionError" x-text="actionError" class="md-body-small"></p>
+            </div>
+        </template>
+
 
     </section>
 

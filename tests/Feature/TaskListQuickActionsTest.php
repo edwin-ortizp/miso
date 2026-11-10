@@ -38,7 +38,38 @@ class TaskListQuickActionsTest extends TestCase
         }
         Livewire::test(TaskList::class)->set('filter', 'completed')
             ->assertDontSee('Mover para hoy')->assertDontSee('Mover para mañana')
+            ->assertDontSee('Iniciar enfoque')
             ->assertSee('Editar')->assertSee('Eliminar')->assertSee('Reabrir');
+    }
+
+    public function test_pending_rows_offer_focus_actions_with_the_editor_suggested_duration(): void
+    {
+        $timed = Task::create([
+            'title' => 'Con intervalo',
+            'start_date' => '2026-10-26 09:00:00',
+            'end_date' => '2026-10-26 10:30:00',
+        ]);
+        $estimated = Task::create(['title' => 'Con estimación', 'estimated_time' => 45]);
+        $allDay = Task::create([
+            'title' => 'Todo el día',
+            'start_date' => '2026-10-26 00:00:00',
+            'end_date' => '2026-10-26 00:00:00',
+            'start_is_date' => true,
+            'end_is_date' => true,
+            'estimated_time' => 30,
+        ]);
+
+        $component = Livewire::test(TaskList::class)
+            ->assertSee('Iniciar enfoque')
+            ->assertSee('Registrar tiempo trabajado');
+
+        $this->assertSame(90, $component->instance()->focusSuggestionMinutes($timed));
+        $this->assertSame(45, $component->instance()->focusSuggestionMinutes($estimated));
+        $this->assertSame(30, $component->instance()->focusSuggestionMinutes($allDay));
+
+        $html = $component->html();
+        $this->assertStringContainsString('start: true', $html);
+        $this->assertStringContainsString('durationMinutes: 90', $html);
     }
 
     public function test_recurrent_completion_preserves_the_existing_prompt_and_history(): void

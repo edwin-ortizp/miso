@@ -53,6 +53,32 @@ for (const width of [1440, 768, 390]) {
             await expect(toolbar.getByLabel('Vista', { exact: true })).toBeVisible();
         }
         await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        const trigger = page.getByRole('button', { name: 'Más acciones de Calendar recurring task', exact: true }).first();
+        await trigger.focus();
+        await trigger.click();
+        const menu = page.getByRole('menu', { name: 'Acciones de la tarea' });
+        await expect(menu).toBeVisible();
+        await expect(menu.getByRole('menuitem', { name: 'Mover para mañana' })).toBeVisible();
+        const box = await menu.boundingBox();
+        expect(box.x).toBeGreaterThanOrEqual(0);
+        expect(box.x + box.width).toBeLessThanOrEqual(width);
+        await page.keyboard.press('Escape');
+        await expect(menu).toBeHidden();
+        await expect(trigger).toBeFocused();
+        for (const [view, label] of [['dayGridMonth', 'Mes'], ['listWeek', 'Agenda'], ['timeGridDay', 'Día'], ['timeGridWeek', 'Semana']]) {
+            if (width >= 768) await toolbar.getByRole('button', { name: label, exact: true }).click();
+            else await toolbar.getByLabel('Vista', { exact: true }).selectOption(view);
+            const action = page.getByRole('button', { name: 'Más acciones de Calendar recurring task', exact: true }).first();
+            await action.focus();
+            await page.keyboard.press('Enter');
+            await expect(menu).toBeVisible();
+            await page.keyboard.press('ArrowDown');
+            await expect(menu.getByRole('menuitem', { name: 'Completar', exact: true })).toBeFocused();
+            await page.keyboard.press('Escape');
+            await expect(menu).toBeHidden();
+        }
+
+        await expect(page.getByRole('dialog', { name: 'Consultar tarea' })).toHaveCount(0);
         await page.screenshot({ path: testInfo.outputPath('calendar.png') });
         const controls = await toolbar.locator('.md-calendar-controls').boundingBox();
         const now = await toolbar.getByRole('button', { name: 'Ahora' }).boundingBox();

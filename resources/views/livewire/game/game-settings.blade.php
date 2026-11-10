@@ -28,7 +28,7 @@
         <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-consistency">
             <h2 class="md-title-medium mb-0" id="game-settings-consistency">Constancia</h2>
             <p class="md-body-small game-muted mb-0">Tu equipo gana +1 xp la primera vez que registras algo de cada tipo en el día.</p>
-            @php($consistencyLabels = ['vehicle' => 'Vehículo (gasolina, gastos, mantenimiento)', 'wellbeing' => 'Bienestar (diario, ánimo, energía)', 'people' => 'Personas (relaciones, visitas a planes)', 'home' => 'Hogar (comidas y compras)'])
+            @php($consistencyLabels = ['vehicle' => 'Vehículo (gasolina, gastos, mantenimiento)', 'wellbeing' => 'Bienestar (diario, ánimo, energía)', 'people' => 'Personas (relaciones, visitas a planes)', 'home' => 'Hogar (comidas y compras)', 'personal_tasks' => 'Tareas personales (categoría Personal)'])
             @foreach ($consistencyLabels as $key => $label)
                 <x-ui.switch name="game-consistency-{{ $key }}" :label="$label" wire:model="consistency.{{ $key }}" :checked="$consistency[$key] ?? true" />
             @endforeach

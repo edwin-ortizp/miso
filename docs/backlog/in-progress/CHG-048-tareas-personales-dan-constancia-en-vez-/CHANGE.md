@@ -1,5 +1,5 @@
 # CHG-048 · Tareas personales dan constancia en vez de ball
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -45,13 +45,18 @@ Aviso:  ✦ EXPERIENCIA · Constancia · Tareas personales
 - Comando: `php artisan test tests/Feature/Game`
 
 ## 7. Tareas
-- [ ] T1 · Las tareas Personal dan +1 xp de constancia en vez de ball, con interruptor en Ajustes — Resp: developer — Archivos: config/game.php, app/Services/Game/RewardGranter.php, resources/views/livewire/game/game-settings.blade.php, tests/Feature/Game/PersonalTaskConsistencyTest.php — Hecho cuando: los 5 casos de §5 pasan y la suite Game sigue en verde
+- [x] T1 · Las tareas Personal dan +1 xp de constancia en vez de ball, con interruptor en Ajustes — Resp: developer — Archivos: config/game.php, app/Services/Game/RewardGranter.php, resources/views/livewire/game/game-settings.blade.php, tests/Feature/Game/PersonalTaskConsistencyTest.php — Hecho cuando: los 5 casos de §5 pasan y la suite Game sigue en verde
 - [ ] T2 · Verificar criterios — Resp: qa-tester — Hecho cuando: los casos de §0 se cumplen
 - [ ] T3 · Documentar la fuente en docs/game.md (sección Constancia) — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-10 — Inicio (start --force: hay otros CHG En desarrollo en paralelo, mismo motivo que CHG-042).
+- T1 — `config/game.php` (fuente `personal_tasks`, default encendida; `consistency_task_categories => ['personal']`), `RewardGranter::forTask` desvía a `ConsistencyXp::grant` cuando la categoría aplica y la fuente está encendida, etiqueta en `game-settings.blade.php`. Tests: `PersonalTaskConsistencyTest` 5/5. Suite Game: 217/218; falla `NewSourcesTest::test_director_accepts_the_new_scopes` (validador de misiones, ajeno a este cambio: no pasa por forTask).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-10 — Creado en to-do/ (Borrador, nivel S)
 - Decisión (Alex): las tareas personales NO avanzan misiones semanales. Solo aplica a la categoría `personal`.
 - 2026-11-10 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-10 — Movido a in-progress/ (En desarrollo)
+- LECCIÓN: ninguna
+- 2026-11-10 — Implementación terminada → En verificación

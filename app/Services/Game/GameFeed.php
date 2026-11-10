@@ -27,7 +27,7 @@ class GameFeed
             return ['last_id' => $lastId, 'toasts' => [], 'celebrate' => false];
         }
 
-        $companions = $this->companionNames($events);
+        $companions = $this->companionProfiles($events);
         $toasts = [];
         $celebrate = false;
         $teamGroups = [];
@@ -53,13 +53,18 @@ class GameFeed
                     }
                     $group = (string) ($effect['activity_event_id'] ?? $event->id);
                     $teamGroups[$group] ??= ['label' => $this->stripPrefix($event->source_label, 'Equipo de la semana · '), 'members' => [], 'consistency' => (bool) ($effect['consistency'] ?? false)];
-                    $name = $companions[$effect['companion_id'] ?? 0] ?? 'Tu Pokémon';
-                    $teamGroups[$group]['members'][] = $name.' +'.($effect['xp'] ?? 0).(($effect['affinity'] ?? false) ? ' (afinidad)' : '');
+                    $companion = $companions[$effect['companion_id'] ?? 0] ?? ['name' => 'Tu Pokémon', 'image' => null];
+                    $teamGroups[$group]['members'][] = [
+                        'name' => $companion['name'],
+                        'xp' => (int) ($effect['xp'] ?? 0),
+                        'affinity' => (bool) ($effect['affinity'] ?? false),
+                        'image' => $companion['image'],
+                    ];
                     break;
 
                 case CompanionProgress::KIND_LEVEL_UP:
                     $celebrate = true;
-                    $name = $companions[$effect['companion_id'] ?? 0] ?? 'Tu Pokémon';
+                    $name = $companions[$effect['companion_id'] ?? 0]['name'] ?? 'Tu Pokémon';
                     $toasts[] = ['type' => 'level', 'icon' => 'bi-arrow-up-circle-fill', 'title' => "¡{$name} subió al nivel ".($effect['to'] ?? '').'!', 'detail' => null, 'action' => null];
                     break;
 
@@ -89,23 +94,41 @@ class GameFeed
 
         foreach ($teamGroups as $group) {
             // Constancia (CHG-042): el aviso nombra la fuente; nunca celebra por sí solo.
-            $detail = implode(' · ', $group['members']);
-            $toasts[] = ['type' => 'xp', 'icon' => 'bi-stars', 'title' => 'Tu equipo ganó experiencia', 'detail' => $group['consistency'] ? $group['label'].' · '.$detail : $detail, 'action' => null];
+            $plain = implode(' · ', array_map(
+                fn (array $member) => $member['name'].' +'.$member['xp'].($member['affinity'] ? ' (afinidad)' : ''),
+                $group['members']
+            ));
+            // La foto de cada integrante (CHG-050) va en `members`; `detail` sigue siendo el
+            // texto plano que leen las pruebas y los lectores de pantalla.
+            $toasts[] = [
+                'type' => 'xp',
+                'icon' => 'bi-stars',
+                'title' => 'Tu equipo ganó experiencia',
+                'detail' => $group['consistency'] ? $group['label'].' · '.$plain : $plain,
+                'note' => $group['consistency'] ? $group['label'] : null,
+                'members' => $group['members'],
+                'action' => null,
+            ];
         }
 
         return ['last_id' => (int) $events->last()->id, 'toasts' => $toasts, 'celebrate' => $celebrate];
     }
 
-    /** @return array<int, string> companion_id => nombre de su especie actual */
-    private function companionNames(Collection $events): array
+    /** @return array<int, array{name: string, image: ?string}> companion_id => nombre e imagen de su especie actual */
+    private function companionProfiles(Collection $events): array
     {
         $ids = $events->map(fn ($event) => $event->effect['companion_id'] ?? null)->filter()->unique()->values();
         if ($ids->isEmpty()) {
             return [];
         }
 
+        $images = app(SpeciesImageProvider::class);
+
         return GameCompanion::withoutGlobalScopes()->whereIn('id', $ids)->with('species')->get()
-            ->mapWithKeys(fn ($companion) => [$companion->id => $companion->species?->name ?? 'Tu Pokémon'])->all();
+            ->mapWithKeys(fn (GameCompanion $companion) => [$companion->id => [
+                'name' => $companion->species?->name ?? 'Tu Pokémon',
+                'image' => $companion->species ? $images->url($companion->species) : null,
+            ]])->all();
     }
 
     private function stripPrefix(?string $text, string $prefix): ?string

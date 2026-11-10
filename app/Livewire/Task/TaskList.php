@@ -13,6 +13,7 @@ use App\Models\TaskStatus;
 use App\Services\TaskGamificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -36,8 +37,7 @@ class TaskList extends Component
         return 'pending';
     }
 
-    /** Catálogo de estados memorizado durante la petición (siguiente paso de cada fila). */
-    protected ?\Illuminate\Support\Collection $statusCatalog = null;
+    use \App\Livewire\Task\Concerns\HandlesTaskRowActions;
 
     public const SORTS = [
         'updated' => 'Última actualización',
@@ -331,56 +331,6 @@ class TaskList extends Component
         $this->closeForm();
     }
 
-    public function completeTask(string $id, TaskGamificationService $gamification): void
-    {
-        if (! auth()->check()) {
-            return;
-        }
-
-        DB::transaction(function () use ($id, $gamification): void {
-            $task = Task::where('user_id', auth()->id())->where('completed', false)->lockForUpdate()->find($id);
-            if (! $task || $this->prepareRecurringCompletion($task)) {
-                return;
-            }
-
-            $result = $gamification->toggle($task);
-            if ($result['completed']) {
-                $this->dispatch('task-completed', ...$result);
-            }
-        });
-    }
-
-    public function moveToDay(string $id, int $daysFromToday): void
-    {
-        if (! auth()->check() || ! in_array($daysFromToday, [0, 1], true)) {
-            return;
-        }
-
-        DB::transaction(function () use ($id, $daysFromToday): void {
-            $task = Task::where('user_id', auth()->id())->where('completed', false)->lockForUpdate()->find($id);
-            if (! $task) {
-                return;
-            }
-
-            $target = today()->addDays($daysFromToday);
-            $reference = $task->end_date ?? $task->start_date;
-            if (! $reference) {
-                $task->update(['end_date' => $target, 'end_is_date' => true]);
-
-                return;
-            }
-
-            $shift = (int) $reference->copy()->startOfDay()->diffInDays($target, false);
-            $dates = [];
-            foreach (['start_date', 'end_date'] as $field) {
-                if ($task->{$field}) {
-                    $dates[$field] = $task->{$field}->copy()->addDays($shift);
-                }
-            }
-            $task->update($dates);
-        });
-    }
-
     public function toggleComplete(string $id, TaskGamificationService $gamification): void
     {
         $task = Task::find($id);
@@ -398,61 +348,22 @@ class TaskList extends Component
     }
 
     /**
-     * Acción principal de la fila: avanza la tarea al siguiente tipo de estado del flujo
-     * (por hacer → listo → en curso) y desde el último paso abierto la completa.
+     * Duración sugerida para foco desde la lista: intervalo válido y, en su
+     * defecto, el tiempo estimado. Es la misma regla del editor de tareas.
      */
-    public function advanceStatus(string $id, TaskGamificationService $gamification): void
+    public function focusSuggestionMinutes(Task $task): ?int
     {
-        $task = Task::with('status')->find($id);
-        if (! $task) {
-            return;
-        }
+        if ($task->start_date && $task->end_date) {
+            $minutes = (int) round($task->start_date->diffInMinutes($task->end_date, true));
 
-        $next = $task->completed ? null : $this->nextStatus($task->status);
-        if (! $next) {
-            $this->toggleComplete($id, $gamification);
-
-            return;
-        }
-
-        $task->update(['status_id' => $next->id]);
-    }
-
-    /** Primer estado del usuario del siguiente tipo abierto del flujo; null si toca completar. */
-    private function nextStatus(?TaskStatus $status): ?TaskStatus
-    {
-        $types = [TaskStatus::TODO, TaskStatus::READY, TaskStatus::IN_PROGRESS];
-        $position = array_search($status?->type ?? TaskStatus::TODO, $types, true);
-        if ($position === false) {
-            return null;
-        }
-
-        $this->statusCatalog ??= TaskStatus::query()->where('user_id', auth()->id())->ordered()->get();
-        foreach (array_slice($types, $position + 1) as $type) {
-            if ($next = $this->statusCatalog->firstWhere('type', $type)) {
-                return $next;
+            if ($minutes >= 1 && $minutes <= 1440) {
+                return $minutes;
             }
         }
 
-        return null;
-    }
+        $estimate = (int) $task->estimated_time;
 
-    /** Etiqueta del botón principal de la fila según el siguiente paso. */
-    public function advanceLabel(Task $task): string
-    {
-        if ($task->completed) {
-            return 'Reabrir';
-        }
-
-        $next = $this->nextStatus($task->status);
-
-        return $next ? 'Pasar a '.$next->name : 'Completar';
-    }
-
-    public function delete(string $id)
-    {
-        // Por modelo, no masivo: así corren el observer de CalDAV y la limpieza de vínculos.
-        Task::query()->find($id)?->delete();
+        return $estimate >= 1 && $estimate <= 1440 ? $estimate : null;
     }
 
     private function resetForm()
@@ -507,13 +418,8 @@ class TaskList extends Component
             SUM(CASE WHEN completed = 0 AND (DATE(start_date) = ? OR DATE(end_date) = ?) THEN 1 ELSE 0 END) as planned_today
         ', [$today, $today, $today])->first();
 
-        $categoryBreakdown = Task::where('completed', true)
-            ->whereDate('completed_at', today())
-            ->whereNotNull('category')
-            ->selectRaw('category, COUNT(*) as total')
-            ->groupBy('category')
-            ->pluck('total', 'category')
-            ->toArray();
+        $todayStats = $this->categoryStats(today()->startOfDay(), today()->endOfDay());
+        $weekStats = $this->categoryStats(now()->startOfWeek(), now()->endOfWeek());
 
         $statusOptions = TaskStatus::query()->where('user_id', auth()->id())->ordered()->pluck('name', 'id')->all();
 
@@ -521,13 +427,92 @@ class TaskList extends Component
             'tasks' => $tasks,
             'sorts' => self::SORTS,
             'statusOptions' => $statusOptions,
+            'focusAvailable' => Schema::hasColumn('pomodoro_sessions', 'task_id'),
             'activeFilters' => $this->taskFilterChips(),
             'pendingCount' => (int) $stats->pending_count,
             'completedCount' => (int) $stats->completed_count,
             'completedToday' => (int) $stats->completed_today,
             'plannedToday' => (int) $stats->planned_today,
             'overdueCount' => Task::query()->overdue()->count(),
-            'categoryBreakdown' => $categoryBreakdown,
+            'todayStats' => $todayStats,
+            'weekStats' => $weekStats,
         ]);
+    }
+
+    /**
+     * Tareas del periodo (planificadas o completadas en él) agrupadas por categoría,
+     * con conteo, completadas y minutos. Los minutos siguen la regla del foco:
+     * intervalo con hora válido y, si no, el tiempo estimado.
+     *
+     * @return array{count:int, done:int, minutes:int, unestimated:int, rows:list<array>}
+     */
+    private function categoryStats(Carbon $from, Carbon $to): array
+    {
+        $tasks = Task::query()
+            ->select(['id', 'category', 'start_date', 'end_date', 'start_is_date', 'end_is_date', 'estimated_time', 'completed', 'completed_at'])
+            ->where(fn ($q) => $q->whereBetween('start_date', [$from, $to])
+                ->orWhereBetween('end_date', [$from, $to])
+                ->orWhereBetween('completed_at', [$from, $to]))
+            ->get();
+
+        $rows = [];
+        foreach ($tasks as $task) {
+            $key = $task->category ?: '';
+            $minutes = $this->taskDurationMinutes($task);
+            $rows[$key] ??= [
+                'key' => $key,
+                'label' => $key === '' ? 'Sin categoría' : ($this->categories[$key] ?? $key),
+                'color' => $this->categoryColor($key),
+                'count' => 0, 'done' => 0, 'minutes' => 0, 'unestimated' => 0,
+            ];
+            $rows[$key]['count']++;
+            $rows[$key]['done'] += $task->completed ? 1 : 0;
+            $rows[$key]['minutes'] += $minutes ?? 0;
+            $rows[$key]['unestimated'] += $minutes === null ? 1 : 0;
+        }
+
+        $rows = array_values($rows);
+        usort($rows, fn ($a, $b) => [$b['minutes'], $b['count']] <=> [$a['minutes'], $a['count']]);
+
+        // Colores del catálogo (Tareas › Ajustes); sin color, uno estable de la misma paleta.
+        $named = ['gray' => '#6b7a8f', 'blue' => '#3b82f6', 'indigo' => '#5b5fd6', 'violet' => '#8b5cf6', 'pink' => '#db4f8f',
+            'red' => '#e0524a', 'orange' => '#ea8a2e', 'yellow' => '#d4a72c', 'green' => '#2e9d6a', 'teal' => '#1f9bb5'];
+        $fallback = ['#3b82f6', '#2e9d6a', '#ea8a2e', '#8b5cf6', '#1f9bb5', '#db4f8f', '#d4a72c', '#6b7a8f'];
+        foreach ($rows as $i => &$row) {
+            $row['color'] = $named[$row['color'] ?? ''] ?? $fallback[$i % count($fallback)];
+        }
+        unset($row);
+
+        return [
+            'count' => array_sum(array_column($rows, 'count')),
+            'done' => array_sum(array_column($rows, 'done')),
+            'minutes' => array_sum(array_column($rows, 'minutes')),
+            'unestimated' => array_sum(array_column($rows, 'unestimated')),
+            'rows' => $rows,
+        ];
+    }
+
+    private function taskDurationMinutes(Task $task): ?int
+    {
+        if ($task->start_date && $task->end_date && ! $task->start_is_date && ! $task->end_is_date) {
+            $minutes = (int) round($task->start_date->diffInMinutes($task->end_date, true));
+            if ($minutes >= 1 && $minutes <= 1440) {
+                return $minutes;
+            }
+        }
+        $estimate = (int) $task->estimated_time;
+
+        return $estimate >= 1 && $estimate <= 1440 ? $estimate : null;
+    }
+
+    public static function formatMinutes(int $minutes): string
+    {
+        if ($minutes <= 0) {
+            return '0 h';
+        }
+        $h = intdiv($minutes, 60);
+        $m = $minutes % 60;
+
+        return $h ? $h.' h'.($m ? ' '.$m.' min' : '') : $m.' min';
     }
 }

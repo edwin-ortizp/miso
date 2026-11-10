@@ -32,6 +32,21 @@ class RewardGranter
     {
         $at = $task->completed_at ?? now();
 
+        // CHG-048: las tareas de categorías de constancia (Personal) dan micro-xp en vez de ball,
+        // sin misiones ni cupo diario. Con la fuente apagada vuelven al flujo normal.
+        if ($task->category && in_array($task->category, (array) config('game.consistency_task_categories'), true)) {
+            $settings = $this->settings->for((int) $task->user_id);
+            if ($settings['enabled'] && ($settings['sources']['personal_tasks'] ?? false)) {
+                $this->safely(function () use ($task, $at) {
+                    app(ConsistencyXp::class)->grant((int) $task->user_id, 'personal_tasks', $task, $at);
+
+                    return null;
+                });
+
+                return null;
+            }
+        }
+
         return $this->safely(fn () => $this->grant(
             (int) $task->user_id, 'tasks', $task, (string) $task->title,
             'task:'.$task->getKey().':'.$at->copy()->timezone(config('app.timezone'))->toDateString(), $at,

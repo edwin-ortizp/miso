@@ -31,6 +31,81 @@ export function readCalendarLayers() {
 export function registerTaskCalendar(Alpine) {
     Alpine.data('taskCalendar', (wire) => ({
         calendar: null,
+        actionEvent: null,
+        actionTrigger: null,
+        actionBusy: false,
+        actionError: '',
+        menuLeft: 0,
+        menuTop: 0,
+        closeActions(restore = true) {
+            this.actionEvent = null;
+            this.actionTrigger?.setAttribute('aria-expanded', 'false');
+            if (restore && this.actionTrigger?.isConnected) this.actionTrigger.focus();
+            this.actionTrigger = null;
+        },
+        openActions(event, trigger) {
+            this.closeActions(false);
+            this.actionEvent = { id: event.id, title: event.title, ...event.extendedProps };
+            this.actionTrigger = trigger;
+            this.actionError = '';
+            trigger.setAttribute('aria-expanded', 'true');
+            this.$nextTick(() => {
+                const menu = this.$refs.actionMenu;
+                const rect = trigger.getBoundingClientRect();
+                this.menuLeft = Math.max(8, Math.min(rect.right - menu.offsetWidth, innerWidth - menu.offsetWidth - 8));
+                this.menuTop = Math.max(8, Math.min(rect.bottom + 4, innerHeight - menu.offsetHeight - 8));
+                menu.style.left = this.menuLeft + 'px';
+                menu.style.top = this.menuTop + 'px';
+                menu.querySelector('[role="menuitem"]')?.focus();
+            });
+        },
+        menuKey(event) {
+            if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+            event.preventDefault();
+            const items = [...this.$refs.actionMenu.querySelectorAll('[role="menuitem"]')].filter(item => !item.disabled && item.getClientRects().length);
+            const index = items.indexOf(document.activeElement);
+            const next = event.key === 'Home' ? 0 : event.key === 'End' ? items.length - 1 : (index + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+            items[next]?.focus();
+        },
+        async runAction(action) {
+            if (!this.actionEvent || this.actionBusy) return;
+            const selected = this.actionEvent;
+            if (action === 'delete' && !window.confirm(`La tarea «${selected.title}» se elimina de forma permanente.`)) return;
+            if (action === 'edit') {
+                this.closeActions();
+                this.$dispatch('task-editor', { action: 'openForm', id: selected.id, mode: 'edit' });
+                return;
+            }
+            this.actionBusy = true;
+            this.actionError = '';
+            try {
+                await wire.calendarAction(selected.id, action);
+                this.closeActions();
+            } catch {
+                this.actionError = 'No se pudo realizar la acción. Inténtalo de nuevo.';
+            } finally { this.actionBusy = false; }
+        },
+        mountActionTrigger(info) {
+            if (info.event.extendedProps.type !== 'tasks') return;
+            const trigger = document.createElement('button');
+            trigger.type = 'button';
+            trigger.className = 'md-calendar-task-actions md-btn-icon';
+            trigger.setAttribute('aria-label', `Más acciones de ${info.event.title}`);
+            trigger.setAttribute('aria-haspopup', 'menu');
+            trigger.setAttribute('aria-expanded', 'false');
+            trigger.innerHTML = '<i class="bi bi-three-dots-vertical" aria-hidden="true"></i>';
+            for (const name of ['pointerdown', 'mousedown', 'touchstart', 'dblclick']) trigger.addEventListener(name, event => event.stopPropagation());
+            trigger.addEventListener('keydown', event => { if (event.key !== 'Escape') event.stopPropagation(); });
+            trigger.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                if (this.actionTrigger === trigger) this.closeActions();
+                else this.openActions(info.event, trigger);
+            });
+            const host = info.el.querySelector('.fc-event-main, .fc-list-event-title') || info.el;
+            host.classList.add('md-calendar-action-host');
+            host.append(trigger);
+        },
         layers: readCalendarLayers(),
         draftLayers: defaultLayers(),
         filtersOpen: false,
@@ -65,6 +140,8 @@ export function registerTaskCalendar(Alpine) {
             }
         },
         clickEvent(info) {
+            if (info.jsEvent?.target?.closest('.md-calendar-task-actions')) return;
+            this.closeActions(false);
             if (info.event.extendedProps.type === 'tasks') this.$dispatch('task-editor', { action: 'openForm', id: info.event.id });
             else if (info.event.extendedProps.detailUrl) {
                 window.location.assign(info.event.extendedProps.detailUrl);
@@ -135,6 +212,7 @@ export function registerTaskCalendar(Alpine) {
                 eventMinHeight: 26,
                 // La rejilla horaria necesita altura fija para desplazarse por dentro; mes y lista crecen con su contenido.
                 datesSet: ({ view }) => {
+                    this.closeActions(false);
                     const date = this.calendar?.getDate() || view.currentStart;
                     this.viewType = view.type;
                     this.mobileView = { timeGridDay: 'Día', timeGridWeek: 'Semana', dayGridMonth: 'Mes', listWeek: 'Agenda' }[view.type];
@@ -153,7 +231,7 @@ export function registerTaskCalendar(Alpine) {
                 }, failure),
                 eventClick: (info) => this.clickEvent(info),
                 // El clic en otro evento no debe contar como «clic afuera» del popover abierto.
-                eventDidMount: (info) => { info.el.dataset.popoverTrigger = ''; if (info.event.extendedProps.type === 'tasks') { const color = info.event.extendedProps.categoryColor; if (['gray', 'blue', 'indigo', 'violet', 'pink', 'red', 'orange', 'yellow', 'green', 'teal'].includes(color)) info.el.classList.add(`md-catalog-chip--${color}`); } if (info.event.extendedProps.type === 'meals') { info.el.title = `${info.event.extendedProps.timeLabel} · ${info.event.title}`; info.el.setAttribute('aria-label', info.el.title); } },
+                eventDidMount: (info) => { this.mountActionTrigger(info); info.el.dataset.popoverTrigger = ''; if (info.event.extendedProps.type === 'tasks') { const color = info.event.extendedProps.categoryColor; if (['gray', 'blue', 'indigo', 'violet', 'pink', 'red', 'orange', 'yellow', 'green', 'teal'].includes(color)) info.el.classList.add(`md-catalog-chip--${color}`); } if (info.event.extendedProps.type === 'meals') { info.el.title = `${info.event.extendedProps.timeLabel} · ${info.event.title}`; info.el.setAttribute('aria-label', info.el.title); } },
                 dateClick: (info) => this.$dispatch('task-editor', {
                     action: 'openForm',
                     prefill: info.allDay
@@ -172,12 +250,13 @@ export function registerTaskCalendar(Alpine) {
             window.visualViewport?.addEventListener('resize', this.resize);
             this.resize();
 
-            this.refresh = () => this.calendar?.refetchEvents();
+            this.refresh = () => { this.closeActions(); this.calendar?.refetchEvents(); };
             window.addEventListener('task-calendar-refresh', this.refresh);
             this.goto = (event) => this.calendar?.gotoDate(event.detail.date);
             window.addEventListener('task-calendar-goto', this.goto);
         },
         destroy() {
+            this.closeActions(false);
             cancelAnimationFrame(this.nowFrame);
             cancelAnimationFrame(this.resizeFrame);
             window.removeEventListener('resize', this.resize);

@@ -352,3 +352,37 @@
     max-height: calc(85dvh - var(--md-sys-layout-nav-bar-height) - var(--lt-safe-bottom));
   }
 }
+
+/* Acciones de tareas dentro de FullCalendar; menú fuera del área recortada. */
+.md-calendar-action-host { position: relative; padding-inline-end: 26px; }
+.md-calendar-task-actions.md-btn-icon { position: absolute; inset-inline-end: 0; top: 0; width: 24px; height: 26px; min-width: 24px; min-height: 26px; padding: 0; font-size: 14px; color: inherit; opacity: 0; z-index: 2; }
+.fc-event:hover .md-calendar-task-actions,
+.fc-event:focus-within .md-calendar-task-actions,
+.md-calendar-task-actions[aria-expanded="true"] { opacity: 1; }
+.md-calendar-action-menu.md-menu__surface { position: fixed; z-index: 1500; min-width: 210px; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow-y: auto; }
+@media (hover: none), (pointer: coarse) {
+    .md-calendar-task-actions.md-btn-icon { opacity: 1; }
+}
+
+/* CHG-054 · Horas y tareas por categoría (hoy y semana). */
+.lt-cat-empty { margin: 0; color: var(--md-sys-color-on-surface-variant); font-size: .82rem; }
+.lt-cat-note { margin: 12px 0 0; color: var(--md-sys-color-on-surface-variant); font-size: .74rem; display: flex; gap: 6px; align-items: center; }
+.lt-cat-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.lt-cat-row__head { display: flex; align-items: center; gap: 8px; font-size: .8rem; margin-bottom: 6px; }
+.lt-cat-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--cat); flex: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--cat) 20%, transparent); }
+.lt-cat-row__name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--md-sys-color-on-surface); font-weight: 600; }
+.lt-cat-row__meta { color: var(--md-sys-color-on-surface-variant); font-size: .72rem; font-variant-numeric: tabular-nums; }
+.lt-cat-row__value { color: var(--md-sys-color-on-surface); font-weight: 700; font-variant-numeric: tabular-nums; min-width: 3.5em; text-align: right; }
+.lt-cat-bar { height: 6px; border-radius: 999px; background: color-mix(in srgb, var(--cat) 14%, var(--md-sys-color-surface-container-highest, #eceef3)); overflow: hidden; }
+.lt-cat-bar > span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--cat) 70%, #fff), var(--cat)); transition: width .5s cubic-bezier(.2, .8, .2, 1); }
+.lt-week { display: grid; gap: 14px; }
+.lt-week__totals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.lt-week__totals > div { padding: 10px 12px; border-radius: 14px; background: var(--md-sys-color-surface-container-low, #f5f6fa); display: grid; gap: 2px; }
+.lt-week__totals strong { font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; color: var(--md-sys-color-on-surface); }
+.lt-week__totals span { font-size: .72rem; color: var(--md-sys-color-on-surface-variant); }
+.lt-segmented { display: inline-flex; padding: 3px; border-radius: 999px; background: var(--md-sys-color-surface-container-high, #e9ebf1); justify-self: start; }
+.lt-segmented button { border: 0; background: transparent; padding: 5px 14px; border-radius: 999px; font-size: .76rem; font-weight: 600; color: var(--md-sys-color-on-surface-variant); cursor: pointer; transition: background .2s, color .2s; }
+.lt-segmented button.is-active { background: var(--md-sys-color-surface, #fff); color: var(--md-sys-color-on-surface); box-shadow: 0 1px 3px rgb(0 0 0 / .12); }
+.lt-segmented button:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
+.lt-stack-bar { display: flex; gap: 3px; height: 14px; margin-bottom: 14px; border-radius: 999px; overflow: hidden; }
+.lt-stack-bar > span { min-width: 4px; }

@@ -5,7 +5,7 @@ return [
     // Valores por defecto; cada usuario los ajusta en Colección → Ajustes (ModuleSetting módulo "game").
     'defaults' => [
         'enabled' => true,
-        'sources' => ['tasks' => true, 'habits' => true, 'focus' => true, 'goals' => true, 'health' => true, 'vehicle' => true, 'wellbeing' => true, 'people' => true, 'home' => true],
+        'sources' => ['tasks' => true, 'habits' => true, 'focus' => true, 'goals' => true, 'health' => true, 'vehicle' => true, 'wellbeing' => true, 'people' => true, 'home' => true, 'personal_tasks' => true],
         'daily_limit' => 5,
         'pity_threshold' => 10,
         'rarity_weights' => ['common' => 60, 'uncommon' => 30, 'rare' => 9, 'legendary' => 1],
@@ -57,7 +57,9 @@ return [
 
     // Integrante del día (CHG-043): frases que el director agrega cada semana.
     'quotes' => ['min' => 7, 'max' => 14, 'max_length' => 140, 'max_age_days' => 60],
-    'consistency_sources' => ['vehicle' => 'Vehículo', 'wellbeing' => 'Bienestar', 'people' => 'Personas', 'home' => 'Hogar'],
+    'consistency_sources' => ['vehicle' => 'Vehículo', 'wellbeing' => 'Bienestar', 'people' => 'Personas', 'home' => 'Hogar', 'personal_tasks' => 'Tareas personales'],
+    // CHG-048: tareas de estas categorías dan constancia (micro-xp) en vez de ball.
+    'consistency_task_categories' => ['personal'],
     'affinity_bonus_xp' => 6,
     'missions_per_week' => 3,
     'mission_target' => [2, 4],

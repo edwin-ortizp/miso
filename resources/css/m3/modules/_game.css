@@ -1024,7 +1024,6 @@ a.game-collectible:hover .game-collectible__art img { transform: translate(-50%,
 
 .game-toast {
     --game-toast-color: var(--md-sys-color-primary);
-    --game-toast-left: 1;
     position: relative;
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -1080,18 +1079,83 @@ a.game-collectible:hover .game-collectible__art img { transform: translate(-50%,
 .game-toast__action { justify-self: start; margin-top: 0.25rem; }
 .game-toast__close { color: var(--md-sys-color-on-surface-variant); }
 
-/* Barra de tiempo (JS actualiza --game-toast-left de 1 a 0; se pausa con el mouse). */
-.game-toast::after {
-    content: '';
+/* Integrantes del aviso de experiencia con su foto (CHG-050). */
+.game-toast__members {
+    display: grid;
+    gap: 0.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.game-toast__member {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-width: 0;
+}
+
+.game-toast__avatar {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    overflow: hidden;
+    border-radius: 8px;
+    background: var(--md-sys-color-surface-container-highest);
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.game-toast__avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.game-toast__member-text {
+    overflow: hidden;
+    font-size: 0.85rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.game-toast__affinity {
+    margin-left: 0.35rem;
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.75rem;
+}
+
+.game-toast__note {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.75rem;
+}
+
+.game-toast__member--more {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: 0.8rem;
+}
+
+/* Barra de tiempo: animación CSS de 5 s; al terminar cierra el aviso; se pausa con el mouse (CHG-053). */
+.game-toast__timer {
     position: absolute;
     right: 0;
     bottom: 0;
     left: 0;
     height: 4px;
     background: var(--game-toast-color);
-    transform: scaleX(var(--game-toast-left));
     transform-origin: left;
-    transition: transform 100ms linear;
+    animation: game-toast-timer 5000ms linear forwards;
+    pointer-events: none;
+}
+
+.game-toast.is-paused .game-toast__timer { animation-play-state: paused; }
+
+@keyframes game-toast-timer {
+    from { transform: scaleX(1); }
+    to { transform: scaleX(0); }
 }
 
 /* Brillo de entrada en los momentos importantes. */
@@ -1233,7 +1297,6 @@ a.game-collectible:hover .game-collectible__art img { transform: translate(-50%,
     .game-toast,
     .game-toast__badge,
     .game-toast::before { animation: none; }
-    .game-toast::after { transition: none; }
 }
 
 .game-celebration-options {

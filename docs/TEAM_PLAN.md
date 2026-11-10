@@ -53,8 +53,13 @@ _Última actualización: 2026-11-10_
 | CHG-045 | S | Temporadas tematicas por calendario | in-progress | En verificación | 4/5 |
 | CHG-046 | M | Modo rutina inmersivo de habitos | in-progress | En verificación | 7/8 |
 | CHG-047 | S | Bebidas con buscador y cierre protegido | in-progress | En verificación | 2/2 |
-| CHG-048 | S | Tareas personales dan constancia en vez de ball | to-do | Aprobado | 0/3 |
+| CHG-048 | S | Tareas personales dan constancia en vez de ball | in-progress | En verificación | 1/3 |
 | CHG-049 | M | Compañero del panel con escenario por tipo y reacciones | in-progress | En verificación | 3/4 |
+| CHG-050 | S | Avisos de experiencia con la foto de cada Pokemon | in-progress | En verificación | 1/1 |
+| CHG-051 | S | Iniciar enfoque desde la lista de tareas | in-progress | En desarrollo | 2/3 |
+| CHG-052 | S | Acciones de tareas desde las tarjetas del calendario | in-progress | En verificación | 2/2 |
+| CHG-053 | XS | Barra de tiempo fluida en los avisos del juego | in-progress | En desarrollo | 0/1 |
+| CHG-054 | S | Horas por categoría hoy y resumen semanal por categoría en tareas | in-progress | En verificación | 2/2 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

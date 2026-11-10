@@ -112,6 +112,14 @@
                             <x-ui.menu-item icon="bi-calendar-event" wire:click="moveToDay('{{ $task->id }}', 0)" wire:loading.attr="disabled">Mover para hoy</x-ui.menu-item>
                             <x-ui.menu-item icon="bi-calendar-plus" wire:click="moveToDay('{{ $task->id }}', 1)" wire:loading.attr="disabled">Mover para mañana</x-ui.menu-item>
                             <x-ui.menu-divider />
+                            @if ($focusAvailable)
+                                @php $focusMinutes = $this->focusSuggestionMinutes($task); @endphp
+                                <x-ui.menu-item icon="bi-stopwatch"
+                                    @click="$dispatch('task-focus-timer', { taskId: {{ \Illuminate\Support\Js::from($task->id) }}, durationMinutes: {{ \Illuminate\Support\Js::from($focusMinutes) }}, start: true })">Iniciar enfoque</x-ui.menu-item>
+                                <x-ui.menu-item icon="bi-clock-history"
+                                    @click="$dispatch('task-focus-manual', { taskId: {{ \Illuminate\Support\Js::from($task->id) }}, durationMinutes: {{ \Illuminate\Support\Js::from($focusMinutes) }} })">Registrar tiempo trabajado</x-ui.menu-item>
+                                <x-ui.menu-divider />
+                            @endif
                         @endunless
                         <x-ui.menu-item icon="bi-pencil" x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}', mode: 'edit'})">Editar</x-ui.menu-item>
                         <x-ui.menu-divider />
@@ -144,15 +152,81 @@
                 </dl>
             </div>
         </x-panel>
-        @if (!empty($categoryBreakdown))
-            <x-panel title="Completadas hoy" icon="bi-bar-chart">
-                <dl class="lt-facts">
-                    @foreach ($categoryBreakdown as $cat => $count)
-                        <div><dt>{{ $categories[$cat] ?? $cat }}</dt><dd>{{ $count }}</dd></div>
+        @php($fmt = fn ($m) => \App\Livewire\Task\TaskList::formatMinutes($m))
+        <x-panel title="Hoy por categoría" icon="bi-clock-history">
+            @if (empty($todayStats['rows']))
+                <p class="lt-cat-empty">Hoy no hay tareas planificadas ni completadas.</p>
+            @else
+                <p class="lt-figure" style="margin: 0 0 12px;"><strong>{{ $fmt($todayStats['minutes']) }}</strong><span>en {{ $todayStats['count'] }} {{ $todayStats['count'] === 1 ? 'tarea' : 'tareas' }}</span></p>
+                @php($maxToday = max(1, max(array_column($todayStats['rows'], 'minutes'))))
+                <ul class="lt-cat-list">
+                    @foreach ($todayStats['rows'] as $row)
+                        <li class="lt-cat-row" style="--cat: {{ $row['color'] }};">
+                            <div class="lt-cat-row__head">
+                                <span class="lt-cat-dot" aria-hidden="true"></span>
+                                <span class="lt-cat-row__name">{{ $row['label'] }}</span>
+                                <span class="lt-cat-row__meta" title="Completadas de las del día">{{ $row['done'] }}/{{ $row['count'] }}</span>
+                                <span class="lt-cat-row__value">{{ $fmt($row['minutes']) }}</span>
+                            </div>
+                            <div class="lt-cat-bar" role="img" aria-label="{{ $row['label'] }}: {{ $fmt($row['minutes']) }}, {{ $row['done'] }} de {{ $row['count'] }} completadas">
+                                <span style="width: {{ round($row['minutes'] / $maxToday * 100) }}%;"></span>
+                            </div>
+                        </li>
                     @endforeach
-                </dl>
-            </x-panel>
-        @endif
+                </ul>
+                @if ($todayStats['unestimated'] > 0)
+                    <p class="lt-cat-note"><i class="bi bi-info-circle"></i> {{ $todayStats['unestimated'] }} {{ $todayStats['unestimated'] === 1 ? 'tarea sin duración no suma' : 'tareas sin duración no suman' }} horas.</p>
+                @endif
+            @endif
+        </x-panel>
+
+        <x-panel title="Esta semana" icon="bi-calendar-week">
+            @if (empty($weekStats['rows']))
+                <p class="lt-cat-empty">Esta semana aún no tiene tareas.</p>
+            @else
+                <div x-data="{ metric: 'count' }" class="lt-week">
+                    <div class="lt-week__totals">
+                        <div><strong>{{ $weekStats['count'] }}</strong><span>tareas · {{ $weekStats['done'] }} hechas</span></div>
+                        <div><strong>{{ $fmt($weekStats['minutes']) }}</strong><span>de trabajo</span></div>
+                    </div>
+                    <div class="lt-segmented" role="group" aria-label="Ver por">
+                        <button type="button" :class="{ 'is-active': metric === 'count' }" :aria-pressed="(metric === 'count').toString()" x-on:click="metric = 'count'">Tareas</button>
+                        <button type="button" :class="{ 'is-active': metric === 'minutes' }" :aria-pressed="(metric === 'minutes').toString()" x-on:click="metric = 'minutes'">Horas</button>
+                    </div>
+                    @foreach (['count', 'minutes'] as $metric)
+                        @php($total = max(1, $weekStats[$metric]))
+                        @php($max = max(1, max(array_column($weekStats['rows'], $metric))))
+                        <div x-show="metric === '{{ $metric }}'" @if ($metric === 'minutes') x-cloak @endif>
+                            <div class="lt-stack-bar" aria-hidden="true">
+                                @foreach ($weekStats['rows'] as $row)
+                                    @if ($row[$metric] > 0)
+                                        <span style="flex: {{ $row[$metric] }}; background: {{ $row['color'] }};" title="{{ $row['label'] }}"></span>
+                                    @endif
+                                @endforeach
+                            </div>
+                            <ul class="lt-cat-list">
+                                @foreach ($weekStats['rows'] as $row)
+                                    <li class="lt-cat-row" style="--cat: {{ $row['color'] }};">
+                                        <div class="lt-cat-row__head">
+                                            <span class="lt-cat-dot" aria-hidden="true"></span>
+                                            <span class="lt-cat-row__name">{{ $row['label'] }}</span>
+                                            <span class="lt-cat-row__meta">{{ round($row[$metric] / $total * 100) }}%</span>
+                                            <span class="lt-cat-row__value">{{ $metric === 'count' ? $row['count'] : $fmt($row['minutes']) }}</span>
+                                        </div>
+                                        <div class="lt-cat-bar" role="img" aria-label="{{ $row['label'] }}: {{ $metric === 'count' ? $row['count'].' tareas' : $fmt($row['minutes']) }}">
+                                            <span style="width: {{ round($row[$metric] / $max * 100) }}%;"></span>
+                                        </div>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endforeach
+                    @if ($weekStats['unestimated'] > 0)
+                        <p class="lt-cat-note" x-show="metric === 'minutes'" x-cloak><i class="bi bi-info-circle"></i> {{ $weekStats['unestimated'] }} sin duración no suman horas.</p>
+                    @endif
+                </div>
+            @endif
+        </x-panel>
         <x-panel title="Vistas relacionadas" icon="bi-signpost-split">
             <div class="md-context-links">
                 <a href="{{ route('tasks.planning') }}"><i class="bi bi-calendar-week"></i> Planificación</a>

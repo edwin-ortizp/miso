@@ -21,6 +21,7 @@ use Livewire\WithPagination;
 class TaskCalendar extends Component
 {
     use WithPagination;
+    use \App\Livewire\Task\Concerns\HandlesTaskRowActions;
 
     use HandlesRecurringTaskCompletion {
         confirmRecurringCompletion as protected completeRecurring;
@@ -111,6 +112,21 @@ class TaskCalendar extends Component
         }
 
         return array_merge($events, app(\App\Services\Meal\MealSchedule::class)->events((int) auth()->id(), $rangeStart, $rangeEnd));
+    }
+
+    public function calendarAction(string $id, string $action, TaskGamificationService $gamification): void
+    {
+        abort_unless(auth()->check(), 403);
+        Task::where('user_id', auth()->id())->findOrFail($id);
+        match ($action) {
+            'advance' => $this->advanceStatus($id, $gamification),
+            'complete' => $this->completeTask($id, $gamification),
+            'today' => $this->moveToDay($id, 0),
+            'tomorrow' => $this->moveToDay($id, 1),
+            'delete' => $this->delete($id),
+            default => abort(422),
+        };
+        $this->dispatch('task-calendar-refresh');
     }
 
     public function moveTask(string $id, string $start, ?string $end, bool $allDay): void
@@ -244,6 +260,7 @@ class TaskCalendar extends Component
             'allDay' => $allDay,
             'extendedProps' => [
                 'type' => 'tasks',
+                'advanceLabel' => $this->advanceLabel($task),
                 'status' => $task->status ? ['id' => $task->status->id, 'name' => $task->status->name, 'icon' => $task->status->icon] : null,
                 'completed' => (bool) $task->completed,
                 'recurrent' => (bool) $task->is_recurrent,

@@ -5,14 +5,9 @@
     <div class="game-toasts" role="status" aria-live="polite">
         @foreach ($toasts as $toast)
             <div class="game-toast game-toast--{{ $toast['type'] }}" wire:key="game-toast-{{ $toast['id'] }}"
-                 {{-- Cierre a los 5 s; pasar el mouse o enfocar lo pausa (y la barra de tiempo). --}}
-                 x-data="{ left: 5000, paused: false, timer: null }"
-                 x-init="timer = setInterval(() => {
-                         if (paused) return;
-                         left -= 100;
-                         $el.style.setProperty('--game-toast-left', Math.max(0, left / 5000));
-                         if (left <= 0) { clearInterval(timer); $wire.dismiss({{ $toast['id'] }}); }
-                     }, 100)"
+                 {{-- Cierre a los 5 s con una animación CSS de la barra (CHG-053): fluida y sin
+                      estilos inline que el morph de Livewire borre. Mouse o foco la pausan. --}}
+                 x-data="{ paused: false }"
                  x-on:mouseenter="paused = true" x-on:mouseleave="paused = false"
                  x-on:focusin="paused = true" x-on:focusout="paused = false"
                  x-bind:class="{ 'is-paused': paused }">
@@ -25,7 +20,31 @@
                 </span>
                 <div class="game-toast__text">
                     <p class="game-toast__eyebrow mb-0">{{ $toast['title'] }}</p>
-                    @if ($toast['detail'])
+                    @if (! empty($toast['members']))
+                        {{-- La foto de cada Pokémon que ganó la experiencia (CHG-050). --}}
+                        <ul class="game-toast__members">
+                            @foreach (array_slice($toast['members'], 0, 3) as $member)
+                                <li class="game-toast__member">
+                                    <span class="game-toast__avatar" aria-hidden="true">
+                                        @if ($member['image'])
+                                            <img src="{{ $member['image'] }}" alt="" width="28" height="28" loading="lazy">
+                                        @else
+                                            {{ mb_substr($member['name'], 0, 1) }}
+                                        @endif
+                                    </span>
+                                    <span class="game-toast__member-text">
+                                        {{ $member['name'] }} +{{ $member['xp'] }}@if ($member['affinity'])<span class="game-toast__affinity">afinidad</span>@endif
+                                    </span>
+                                </li>
+                            @endforeach
+                            @if (count($toast['members']) > 3)
+                                <li class="game-toast__member game-toast__member--more">y {{ count($toast['members']) - 3 }} más</li>
+                            @endif
+                        </ul>
+                        @if ($toast['note'] ?? null)
+                            <p class="game-toast__note mb-0">{{ $toast['note'] }}</p>
+                        @endif
+                    @elseif ($toast['detail'])
                         <p class="md-body-medium mb-0 game-toast__detail">{{ $toast['detail'] }}</p>
                     @endif
                     @if ($toast['action'] === 'ball')
@@ -35,6 +54,8 @@
                 <button type="button" class="md-btn-icon game-toast__close" wire:click="dismiss({{ $toast['id'] }})" aria-label="Cerrar aviso">
                     <i class="bi bi-x-lg" aria-hidden="true"></i>
                 </button>
+                <span class="game-toast__timer" aria-hidden="true"
+                      x-on:animationend.self="$wire.dismiss({{ $toast['id'] }})"></span>
             </div>
         @endforeach
     </div>
