@@ -50,7 +50,7 @@ class GameWeekViewTest extends TestCase
             ->assertSee('Nv 3')
             ->assertSee('Afinidad')->assertSee('Poder')
             ->assertSee('Completa 4 tareas de Hogar')
-            ->assertSee('Ball recibida');
+            ->assertSee('Recompensa parcial recibida');
     }
 
     public function test_other_users_week_is_not_visible(): void

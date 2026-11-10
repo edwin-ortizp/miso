@@ -3,6 +3,7 @@
 namespace App\Livewire\Game;
 
 use App\Models\Game\GameEncounter;
+use App\Models\Game\GameSpecies;
 use App\Services\Game\EncounterOpener;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\Layout;
@@ -23,6 +24,8 @@ class GameBalls extends Component
 
     public bool $showReveal = false;
 
+    public int $revealKey = 0;
+
     public string $error = '';
 
     public function open(int $encounterId, EncounterOpener $opener): void
@@ -30,6 +33,7 @@ class GameBalls extends Component
         $this->error = '';
         try {
             $this->revealed = $opener->open($encounterId, (int) auth()->id());
+            $this->revealKey++;
             $this->showReveal = true;
         } catch (Throwable $exception) {
             Log::warning('game.open_failed', ['encounter' => $encounterId, 'error' => $exception->getMessage()]);
@@ -57,6 +61,9 @@ class GameBalls extends Component
             ->orderByDesc('granted_at')->orderByDesc('id')
             ->get();
 
-        return view('livewire.game.game-balls', ['pending' => $pending]);
+        return view('livewire.game.game-balls', [
+            'pending' => $pending,
+            'revealedSpecies' => $this->revealed ? GameSpecies::find($this->revealed['species_id']) : null,
+        ]);
     }
 }

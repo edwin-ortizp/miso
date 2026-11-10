@@ -123,6 +123,21 @@ class UiPatternsTest extends TestCase
         $this->assertStringContainsString('showForm = false', $html);
     }
 
+    public function test_standard_dialog_accepts_sections_without_adding_a_save_form(): void
+    {
+        $html = $this->render(<<<'BLADE'
+            <x-ui.dialog standard persistent-content state="sheetOpen" title="Ficha" size="lg"
+                :sections="['profile' => ['label' => 'Ficha', 'icon' => 'bi-person-badge'], 'history' => ['label' => 'Historial', 'icon' => 'bi-clock-history']]">
+                Información
+            </x-ui.dialog>
+        BLADE);
+        $this->assertStringContainsString('md-form-dialog--large', $html);
+        $this->assertStringContainsString('md-form-dialog--sections', $html);
+        $this->assertStringContainsString('Historial', $html);
+        $this->assertStringContainsString('aria-controls="dialog-ficha-nav"', $html);
+        $this->assertStringNotContainsString('type="submit"', $html);
+    }
+
     public function test_sheet_reuses_the_modal_surface_contract(): void
     {
         $html = $this->render('<x-ui.sheet state="showSheet" title="Detalle" placement="side">Contenido</x-ui.sheet>');

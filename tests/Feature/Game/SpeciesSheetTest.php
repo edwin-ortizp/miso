@@ -9,7 +9,6 @@ use App\Models\Game\GameEncounter;
 use App\Models\Game\GameSpecies;
 use App\Models\Task;
 use App\Models\User;
-use App\Services\Game\CompanionProgress;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -44,6 +43,34 @@ class SpeciesSheetTest extends TestCase
         Livewire::test(GameBalls::class)->call('open', $encounter->id);
     }
 
+    public function test_profile_sections_and_properties_preserve_history_and_stats(): void
+    {
+        $this->openBallOf('Brotelo', 'Una actividad para recordar');
+        $species = GameSpecies::where('name', 'Brotelo')->first();
+        $species->update(['stats' => ['hp' => 45, 'attack' => 49, 'defense' => 49, 'special_attack' => 65, 'special_defense' => 65, 'speed' => 45]]);
+        Livewire::test(GameCollection::class)->call('showSpecies', $species->id)
+            ->assertSee('Historial')->assertSee('Características')->assertSee('Experiencia del nivel')
+            ->assertSee('md-form-dialog--large')->assertSee('md-form-dialog--sections')
+            ->assertSee('Una actividad para recordar');
+        $this->assertDatabaseCount('game_companions', 1);
+    }
+
+    public function test_experience_is_central_and_maximum_level_never_promises_a_next_level(): void
+    {
+        $this->openBallOf('Brotelo', 'Un avance que cuenta');
+        $species = GameSpecies::where('name', 'Brotelo')->first();
+        $component = Livewire::test(GameCollection::class)->call('showSpecies', $species->id)
+            ->assertSee('Tu experiencia ganada')->assertSee('XP acumulada')->assertSee('35 XP')->assertSee('nivel 2');
+        $doc = new \DOMDocument;
+        @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$component->html());
+        $xpath = new \DOMXPath($doc);
+        $this->assertSame(1, $xpath->query('//*[contains(@class, "game-sheet__content")]//*[contains(@class, "game-experience__total")]')->length);
+        $this->assertSame(0, $xpath->query('//aside//*[contains(@class, "game-experience")]')->length);
+        GameCompanion::first()->update(['xp' => 4000, 'level' => 100]);
+        Livewire::test(GameCollection::class)->call('showSpecies', $species->id)
+            ->assertSee('Nivel máximo alcanzado')->assertSee('4.000')->assertDontSee('nivel 101');
+    }
+
     public function test_discovered_species_shows_bio_types_and_companion(): void
     {
         $this->openBallOf('Brotelo', 'Pagar arriendo');
@@ -66,7 +93,7 @@ class SpeciesSheetTest extends TestCase
         Livewire::test(GameCollection::class)
             ->call('showSpecies', $id)
             ->assertSee('Aún no la descubres')
-            ->assertDontSee('Florece de noche.');
+            ->assertDontSee('Florece de noche.')->assertDontSee('Características del Pokémon');
     }
 
     public function test_history_is_newest_first_and_survives_source_deletion(): void

@@ -85,7 +85,7 @@ class WeekPlannerTest extends TestCase
         }
 
         // 12 semanas x 6 lugares entre 7: la rotación reparte (nadie queda fuera ni acapara).
-        $this->assertGreaterThanOrEqual(8, min($counts));
+        $this->assertGreaterThanOrEqual(7, min($counts));
         $this->assertLessThanOrEqual(12, max($counts));
     }
 

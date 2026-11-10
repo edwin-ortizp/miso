@@ -5,7 +5,7 @@
         @endif
     </div>
 
-    <section class="md-card-elevated">
+    <section aria-label="Tus Poké Balls">
         <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2 mb-3">
             <h2 class="md-title-medium mb-0">{{ $pending->count() }} por abrir</h2>
             @if ($pending->isNotEmpty())
@@ -32,44 +32,41 @@
                         $label = $event?->source_label ?? 'Actividad';
                         $when = $ball->granted_at->isToday() ? 'hoy '.$ball->granted_at->format('g:i a') : ($ball->granted_at->isYesterday() ? 'ayer' : $ball->granted_at->translatedFormat('j M'));
                     @endphp
-                    <li wire:key="ball-{{ $ball->id }}">
-                        <button type="button" class="md-btn-text game-balls__item" wire:click="open({{ $ball->id }})"
-                                wire:loading.attr="disabled" wire:target="open({{ $ball->id }})"
-                                aria-label="Abrir ball de {{ $kind }}: {{ $label }}, {{ $when }}">
-                            <x-game.ball size="md" />
-                            <span class="md-label-large">{{ $kind }}</span>
-                            <span class="md-body-small">{{ \Illuminate\Support\Str::limit($label, 40) }}</span>
-                            <span class="md-label-small game-muted">{{ $when }}</span>
-                        </button>
+                    <li class="game-ball-card" wire:key="ball-{{ $ball->id }}">
+                        <div class="game-ball-card__art" aria-hidden="true"><x-game.opening-ball /><span class="game-ball-card__spark">✦</span></div>
+                        <div class="game-ball-card__body">
+                            <span class="game-ball-card__kind">{{ $kind }}</span>
+                            <h3 class="game-ball-card__title">{{ $label }}</h3>
+                            <time datetime="{{ $ball->granted_at->toIso8601String() }}" class="md-body-small game-muted">{{ $when }}</time>
+                            <button type="button" class="md-btn-filled" wire:click="open({{ $ball->id }})"
+                                    wire:loading.attr="disabled" wire:target="open,openNext"
+                                    aria-label="Abrir Poké Ball de {{ $kind }}: {{ $label }}, {{ $when }}">
+                                <span wire:loading.remove wire:target="open({{ $ball->id }})">Abrir Poké Ball <i class="bi bi-stars" aria-hidden="true"></i></span>
+                                <span wire:loading wire:target="open({{ $ball->id }})" role="status">Abriendo…</span>
+                            </button>
+                        </div>
                     </li>
                 @endforeach
             </ul>
         @endif
     </section>
 
-    <div x-data="{ revealOpen: $wire.entangle('showReveal').live }">
-    <x-ui.dialog standard persistent-content state="revealOpen" title="Revelación" icon="bi-stars">
+    <div x-data="gameReveal($wire)">
+    <x-ui.dialog standard persistent-content state="revealOpen" title="Tu descubrimiento" icon="bi-stars" data-module="game">
         @if ($revealed)
             @php
-                $revealedSpecies = \App\Models\Game\GameSpecies::find($revealed['species_id']);
                 $rarity = $revealedSpecies?->rarity ?? 'common';
+                $revealedCompanion = isset($revealed['companion_id']) ? \App\Models\Game\GameCompanion::find($revealed['companion_id']) : null;
+                $revealedPower = $revealedCompanion ? app(\App\Services\Game\CompanionProgress::class)->power($revealedCompanion) : null;
             @endphp
-            {{-- El resultado ya está guardado; esta secuencia solo lo presenta: tiembla → destello → aparición. --}}
-            <div class="game-reveal game-rarity--{{ $rarity }}"
-                 wire:key="reveal-{{ $revealed['species_id'] }}-{{ $revealed['companion_xp'] }}-{{ $revealed['level_to'] ?? 0 }}"
-                 x-data="{ phase: '' }"
-                 x-init="
-                     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { phase = 'is-revealed'; return; }
-                     phase = 'is-shaking';
-                     setTimeout(() => phase = 'is-burst', 900);
-                     setTimeout(() => phase = 'is-revealed', 1200);
-                 "
-                 :class="phase === 'is-shaking' ? '' : phase">
-                <div class="game-reveal__stage">
-                    <span class="game-reveal__burst" aria-hidden="true"></span>
-                    <x-game.ball size="lg" class="game-reveal__ball" x-bind:class="{ 'is-shaking': phase === 'is-shaking' }" />
+            {{-- La apertura es persistente; esta secuencia solo presenta su resultado. --}}
+            <div class="game-discovery game-rarity--{{ $rarity }}" :class="'game-discovery--' + phase" wire:key="discovery-{{ $revealKey }}">
+                <div class="game-discovery__stage">
+                    <div class="game-discovery__halo" aria-hidden="true"></div>
+                    <div class="game-discovery__particles" aria-hidden="true"><span>✦</span><span>✧</span><span>✦</span><span>✧</span></div>
+                    <x-game.opening-ball class="game-discovery__ball" />
                     @if ($revealed['evolved'] ?? false)
-                        <div class="game-reveal__art game-reveal__art--evolution">
+                        <div class="game-discovery__art game-reveal__art--evolution">
                             @foreach ([['evolved_from_image', 'evolved_from_name'], ['evolved_to_image', 'evolved_to_name']] as $index => [$imageKey, $nameKey])
                                 @if ($index === 1)<i class="bi bi-arrow-right game-evolution__arrow" aria-hidden="true"></i>@endif
                                 @if ($revealed[$imageKey])
@@ -79,10 +76,19 @@
                                 @endif
                             @endforeach
                         </div>
+                    @elseif ($revealed['is_new'] && $revealedSpecies)
+                        {{-- Especie nueva: se presenta como carta coleccionable que se voltea (CHG-033). --}}
+                        <div class="game-discovery__art">
+                            <x-game.collectible-card class="game-discovery__card" :species="$revealedSpecies" :level="$revealed['level_to'] ?? 1"
+                                                     :level-xp="($revealed['companion_xp'] ?? 0) % max(1, (int) config('game.xp_per_level'))"
+                                                     :xp-per-level="max(1, (int) config('game.xp_per_level'))"
+                                                     :power="$revealedPower"
+                                                     :image="$revealed['image']" flip />
+                        </div>
                     @else
-                        <div class="game-reveal__art">
+                        <div class="game-discovery__art">
                             @if ($revealed['image'])
-                                <img src="{{ $revealed['image'] }}" alt="{{ $revealed['name'] }}" width="180" height="180">
+                                <img src="{{ $revealed['image'] }}" alt="{{ $revealed['name'] }}" width="220" height="220">
                             @else
                                 <span class="game-placeholder" aria-hidden="true"><i class="bi bi-stars"></i></span>
                             @endif
@@ -90,7 +96,8 @@
                     @endif
                 </div>
 
-                <div role="status" aria-live="assertive" x-show="phase === 'is-revealed'" x-transition.opacity>
+                <button type="button" class="md-btn-text" x-show="!ready" @click="finish()">Mostrar ahora</button>
+                <div role="status" aria-live="polite" x-show="ready" x-cloak class="game-discovery__details">
                     @if ($revealed['evolved'] ?? false)
                         <span class="game-ribbon">¡Evolución!</span>
                         <p class="md-title-large mt-2 mb-1">¡{{ $revealed['evolved_from_name'] }} evolucionó a {{ $revealed['evolved_to_name'] }}!</p>
@@ -108,18 +115,33 @@
                     @if ($revealed['ready_to_evolve'] ?? false)
                         <p class="md-body-medium mb-1">Listo para evolucionar: elige en su ficha.</p>
                     @endif
+                    @unless ($revealed['is_new'] && !($revealed['evolved'] ?? false))<p class="md-label-large game-muted mb-1">#{{ str_pad($revealed['number'], 3, '0', STR_PAD_LEFT) }} · {{ $revealed['name'] }}</p>@endunless
+                    <div class="game-discovery__types">
+                        @foreach ($revealedSpecies?->types ?? [] as $type)
+                            <span class="game-type-chip {{ \App\Services\Game\CompanionProgress::typeClass($type) }}">{{ $type }}</span>
+                        @endforeach
+                        @unless ($revealed['is_new'] && !($revealed['evolved'] ?? false))<x-game.rarity-tag :rarity="$rarity" />@endunless
+                    </div>
+                    <div class="game-discovery__bio" tabindex="0" role="region" aria-label="Descripción del Pokémon">
+                        @if ($revealed['evolved'] ?? false)<h3 class="md-title-small">Sobre {{ $revealed['name'] }}</h3>@endif
+                        <p class="md-body-medium mb-0">{{ $revealedSpecies?->description ?: 'Aún no tenemos una descripción de este Pokémon' }}</p>
+                    </div>
                     @if ($revealed['source_label'])
                         <p class="md-body-medium game-muted mb-0">Llegó por: {{ $revealed['source_label'] }}</p>
                     @endif
                 </div>
             </div>
-            <div class="d-flex gap-2 justify-content-end mt-3">
-                <a href="{{ route('game.collection', ['species' => $revealed['species_id']]) }}" class="md-btn-outlined" wire:navigate>Ver ficha</a>
-                @if ($pending->isNotEmpty())
-                    <button type="button" class="md-btn-filled" wire:click="openNext">Abrir otra</button>
-                @endif
-            </div>
         @endif
+        <x-slot:actions>
+            @if ($revealed)
+                <div x-show="ready" x-cloak class="game-discovery__actions">
+                    <a href="{{ route('game.collection', ['species' => $revealed['species_id']]) }}" class="md-btn-outlined" wire:navigate>Ver ficha</a>
+                    @if ($pending->isNotEmpty())
+                        <button type="button" class="md-btn-filled" wire:click="openNext" wire:loading.attr="disabled" wire:target="open,openNext">Abrir otra</button>
+                    @endif
+                </div>
+            @endif
+        </x-slot:actions>
     </x-ui.dialog>
     </div>
 </x-module-shell>

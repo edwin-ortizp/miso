@@ -71,7 +71,9 @@ class GameVisualTest extends TestCase
         app(WeekPlanner::class)->forWeek(auth()->id(), now())->members()->first()->update(['ability_label' => 'Hogar']);
 
         $this->get(route('game.week'))->assertOk()
-            ->assertSee('game-card game-type--planta game-rarity--rare', false)
+            ->assertSee('game-collectible md-btn-text game-type--planta game-rarity--rare', false)
+            ->assertSee('game-collection-cards', false)
+            ->assertSee('ATQ')
             ->assertSee('Nv 3')
             ->assertSee('Poder 350')                                         // 318 × 1,1 = 349,8
             ->assertSee('12 / 40 xp')
@@ -102,5 +104,41 @@ class GameVisualTest extends TestCase
             ->assertSeeHtml('--md-progress-value: 19%')                      // 49 / 255
             ->assertSeeHtml('game-chain__item is-discovered')
             ->assertSee('Línea de tiempo');
+    }
+
+    public function test_team_cards_are_independent_one_per_member(): void
+    {
+        config(['game.image_base_url' => 'https://img.test']);
+        $this->companion(2);
+        $other = GameSpecies::where('name', 'Gotin')->first();
+        GameCompanion::create(['line_key' => 'gotin', 'species_id' => $other->id, 'level' => 1, 'first_met_at' => now()]);
+        app(WeekPlanner::class)->forWeek(auth()->id(), now());
+
+        $html = $this->get(route('game.week'))->assertOk()->getContent();
+
+        $this->assertSame(2, substr_count($html, 'class="game-collectible '));
+        // CHG-036: el arte va dentro de su ventana (se apoya en la base y sobresale solo hacia arriba).
+        $this->assertMatchesRegularExpression('/<span class="game-collectible__art">\s*(?:<!--.*?-->\s*)*<img /s', $html);
+        $this->assertStringNotContainsString('class="game-team"', $html);
+    }
+
+    public function test_new_species_reveal_uses_the_flipping_card_and_repeats_do_not(): void
+    {
+        $this->completeTask('Primera');
+        $encounter = \App\Models\Game\GameEncounter::first();
+        $encounter->update(['species_id' => GameSpecies::where('name', 'Brotelo')->value('id')]);
+
+        \Livewire\Livewire::test(\App\Livewire\Game\GameBalls::class)
+            ->call('open', $encounter->id)
+            ->assertSeeHtml('is-flipping')
+            ->assertSeeHtml('game-discovery__card');
+
+        $this->completeTask('Segunda');
+        $repeat = \App\Models\Game\GameEncounter::latest('id')->first();
+        $repeat->update(['species_id' => GameSpecies::where('name', 'Brotelo')->value('id')]);
+
+        \Livewire\Livewire::test(\App\Livewire\Game\GameBalls::class)
+            ->call('open', $repeat->id)
+            ->assertDontSeeHtml('is-flipping');
     }
 }

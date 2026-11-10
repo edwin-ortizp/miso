@@ -36,7 +36,17 @@ Pantallas: menú **Productividad → Colección** (`/game`), con las pestañas B
 - Máximo diario configurable (por defecto **5**). Al alcanzarlo, la actividad se registra sin ball y no se muestra error.
 - La especie se decide **al conceder** la ball, con una semilla registrada. Solo salen especies de etapa 1, por rareza ponderada.
 - Protección: tras **10** balls seguidas sin una línea nueva, la siguiente garantiza una especie no descubierta.
-- Cuando llega una ball aparece el aviso "¡Ganaste una ball!" (`BallNotifier` en el layout).
+- **Avisos y celebraciones (CHG-034):** `GameNotifier` vive en el layout y reemplaza a `BallNotifier`. Lee los eventos nuevos (`GameFeed`) y muestra hasta 3 avisos apilados, que duran 5 s y se pueden cerrar:
+  - ball ganada, con su origen y el botón Abrir;
+  - experiencia del equipo, agrupada por actividad (por ejemplo "Gotin +9 (afinidad)");
+  - subida de nivel y evolución;
+  - misión (al 50 % y cumplida);
+  - meta cumplida.
+- **Cuándo se entera:** de inmediato tras cualquier acción en la app (`Livewire.hook('commit')` → `game-check`), con los eventos de tareas y hábitos, y cada 60 s para lo que llega por MCP. No repite lo ocurrido antes de cargar la página.
+- **Celebraciones:** en los momentos importantes (ball, nivel, evolución, misión o meta cumplida) sale una al azar del catálogo, sin repetir la anterior: confeti, gatitos, estrellas fugaces, globos, fuegos artificiales, burbujas, lluvia de balls y pétalos (`resources/js/game-celebrations.js`).
+  - Se configuran en Ajustes → Celebraciones: mostrar sí o no, y cuáles.
+  - Con movimiento reducido solo hay avisos.
+  - Para agregar una: su clave en `config('game.celebration_catalog')` y su función en el catálogo JS.
 
 ## Abrir, experiencia, niveles y evolución
 
@@ -142,7 +152,8 @@ No pidas ni leas descripciones de tareas, tareas privadas, diario ni datos de sa
 - **Tipos con color:** `config('game.type_palette')` lista los tipos con color propio, en forma de slug (`psíquico` → `psiquico`). El color se define en `_game.css` con `--game-type-{slug}` y `--game-on-type-{slug}`, y se aplica con la clase `game-type--{slug}`. Un tipo sin entrada usa el neutro. Para agregar uno, añade su slug a la lista y sus dos variables al CSS.
 - **Rarezas:** cada una tiene marco y acento de color (`game-rarity--*`), y siempre texto e ícono (`x-game.rarity-tag`).
 - **Componentes:** `x-game.ball`, `x-game.species-card`, `x-game.companion-card` y `x-game.rarity-tag`.
-- **Apertura:** la ball tiembla, destella y aparece la criatura (Alpine en `game-balls.blade.php`). El resultado ya está guardado antes de la animación. Con movimiento reducido, solo hay un fundido.
+- **Carta coleccionable** (`x-game.collectible-card`, CHG-033): carta vertical 5:7 de diseño original. Lleva marco del color del tipo y borde según la rareza, arte, PS/ATQ/VEL en mini barras, xp, Poder y afinidad. Se inclina con el mouse y tiene reflejo; las legendarias tienen brillo. Se usa en el equipo de la semana (una carta por integrante) y en la revelación de una especie nueva, donde se voltea. Con movimiento reducido no tiene efectos. El arte (150 px) se apoya en la base de su ventana (120 px) y sobresale solo hacia arriba, sin quedar tapado (CHG-036).
+- **Apertura:** cartas independientes con la actividad completa. La Poké Ball se balancea, abre sus mitades y presenta la criatura. “Mostrar ahora” salta la secuencia; con movimiento reducido el resultado es inmediato. El resultado ya está guardado antes de animar. Ver ficha y Abrir otra viven en el footer fijo del diálogo.
 
 ## Catálogo de especies
 
@@ -196,3 +207,25 @@ Servicios en `app/Services/Game/`: `RewardGranter`, `EncounterRoller`, `Encounte
 
 Pruebas: `php artisan test tests/Feature/Game tests/Unit/Game`.
 
+
+### Completar descripciones españolas
+
+La revelación y la ficha leen la misma descripción del catálogo; abrir una ball no consulta servicios externos.
+
+```bash
+php artisan game:sync-species-descriptions --dry-run
+php artisan game:sync-species-descriptions
+php artisan game:sync-species-descriptions --number=25 --dry-run
+```
+
+El comando consulta PokéAPI por número de especie y completa únicamente descripciones nulas, vacías o con espacios. Conserva las existentes, también si cambian mientras se consulta. Selecciona la primera entrada española no vacía ordenada por identificador de versión y normaliza espacios y saltos de línea. Sin español, con respuesta inválida o error de red, omite la especie e informa el resultado.
+
+Las solicitudes son secuenciales, con timeout de 10 segundos (conexión 5), dos intentos y caché de siete días en el store local file. El dry-run no cambia el catálogo y puede llenar esa caché para reanudar. Los errores de red no se cachean. La salida distingue completadas (previstas en simulación), conservadas, sin español y errores; si hubo errores devuelve código de fallo, aunque conserva las actualizaciones correctas para poder reintentar.
+
+No se modifica ningún otro atributo de las especies. La sincronización no corre automáticamente al navegar ni al abrir balls.
+
+### Organización de la ficha
+
+La ficha usa el diálogo estándar ancho (hasta 1200 px), con las secciones Ficha e Historial en la navegación izquierda compartida. Historial solo aparece cuando hay un ejemplar descubierto. La imagen, descripción y cadena evolutiva viven en Ficha; los eventos conservan su orden y el botón Ver más en Historial.
+
+La experiencia del ejemplar actual aparece en una tarjeta central bajo el Pokémon: XP total acumulada, nivel, avance y XP restante para subir. Al alcanzar el nivel máximo se conserva la experiencia y no se anuncia un siguiente nivel. El panel Características reúne poder y estadísticas, junto a los datos del ejemplar y sus opciones de evolución. Permanece a la derecha en escritorio y pasa debajo del contenido en pantallas menores. Cabecera y footer permanecen accesibles; la navegación se colapsa en móvil con el control Secciones. No se revelan datos de especies sin descubrir.

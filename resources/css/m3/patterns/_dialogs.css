@@ -315,7 +315,9 @@
   position: relative; z-index: 1; display: flex; width: min(560px, 100%); max-height: calc(100vh - 48px);
   border-radius: 28px; background: var(--md-sys-color-surface-container-lowest); box-shadow: var(--md-sys-elevation-3); outline: none;
 }
+.md-form-dialog--large { width: min(1200px, 100%); }
 .md-form-dialog--sections { width: min(1080px, 100%); height: min(720px, calc(100vh - 48px)); }
+.md-form-dialog--large.md-form-dialog--sections { width: min(1200px, 100%); }
 .md-form-dialog.is-expanded { justify-self: stretch; align-self: stretch; width: 100%; height: 100%; max-height: none; }
 .md-form-dialog-layer:has(.is-expanded) { place-items: stretch; padding: 16px; }
 .md-form-dialog__form { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; width: 100%; min-height: 0; }

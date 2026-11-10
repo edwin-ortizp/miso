@@ -131,10 +131,10 @@
             {{ $slot }}
         </main>
 
-        {{-- Aviso global de balls del juego (CHG-023); persiste entre navegaciones. --}}
+        {{-- Avisos y celebraciones del juego (CHG-034); persisten entre navegaciones. --}}
         @auth
-            @persist('ball-notifier')
-                <livewire:game.ball-notifier />
+            @persist('game-notifier')
+                <livewire:game.game-notifier />
             @endpersist
         @endauth
 

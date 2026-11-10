@@ -54,7 +54,11 @@
     @endif
 
     <div x-data="{ sheetOpen: $wire.entangle('showSheet').live }">
-        <x-ui.dialog standard persistent-content state="sheetOpen" title="Ficha" size="lg" icon="bi-journal-richtext">
+        <x-ui.dialog standard persistent-content state="sheetOpen" title="Ficha" size="lg" icon="bi-journal-richtext" data-module="game"
+                     :sections="[
+                        'profile' => ['label' => 'Ficha', 'icon' => 'bi-person-badge'],
+                        ...($sheet && $sheet['discovered'] && $sheet['companion'] ? ['history' => ['label' => 'Historial', 'icon' => 'bi-clock-history']] : []),
+                     ]">
             @if ($sheet)
                 @include('livewire.game.partials.species-sheet', ['sheet' => $sheet])
             @endif

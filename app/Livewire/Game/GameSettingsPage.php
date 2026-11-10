@@ -30,6 +30,11 @@ class GameSettingsPage extends Component
 
     public bool $seasonsEnabled = true;
 
+    public bool $celebrations = true;
+
+    /** @var array<int, string> */
+    public array $celebrationSet = [];
+
     public string $message = '';
 
     public function mount(GameSettings $settings): void
@@ -44,6 +49,8 @@ class GameSettingsPage extends Component
         $this->dailyLimit = $current['daily_limit'];
         $this->directorEnabled = $current['director_enabled'];
         $this->seasonsEnabled = $current['seasons_enabled'];
+        $this->celebrations = $current['celebrations'];
+        $this->celebrationSet = $current['celebration_set'];
     }
 
     public function save(GameSettings $settings): void
@@ -57,6 +64,8 @@ class GameSettingsPage extends Component
             'daily_limit' => $this->dailyLimit,
             'director_enabled' => $this->directorEnabled,
             'seasons_enabled' => $this->seasonsEnabled,
+            'celebrations' => $this->celebrations,
+            'celebration_set' => array_values(array_intersect(array_keys(config('game.celebration_catalog')), $this->celebrationSet)),
         ]);
 
         $this->message = 'Ajustes guardados.';

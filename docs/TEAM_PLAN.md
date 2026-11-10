@@ -34,6 +34,15 @@ _Última actualización: 2026-11-09_
 | CHG-026 | M | Misiones semanales contextuales propuestas por el director vía MCP | in-progress | En verificación | 4/5 |
 | CHG-027 | M | Nuevas fuentes del juego: foco, metas y salud diaria | in-progress | En verificación | 3/4 |
 | CHG-028 | S | Misiones del director: una propuesta por semana (idempotencia) | in-progress | En verificación | 1/2 |
+| CHG-029 | M | Temporada como aventura ilustrada | in-progress | En verificación | 5/5 |
+| CHG-030 | S | Corregir rutas de fuentes para instalación local bajo subruta | in-progress | En verificación | 1/1 |
+| CHG-031 | M | Balls y revelación como experiencia de descubrimiento | in-progress | En verificación | 3/3 |
+| CHG-032 | M | Ficha Pokémon con secciones y panel de características | in-progress | En verificación | 3/3 |
+| CHG-033 | S | Carta coleccionable para el equipo y la revelación | in-progress | En verificación | 2/3 |
+| CHG-034 | M | Celebraciones aleatorias y avisos de experiencia en toda la app | in-progress | En verificación | 4/5 |
+| CHG-035 | XS | Fijar APP_URL de pruebas en phpunit.xml | done | Cerrado | 1/1 |
+| CHG-036 | S | Cartas del equipo sin Pokémon cortados | in-progress | En verificación | 1/2 |
+| CHG-037 | XS | Misiones de la semana como tarjetas de aventura | done | Cerrado | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

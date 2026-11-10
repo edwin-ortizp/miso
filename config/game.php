@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'description_cache_store' => 'file',
     // Valores por defecto; cada usuario los ajusta en Colección → Ajustes (ModuleSetting módulo "game").
     'defaults' => [
         'enabled' => true,
@@ -9,6 +10,9 @@ return [
         'pity_threshold' => 10,
         'rarity_weights' => ['common' => 60, 'uncommon' => 30, 'rare' => 9, 'legendary' => 1],
         'director_enabled' => true,
+        // Celebraciones (CHG-034): activas y cuáles del catálogo pueden salir.
+        'celebrations' => true,
+        'celebration_set' => ['confetti', 'cats', 'shooting-stars', 'balloons', 'fireworks', 'bubbles', 'balls', 'petals'],
         'seasons_enabled' => true,
     ],
 
@@ -57,6 +61,18 @@ return [
     'power_default_base' => 300,
     // Tipos con color propio en _game.css (clase game-type--{slug}); los demás usan el neutro.
     'type_palette' => ['acero', 'agua', 'bicho', 'dragon', 'electrico', 'fantasma', 'fuego', 'hada', 'hielo', 'lucha', 'normal', 'planta', 'psiquico', 'roca', 'siniestro', 'tierra', 'veneno', 'volador'],
+
+    // Catálogo de celebraciones (resources/js/game-celebrations.js). Para agregar una: clave aquí y función allá.
+    'celebration_catalog' => [
+        'confetti' => 'Confeti',
+        'cats' => 'Gatitos',
+        'shooting-stars' => 'Estrellas fugaces',
+        'balloons' => 'Globos',
+        'fireworks' => 'Fuegos artificiales',
+        'bubbles' => 'Burbujas',
+        'balls' => 'Lluvia de balls',
+        'petals' => 'Pétalos',
+    ],
 
     // Rangos permitidos para los ajustes numéricos.
     'limits' => ['daily_limit' => [0, 50], 'pity_threshold' => [1, 100]],

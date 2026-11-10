@@ -5,7 +5,8 @@
  */
 
 [data-module="game"],
-.game-notifier {
+.game-notifier,
+.game-celebration {
     /* Paleta por tipo: fondo sólido y texto con contraste AA. */
     --game-type-neutral: #8a8f98;      --game-on-type-neutral: #ffffff;
     --game-type-normal: #9a9a7a;       --game-on-type-normal: #1d1d12;
@@ -164,7 +165,7 @@
 /* ---------- Balls por abrir ---------- */
 .game-balls {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(128px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
     gap: 1rem;
     margin: 0;
     padding: 0;
@@ -422,8 +423,8 @@ button.game-balls__item:focus-visible {
     gap: 1rem;
     padding: 1.25rem 1.25rem 1rem;
     border-radius: 18px;
-    background: var(--game-type);
-    color: var(--game-on-type);
+    background: color-mix(in srgb, var(--game-type, var(--md-sys-color-primary)) 18%, var(--md-sys-color-surface));
+    color: var(--md-sys-color-on-surface);
 }
 
 .game-sheet__hero.is-hidden {
@@ -627,3 +628,542 @@ button.game-balls__item:focus-visible {
 .game-mission__task.is-done > i { color: var(--md-custom-color-success, var(--md-sys-color-primary)); }
 .game-mission__task-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .game-mission__task.is-done .game-mission__task-title { color: var(--md-sys-color-on-surface-variant); text-decoration: line-through; }
+/* Temporada: un paisaje propio dentro del shell compartido. */
+.game-adventure { display: grid; gap: 24px; }
+.game-adventure__cover { display: grid; grid-template-columns: 1.1fr 1fr; overflow: hidden; border-radius: 28px; background: var(--md-sys-color-surface-container, var(--md-sys-color-surface)); border: 1px solid var(--md-sys-color-outline-variant); }
+.game-adventure__intro { padding: clamp(24px, 3vw, 48px); align-self: center; min-width: 0; }
+.game-adventure__intro h2 { font-size: clamp(1.8rem, 3vw, 2.75rem); line-height: 1.12; letter-spacing: -.035em; margin: 16px 0; font-weight: 750; overflow-wrap: anywhere; }
+.game-adventure__intro p { line-height: 1.6; }
+.game-adventure__eyebrow { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; color: var(--md-sys-color-primary); }
+.game-adventure__dates { font-weight: 600; font-size: .875rem; }
+.game-adventure__landscape { position: relative; min-height: 340px; background: #dceeea; color: #183c30; overflow: hidden; }
+.game-adventure__scenery { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.game-adventure__companions { position: absolute; bottom: 22px; inset-inline: 20px; display: flex; justify-content: center; align-items: end; gap: 8px; }
+.game-adventure__companions figure { margin: 0; text-align: center; flex: 0 1 120px; min-width: 0; }
+.game-adventure__companions figure:nth-child(2) { transform: translateY(-20px); }
+.game-adventure__companions img { display: block; width: 100%; height: 112px; object-fit: contain; filter: drop-shadow(0 8px 3px #183c3033); }
+.game-adventure__companions figure > i { display: block; font-size: 3rem; }
+.game-adventure__companions figcaption, .game-adventure__welcome { background: #fff6df; color: #183c30; padding: 6px 12px; border-radius: 16px; font-size: .8rem; font-weight: 600; overflow-wrap: anywhere; }
+.game-adventure__welcome { max-width: 260px; text-align: center; }
+.game-adventure__journey { padding: 24px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 24px; }
+.game-adventure__stages { list-style: none; display: flex; padding: 12px 0; margin: 0; gap: 12px; }
+.game-adventure__stages li { flex: 1; min-width: 0; position: relative; display: grid; justify-items: center; align-content: start; gap: 6px; text-align: center; font-size: .8rem; }
+.game-adventure__stages li::before { content: ''; position: absolute; height: 3px; background: var(--md-sys-color-outline-variant); top: 24px; left: -12px; width: calc(100% + 12px); }
+.game-adventure__stages li:first-child::before { left: 50%; width: 50%; }
+.game-adventure__stages li:last-child::before { width: 50%; }
+.game-adventure__milestone { position: relative; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); border: 2px solid var(--md-sys-color-outline-variant); font-size: 1.2rem; }
+.game-adventure__stages .is-current .game-adventure__milestone { background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); border-color: var(--md-sys-color-primary); box-shadow: 0 0 0 5px var(--md-sys-color-primary-container); }
+.game-adventure__stages .is-current strong { color: var(--md-sys-color-primary); }
+.game-adventure__section-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 16px; }
+.game-adventure__missions { scroll-margin-top: 100px; }
+.game-adventure__mission-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 20px; background: transparent; align-items: stretch; }
+.game-adventure__extras { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.game-adventure__bonus { margin: 16px 0; }
+.game-adventure__bonus > strong { color: var(--md-sys-color-primary); font-size: 1.2rem; }
+.game-adventure__how { list-style: none; display: grid; gap: 16px; margin: 20px 0; padding: 0; }
+.game-adventure__how li { display: flex; align-items: center; gap: 12px; }
+.game-adventure__how li > i { font-size: 1.4rem; color: var(--md-sys-color-primary); }
+.game-adventure__how .game-ball { flex-shrink: 0; }
+.game-adventure__details > summary { cursor: pointer; padding: 16px; min-height: 44px; font-weight: 600; }
+.game-adventure__details > summary:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
+@media (max-width: 767px) {
+    .game-adventure__cover, .game-adventure__extras { grid-template-columns: 1fr; }
+    .game-adventure__landscape { min-height: 240px; }
+    .game-adventure__intro { padding: 24px; }
+    .game-adventure__journey { padding: 16px 12px; }
+    .game-adventure__stages { gap: 8px; }
+    .game-adventure__stages li { flex: 1; }
+    .game-adventure__stages:has(li:nth-child(5)) { flex-wrap: wrap; }
+    .game-adventure__stages:has(li:nth-child(5)) li { flex-basis: 28%; }
+    .game-adventure__section-heading { align-items: start; flex-wrap: wrap; }
+}
+
+@keyframes game-season-float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+@media (prefers-reduced-motion: no-preference) {
+    .game-adventure__companions img { animation: game-season-float 6s ease-in-out infinite; }
+}
+
+/* Cartas de misión: la variante de Temporada no altera las listas de Semana. */
+.game-quest {
+    --quest-accent: #a76a12;
+    --quest-art: #ffe4ad;
+    --quest-ink: #5b390a;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+    list-style: none;
+    border: 1px solid color-mix(in srgb, var(--quest-accent) 35%, var(--md-sys-color-outline-variant));
+    border-radius: 24px;
+    background: color-mix(in srgb, var(--quest-accent) 4%, var(--md-sys-color-surface));
+    box-shadow: 0 4px 0 color-mix(in srgb, var(--quest-accent) 16%, var(--md-sys-color-surface)), 0 8px 20px #00000008;
+}
+.game-quest--habits { --quest-accent: #2d8567; --quest-art: #ceefdd; --quest-ink: #154d3a; }
+.game-quest--explore { --quest-accent: #8854b6; --quest-art: #e9dcfa; --quest-ink: #4d296b; }
+.game-quest__art { position: relative; display: flex; justify-content: center; align-items: center; min-height: 116px; background: var(--quest-art); color: var(--quest-ink); overflow: hidden; }
+.game-quest__art::before, .game-quest__art::after { content: ''; position: absolute; width: 180px; height: 180px; border: 1px solid currentColor; opacity: .12; border-radius: 50%; }
+.game-quest__art::after { width: 230px; height: 230px; }
+.game-quest__emblem { display: grid; place-items: center; width: 72px; height: 72px; border-radius: 24px; border: 2px solid #ffffffaa; background: #ffffff66; box-shadow: 0 4px 0 #0000000c; transform: rotate(-6deg); font-size: 2.25rem; }
+.game-quest__emblem > i { transform: rotate(6deg); }
+.game-quest__number { position: absolute; right: 16px; top: 12px; font-size: .75rem; font-weight: 700; letter-spacing: .12em; }
+.game-quest__spark { position: absolute; font-size: 1.6rem; }
+.game-quest__spark--one { left: 22%; top: 20px; }
+.game-quest__spark--two { right: 23%; bottom: 18px; font-size: 1.2rem; }
+.game-quest__body { display: flex; flex-direction: column; flex: 1; padding: 20px; gap: 12px; min-width: 0; }
+.game-quest__caption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 8px; font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--md-sys-color-on-surface-variant); }
+.game-quest__title { margin: 0; font-size: 1.15rem; line-height: 1.35; font-weight: 700; letter-spacing: -.015em; overflow-wrap: anywhere; }
+.game-quest__state { display: inline-flex; align-items: center; align-self: start; gap: 6px; font-size: .75rem; color: var(--md-sys-color-on-surface-variant); }
+.game-quest--complete .game-quest__state { background: #d4f3dc; color: #174b2a; border-radius: 16px; padding: 6px 10px; font-weight: 700; }
+.game-quest__progress { margin-top: auto; padding-top: 4px; }
+.game-quest__counter { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.game-quest__counter > strong { font-size: 2.25rem; font-weight: 750; line-height: 1; letter-spacing: -.04em; }
+.game-quest__counter strong > span { font-size: 1.25rem; color: var(--md-sys-color-on-surface-variant); font-weight: 500; letter-spacing: 0; }
+.game-quest__counter > span { font-size: .8rem; color: var(--md-sys-color-on-surface-variant); }
+.game-quest__steps { display: flex; gap: 6px; }
+.game-quest__steps > span { display: grid; place-items: center; flex: 1; height: 28px; border-radius: 8px; background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface-variant); border: 1px solid var(--md-sys-color-outline-variant); font-size: .65rem; }
+.game-quest__steps > .is-filled { background: var(--quest-art); border-color: var(--quest-accent); color: var(--quest-ink); font-size: .9rem; }
+.game-quest__bar { display: block; width: 100%; height: 10px; border: 0; border-radius: 8px; overflow: hidden; appearance: none; background: var(--md-sys-color-outline-variant); }
+.game-quest__bar::-webkit-progress-bar { background: var(--md-sys-color-outline-variant); }
+.game-quest__bar::-webkit-progress-value { background: var(--quest-accent); }
+.game-quest__bar::-moz-progress-bar { background: var(--quest-accent); }
+.game-quest__rewards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding-top: 4px; }
+.game-quest__reward { display: grid; justify-items: center; gap: 2px; padding: 12px 6px; border-radius: 14px; background: var(--md-sys-color-surface); border: 1px dashed var(--md-sys-color-outline); position: relative; }
+.game-quest__prize { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.game-quest__prize > strong { font-size: 1.2rem; }
+.game-quest__reward > span { font-size: .8rem; font-weight: 600; }
+.game-quest__reward > small { font-size: .7rem; color: var(--md-sys-color-on-surface-variant); }
+.game-quest__reward.is-received { border-style: solid; border-color: var(--quest-accent); background: color-mix(in srgb, var(--quest-accent) 10%, var(--md-sys-color-surface)); }
+.game-quest__reward-check { position: absolute; top: 6px; right: 6px; color: var(--md-sys-color-on-surface); font-size: .8rem; }
+.game-quest__action { display: flex; justify-content: stretch; padding-top: 4px; }
+.game-quest__action > a { flex: 1; }
+.game-quest .game-mission__tasks { gap: 8px; padding-block: 4px; }
+.game-quest .game-mission__task { flex-wrap: wrap; align-items: start; }
+.game-quest .game-mission__task-title { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; flex-basis: 65%; }
+@media (min-width: 1200px) {
+    .game-adventure__mission-list { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+    .game-adventure__mission-list { grid-template-columns: 1fr; gap: 20px; }
+    .game-quest__art { min-height: 96px; }
+    .game-quest__emblem { width: 60px; height: 60px; font-size: 1.85rem; border-radius: 20px; }
+}
+
+/* Cartas de balls y una Poké Ball reconocible en ambos temas. */
+.game-opening-ball { --opening-size: 96px; display: inline-block; position: relative; width: var(--opening-size); height: var(--opening-size); flex: none; filter: drop-shadow(0 8px 0 #00000015); }
+.game-opening-ball__top, .game-opening-ball__bottom { position: absolute; left: 0; width: 100%; height: 50%; border: calc(var(--opening-size) * .065) solid #242831; transition: transform 650ms ease, opacity 350ms ease; }
+.game-opening-ball__top { top: 0; border-radius: 100px 100px 0 0; background: #e64848; border-bottom-width: calc(var(--opening-size) * .035); }
+.game-opening-ball__top::after { content: ''; position: absolute; width: 25%; height: 25%; background: #ffffffaa; top: 20%; left: 15%; border-radius: 100%; transform: rotate(-30deg); }
+.game-opening-ball__bottom { bottom: 0; border-radius: 0 0 100px 100px; background: #fff; border-top-width: calc(var(--opening-size) * .035); }
+.game-opening-ball__button { position: absolute; top: 50%; left: 50%; width: 32%; height: 32%; border: calc(var(--opening-size) * .06) solid #242831; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 2px #d6dce5; transform: translate(-50%, -50%); transition: opacity 250ms ease; }
+.game-ball-card { list-style: none; display: flex; flex-direction: column; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 24px; overflow: hidden; background: var(--md-sys-color-surface); box-shadow: 0 4px 0 var(--md-sys-color-surface-container-high); min-width: 0; }
+.game-ball-card__art { position: relative; display: grid; place-items: center; padding: 22px; min-height: 150px; background: var(--md-sys-color-primary-container); }
+.game-ball-card__spark { position: absolute; right: 25%; top: 24px; color: var(--md-sys-color-on-primary-container); font-size: 1.4rem; }
+.game-ball-card__body { padding: 20px; display: flex; flex-direction: column; flex: 1; gap: 12px; }
+.game-ball-card__kind { color: var(--md-sys-color-on-surface-variant); font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.game-ball-card__title { font-size: 1.1rem; line-height: 1.4; font-weight: 650; margin: 0; overflow-wrap: anywhere; }
+.game-ball-card__body > button { margin-top: auto; }
+.game-ball-card__body > time { padding-bottom: 4px; }
+.game-discovery { display: grid; justify-items: center; text-align: center; gap: 12px; }
+.game-discovery__stage { position: relative; display: grid; place-items: center; width: min(100%, 320px); height: 270px; }
+.game-discovery__halo { position: absolute; width: 230px; height: 230px; border-radius: 50%; background: color-mix(in srgb, var(--game-rarity, var(--md-sys-color-primary)) 12%, var(--md-sys-color-surface)); border: 1px solid color-mix(in srgb, var(--game-rarity, var(--md-sys-color-primary)) 30%, transparent); }
+.game-discovery__ball { --opening-size: 132px; position: absolute; z-index: 2; transition: opacity 350ms ease; }
+.game-discovery--shake .game-discovery__ball { animation: game-ball-shake 850ms ease-in-out both; }
+.game-discovery--open .game-opening-ball__top { transform: translateY(-60px) rotate(-18deg); }
+.game-discovery--open .game-opening-ball__bottom { transform: translateY(60px) rotate(18deg); }
+.game-discovery--open .game-opening-ball__button { opacity: 0; }
+.game-discovery--shake .game-opening-ball__button { background: #fff3b5; }
+.game-discovery--revealed .game-discovery__ball { opacity: 0; pointer-events: none; }
+.game-discovery__art { position: relative; display: grid; place-items: center; opacity: 0; transform: translateY(12px) scale(.85); transition: transform 400ms ease, opacity 400ms ease; }
+.game-discovery__art img { object-fit: contain; max-width: 100%; }
+.game-discovery--revealed .game-discovery__art { opacity: 1; transform: none; }
+.game-discovery__particles { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 400ms ease; color: var(--md-sys-color-on-surface-variant); }
+.game-discovery__particles span { position: absolute; font-size: 1.6rem; }
+.game-discovery__particles span:nth-child(1) { left: 12%; top: 18%; }
+.game-discovery__particles span:nth-child(2) { right: 10%; top: 30%; }
+.game-discovery__particles span:nth-child(3) { left: 17%; bottom: 18%; }
+.game-discovery__particles span:nth-child(4) { right: 18%; bottom: 10%; }
+.game-discovery--open .game-discovery__particles, .game-discovery--revealed .game-discovery__particles { opacity: 1; }
+.game-discovery__details { display: grid; gap: 12px; width: 100%; }
+.game-discovery__types { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
+.game-discovery__bio { padding: 16px; border-radius: 16px; text-align: left; background: var(--md-sys-color-surface-container-low); overflow-wrap: anywhere; }
+.game-discovery__actions { display: flex; justify-content: end; flex-wrap: wrap; gap: 8px; width: 100%; }
+@media (min-width: 1200px) { .game-balls { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 639px) { .game-balls { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) {
+    .game-discovery--shake .game-discovery__ball { animation: none; }
+    .game-discovery__ball, .game-discovery__art, .game-discovery__particles,
+    .game-opening-ball__top, .game-opening-ball__bottom, .game-opening-ball__button { transition: none; }
+}
+
+.game-discovery .game-ribbon { justify-self: center; color: var(--md-sys-color-on-surface); background: color-mix(in srgb, var(--game-rarity, var(--md-sys-color-primary)) 18%, var(--md-sys-color-surface)); }
+.game-discovery__bio:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
+
+.game-discovery__details > .game-rarity-tag { justify-self: center; }
+.game-discovery__types .game-type-chip { background: color-mix(in srgb, var(--game-type, var(--md-sys-color-primary)) 20%, var(--md-sys-color-surface)); color: var(--md-sys-color-on-surface); }
+
+.game-discovery__art .game-evolution__from, .game-discovery__art .game-evolution__to { animation: none; }
+
+/* Ficha: contenido y características, dentro de la navegación modal canónica. */
+.game-sheet__layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; align-items: start; }
+.game-sheet__layout--hidden { grid-template-columns: minmax(0, 1fr); }
+.game-sheet__content { min-width: 0; }
+.game-sheet__properties { display: grid; gap: 16px; min-width: 0; padding: 20px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 20px; background: var(--md-sys-color-surface-container-low); }
+.game-sheet__properties .game-sheet__headline { flex-direction: column; align-items: start; gap: 8px; margin: 0; }
+.game-sheet__properties .game-stats { margin: 0; }
+.game-sheet__properties .game-stats__row { grid-template-columns: 84px minmax(20px, 1fr) 28px; gap: 6px; }
+.game-sheet__properties .game-sheet__section { padding-top: 16px; margin-top: 0; }
+.game-sheet__content > section:focus-visible, .game-sheet__content > div:focus-visible, .game-sheet__properties:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 3px; border-radius: 16px; }
+@media (max-width: 1100px) {
+    .game-sheet__layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+.game-sheet__history .game-sheet__section { margin-top: 0; padding-top: 0; border-top: 0; }
+@media (min-width: 1101px) { .game-sheet__properties { position: sticky; top: 0; } }
+
+/* La experiencia ganada tiene protagonismo junto al compañero. */
+.game-experience { position: relative; overflow: hidden; display: grid; gap: 16px; margin-top: 36px; padding: 22px; border-radius: 22px; border: 1px solid var(--md-sys-color-primary); background: color-mix(in srgb, var(--md-sys-color-primary) 7%, var(--md-sys-color-surface)); box-shadow: 0 4px 0 var(--md-sys-color-primary-container); }
+.game-experience::after { content: '✦'; position: absolute; right: 20px; top: 50px; font-size: 100px; opacity: .07; pointer-events: none; color: var(--md-sys-color-primary); }
+.game-experience__heading { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; position: relative; }
+.game-experience__emblem { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 15px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-size: 1.5rem; }
+.game-experience__heading h4 { font-size: .95rem; font-weight: 700; margin: 0 0 3px; }
+.game-experience__heading p { font-size: .75rem; color: var(--md-sys-color-on-surface-variant); margin: 0; }
+.game-experience__level { margin-left: auto; padding: 6px 10px; border-radius: 12px; font-size: .8rem; font-weight: 700; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); }
+.game-experience__total { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.game-experience__total > strong { font-size: clamp(2rem, 4vw, 3rem); line-height: 1; font-weight: 750; letter-spacing: -.04em; overflow-wrap: anywhere; }
+.game-experience__total > span { font-size: .85rem; color: var(--md-sys-color-on-surface-variant); }
+.game-experience__next { display: flex; align-items: start; gap: 8px; font-size: .85rem; }
+.game-experience__next > i { color: var(--md-sys-color-primary); }
+@media (max-width: 639px) { .game-experience { padding: 18px; } .game-experience__heading { gap: 8px; } }
+
+/* ---------- Carta coleccionable (CHG-033): diseño original de MiSo ---------- */
+.game-collection-cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.game-collectible {
+    --game-tilt-x: 0deg;
+    --game-tilt-y: 0deg;
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    min-height: 0;
+    margin: 0 auto;
+    padding: 0;
+    /* CHG-036: altura según el contenido y sin recorte, para que el Pokémon sobresalga por arriba. */
+    overflow: visible;
+    border: 3px solid var(--game-rarity, var(--md-sys-color-outline-variant));
+    border-radius: 18px;
+    background: var(--game-type, var(--game-type-neutral));
+    color: var(--game-on-type, var(--game-on-type-neutral));
+    font-weight: inherit;
+    white-space: normal;
+    text-align: left;
+    text-decoration: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    transform: perspective(900px) rotateX(var(--game-tilt-x)) rotateY(var(--game-tilt-y));
+    transition: transform 120ms ease-out, box-shadow 160ms ease;
+}
+
+a.game-collectible:hover,
+a.game-collectible:focus-visible { box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24); }
+
+a.game-collectible:focus-visible { outline: 3px solid var(--md-sys-color-primary); outline-offset: 3px; }
+
+/* Reflejo decorativo que acompaña la inclinación. */
+.game-collectible::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: inherit;
+    background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%) 50% 0 / 250% 100% no-repeat;
+    opacity: 0;
+    transition: opacity 160ms ease;
+    pointer-events: none;
+}
+
+a.game-collectible:hover::after { opacity: 1; }
+
+/* Legendarias: brillo sutil permanente. */
+.game-collectible.game-rarity--legendary::after { animation: game-collectible-shine 4s ease-in-out infinite; }
+
+@keyframes game-collectible-shine {
+    0%, 60%, 100% { opacity: 0; background-position: 100% 0; }
+    80% { opacity: 1; background-position: 0 0; }
+}
+
+.game-collectible__inner {
+    display: grid;
+    gap: 0.375rem;
+    padding: 0.75rem;
+}
+
+.game-collectible__head,
+.game-collectible__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.game-collectible__name { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.01em; }
+.game-collectible__level { font-weight: 700; font-variant-numeric: tabular-nums; }
+.game-collectible__meta { font-size: 0.75rem; opacity: 0.9; }
+.game-collectible__meta .game-rarity-tag i { color: inherit; }
+
+.game-collectible__art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    height: 120px;
+    margin-top: 2.25rem;
+    overflow: visible;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    border-radius: 12px;
+    background: var(--md-sys-color-surface);
+}
+
+/* El Pokémon se apoya en la base de su ventana y sobresale solo hacia arriba (efecto 3D). */
+.game-collectible__art img {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    z-index: 1;
+    width: auto;
+    height: 150px;
+    max-width: 92%;
+    object-fit: contain;
+    object-position: bottom;
+    filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.25));
+    transform: translateX(-50%);
+    transition: transform 160ms ease;
+}
+
+a.game-collectible:hover .game-collectible__art img { transform: translate(-50%, -4px) scale(1.04); }
+
+.game-collectible__types { display: flex; flex-wrap: wrap; gap: 0.25rem; }
+.game-collectible__types .game-type-chip { background: var(--md-sys-color-surface); color: var(--md-sys-color-on-surface); }
+
+.game-collectible__stats {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.375rem 0.5rem;
+    border-radius: 10px;
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.7rem;
+}
+
+.game-collectible__stat {
+    display: grid;
+    grid-template-columns: 2rem 1fr 1.75rem;
+    align-items: center;
+    gap: 0.375rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.game-collectible__stat > span:last-child { text-align: right; }
+
+.game-collectible__foot {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.5rem;
+    border-radius: 10px;
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    font-size: 0.8rem;
+}
+
+/* Volteo al revelar una especie nueva. */
+.game-collectible.is-flipping { animation: game-collectible-flip 700ms cubic-bezier(0.2, 0.8, 0.3, 1) both; }
+
+@keyframes game-collectible-flip {
+    0% { opacity: 0; transform: perspective(900px) rotateY(180deg) scale(0.8); }
+    60% { opacity: 1; }
+    100% { opacity: 1; transform: perspective(900px) rotateY(0) scale(1); }
+}
+
+.game-discovery__card { width: min(240px, 70vw); }
+
+@media (max-width: 1199.98px) { .game-collection-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 767.98px) { .game-collection-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 479.98px) { .game-collection-cards { grid-template-columns: 1fr; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .game-collectible { transform: none; transition: none; }
+    .game-collectible__art img,
+    a.game-collectible:hover .game-collectible__art img { transform: translateX(-50%); transition: none; }
+    .game-collectible::after,
+    .game-collectible.game-rarity--legendary::after { animation: none; opacity: 0; }
+    .game-collectible.is-flipping { animation: game-reveal-fade 150ms ease-out both; }
+}
+
+/* ---------- Avisos del juego (CHG-034) ---------- */
+/* La pila no usa transform: así los avisos se ubican bien (defecto de CHG-023). */
+.game-toasts {
+    position: fixed;
+    right: 0;
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    left: 0;
+    z-index: 1080;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0 1rem;
+    pointer-events: none;
+}
+
+.game-toast {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: min(38rem, 100%);
+    padding: 0.625rem 0.5rem 0.625rem 0.875rem;
+    border-radius: 14px;
+    background: var(--md-sys-color-inverse-surface);
+    color: var(--md-sys-color-inverse-on-surface);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+    pointer-events: auto;
+    animation: game-toast-in 260ms cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.game-toast__icon { font-size: 1.35rem; color: var(--md-sys-color-inverse-primary); }
+.game-toast--goal .game-toast__icon,
+.game-toast--evolution .game-toast__icon { color: var(--game-rarity-legendary); }
+.game-toast__ball { --game-ball-size: 26px; }
+.game-toast__text { flex: 1; min-width: 0; }
+.game-toast__detail { opacity: 0.85; overflow-wrap: anywhere; }
+.game-toast__action,
+.game-toast__close { color: var(--md-sys-color-inverse-primary); }
+
+@keyframes game-toast-in {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 767.98px) {
+    .game-toasts { bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+}
+
+/* ---------- Celebraciones (CHG-034) ---------- */
+.game-celebration {
+    position: fixed;
+    inset: 0;
+    z-index: 1070;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.game-celebration__particle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: var(--size, 1.25rem);
+    line-height: 1;
+    animation-delay: var(--delay, 0ms);
+    animation-duration: var(--dur, 2000ms);
+    animation-fill-mode: both;
+    animation-timing-function: ease-out;
+    will-change: transform, opacity;
+}
+
+/* Confeti: rectángulos del color de los tipos. */
+.game-celebration--confetti .game-celebration__particle {
+    width: 9px;
+    height: 14px;
+    border-radius: 2px;
+    background: var(--game-type);
+    animation-name: game-fall;
+    animation-timing-function: cubic-bezier(0.25, 0.6, 0.4, 1);
+}
+
+@keyframes game-fall {
+    from { opacity: 1; transform: translate(var(--x), -5vh) rotate(0); }
+    to { opacity: 0.9; transform: translate(calc(var(--x) + var(--drift, 0vw)), 105vh) rotate(var(--spin, 360deg)); }
+}
+
+/* Gatitos que cruzan la pantalla, con un saltito al caminar. */
+.game-celebration--cats .game-celebration__particle { animation-name: game-walk; animation-timing-function: linear; }
+
+@keyframes game-walk {
+    0% { opacity: 0; transform: translate(-12vw, var(--y)) scaleX(-1); }
+    10% { opacity: 1; }
+    25% { transform: translate(18vw, calc(var(--y) - 2vh)) scaleX(-1); }
+    50% { transform: translate(48vw, var(--y)) scaleX(-1); }
+    75% { transform: translate(78vw, calc(var(--y) - 2vh)) scaleX(-1); }
+    90% { opacity: 1; }
+    100% { opacity: 0; transform: translate(108vw, var(--y)) scaleX(-1); }
+}
+
+/* Estrellas fugaces en diagonal. */
+.game-celebration--shooting-stars .game-celebration__particle { color: var(--game-rarity-legendary); animation-name: game-shoot; }
+
+@keyframes game-shoot {
+    from { opacity: 0; transform: translate(var(--x), var(--y)) scale(0.6); }
+    20% { opacity: 1; }
+    to { opacity: 0; transform: translate(calc(var(--x) + 40vw), calc(var(--y) + 30vh)) scale(1.1); }
+}
+
+/* Globos y burbujas que suben. */
+.game-celebration--balloons .game-celebration__particle { animation-name: game-rise; }
+
+.game-celebration--bubbles .game-celebration__particle {
+    width: var(--size);
+    height: var(--size);
+    border: 2px solid var(--md-sys-color-primary);
+    border-radius: 50%;
+    background: transparent;
+    opacity: 0.7;
+    animation-name: game-rise;
+}
+
+@keyframes game-rise {
+    from { opacity: 0; transform: translate(var(--x), 105vh); }
+    15% { opacity: 1; }
+    to { opacity: 0; transform: translate(calc(var(--x) + var(--drift, 0vw)), -10vh); }
+}
+
+/* Fuegos artificiales: estallidos radiales. */
+.game-celebration--fireworks .game-celebration__particle { color: var(--game-type); font-size: 1.1rem; animation-name: game-burst-out; }
+
+@keyframes game-burst-out {
+    from { opacity: 1; transform: translate(var(--x), var(--y)) scale(0.4); }
+    to { opacity: 0; transform: translate(calc(var(--x) + var(--dx)), calc(var(--y) + var(--dy))) scale(1); }
+}
+
+/* Lluvia de balls (reusa .game-ball). */
+.game-celebration--balls .game-celebration__particle {
+    --game-ball-size: 26px;
+    position: absolute;
+    animation-name: game-fall;
+}
+
+/* Pétalos que caen meciéndose. */
+.game-celebration--petals .game-celebration__particle { animation-name: game-fall; animation-timing-function: ease-in-out; }
+
+@media (prefers-reduced-motion: reduce) {
+    .game-celebration { display: none; }
+    .game-toast { animation: none; }
+}
+
+.game-celebration-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.5rem 1rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.game-celebration-options legend { grid-column: 1 / -1; margin-bottom: 0.25rem; }

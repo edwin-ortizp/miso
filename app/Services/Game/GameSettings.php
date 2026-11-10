@@ -26,6 +26,11 @@ class GameSettings
         $settings['enabled'] = (bool) $settings['enabled'];
         $settings['director_enabled'] = (bool) $settings['director_enabled'];
         $settings['seasons_enabled'] = (bool) $settings['seasons_enabled'];
+        $settings['celebrations'] = (bool) $settings['celebrations'];
+        $settings['celebration_set'] = array_values(array_intersect(
+            array_keys(config('game.celebration_catalog')),
+            array_map('strval', (array) $settings['celebration_set']),
+        ));
         $settings['daily_limit'] = $this->clamp('daily_limit', (int) $settings['daily_limit']);
         $settings['pity_threshold'] = $this->clamp('pity_threshold', (int) $settings['pity_threshold']);
 

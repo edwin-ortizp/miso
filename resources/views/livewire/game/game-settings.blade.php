@@ -37,6 +37,19 @@
                          help="Si lo apagas, el juego usa sus reglas base. No pierdes nada." />
         </section>
 
+        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-celebrations">
+            <h2 class="md-title-medium mb-0" id="game-settings-celebrations">Celebraciones</h2>
+            <x-ui.switch name="game-celebrations" label="Mostrar celebraciones" wire:model="celebrations" :checked="$celebrations"
+                         help="Una animación al azar cuando ganas una ball, subes de nivel, evolucionas o cumples una misión o meta." />
+            <fieldset class="game-celebration-options">
+                <legend class="md-label-large">Cuáles pueden salir</legend>
+                @foreach (config('game.celebration_catalog') as $key => $label)
+                    <x-ui.switch name="game-celebration-{{ $key }}" :label="$label" wire:model="celebrationSet" value="{{ $key }}"
+                                 :checked="in_array($key, $celebrationSet, true)" />
+                @endforeach
+            </fieldset>
+        </section>
+
         <div><button type="submit" class="md-btn-filled"><i class="bi bi-save"></i> Guardar ajustes</button></div>
     </form>
 </x-module-shell>

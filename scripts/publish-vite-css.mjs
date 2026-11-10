@@ -37,9 +37,8 @@ for (const file of assetFiles) {
         continue;
     }
 
-    // Las fuentes, en cambio, se referencian desde el CSS con una ruta absoluta
-    // `/build/assets/...`. Se publican junto al CSS y la referencia se reescribe;
-    // sin esto los iconos y la tipografia dan 404 fuera de local.
+    // Las fuentes se publican junto al CSS. La referencia relativa permite
+    // servirlas tanto desde la raiz del dominio como desde una subruta local.
     if (!file.endsWith('.css')) {
         await copyFile(new URL(file, assetsDirectory), new URL(file, publicFontsDirectory));
     }
@@ -57,7 +56,7 @@ for (const file of await readdir(publicJsDirectory)) {
 }
 
 const css = await readFile(new URL(`../public/build/${cssFile}`, import.meta.url), 'utf8');
-const publishedCss = css.replaceAll('/build/assets/', '/css/assets/');
+const publishedCss = css.replaceAll('/build/assets/', 'assets/');
 
 if (publishedCss.includes('/build/')) {
     throw new Error('El CSS publicado sigue apuntando a /build/, que no se despliega.');

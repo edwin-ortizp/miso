@@ -60,6 +60,55 @@ class GameUiTest extends TestCase
         Livewire::test(GameCollection::class)->assertSee('1 de 6 descubiertas')->assertSee($name);
     }
 
+    public function test_cards_show_full_activity_and_reveal_has_description_and_footer_actions(): void
+    {
+        $title = 'Preparar todos los materiales para la próxima reunión y compartir las conclusiones con el equipo';
+        $this->completeTask($title);
+        $this->completeTask('Un pequeño paso para ordenar la casa');
+        $this->completeTask('Dedicar un momento a una idea nueva');
+        $this->get(route('game.balls'))->assertOk()->assertSee($title)->assertSee('Abrir Poké Ball');
+        $encounter = GameEncounter::first();
+        $species = GameSpecies::find($encounter->species_id);
+        $species->update(['description' => str_repeat('Le gusta descansar al sol y explorar con sus compañeros. ', 12), 'types' => ['planta']]);
+        $component = Livewire::test(GameBalls::class)->call('open', $encounter->id)
+            ->assertSet('showReveal', true)->assertSet('revealKey', 1)
+            ->assertSee('Le gusta descansar al sol')->assertSee('planta')->assertSee('Mostrar ahora');
+        $doc = new \DOMDocument;
+        @$doc->loadHTML('<?xml encoding="utf-8" ?>'.$component->html());
+        $xpath = new \DOMXPath($doc);
+        $this->assertSame(1, $xpath->query('//footer//a[contains(text(), "Ver ficha")]')->length);
+        $this->assertSame(1, $xpath->query('//footer//button[contains(text(), "Abrir otra")]')->length);
+    }
+
+    public function test_reopening_is_idempotent_and_last_ball_has_no_open_another_action(): void
+    {
+        $this->completeTask();
+        $encounter = GameEncounter::first();
+        $component = Livewire::test(GameBalls::class)->call('open', $encounter->id);
+        $xp = GameCompanion::first()->xp;
+        $component->call('open', $encounter->id)->assertSet('revealKey', 2)
+            ->assertSee('Aún no tenemos una descripción de este Pokémon')->assertDontSee('Abrir otra');
+        $this->assertSame($xp, GameCompanion::first()->xp);
+        $component->call('openNext')->assertSet('showReveal', false);
+    }
+
+    public function test_repeated_companion_can_level_and_evolve_with_original_species_bio_identified(): void
+    {
+        $this->completeTask('Un paso que suma experiencia');
+        $encounter = GameEncounter::first();
+        $original = GameSpecies::where('name', 'Brotelo')->first();
+        $original->update(['description' => 'La descripción de Brotelo.']);
+        $encounter->update(['species_id' => $original->id]);
+        GameCompanion::create([
+            'species_id' => $original->id, 'line_key' => $original->line_key,
+            'xp' => 355, 'level' => 9, 'first_met_at' => now(),
+        ]);
+        Livewire::test(GameBalls::class)->call('open', $encounter->id)
+            ->assertSee('¡Evolución!')->assertSee('Brotalia')->assertSee('Subió al nivel 10')
+            ->assertSee('Sobre Brotelo')->assertSee('La descripción de Brotelo.');
+        $this->assertSame(1, GameCompanion::count());
+    }
+
     public function test_cannot_open_another_users_ball_from_ui(): void
     {
         $this->completeTask();
