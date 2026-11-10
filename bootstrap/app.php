@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\AddGameEventHeader;
 use App\Http\Middleware\AuthenticateIntegrationToken;
 use App\Http\Middleware\AuthenticateMcpRequest;
 use App\Http\Middleware\MeasurePerformance;
@@ -17,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(MeasurePerformance::class);
+        $middleware->appendToGroup('web', AddGameEventHeader::class);
         $middleware->alias([
             'integration.token' => AuthenticateIntegrationToken::class,
             'mcp.auth' => AuthenticateMcpRequest::class,

@@ -46,11 +46,12 @@ _Última actualización: 2026-11-09_
 | CHG-038 | S | Avisos del juego como tarjetas de logro arriba a la derecha | in-progress | En verificación | 1/2 |
 | CHG-039 | S | Ampliar bios Pokémon con movimientos verificados | done | Cerrado | 2/2 |
 | CHG-040 | M | Misiones semanales ajustables y relevantes | in-progress | En verificación | 3/3 |
-| CHG-041 | S | Avisos del juego sin consultas extra | to-do | Borrador | 0/0 |
-| CHG-042 | M | Micro-xp por constancia con interruptor por fuente | to-do | Borrador | 0/0 |
-| CHG-043 | M | Integrante del dia con frase en panel y dashboard | to-do | Borrador | 0/0 |
-| CHG-044 | S | Sonido sutil al ganar y abrir balls | to-do | Borrador | 0/0 |
-| CHG-045 | S | Temporadas tematicas por calendario | to-do | Borrador | 0/0 |
+| CHG-041 | S | Avisos del juego sin consultas extra | in-progress | En desarrollo | 0/4 |
+| CHG-042 | M | Micro-xp por constancia con interruptor por fuente | to-do | Aprobado | 0/5 |
+| CHG-043 | M | Integrante del dia con frase en panel y dashboard | to-do | Aprobado | 0/5 |
+| CHG-044 | S | Sonido sutil al ganar y abrir balls | to-do | Aprobado | 0/4 |
+| CHG-045 | S | Temporadas tematicas por calendario | to-do | Aprobado | 0/5 |
+| CHG-046 | M | Modo rutina inmersivo de habitos | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

@@ -1,9 +1,9 @@
 # CHG-041 · Avisos del juego sin consultas extra
-**Estado:** Borrador
+**Estado:** En desarrollo
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-09 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-09 · **Aprobado:** 2026-11-09 · **Cerrado:** —
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -47,3 +47,5 @@ sequenceDiagram
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-09 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-09 — Decisión (Alex): game-check solo cuando la acción generó xp/ball.
+- 2026-11-09 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-09 — Movido a in-progress/ (En desarrollo)

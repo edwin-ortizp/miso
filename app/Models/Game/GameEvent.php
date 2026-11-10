@@ -3,6 +3,7 @@
 namespace App\Models\Game;
 
 use App\Models\Traits\BelongsToUser;
+use App\Support\Game\RequestGameActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -23,6 +24,16 @@ class GameEvent extends Model
         'user_id', 'source_type', 'source_id', 'source_label', 'kind', 'effect',
         'config_snapshot', 'idempotency_key', 'occurred_at',
     ];
+
+    protected static function booted(): void
+    {
+        // CHG-041: avisa a la respuesta que hubo novedad del juego del usuario.
+        static::created(function (GameEvent $event): void {
+            if (auth()->check() && (int) $event->user_id === (int) auth()->id()) {
+                app(RequestGameActivity::class)->touch();
+            }
+        });
+    }
 
     protected function casts(): array
     {
