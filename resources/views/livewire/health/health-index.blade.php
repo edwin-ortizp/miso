@@ -13,6 +13,8 @@
                           :split="true" />
     </x-slot:actions>
 
+    <x-game.module-guardian :guardian="$guardian" :line="$guardianLine" class="game-guardian--top" />
+
     <x-ui.management-card id="health-timeline" title="Cronología de salud" icon="bi-clock-history" class="health-timeline-section"
                           :count="'('.$events->total().' / '.$totalCount.')'" search="search" search-placeholder="Buscar eventos"
                           :active-filters="count($activeFilters)" :paginator="$events" noun="eventos"
@@ -230,6 +232,7 @@
                 <h2 id="health-next-title">Próximo cuidado</h2>
             </header>
             <div class="health-card__body">
+                <x-game.module-guardian :guardian="$guardian" :line="$guardianLine" class="game-guardian--rail" />
                 @if ($nextEvent)
                     @php $nextDay = $nextEvent->event_date->isToday() ? 'Hoy' : ($nextEvent->event_date->isTomorrow() ? 'Mañana' : \Illuminate\Support\Str::ucfirst($nextEvent->event_date->translatedFormat('l'))); @endphp
                     <button type="button" class="md-list-item-link health-next" x-on:click="$dispatch('health-editor', {action: 'openForm', id: '{{ $nextEvent->id }}'})">

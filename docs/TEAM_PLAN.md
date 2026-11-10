@@ -60,6 +60,7 @@ _Última actualización: 2026-11-10_
 | CHG-052 | S | Acciones de tareas desde las tarjetas del calendario | in-progress | En verificación | 2/2 |
 | CHG-053 | XS | Barra de tiempo fluida en los avisos del juego | in-progress | En desarrollo | 0/1 |
 | CHG-054 | S | Horas por categoría hoy y resumen semanal por categoría en tareas | in-progress | En verificación | 2/2 |
+| CHG-055 | M | Guardianes de módulo en el panel lateral | in-progress | En verificación | 4/5 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

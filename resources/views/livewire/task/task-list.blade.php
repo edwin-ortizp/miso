@@ -5,6 +5,7 @@
 
     <div class="lt-cols task-list-layout">
     <div class="lt-stack">
+    <x-game.module-guardian :guardian="$guardian" :line="$guardianLine" class="game-guardian--top" />
     @php
         $activeFilterCount = collect([$dateFilter, $categoryFilter, $priorityFilter, $sizeFilter, $filter])->filter()->count();
     @endphp
@@ -139,6 +140,7 @@
 
     <div class="lt-stack">
         <x-panel title="Hoy" icon="bi-lightning-charge">
+            <x-game.module-guardian :guardian="$guardian" :line="$guardianLine" class="game-guardian--rail" />
             <div style="display: grid; gap: 14px;">
                 <div>
                     <p class="lt-figure" style="margin: 0 0 8px;"><strong>{{ $completedToday }}</strong><span>de {{ $plannedToday }} planificadas hoy</span></p>

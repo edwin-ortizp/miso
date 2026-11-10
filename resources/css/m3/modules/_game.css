@@ -1412,3 +1412,52 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
 @keyframes game-buddy-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
 @keyframes game-buddy-hop { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-14px) rotate(-3deg); } 55% { transform: translateY(0); } 70% { transform: translateY(-6px) rotate(2deg); } }
 @media (prefers-reduced-motion: reduce) { .game-buddy-stage__art, .game-buddy-stage.is-celebrate .game-buddy-stage__art { animation: none; } }
+
+/* Guardián de módulo (CHG-055): franja de escenario al inicio de una tarjeta del panel lateral. */
+.game-guardian {
+    position: relative; display: flex; align-items: center; gap: 12px;
+    margin: -16px -16px 16px; padding: 12px 16px 12px 10px;
+    background: linear-gradient(160deg, var(--stage-top, #2f5f8f), var(--stage-bottom, #5b8fbd));
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    overflow: hidden;
+}
+.health-card__body > .game-guardian { margin: -12px -16px 14px; }
+.game-guardian::before {
+    content: ""; position: absolute; left: 14px; bottom: 6px; width: 88px; height: 14px;
+    border-radius: 50%; background: rgb(0 0 0 / .22); filter: blur(3px);
+}
+.game-guardian__art { position: relative; flex: 0 0 auto; display: block; width: 96px; height: 96px; border-radius: 16px; }
+.game-guardian__art img, .game-guardian__art .game-placeholder {
+    width: 96px; height: 96px; object-fit: contain; display: block;
+    filter: drop-shadow(0 4px 6px rgb(0 0 0 / .35));
+}
+.game-guardian__art:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.game-guardian__talk { flex: 1 1 auto; min-width: 0; display: grid; gap: 6px; }
+.game-guardian__name { color: #fff; font-size: .8rem; font-weight: 700; letter-spacing: .02em; text-shadow: 0 1px 2px rgb(0 0 0 / .4); }
+.game-guardian__bubble {
+    position: relative; margin: 0; padding: 8px 12px;
+    font-size: .9rem; line-height: 1.35; font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    background: var(--md-sys-color-surface-container-lowest, #fff);
+    border-radius: 14px; box-shadow: 0 2px 8px rgb(0 0 0 / .18);
+}
+.game-guardian__bubble::before {
+    content: ""; position: absolute; left: -6px; top: 14px; width: 12px; height: 12px;
+    background: inherit; transform: rotate(45deg); border-radius: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+    .game-guardian__art img { animation: game-guardian-breathe 4s ease-in-out infinite; transform-origin: bottom center; }
+}
+@keyframes game-guardian-breathe { 50% { transform: translateY(-2px) scale(1.03); } }
+@media (max-width: 767.98px) {
+    .game-guardian__art, .game-guardian__art img, .game-guardian__art .game-placeholder { width: 72px; height: 72px; }
+    .game-guardian::before { width: 64px; left: 14px; }
+    .game-guardian__bubble { font-size: .85rem; }
+}
+
+/* Arriba de la lista solo cuando el panel lateral baja (< 1200 px); el del panel se oculta. */
+.game-guardian--top { display: none; }
+@media (max-width: 1199.98px) {
+    .game-guardian--top { display: flex; margin: 0 0 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 20px; }
+    .game-guardian--rail { display: none; }
+}

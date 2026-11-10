@@ -47,6 +47,28 @@ return [
         'roca' => 'tierra', 'tierra' => 'tierra', 'lucha' => 'tierra',
         'volador' => 'cielo', 'normal' => 'cielo',
     ],
+    // Guardianes de módulo (CHG-055): tipos afines por módulo y frase por estado.
+    'module_guardians' => [
+        'tasks' => ['psiquico', 'acero'],
+        'health' => ['hada', 'normal'],
+    ],
+    'guardian_lines' => [
+        'tasks' => [
+            'free' => 'Día libre, disfrútalo.',
+            'greet' => 'Hoy empezamos juntos.',
+            'cheer' => 'Un pasito y ya cuenta.',
+            'happy' => 'Buen ritmo, sigue así.',
+            'celebrate' => '¡Vas volando hoy!',
+        ],
+        'health' => [
+            'care' => 'Recupérate con calma, aquí estoy.',
+            'free' => 'Todo en orden, cuídate.',
+            'greet' => 'Hoy también te cuidamos.',
+            'cheer' => 'Un cuidado a la vez.',
+            'happy' => 'Te estás cuidando bien.',
+            'celebrate' => '¡Pendientes de salud al día!',
+        ],
+    ],
     'buddy_moods' => [
         'celebrate' => ['min' => 70, 'text' => '¡Vas volando!'],
         'happy' => ['min' => 30, 'text' => 'Buen ritmo'],

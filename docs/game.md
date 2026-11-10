@@ -116,6 +116,16 @@ Aparece un ejemplar **al azar** del usuario con una frase (`x-game.daily-buddy`)
 - **Frases** (`game_quotes`): 30 semilla (`user_id` null, se insertan con la migración desde `GameQuote::SEED`) siempre elegibles, más las del director, que dejan de salir a los 60 días (`config('game.quotes')`).
 - **`propose-game-quotes-tool`** recibe `{ "quotes": [ … ] }`: 7 a 14 frases de hasta 140 caracteres, sin repetir y sin palabras de culpa (`MissionProposalValidator::PENALTY_WORDS`). Todo o nada. Una propuesta por semana (`ya_propuestas`); con el director en pausa responde `director_paused`. El contexto del director trae `quotes_due` y `quotes_limits`.
 
+## Guardianes de módulo (CHG-055)
+
+Cada módulo tiene un guardián que asoma en la esquina de una tarjeta de su panel lateral, con una frase según el avance del día.
+
+- **Dónde:** Tareas → tarjeta "Hoy"; Salud → tarjeta "Próximo cuidado".
+- **Quién:** el ejemplar de mayor nivel con un tipo afín al módulo (`game.module_guardians`: Tareas = psíquico/acero, Salud = hada/normal); empate → el más antiguo; sin afinidad → el de mayor nivel. Se elige al montar la página y no cambia con los re-renders.
+- **Frase:** `ModuleGuardian::line()` usa los umbrales de `DailyBuddy::mood` y los textos de `game.guardian_lines`. Tareas: completadas/planificadas hoy. Salud: si hay un evento en seguimiento (tipo de evolución sin fecha de fin) dice la frase `care`; si no, completados en 7 días / (esos + pendientes de salud).
+- **Oculto** con el juego apagado o sin ejemplares.
+- **Agregar otro módulo:** añadir sus tipos en `module_guardians` y sus frases en `guardian_lines`, elegir el guardián en `mount()` con `ModuleGuardian::pick($userId, 'modulo')`, y poner `<x-game.module-guardian>` dentro de la tarjeta con la clase `has-guardian`.
+
 ## Director y temporadas
 
 El director IA **no corre dentro de MiSo**: es un schedule de Paseo que usa el conector MCP de MiSo. Lee los datos de producción **solo por MCP**: agregados del juego y, para las misiones, la lista acotada de tareas abiertas no privadas. MiSo no integra un cliente LLM ni usa el scheduler del servidor. Todo cálculo de recompensas sigue siendo determinista en el backend.
