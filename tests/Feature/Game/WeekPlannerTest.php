@@ -7,8 +7,10 @@ use App\Models\Game\GameMission;
 use App\Models\Game\GameSpecies;
 use App\Models\Game\GameTeamMember;
 use App\Models\Game\GameWeek;
+use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\User;
+use App\Services\Game\GameRules;
 use App\Services\Game\WeekPlanner;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -105,6 +107,9 @@ class WeekPlannerTest extends TestCase
     {
         TaskCategory::create(['name' => 'Hogar', 'key' => 'hogar']);
         TaskCategory::create(['name' => 'Trabajo', 'key' => 'trabajo']);
+        foreach (range(1, 4) as $i) {
+            Task::create(['title' => 'Pendiente '.$i, 'category' => 'hogar']);
+        }
         $this->habit('Caminar');
 
         $week = app(WeekPlanner::class)->forWeek(auth()->id(), now());
@@ -131,5 +136,60 @@ class WeekPlannerTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         $this->assertSame(0, GameWeek::count());
+    }
+
+    public function test_categories_rank_real_pending_tasks_and_cap_targets_without_duplicates(): void
+    {
+        config(['game.mission_types' => ['category_tasks'], 'game.mission_target' => [4, 4]]);
+        foreach (['hogar' => 1, 'trabajo' => 3, 'finanzas' => 0] as $category => $count) {
+            TaskCategory::create(['name' => ucfirst($category), 'key' => $category]);
+            for ($i = 0; $i < $count; $i++) {
+                Task::create(['title' => 'Pendiente '.$i, 'category' => $category]);
+            }
+        }
+        foreach (range(1, 8) as $i) {
+            Task::create(['title' => 'Recurrente '.$i, 'category' => 'finanzas', 'is_recurrent' => true]);
+        }
+        foreach ([['completed' => true], ['is_private' => true], ['is_recurrence_history' => true]] as $excluded) {
+            Task::create(['title' => 'Excluida', 'category' => 'finanzas'] + $excluded);
+        }
+        $other = User::factory()->create();
+        TaskCategory::forceCreate(['user_id' => $other->id, 'name' => 'Finanzas', 'key' => 'finanzas']);
+        Task::forceCreate(['user_id' => $other->id, 'title' => 'Ajena', 'category' => 'finanzas']);
+        $missions = app(WeekPlanner::class)->forWeek(auth()->id(), now())->missions()->orderBy('id')->get();
+        $this->assertSame(['trabajo', 'hogar'], $missions->map(fn ($m) => $m->params['category'])->all());
+        $this->assertSame([3, 1], $missions->pluck('target')->all());
+    }
+
+    public function test_focus_only_breaks_count_ties_and_seed_is_reproducible(): void
+    {
+        foreach (['hogar' => 1, 'trabajo' => 2, 'salud' => 1, 'deporte' => 1] as $key => $count) {
+            TaskCategory::create(['name' => $key, 'key' => $key]);
+            for ($i = 0; $i < $count; $i++) {
+                Task::create(['title' => 'Pendiente '.$i, 'category' => $key]);
+            }
+        }
+        $this->mock(GameRules::class, function ($mock) {
+            $mock->shouldReceive('for')->andReturn(['mission_types' => ['category_tasks'], 'mission_target' => [2, 4], 'mission_focus' => ['salud']]);
+        });
+        $week = app(WeekPlanner::class)->forWeek(auth()->id(), now());
+        $categories = $week->missions()->orderBy('id')->get()->map(fn ($m) => $m->params['category'])->all();
+        $this->assertSame(['trabajo', 'salud'], array_slice($categories, 0, 2));
+        $this->assertContains($categories[2], ['hogar', 'deporte']);
+
+        // Recrear solo en la base desechable con la misma semilla reproduce desempates y metas.
+        $before = $week->missions()->orderBy('id')->get(['type', 'title', 'params', 'target'])->toArray();
+        $week->missions()->delete();
+        $method = new \ReflectionMethod(WeekPlanner::class, 'createMissions');
+        $method->invoke(app(WeekPlanner::class), $week);
+        $this->assertSame($before, $week->missions()->orderBy('id')->get(['type', 'title', 'params', 'target'])->toArray());
+    }
+
+    public function test_variety_does_not_count_empty_categories(): void
+    {
+        TaskCategory::create(['name' => 'Vacía', 'key' => 'vacia']);
+        $this->habit();
+        config(['game.mission_types' => ['variety']]);
+        $this->assertSame(0, app(WeekPlanner::class)->forWeek(auth()->id(), now())->missions()->count());
     }
 }

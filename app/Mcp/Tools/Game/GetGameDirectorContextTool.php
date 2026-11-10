@@ -10,7 +10,7 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Director del juego de Colección: devuelve el resumen del juego del usuario autenticado (participación por semana, actividad por ámbito, misiones, colección, temporada activa y anteriores, límites permitidos y si toca proponer). Incluye open_tasks (hasta 40 tareas abiertas no privadas: id, código, título, categoría, vencimiento, tamaño y prioridad, sin descripciones), habit_periods y current_week para proponer misiones con propose-game-week-missions-tool. Úsalo antes de propose-game-season-tool. No incluye descripciones de tareas, tareas privadas, diario, salud ni contactos.')]
+#[Description('Director del juego de Colección: devuelve el resumen del juego del usuario autenticado (participación por semana, actividad por ámbito, misiones, colección, temporada activa y anteriores, límites permitidos y si toca proponer). Incluye open_tasks (hasta 40 tareas abiertas no privadas: id, código, título, categoría, vencimiento, tamaño y prioridad, sin descripciones), pending_tasks_by_category (conteos no recurrentes no privados), habit_periods y current_week (misiones con id, params y editable para update-game-week-missions-tool) para proponer misiones con propose-game-week-missions-tool. Úsalo antes de propose-game-season-tool. No incluye descripciones de tareas, tareas privadas, diario, salud ni contactos.')]
 class GetGameDirectorContextTool extends Tool
 {
     public function handle(Request $request, SeasonManager $seasons): Response

@@ -234,6 +234,7 @@ class LifeTrackerServer extends Server
         GetGameDirectorContextTool::class,
         ProposeGameSeasonTool::class,
         ProposeGameWeekMissionsTool::class,
+        \App\Mcp\Tools\Game\UpdateGameWeekMissionsTool::class,
     ];
 
     protected array $resources = [

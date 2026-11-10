@@ -149,8 +149,8 @@ class WeekPlanner
         // Reglas de la temporada vigente al iniciar la semana (CHG-022); si no hay, las base.
         $rules = app(GameRules::class)->for($week->user_id, $week->week_start->copy()->addHours(12));
         [$min, $max] = $rules['mission_target'];
-        $categories = $this->categories($week->user_id);
-        $focus = $categories->only($rules['mission_focus']);
+        $counts = app(MissionPendingTasks::class)->counts($week->user_id);
+        $categories = $this->categories($week->user_id)->only($counts->keys()->all());
         $periods = HabitDefinition::withoutGlobalScopes()->where('user_id', $week->user_id)->get(['time_of_day'])
             ->map(fn ($habit) => $habit->time_of_day ?: 'anytime')->unique()->values();
         $types = collect($rules['mission_types'])->filter(fn ($type) => match ($type) {
@@ -162,11 +162,17 @@ class WeekPlanner
         mt_srand($week->seed);
         try {
             $created = [];
+            // Cantidad primero; foco y semilla solo resuelven empates.
+            $ranked = $categories->map(fn ($name, $key) => [
+                'key' => $key, 'count' => $counts[$key],
+                'focus' => in_array($key, $rules['mission_focus'], true) ? 1 : 0,
+                'tie' => mt_rand(),
+            ])->sort(fn ($a, $b) => ($b['count'] <=> $a['count']) ?: ($b['focus'] <=> $a['focus']) ?: ($a['tie'] <=> $b['tie']))->values();
             for ($i = 0; $i < (int) config('game.missions_per_week') && $types->isNotEmpty(); $i++) {
                 $type = $types[$i % $types->count()];
                 $target = mt_rand($min, $max);
                 $mission = match ($type) {
-                    GameMission::TYPE_CATEGORY => $this->categoryMission($focus->isNotEmpty() ? $focus : $categories, $target, $created),
+                    GameMission::TYPE_CATEGORY => $this->categoryMission($categories, $counts, $ranked, $target),
                     GameMission::TYPE_HABITS => $this->habitsMission($periods, $target, $created),
                     default => $this->varietyMission($categories->count() + ($periods->isNotEmpty() ? 1 : 0), $target),
                 };
@@ -196,14 +202,18 @@ class WeekPlanner
         return ['title' => "Avanza en {$target} categorías distintas", 'params' => [], 'target' => $target];
     }
 
-    /** @param array<int, string> $created */
-    private function categoryMission(Collection $categories, int $target, array $created): ?array
+    private function categoryMission(Collection $categories, Collection $counts, Collection $ranked, int $target): ?array
     {
-        $keys = $categories->keys()->values();
-        $key = $keys[mt_rand(0, $keys->count() - 1)];
+        $candidate = $ranked->shift();
+        if (! $candidate) {
+            return null;
+        }
+        $key = $candidate['key'];
         $name = $categories[$key];
+        $target = min($target, $counts[$key]);
+        $tasks = $target === 1 ? 'tarea' : 'tareas';
 
-        return ['title' => "Completa {$target} tareas de {$name}", 'params' => ['category' => $key, 'category_name' => $name], 'target' => $target];
+        return ['title' => "Completa {$target} {$tasks} de {$name}", 'params' => ['category' => $key, 'category_name' => $name], 'target' => $target];
     }
 
     /** @param array<int, string> $created */

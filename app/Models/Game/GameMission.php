@@ -11,11 +11,15 @@ class GameMission extends Model
     use BelongsToUser;
 
     public const TYPE_CATEGORY = 'category_tasks';
+
     public const TYPE_HABITS = 'habit_groups';
+
     public const TYPE_VARIETY = 'variety';
+
     public const TYPE_SPECIFIC = 'specific_tasks';
 
     public const SOURCE_AUTO = 'auto';
+
     public const SOURCE_DIRECTOR = 'director';
 
     protected $fillable = [
@@ -37,5 +41,10 @@ class GameMission extends Model
     public function halfThreshold(): int
     {
         return max(1, (int) ceil($this->target / 2));
+    }
+
+    public function isEditable(): bool
+    {
+        return $this->progress === 0 && ! $this->half_rewarded_at && ! $this->full_rewarded_at;
     }
 }

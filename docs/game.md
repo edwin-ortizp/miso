@@ -30,7 +30,7 @@ Pantallas: menú **Productividad → Colección** (`/game`), con las pestañas B
 | Ejercicio del día | Los minutos del día alcanzan tu meta de ejercicio (30 por defecto) | `exercise:{fecha}` |
 
 - Todas cuentan igual desde la app o el MCP: se detectan en los modelos (`app/Observers/GameTaskObserver.php` y `app/Observers/Game/*`) y otorgan tras confirmar la transacción.
-- **Ámbitos** (`config('game.scopes')`): `habits` (Hábitos), `focus` (Foco), `goals` (Metas) y `health` (Salud), además de las categorías de tarea. Cada uno puede ser afinidad del equipo, cuenta en la variedad y se admite en los bonos de temporada y en las misiones de ámbito del director.
+- **Ámbitos** (`config('game.scopes')`): `habits` (Hábitos), `focus` (Foco), `goals` (Metas) y `health` (Salud), además de las categorías de tarea. Cada uno puede ser afinidad del equipo, cuenta en el progreso de variedad y se admite en los bonos de temporada. Las nuevas misiones `category_tasks` requieren una categoría real con pendientes elegibles.
 - En Ajustes puedes apagar cada fuente: tareas, hábitos, foco, metas y salud.
 
 - Máximo diario configurable (por defecto **5**). Al alcanzarlo, la actividad se registra sin ball y no se muestra error.
@@ -65,13 +65,16 @@ Pestaña **Semana** (`/game/week`). La semana va de lunes a domingo (America/Bog
 
 - **Equipo:** hasta 6 ejemplares, elegidos al azar con preferencia por los que han estado menos veces (peso `1 / (1 + apariciones)`, semilla registrada). Si la semana empezó con huecos, se completan al descubrir nuevos ejemplares. Los equipos anteriores quedan guardados.
 - **Habilidades:** afinidad con una categoría de tarea del usuario o con "Hábitos". Cada actividad elegible da **+3 xp** a todo el equipo y **+6 extra** al integrante afín, aunque se haya alcanzado el límite diario de balls. En el historial aparece como "Equipo de la semana · {origen}".
-- **Misiones:** 3 por semana, con metas de 2 a 4: tareas de una categoría, grupos de hábitos de un momento del día (días distintos) y variedad de ámbitos (categorías distintas, donde hábitos cuenta como un ámbito). Al 50 % se recibe **1 ball** y al 100 % **2 más**, una sola vez. Estas balls no cuentan para el límite diario. Si una misión queda incompleta no pasa nada y la semana siguiente trae otras.
+- **Misiones:** hasta 3 por semana, con metas base de 2 a 4: tareas de una categoría, grupos de hábitos de un momento del día (días distintos) y variedad de ámbitos. Al 50 % se recibe **1 ball** y al 100 % **2 más**, una sola vez. Estas balls no cuentan para el límite diario. Si una misión queda incompleta no pasa nada y la semana siguiente trae otras.
+- **Pendientes elegibles (CHG-040):** tareas propias sin completar, no privadas, no recurrentes y fuera del historial de recurrencias. El generador elige categorías por cantidad de estos pendientes, de mayor a menor y sin repetir; el foco de temporada solo desempata cantidades iguales y luego decide la semilla semanal. La meta por categoría no supera los pendientes disponibles y puede ser **1**. Para generar variedad se cuentan solo esas categorías y el ámbito de hábitos si existe. Después de crear la misión, las tareas recurrentes siguen sumando progreso de categoría, igual que antes. Las semanas existentes no se regeneran.
 - **Misiones del director (CHG-026):** cada lunes el director puede proponer las misiones de la semana actual con `propose-game-week-missions-tool`.
   - Incluye el tipo `specific_tasks`: "Cierra n de estas m tareas", con 2 a 6 tareas abiertas no privadas. Cuenta una vez por tarea; las recurrentes cuentan por su ocurrencia.
   - Solo reemplaza misiones sin avance; si alguna ya avanzó, responde `ya_con_avance` y nada cambia.
+  - La propuesta inicial sigue limitada a una por semana (`ya_propuestas`); para ajustes solicitados por el usuario se utiliza la herramienta separada siguiente.
   - Los títulos no pueden usar "debes", "obligatorio", "atrasado", "fallaste" ni "castigo".
   - En Semana, esas misiones llevan "Propuesta por el director" y sus tareas enlazadas, con ✓ cuando ya están completadas.
   - Si el director no propone nada, quedan las misiones automáticas.
+- **Ajustes conversacionales (CHG-040):** `update-game-week-missions-tool` recibe `missions`, una lista de 1 a 3 sustituciones completas `{id, type, title, target, task_ids?, category?, period?}`. Obtén los IDs de `current_week.missions` y cambia solo `editable=true` (progreso cero, sin recompensas). Conserva el ID, no aumenta el cupo y permite cambios aunque otras misiones estén avanzadas o completadas. Valida toda la solicitud antes de guardar; un ID ajeno, de otra semana, repetido o una propuesta inválida rechaza el conjunto sin cambios. Responde `applied`, `unchanged` en reintentos idénticos o error `rejected` con motivos. No otorga recompensas ni elimina contribuciones. La transacción bloquea primero al usuario y después las misiones, igual que la ruta de progreso. Requiere el director activo y no debe invocarse desde el schedule para regenerar la semana automáticamente.
 
 ## Director y temporadas
 
@@ -82,7 +85,8 @@ El director IA **no corre dentro de MiSo**: es un schedule de Paseo que usa el c
   - las categorías, el tamaño de la colección, las temporadas activa, programada y recientes;
   - los límites y `proposal_due`;
   - `open_tasks`: hasta 40 tareas abiertas **no privadas**, con id, código, título, categoría, vencimiento, si está vencida, tamaño, prioridad y días abierta. Lo aprobó Alex para las misiones contextuales;
-  - `habit_periods` y `current_week` (misiones actuales y si se pueden reemplazar).
+  - `pending_tasks_by_category`: conteos completos de pendientes elegibles, sin el límite de 40 de `open_tasks`;
+  - `habit_periods` y `current_week` (misiones actuales con `id`, `params`, `editable`, además de `replaceable` para la propuesta inicial).
   - No incluye descripciones de tareas, tareas privadas, diario, salud ni contactos.
 - `propose-game-season-tool` recibe `{ "season": { … } }`. `SeasonValidator` valida estrictamente:
   - rechaza claves desconocidas;
@@ -131,11 +135,12 @@ Eres el director del juego de Colección de MiSo. Usa SOLO el conector MCP de Mi
    propose-game-week-missions-tool pensadas en open_tasks:
    - una specific_tasks con 3-5 tareas concretas (prioriza vencidas y las que llevan más días abiertas),
      con una meta alcanzable (la mitad o un poco más);
-   - otra que equilibre: un ámbito poco atendido (category_tasks) o hábitos (habit_groups, period de habit_periods);
+   - otra que equilibre: una categoría con pending_tasks_by_category > 0 (category_tasks, meta de 1 a 5 sin superar ese conteo) o hábitos (habit_groups, period de habit_periods);
    - una variety para premiar el equilibrio.
    Títulos breves, cálidos y sin culpa (prohibido "debes", "obligatorio", "atrasado", "fallaste", "castigo").
    Si current_week.director_proposed es true, no propongas misiones. Si responde rejected, corrige según "errors"
    y reintenta una vez. Si responde ya_propuestas o ya_con_avance, no insistas.
+   No uses update-game-week-missions-tool desde este schedule: se reserva para ajustes pedidos por el usuario.
 3. TEMPORADA: si proposal_due es false, termina y resume en una línea lo observado. Si toca, diseña una temporada de 4 semanas que:
    - celebre lo que sí se hizo y nunca castigue la baja actividad;
    - impulse con bonos (no con exigencias) 1-2 ámbitos poco atendidos según activities_by_scope;

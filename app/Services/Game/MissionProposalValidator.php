@@ -31,9 +31,9 @@ class MissionProposalValidator
             return ['errors' => ['Envía de 1 a '.config('game.missions_per_week').' misiones.'], 'missions' => []];
         }
 
-        // Categorías de tarea más los ámbitos del juego que no son hábitos (foco, metas, salud).
+        $counts = app(MissionPendingTasks::class)->counts($userId);
         $categories = TaskCategory::withoutGlobalScopes()->where('user_id', $userId)->pluck('name', 'key')
-            ->union(collect(config('game.scopes'))->except('habits'));
+            ->only($counts->keys()->all());
         $periods = HabitDefinition::withoutGlobalScopes()->where('user_id', $userId)->get(['time_of_day'])
             ->map(fn ($habit) => $habit->time_of_day ?: 'anytime')->unique()->values()->all();
 
@@ -89,10 +89,10 @@ class MissionProposalValidator
                 case GameMission::TYPE_CATEGORY:
                     $category = $mission['category'] ?? null;
                     if (! is_string($category) || ! $categories->has($category)) {
-                        $errors[] = "Misión {$n}: la categoría no existe.";
+                        $errors[] = "Misión {$n}: la categoría no tiene tareas pendientes no recurrentes disponibles.";
                     }
-                    $row['params'] = ['category' => $category, 'category_name' => $categories[$category] ?? $category];
-                    $this->checkTarget($target, $minTarget, $maxTarget, $n, $errors);
+                    $row['params'] = ['category' => $category, 'category_name' => is_string($category) ? ($categories[$category] ?? $category) : ''];
+                    $this->checkTarget($target, 1, min($maxTarget, is_string($category) ? ($counts[$category] ?? 0) : 0), $n, $errors);
                     break;
 
                 case GameMission::TYPE_HABITS:

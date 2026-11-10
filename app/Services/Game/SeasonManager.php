@@ -69,6 +69,7 @@ class SeasonManager
             'proposal_due' => $this->isDue($userId, $now),
             'now' => $now->toIso8601String(),
             'categories' => TaskCategory::withoutGlobalScopes()->where('user_id', $userId)->pluck('name', 'key'),
+            'pending_tasks_by_category' => app(MissionPendingTasks::class)->counts($userId),
             'collection' => [
                 'species_total' => GameSpecies::query()->where('active', true)->count(),
                 'companions' => GameCompanion::withoutGlobalScopes()->where('user_id', $userId)->count(),
@@ -127,7 +128,7 @@ class SeasonManager
 
         return [
             'week_start' => $week->week_start->toDateString(),
-            'missions' => $missions->map(fn ($m) => ['type' => $m->type, 'title' => $m->title, 'target' => $m->target, 'progress' => $m->progress, 'source' => $m->source])->all(),
+            'missions' => $missions->map(fn ($m) => ['id' => $m->id, 'type' => $m->type, 'title' => $m->title, 'params' => $m->params, 'target' => $m->target, 'progress' => $m->progress, 'source' => $m->source, 'editable' => $m->isEditable()])->all(),
             'replaceable' => ! $proposed && $this->missionsReplaceable($missions),
             'director_proposed' => $proposed,
         ];
@@ -143,7 +144,60 @@ class SeasonManager
 
     private function missionsReplaceable($missions): bool
     {
-        return $missions->every(fn ($m) => $m->progress === 0 && ! $m->half_rewarded_at && ! $m->full_rewarded_at);
+        return $missions->every(fn ($m) => $m->isEditable());
+    }
+
+    /** Sustituye solo las misiones indicadas, sin borrar identidad, aportes ni recompensas. */
+    public function updateWeekMissions(int $userId, array $updates): array
+    {
+        return DB::transaction(function () use ($userId, $updates): array {
+            User::query()->whereKey($userId)->lockForUpdate()->first();
+            $reject = fn (string $message) => ['status' => 'rejected', 'message' => $message, 'errors' => [$message]];
+            if (! $this->settings->for($userId)['director_enabled']) {
+                return $reject('El director está en pausa.');
+            }
+            if (! array_is_list($updates) || $updates === [] || count($updates) > (int) config('game.missions_per_week')) {
+                return $reject('Envía de 1 a '.config('game.missions_per_week').' sustituciones.');
+            }
+            $ids = [];
+            $proposals = [];
+            foreach ($updates as $update) {
+                if (! is_array($update) || ! isset($update['id']) || ! is_int($update['id']) || $update['id'] < 1 || in_array($update['id'], $ids, true)) {
+                    return $reject('Cada sustitución necesita un ID de misión entero, positivo y distinto.');
+                }
+                $ids[] = $update['id'];
+                unset($update['id']);
+                $proposals[] = $update;
+            }
+            $week = GameWeek::withoutGlobalScopes()->where('user_id', $userId)
+                ->whereDate('week_start', WeekPlanner::weekStart(now())->toDateString())->first();
+            if (! $week) {
+                return $reject('No hay misiones para la semana actual.');
+            }
+            $missions = GameMission::withoutGlobalScopes()->where('user_id', $userId)->where('game_week_id', $week->id)
+                ->whereIn('id', $ids)->orderBy('id')->lockForUpdate()->get()->keyBy('id');
+            if ($missions->count() !== count($ids)) {
+                return $reject('Las misiones deben pertenecer a tu semana actual.');
+            }
+            if (! $this->missionsReplaceable($missions)) {
+                return $reject('Solo puedes cambiar misiones sin avance ni recompensas.');
+            }
+            $validated = app(MissionProposalValidator::class)->validate($proposals, $userId);
+            if ($validated['errors'] !== []) {
+                return ['status' => 'rejected', 'message' => 'Sustituciones rechazadas.', 'errors' => $validated['errors']];
+            }
+            $changed = 0;
+            foreach ($ids as $index => $id) {
+                $mission = $missions[$id];
+                $mission->fill($validated['missions'][$index] + ['source' => GameMission::SOURCE_DIRECTOR]);
+                if ($mission->isDirty()) {
+                    $mission->save();
+                    $changed++;
+                }
+            }
+
+            return ['status' => $changed ? 'applied' : 'unchanged', 'message' => $changed.' misiones actualizadas.', 'errors' => []];
+        });
     }
 
     /**

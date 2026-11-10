@@ -128,6 +128,9 @@ class SeasonManagerTest extends TestCase
     {
         $this->withWeeklyMissions();
         $this->propose(['missions' => ['types' => ['category_tasks'], 'target' => [5, 5], 'focus' => ['salud']]]);
+        foreach (range(1, 5) as $i) {
+            Task::create(['title' => 'Pendiente '.$i, 'category' => 'salud']);
+        }
 
         $week = app(WeekPlanner::class)->forWeek(auth()->id(), now()->addWeek());
         $missions = $week->missions()->get();
