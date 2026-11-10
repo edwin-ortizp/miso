@@ -4,6 +4,7 @@ namespace App\Services\Game;
 
 use App\Models\Game\GameSpecies;
 use App\Models\TaskCategory;
+use Illuminate\Support\Str;
 
 /**
  * Valida de forma estricta una propuesta de temporada del director. Nada se
@@ -12,7 +13,7 @@ use App\Models\TaskCategory;
  */
 class SeasonValidator
 {
-    private const KEYS = ['name', 'narrative', 'notes', 'weeks', 'missions', 'team_bonus', 'rarity_weights', 'featured_line'];
+    private const KEYS = ['name', 'narrative', 'notes', 'weeks', 'missions', 'team_bonus', 'rarity_weights', 'featured_line', 'theme', 'featured_types'];
     private const MISSION_KEYS = ['types', 'target', 'focus'];
 
     /**
@@ -137,6 +138,39 @@ class SeasonValidator
             }
         }
 
+        // Temporadas temáticas (CHG-045).
+        $themes = (array) config('game.season_themes');
+        if (isset($proposal['theme'])) {
+            if (! is_string($proposal['theme']) || ! array_key_exists($proposal['theme'], $themes)) {
+                $errors[] = 'El tema no existe. Temas: '.implode(', ', array_keys($themes)).'.';
+            } else {
+                $config['theme'] = $proposal['theme'];
+            }
+        }
+        if (isset($proposal['featured_types'])) {
+            $types = $proposal['featured_types'];
+            $max = (int) $rules['max_featured_types'];
+            if (! is_array($types) || ! array_is_list($types) || $types === [] || count($types) > $max) {
+                $errors[] = "Los tipos destacados son una lista de 1 a {$max}.";
+            } else {
+                $slugs = array_values(array_unique(array_map(fn ($type) => is_string($type) ? Str::slug($type) : '', $types)));
+                $missing = array_diff($slugs, self::catalogTypes());
+                if ($missing !== []) {
+                    $errors[] = 'Tipos destacados que no existen en el catálogo: '.implode(', ', $missing).'.';
+                } else {
+                    $config['featured_types'] = $slugs;
+                }
+            }
+        }
+
         return ['errors' => $errors, 'config' => $errors === [] ? $config : []];
+    }
+
+    /** Tipos (en slug) presentes en las especies activas del catálogo. @return array<int, string> */
+    public static function catalogTypes(): array
+    {
+        return GameSpecies::query()->where('active', true)->pluck('types')
+            ->flatMap(fn ($types) => (array) $types)->map(fn ($type) => Str::slug((string) $type))
+            ->filter()->unique()->values()->all();
     }
 }

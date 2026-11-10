@@ -90,6 +90,40 @@ export const catalog = {
             vars: { '--x': `${rand(0, 96)}vw`, '--delay': `${rand(0, 700)}ms`, '--dur': `${rand(1300, 2000)}ms`, '--spin': `${rand(-360, 360)}deg` },
         }));
     },
+    // Temáticas (CHG-045): solo salen durante una temporada con ese tema.
+    snow(el) {
+        particles(el, 30, () => ({
+            text: Math.random() > 0.5 ? '❄' : '•',
+            vars: { '--x': `${rand(0, 98)}vw`, '--drift': `${rand(-6, 6)}vw`, '--spin': `${rand(-120, 120)}deg`, '--delay': `${rand(0, 900)}ms`, '--dur': `${rand(2000, 2600)}ms`, '--size': `${rand(0.8, 1.6)}rem` },
+        }));
+    },
+    sparkles(el) {
+        particles(el, 18, (index) => ({
+            text: index % 3 ? '✦' : '✧',
+            vars: { '--x': `${rand(0, 70)}vw`, '--y': `${rand(0, 40)}vh`, '--delay': `${rand(0, 1000)}ms`, '--dur': `${rand(900, 1500)}ms`, '--size': `${rand(1, 2)}rem` },
+        }));
+    },
+    pumpkins(el) {
+        const items = ['🎃', '🦇', '🍬', '🎃'];
+        particles(el, 12, (index) => ({
+            text: items[index % items.length],
+            vars: { '--x': `${rand(2, 95)}vw`, '--drift': `${rand(-6, 6)}vw`, '--delay': `${rand(0, 700)}ms`, '--dur': `${rand(2000, 2600)}ms`, '--size': `${rand(1.6, 2.6)}rem` },
+        }));
+    },
+    hearts(el) {
+        const items = ['💛', '💖', '💜', '🤝'];
+        particles(el, 14, (index) => ({
+            text: items[index % items.length],
+            vars: { '--x': `${rand(2, 95)}vw`, '--drift': `${rand(-6, 6)}vw`, '--delay': `${rand(0, 700)}ms`, '--dur': `${rand(2000, 2600)}ms`, '--size': `${rand(1.4, 2.4)}rem` },
+        }));
+    },
+    candles(el) {
+        const items = ['🕯️', '🎂', '🎉', '🕯️'];
+        particles(el, 12, (index) => ({
+            text: items[index % items.length],
+            vars: { '--x': `${rand(2, 95)}vw`, '--drift': `${rand(-6, 6)}vw`, '--delay': `${rand(0, 700)}ms`, '--dur': `${rand(2000, 2600)}ms`, '--size': `${rand(1.6, 2.6)}rem` },
+        }));
+    },
     petals(el) {
         const petals = ['🌸', '🌼', '🍃', '🌺'];
         particles(el, 22, (index) => ({
@@ -113,17 +147,17 @@ export function celebrate(name) {
 }
 
 /**
- * Escucha `game-celebrate` (lo despacha el notificador) y, tras cada petición
- * exitosa de Livewire, pide al notificador revisar novedades (`game-check`).
+ * Escucha `game-celebrate` (lo despacha el notificador) y pide al notificador
+ * revisar novedades (`game-check`) solo cuando la respuesta del servidor trae
+ * `X-Game-Event: 1`, es decir, cuando la acción generó un evento del juego (CHG-041).
  */
 export function registerGameCelebrations(Livewire) {
     window.addEventListener('game-celebrate', (event) => celebrate(event.detail?.name));
 
     let timer = null;
-    Livewire.hook('commit', ({ component, succeed }) => {
-        succeed(() => {
-            // Se ignora el propio notificador para no entrar en bucle.
-            if (component?.name === 'game.game-notifier') return;
+    Livewire.hook('request', ({ respond }) => {
+        respond(({ response }) => {
+            if (response?.headers?.get('X-Game-Event') !== '1') return;
             window.clearTimeout(timer);
             timer = window.setTimeout(() => Livewire.dispatch('game-check'), 400);
         });

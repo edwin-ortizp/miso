@@ -46,8 +46,12 @@ class WallPanel extends Component
     #[Locked]
     public ?string $detailId = null;
 
+    /** Integrante del día (CHG-043): se elige al cargar y no cambia con los refrescos. @var array<string, mixed>|null */
+    public ?array $buddy = null;
+
     public function mount(): void
     {
+        $this->buddy = app(\App\Services\Game\DailyBuddy::class)->pick((int) auth()->id());
         $this->refreshPanel();
     }
 
@@ -132,6 +136,15 @@ class WallPanel extends Component
         $this->showDetail = false;
     }
 
+    /** "Otra frase" (CHG-049): cambia solo la frase; el compañero se conserva. */
+    public function anotherQuote(): void
+    {
+        if (! $this->buddy || ($this->buddy['empty'] ?? true)) {
+            return;
+        }
+        $this->buddy['quote'] = app(\App\Services\Game\DailyBuddy::class)->quote((int) auth()->id(), $this->buddy['quote']);
+    }
+
     public function render()
     {
         $data = app(WallPanelData::class)->forToday();
@@ -143,7 +156,18 @@ class WallPanel extends Component
             default => null,
         };
 
-        $viewData = $data + ['detail' => $detail, 'moodStates' => $this->moodLogger()->prioritizedStates(), ...$this->moodProgressiveData()];
+        // Compañero del panel (CHG-049): reacción al día y balls por abrir, recalculadas en cada refresco.
+        $dayTasks = collect($data['week'][0]['rows'])->where('kind', 'task');
+        $buddyMood = \App\Services\Game\DailyBuddy::mood(
+            count($data['completions']) + $dayTasks->where('done', true)->count(),
+            $data['habits']->count() + $dayTasks->count(),
+            now(),
+        );
+        $unopenedBalls = ($this->buddy && ! ($this->buddy['empty'] ?? true))
+            ? \App\Models\Game\GameEncounter::query()->whereNull('opened_at')->count()
+            : 0;
+
+        $viewData = $data + ['buddyMood' => $buddyMood, 'unopenedBalls' => $unopenedBalls, 'detail' => $detail, 'moodStates' => $this->moodLogger()->prioritizedStates(), ...$this->moodProgressiveData()];
         // Only publish a new timestamp once all summary queries succeeded.
         $this->lastUpdatedAt = now()->format('Y-m-d\TH:i:s.uP');
 

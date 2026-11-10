@@ -12,6 +12,11 @@
 
     {{-- Bento grid: mixed-size cards, full width --}}
     <div class="row g-3">
+        @if ($buddy)
+            <div class="col-12">
+                <x-game.daily-buddy :buddy="$buddy" />
+            </div>
+        @endif
         <div class="col-12 col-lg-7">
             @include('livewire.home.partials.quick-log')
         </div>

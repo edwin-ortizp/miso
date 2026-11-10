@@ -31,7 +31,22 @@ Pantallas: menú **Productividad → Colección** (`/game`), con las pestañas B
 
 - Todas cuentan igual desde la app o el MCP: se detectan en los modelos (`app/Observers/GameTaskObserver.php` y `app/Observers/Game/*`) y otorgan tras confirmar la transacción.
 - **Ámbitos** (`config('game.scopes')`): `habits` (Hábitos), `focus` (Foco), `goals` (Metas) y `health` (Salud), además de las categorías de tarea. Cada uno puede ser afinidad del equipo, cuenta en el progreso de variedad y se admite en los bonos de temporada. Las nuevas misiones `category_tasks` requieren una categoría real con pendientes elegibles.
-- En Ajustes puedes apagar cada fuente: tareas, hábitos, foco, metas y salud.
+- En Ajustes puedes apagar cada fuente: tareas, hábitos, foco, metas y salud, y las de constancia (vehículo, bienestar, personas y hogar).
+
+### Constancia (micro-xp, CHG-042)
+
+El primer registro del día de cada fuente da **+1 xp** (`consistency_xp`) a cada integrante del equipo de la semana. No da balls, no avanza misiones ni variedad, no tiene afinidad ni bono de temporada y no consume el máximo diario. Cuenta el día en que se registra (no la fecha del registro), así cargar días pasados no multiplica la xp. Nunca se lee el contenido.
+
+| Fuente | Registros | Clave |
+|---|---|---|
+| Vehículo (`vehicle`) | `VehicleEnergyLog`, `VehicleExpense`, `VehicleMaintenanceLog` | `micro:vehicle:{fecha}` |
+| Bienestar (`wellbeing`) | `JournalEntry`, `MoodEntry`, `EnergyEntry` | `micro:wellbeing:{fecha}` |
+| Personas (`people`) | `RelationshipEvent`, `PlanVisit` | `micro:people:{fecha}` |
+| Hogar (`home`) | `MealPreparation`, `PreparedMeal`, `Purchase` | `micro:home:{fecha}` |
+
+- Se detecta en `App\Observers\Game\ConsistencySourceObserver` (app y MCP) y lo otorga `App\Services\Game\ConsistencyXp`.
+- Aviso de experiencia sin celebración: "Constancia · {Fuente} · Gotin +1 · …".
+- Cada fuente se apaga en Ajustes → Constancia.
 
 - Máximo diario configurable (por defecto **5**). Al alcanzarlo, la actividad se registra sin ball y no se muestra error.
 - La especie se decide **al conceder** la ball, con una semilla registrada. Solo salen especies de etapa 1, por rareza ponderada.
@@ -43,11 +58,14 @@ Pantallas: menú **Productividad → Colección** (`/game`), con las pestañas B
   - misión (al 50 % y cumplida);
   - meta cumplida.
 - **Presentación de los avisos (CHG-038):** tarjetas de logro arriba a la derecha, bajo la barra superior (en móvil, a todo el ancho). Cada tipo tiene su color: ball roja, experiencia, nivel verde, misión azul, meta y evolución doradas. Llevan ícono grande animado, título en versalitas, el botón "Abrir ball" y una barra de tiempo de 5 s que se pausa al pasar el mouse o al enfocar. Ninguna barra inferior (Debug Bar, navegación móvil) las tapa.
-- **Cuándo se entera:** de inmediato tras cualquier acción en la app (`Livewire.hook('commit')` → `game-check`), con los eventos de tareas y hábitos, y cada 60 s para lo que llega por MCP. No repite lo ocurrido antes de cargar la página.
+- **Cuándo se entera (CHG-041):** si una acción en la app crea un evento del juego del usuario, la respuesta trae la cabecera `X-Game-Event: 1` (`AddGameEventHeader` + `RequestGameActivity`) y solo entonces el navegador pide `game-check`; las acciones sin novedad no generan una segunda petición. También escucha los eventos de tareas y hábitos, y consulta cada 60 s mientras la pestaña está visible (`wire:poll.60s.visible`) para lo que llega por MCP. No repite lo ocurrido antes de cargar la página.
 - **Celebraciones:** en los momentos importantes (ball, nivel, evolución, misión o meta cumplida) sale una al azar del catálogo, sin repetir la anterior: confeti, gatitos, estrellas fugaces, globos, fuegos artificiales, burbujas, lluvia de balls y pétalos (`resources/js/game-celebrations.js`).
   - Se configuran en Ajustes → Celebraciones: mostrar sí o no, y cuáles.
   - Con movimiento reducido solo hay avisos.
   - Para agregar una: su clave en `config('game.celebration_catalog')` y su función en el catálogo JS.
+- **Sonidos (CHG-044):** sonidos cortos sintetizados con Web Audio (`resources/js/game-sounds.js`), sin archivos, a volumen bajo fijo: `ball` al ganar una ball, `open` al abrir (también con movimiento reducido), `level` en nivel o evolución y `mission` en misión o meta cumplida. Por tanda suena solo el momento más importante y la experiencia sola no suena.
+  - Ajustes → Celebraciones → "Sonidos" (encendido por defecto) y "Probar sonido". Es independiente de las animaciones.
+  - El notificador despacha `game-sound` y expone el ajuste en `data-game-sound`. Solo suena después del primer clic o tecla en la página y nunca con la pestaña oculta.
 
 ## Abrir, experiencia, niveles y evolución
 
@@ -75,6 +93,28 @@ Pestaña **Semana** (`/game/week`). La semana va de lunes a domingo (America/Bog
   - En Semana, esas misiones llevan "Propuesta por el director" y sus tareas enlazadas, con ✓ cuando ya están completadas.
   - Si el director no propone nada, quedan las misiones automáticas.
 - **Ajustes conversacionales (CHG-040):** `update-game-week-missions-tool` recibe `missions`, una lista de 1 a 3 sustituciones completas `{id, type, title, target, task_ids?, category?, period?}`. Obtén los IDs de `current_week.missions` y cambia solo `editable=true` (progreso cero, sin recompensas). Conserva el ID, no aumenta el cupo y permite cambios aunque otras misiones estén avanzadas o completadas. Valida toda la solicitud antes de guardar; un ID ajeno, de otra semana, repetido o una propuesta inválida rechaza el conjunto sin cambios. Responde `applied`, `unchanged` en reintentos idénticos o error `rejected` con motivos. No otorga recompensas ni elimina contribuciones. La transacción bloquea primero al usuario y después las misiones, igual que la ruta de progreso. Requiere el director activo y no debe invocarse desde el schedule para regenerar la semana automáticamente.
+
+## Integrante del día (CHG-043)
+
+Aparece un ejemplar **al azar** del usuario con una frase (`x-game.daily-buddy`). En el panel de pared ocupa la 5.ª columna de "Próximos días" (4 días + compañero, `variant="wall"`, con el marco de un día), con el arte, el nivel y la frase. En el dashboard es una tarjeta. Se elige al cargar la página (`DailyBuddy::pick`) y se guarda en la propiedad `buddy`, así que las actualizaciones automáticas del panel no lo cambian. Tocarlo abre su ficha. Sin ejemplares, el dashboard invita a abrir la primera ball y el panel conserva sus 5 días. Con el juego apagado no aparece.
+
+- **Columna del panel (CHG-049):**
+  - Escenario según la familia del tipo principal (`config('game.stage_families')`): fuego, agua, planta, eléctrico, místico, tierra y cielo, que también es el neutro. Todo es CSS, sin imágenes.
+  - Reacción al avance del día: hábitos + tareas de hoy hechos sobre el total, con `config('game.buddy_moods')`:
+
+    | Avance | Reacción |
+    |---|---|
+    | ≥ 70 % | "¡Vas volando!" (salta) |
+    | ≥ 30 % | "Buen ritmo" |
+    | < 30 %, antes de las 15:00 | "Hoy empezamos juntos" |
+    | < 30 %, desde las 15:00 | "Un pasito y ya cuenta" |
+    | Sin hábitos ni tareas | "Día libre, disfrútalo" |
+
+  - Aviso "Tienes n balls", que lleva a Balls.
+  - Botón "Otra frase" (`WallPanel::anotherQuote`): cambia la frase sin cambiar de compañero.
+  - La reacción y las balls se recalculan en cada refresco del panel; el compañero, no.
+- **Frases** (`game_quotes`): 30 semilla (`user_id` null, se insertan con la migración desde `GameQuote::SEED`) siempre elegibles, más las del director, que dejan de salir a los 60 días (`config('game.quotes')`).
+- **`propose-game-quotes-tool`** recibe `{ "quotes": [ … ] }`: 7 a 14 frases de hasta 140 caracteres, sin repetir y sin palabras de culpa (`MissionProposalValidator::PENALTY_WORDS`). Todo o nada. Una propuesta por semana (`ya_propuestas`); con el director en pausa responde `director_paused`. El contexto del director trae `quotes_due` y `quotes_limits`.
 
 ## Director y temporadas
 
@@ -112,6 +152,10 @@ El director IA **no corre dentro de MiSo**: es un schedule de Paseo que usa el c
   - los interruptores "Director activo" y "Juego de temporadas";
   - el historial.
 - `notes` (≤ 1000 caracteres) guarda ideas del director para revisar; nada se instala automáticamente.
+- **Temporadas temáticas (CHG-045):** la propuesta admite `theme` (catálogo cerrado `config('game.season_themes')`: `navidad`, `ano-nuevo`, `halloween`, `amor-amistad`, `cumpleanos`) y `featured_types` (1 o 2 tipos que existan en el catálogo, guardados en slug).
+  - Los tipos destacados pesan ×1,5 dentro de su rareza y se combinan con `featured_line`.
+  - Cada tema trae color e ícono en la pestaña Temporada (`game-season--theme-{clave}`) y una celebración propia: nieve, destellos, calabazas, corazones o velas. Esa celebración entra al sorteo solo mientras dure la temporada y respeta "Mostrar celebraciones" y el movimiento reducido.
+  - El contexto incluye `calendar_hints`: los temas vigentes o que empiezan en las próximas 6 semanas, con `starts_on`/`ends_on` (mes-día) y `suggested_types`. Del cumpleaños solo se usa el mes y el día de `users.birth_date` (±7 días); nunca se expone el año ni la edad.
 
 ### Idempotencia (schedule que corre dos veces o reintentos)
 
@@ -141,14 +185,17 @@ Eres el director del juego de Colección de MiSo. Usa SOLO el conector MCP de Mi
    Si current_week.director_proposed es true, no propongas misiones. Si responde rejected, corrige según "errors"
    y reintenta una vez. Si responde ya_propuestas o ya_con_avance, no insistas.
    No uses update-game-week-missions-tool desde este schedule: se reserva para ajustes pedidos por el usuario.
-3. TEMPORADA: si proposal_due es false, termina y resume en una línea lo observado. Si toca, diseña una temporada de 4 semanas que:
+3. FRASES: si quotes_due es true, llama propose-game-quotes-tool con 7-14 frases breves, cálidas y generales
+   (sin datos personales ni culpa). Si responde ya_propuestas, no insistas.
+4. TEMPORADA: si proposal_due es false, termina y resume en una línea lo observado. Si toca, diseña una temporada de 4 semanas que:
    - celebre lo que sí se hizo y nunca castigue la baja actividad;
    - impulse con bonos (no con exigencias) 1-2 ámbitos poco atendidos según activities_by_scope;
    - mantenga metas modestas (2-4) si la participación fue baja, y hasta 5 solo si las misiones se completaron;
    - use un nombre y una narrativa breves en español, cálidos y sin culpa;
    - respete exactamente los límites de "limits"; usa solo claves de "categories" o "habits".
-4. Llama propose-game-season-tool con {"season": {name, narrative, weeks, missions, team_bonus, rarity_weights?, featured_line?, notes?}}.
-5. Si responde rejected, corrige según "errors" y reintenta una sola vez. Si vuelve a fallar, termina e informa.
+   - si calendar_hints trae un tema, puedes usar theme y hasta 2 featured_types (de sus suggested_types).
+5. Llama propose-game-season-tool con {"season": {name, narrative, weeks, missions, team_bonus, rarity_weights?, featured_line?, theme?, featured_types?, notes?}}.
+6. Si responde rejected, corrige según "errors" y reintenta una sola vez. Si vuelve a fallar, termina e informa.
 No pidas ni leas descripciones de tareas, tareas privadas, diario ni datos de salud o contactos. No crees ni modifiques tareas.
 ```
 
@@ -208,6 +255,7 @@ Los demás campos se ignoran. Para agregar especies, añade filas y vuelve a imp
 | `game_discoveries` | Especies alcanzadas por usuario |
 | `game_weeks`, `game_team_members`, `game_missions`, `game_mission_contributions` | Semana, equipo, misiones y aportes únicos a cada misión |
 | `game_seasons` | Temporadas: estado, configuración validada, propuesta original, motivos de rechazo, fechas |
+| `game_quotes` | Frases del integrante del día: semilla (`user_id` null) y del director (`week_start`) |
 
 Servicios en `app/Services/Game/`: `RewardGranter`, `EncounterRoller`, `EncounterOpener`, `CompanionProgress`, `WeekPlanner`, `ActivityEffects`, `GameRules`, `SeasonValidator`, `SeasonManager`, `GameSettings`, `SpeciesImageProvider`.
 

@@ -1,5 +1,5 @@
 # CHG-042 · Micro-xp por constancia con interruptor por fuente
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -104,15 +104,25 @@ sequenceDiagram
 - Docs a actualizar: `docs/game.md` → subsección "Constancia (micro-xp)" con tabla fuente/modelos/clave, más Ajustes y Configuración.
 
 ## 7. Tareas
-- [ ] T1 · El equipo gana +1 xp por el primer registro del día de cada fuente — Resp: developer — Archivos: config/game.php, app/Services/Game/ConsistencyXp.php, app/Services/Game/GameSettings.php, tests/Feature/Game/ConsistencyXpTest.php — Hecho cuando: los casos de idempotencia, apagado, sin equipo y sin ball pasan
-- [ ] T2 · Gasolina, diario, ánimo, relaciones, visitas, comidas y compras disparan la constancia (app y MCP) — Resp: developer — Archivos: app/Observers/Game/ConsistencySourceObserver.php, app/Providers/AppServiceProvider.php, tests/Feature/Game/ConsistencyXpTest.php — Hecho cuando: hay un test verde por fuente creando el registro real
-- [ ] T3 · Ajustes → Constancia con un interruptor por fuente y aviso discreto sin celebración — Resp: developer — Archivos: app/Livewire/Game/GameSettingsPage.php, resources/views/livewire/game/game-settings.blade.php, app/Services/Game/GameFeed.php, app/Livewire/Game/GameNotifier.php, tests/Feature/Game/GameSettingsPageTest.php, tests/Feature/Game/GameNotifierTest.php — Hecho cuando: los interruptores guardan y el aviso no lanza celebración
+- [x] T1 · El equipo gana +1 xp por el primer registro del día de cada fuente — Resp: developer — Archivos: config/game.php, app/Services/Game/ConsistencyXp.php, app/Services/Game/GameSettings.php, tests/Feature/Game/ConsistencyXpTest.php — Hecho cuando: los casos de idempotencia, apagado, sin equipo y sin ball pasan
+- [x] T2 · Gasolina, diario, ánimo, relaciones, visitas, comidas y compras disparan la constancia (app y MCP) — Resp: developer — Archivos: app/Observers/Game/ConsistencySourceObserver.php, app/Providers/AppServiceProvider.php, tests/Feature/Game/ConsistencyXpTest.php — Hecho cuando: hay un test verde por fuente creando el registro real
+- [x] T3 · Ajustes → Constancia con un interruptor por fuente y aviso discreto sin celebración — Resp: developer — Archivos: app/Livewire/Game/GameSettingsPage.php, resources/views/livewire/game/game-settings.blade.php, app/Services/Game/GameFeed.php, app/Livewire/Game/GameNotifier.php, tests/Feature/Game/GameSettingsPageTest.php, tests/Feature/Game/GameNotifierTest.php — Hecho cuando: los interruptores guardan y el aviso no lanza celebración
 - [ ] T4 · Verificar criterios de aceptación — Resp: qa-tester — Hecho cuando: los 7 criterios pasan y la suite Game está en verde
-- [ ] T5 · Actualizar documentación — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
+- [x] T5 · Actualizar documentación — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-10 — Inicio (start --force, mismo motivo que CHG-041).
+- T1 — `config/game.php` (`consistency_xp`, `consistency_sources`, 4 fuentes en defaults), `ConsistencyXp` (actividad `micro:{fuente}:{fecha}` + `team:{evento}:{ejemplar}`, sin ActivityEffects ni RewardGranter).
+- T2 — `ConsistencySourceObserver` (11 modelos, solo `created`, afterCommit) registrado en AppServiceProvider. Se agregaron alias al `enforceMorphMap` para los 8 modelos que no tenían (necesario para `source_type`).
+- T3 — Ajustes → sección "Constancia" (propiedad `consistency[fuente]`); `GameFeed` antepone "Constancia · {Fuente}" al detalle del aviso. `GameNotifier` no necesitó cambios: la xp de equipo nunca celebra por sí sola.
+- T5 — docs/game.md: subsección "Constancia (micro-xp)".
+- Tests: tests/Feature/Game/ConsistencyXpTest.php → 9 pasan. Suite Game 184/185 (falla previa ajena). Suite completa: las demás fallas (Relationship/Plan/GuidedReflection/UrlState/Ui de hábitos…) se reproducen igual sin el observer: previas y ajenas al cambio.
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-10 — Decisión de implementación: la "fecha" de la clave es el día en que se registra (no la fecha del registro), para que cargar días pasados no multiplique la xp. Coherente con "una vez por fuente y día"; revisable en QA.
+- LECCIÓN(developer): un modelo nuevo como origen de `GameEvent` necesita alias en `Relation::enforceMorphMap` — falló con "No morph map defined" · destino sugerido: docs/game.md (Datos)
 - 2026-11-09 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-09 — Decisiones (Alex): +1 xp a todo el equipo, una vez por fuente y día; 4 fuentes (Vehículo, Bienestar, Personas, Hogar); aviso discreto sin celebración; no cuenta para misiones ni variedad; interruptor por fuente.
 - 2026-11-09 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-10 — Movido a in-progress/ (En desarrollo)
+- 2026-11-10 — Implementación terminada → En verificación

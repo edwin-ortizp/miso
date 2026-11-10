@@ -52,7 +52,7 @@ class GameFeed
                         break;
                     }
                     $group = (string) ($effect['activity_event_id'] ?? $event->id);
-                    $teamGroups[$group] ??= ['label' => $this->stripPrefix($event->source_label, 'Equipo de la semana · '), 'members' => []];
+                    $teamGroups[$group] ??= ['label' => $this->stripPrefix($event->source_label, 'Equipo de la semana · '), 'members' => [], 'consistency' => (bool) ($effect['consistency'] ?? false)];
                     $name = $companions[$effect['companion_id'] ?? 0] ?? 'Tu Pokémon';
                     $teamGroups[$group]['members'][] = $name.' +'.($effect['xp'] ?? 0).(($effect['affinity'] ?? false) ? ' (afinidad)' : '');
                     break;
@@ -88,7 +88,9 @@ class GameFeed
         }
 
         foreach ($teamGroups as $group) {
-            $toasts[] = ['type' => 'xp', 'icon' => 'bi-stars', 'title' => 'Tu equipo ganó experiencia', 'detail' => implode(' · ', $group['members']), 'action' => null];
+            // Constancia (CHG-042): el aviso nombra la fuente; nunca celebra por sí solo.
+            $detail = implode(' · ', $group['members']);
+            $toasts[] = ['type' => 'xp', 'icon' => 'bi-stars', 'title' => 'Tu equipo ganó experiencia', 'detail' => $group['consistency'] ? $group['label'].' · '.$detail : $detail, 'action' => null];
         }
 
         return ['last_id' => (int) $events->last()->id, 'toasts' => $toasts, 'celebrate' => $celebrate];

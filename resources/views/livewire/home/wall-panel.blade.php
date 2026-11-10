@@ -63,14 +63,18 @@
                 <div><x-ui.action class="wall-control" variant="filled" icon="bi-stopwatch" @click="$dispatch('panel-focus', {start: true})">Iniciar foco</x-ui.action></div>
             @endif
         </section>
+        {{-- Integrante del día (CHG-043): con un ejemplar, el panel le cede la 5.ª columna de Próximos días. --}}
+        @php($showBuddy = $buddy && ! $buddy['empty'])
+        @php($visibleDays = $showBuddy ? array_slice($week, 0, 4, true) : $week)
+        @php($lastDay = end($visibleDays))
         <section class="wall-week" aria-labelledby="panel-week-title">
-            <header class="wall-section-head"><h2 id="panel-week-title">Próximos días</h2><span>{{ $week[0]['date']->locale('es')->translatedFormat('d M') }} – {{ $week[4]['date']->locale('es')->translatedFormat('d M') }}</span><div class="md-chip-rail wall-layer-rail" role="group" aria-label="Capas del calendario">
+            <header class="wall-section-head"><h2 id="panel-week-title">Próximos días</h2><span>{{ $week[0]['date']->locale('es')->translatedFormat('d M') }} – {{ $lastDay['date']->locale('es')->translatedFormat('d M') }}</span><div class="md-chip-rail wall-layer-rail" role="group" aria-label="Capas del calendario">
                 @foreach (['task' => 'Tareas', 'plan' => 'Planes', 'person' => 'Personas', 'meal' => 'Comidas'] as $key => $label)
                     <x-ui.chip variant="filter" x-bind:class="{selected: layers.{{ $key }}}" x-bind:aria-pressed="layers.{{ $key }}" @click="layers.{{ $key }} = !layers.{{ $key }}">{{ $label }}</x-ui.chip>
                 @endforeach
             </div></header>
-            <div class="wall-days">
-                @foreach ($week as $i => $day)
+            <div @class(['wall-days', 'has-buddy' => $showBuddy])>
+                @foreach ($visibleDays as $i => $day)
                     <article class="wall-day {{ $i === 0 ? 'is-today' : '' }}" wire:key="day-{{ $day['date']->toDateString() }}-{{ md5(json_encode($day['rows'])) }}" x-data="wallDay({{ \Illuminate\Support\Js::from($day['rows']) }})">
                         <button type="button" class="md-btn-text wall-day__head" @click="dayIndex = {{ $i }}; agendaOpen = true" aria-label="Ver agenda del {{ $day['date']->locale('es')->translatedFormat('l d F') }}"><span>{{ $i === 0 ? 'Hoy' : $day['date']->locale('es')->translatedFormat('D') }}</span><b>{{ $day['date']->day }}</b></button>
                         <div class="wall-day__items" x-ref="items">
@@ -83,6 +87,9 @@
                         <footer class="wall-card__foot" x-show="rows.filter(row => layers[row.kind]).length > limit"><x-ui.action class="wall-control" variant="text" @click="dayIndex = {{ $i }}; agendaOpen = true"><span x-text="' +' + (rows.filter(row => layers[row.kind]).length - limit) + ' más'"></span></x-ui.action></footer>
                     </article>
                 @endforeach
+                @if ($showBuddy)
+                    <x-game.daily-buddy :buddy="$buddy" variant="wall" :mood="$buddyMood" :balls="$unopenedBalls" />
+                @endif
             </div>
         </section>
         <section class="wall-cards" aria-label="Registros y seguimiento">

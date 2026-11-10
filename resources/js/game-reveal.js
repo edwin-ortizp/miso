@@ -1,3 +1,5 @@
+import { playGameSound } from './game-sounds.js';
+
 export function createGameReveal({ reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches, schedule = setTimeout, cancel = clearTimeout } = {}) {
     let timers = [];
     return {
@@ -8,6 +10,8 @@ export function createGameReveal({ reducedMotion = () => window.matchMedia('(pre
         begin() {
             this.cleanup();
             this.ready = false;
+            // CHG-044: el sonido acompaña la apertura, también con movimiento reducido.
+            playGameSound('open');
             if (reducedMotion()) { this.finish(); return; }
             this.phase = 'shake';
             timers.push(schedule(() => { this.phase = 'open'; }, 850));

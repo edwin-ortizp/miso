@@ -122,4 +122,35 @@ class GameNotifierTest extends TestCase
         $settings = app(GameSettings::class)->for(auth()->id());
         $this->assertSame(['confetti', 'cats'], $settings['celebration_set']);
     }
+
+    public function test_a_new_ball_plays_the_ball_sound_even_without_celebrations(): void
+    {
+        $this->gameSettings(['celebrations' => false]);
+        $notifier = Livewire::test(GameNotifier::class)->assertSeeHtml('data-game-sound="1"');
+
+        $this->completeTask('A');
+        $notifier->call('check')->assertDispatched('game-sound', name: 'ball');
+    }
+
+    public function test_sounds_off_never_dispatch_a_sound(): void
+    {
+        $this->gameSettings(['sounds' => false]);
+        $notifier = Livewire::test(GameNotifier::class)->assertSeeHtml('data-game-sound="0"');
+
+        $this->completeTask('A');
+        $notifier->call('check')->assertNotDispatched('game-sound');
+    }
+
+    public function test_sound_setting_is_saved_and_announced(): void
+    {
+        Livewire::test(GameSettingsPage::class)
+            ->assertSee('Probar sonido')
+            ->assertSet('sounds', true)
+            ->set('sounds', false)
+            ->call('save')
+            ->assertDispatched('game-settings-saved');
+
+        $this->assertFalse(app(GameSettings::class)->for(auth()->id())['sounds']);
+        Livewire::test(GameNotifier::class)->assertSet('sounds', false);
+    }
 }

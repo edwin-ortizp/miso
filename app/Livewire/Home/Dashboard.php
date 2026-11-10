@@ -42,8 +42,12 @@ class Dashboard extends Component
         'cena' => 'Cena',
     ];
 
+    /** Integrante del día (CHG-043): se elige al cargar y no cambia con los refrescos. @var array<string, mixed>|null */
+    public ?array $buddy = null;
+
     public function mount()
     {
+        $this->buddy = app(\App\Services\Game\DailyBuddy::class)->pick((int) auth()->id());
         $this->initializeSelectedDate();
     }
 

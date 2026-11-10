@@ -65,6 +65,10 @@ class AppServiceProvider extends ServiceProvider
         foreach ([DrinkLog::class, ExerciseLog::class] as $healthSource) {
             $healthSource::observe(\App\Observers\Game\HealthSourceObserver::class);
         }
+        // Constancia (CHG-042): +1 xp de equipo por fuente y día.
+        foreach (array_keys(\App\Observers\Game\ConsistencySourceObserver::SOURCES) as $consistencySource) {
+            $consistencySource::observe(\App\Observers\Game\ConsistencySourceObserver::class);
+        }
         foreach ([Task::class, \App\Models\Plan::class, Goal::class, Relationship::class] as $source) {
             $source::observe(\App\Observers\NotificationSourceObserver::class);
         }
@@ -107,6 +111,15 @@ class AppServiceProvider extends ServiceProvider
             'mood-entry' => MoodEntry::class,
             'energy-entry' => EnergyEntry::class,
             'relationship-event' => RelationshipEvent::class,
+            // Fuentes de constancia del juego (CHG-042).
+            'vehicle-energy-log' => \App\Models\VehicleEnergyLog::class,
+            'vehicle-expense' => \App\Models\VehicleExpense::class,
+            'vehicle-maintenance-log' => \App\Models\VehicleMaintenanceLog::class,
+            'journal-entry' => \App\Models\JournalEntry::class,
+            'plan-visit' => \App\Models\PlanVisit::class,
+            'meal-preparation' => \App\Models\MealPreparation::class,
+            'prepared-meal' => \App\Models\PreparedMeal::class,
+            'purchase' => \App\Models\Purchase::class,
         ]);
     }
 }

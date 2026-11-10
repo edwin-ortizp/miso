@@ -24,6 +24,9 @@ class GameSettingsPage extends Component
 
     public bool $health = true;
 
+    /** Constancia (CHG-042): fuente => activa. @var array<string, bool> */
+    public array $consistency = [];
+
     public int $dailyLimit = 5;
 
     public bool $directorEnabled = true;
@@ -31,6 +34,8 @@ class GameSettingsPage extends Component
     public bool $seasonsEnabled = true;
 
     public bool $celebrations = true;
+
+    public bool $sounds = true;
 
     /** @var array<int, string> */
     public array $celebrationSet = [];
@@ -46,10 +51,14 @@ class GameSettingsPage extends Component
         $this->focus = (bool) $current['sources']['focus'];
         $this->goals = (bool) $current['sources']['goals'];
         $this->health = (bool) $current['sources']['health'];
+        foreach (array_keys(config('game.consistency_sources')) as $source) {
+            $this->consistency[$source] = (bool) ($current['sources'][$source] ?? true);
+        }
         $this->dailyLimit = $current['daily_limit'];
         $this->directorEnabled = $current['director_enabled'];
         $this->seasonsEnabled = $current['seasons_enabled'];
         $this->celebrations = $current['celebrations'];
+        $this->sounds = $current['sounds'];
         $this->celebrationSet = $current['celebration_set'];
     }
 
@@ -60,14 +69,17 @@ class GameSettingsPage extends Component
 
         $settings->save((int) auth()->id(), [
             'enabled' => $this->enabled,
-            'sources' => ['tasks' => $this->tasks, 'habits' => $this->habits, 'focus' => $this->focus, 'goals' => $this->goals, 'health' => $this->health],
+            'sources' => ['tasks' => $this->tasks, 'habits' => $this->habits, 'focus' => $this->focus, 'goals' => $this->goals, 'health' => $this->health]
+                + array_map('boolval', array_intersect_key($this->consistency, config('game.consistency_sources'))),
             'daily_limit' => $this->dailyLimit,
             'director_enabled' => $this->directorEnabled,
             'seasons_enabled' => $this->seasonsEnabled,
             'celebrations' => $this->celebrations,
+            'sounds' => $this->sounds,
             'celebration_set' => array_values(array_intersect(array_keys(config('game.celebration_catalog')), $this->celebrationSet)),
         ]);
 
+        $this->dispatch('game-settings-saved');
         $this->message = 'Ajustes guardados.';
     }
 

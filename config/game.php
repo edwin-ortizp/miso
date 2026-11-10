@@ -5,13 +5,15 @@ return [
     // Valores por defecto; cada usuario los ajusta en Colección → Ajustes (ModuleSetting módulo "game").
     'defaults' => [
         'enabled' => true,
-        'sources' => ['tasks' => true, 'habits' => true, 'focus' => true, 'goals' => true, 'health' => true],
+        'sources' => ['tasks' => true, 'habits' => true, 'focus' => true, 'goals' => true, 'health' => true, 'vehicle' => true, 'wellbeing' => true, 'people' => true, 'home' => true],
         'daily_limit' => 5,
         'pity_threshold' => 10,
         'rarity_weights' => ['common' => 60, 'uncommon' => 30, 'rare' => 9, 'legendary' => 1],
         'director_enabled' => true,
         // Celebraciones (CHG-034): activas y cuáles del catálogo pueden salir.
         'celebrations' => true,
+        // Sonidos sutiles (CHG-044): encendidos por defecto, volumen bajo fijo.
+        'sounds' => true,
         'celebration_set' => ['confetti', 'cats', 'shooting-stars', 'balloons', 'fireworks', 'bubbles', 'balls', 'petals'],
         'seasons_enabled' => true,
     ],
@@ -30,6 +32,32 @@ return [
     // Equipo semanal y misiones (CHG-021). La semana va de lunes a domingo en la zona de la app.
     'team_size' => 6,
     'team_xp' => 3,
+
+    // Constancia (CHG-042): xp mínima para cada integrante del equipo por el primer
+    // registro del día de cada fuente. Sin ball, misiones, afinidad ni bono de temporada.
+    'consistency_xp' => 1,
+
+    // Compañero del panel (CHG-049): familia de escenario por tipo (slug) y reacciones al avance del día.
+    'stage_families' => [
+        'fuego' => 'fuego', 'dragon' => 'fuego',
+        'agua' => 'agua', 'hielo' => 'agua',
+        'planta' => 'planta', 'bicho' => 'planta', 'veneno' => 'planta',
+        'electrico' => 'electrico', 'acero' => 'electrico',
+        'psiquico' => 'mistico', 'hada' => 'mistico', 'fantasma' => 'mistico', 'siniestro' => 'mistico',
+        'roca' => 'tierra', 'tierra' => 'tierra', 'lucha' => 'tierra',
+        'volador' => 'cielo', 'normal' => 'cielo',
+    ],
+    'buddy_moods' => [
+        'celebrate' => ['min' => 70, 'text' => '¡Vas volando!'],
+        'happy' => ['min' => 30, 'text' => 'Buen ritmo'],
+        'greet' => ['before_hour' => 15, 'text' => 'Hoy empezamos juntos'],
+        'cheer' => ['text' => 'Un pasito y ya cuenta'],
+        'free' => ['text' => 'Día libre, disfrútalo'],
+    ],
+
+    // Integrante del día (CHG-043): frases que el director agrega cada semana.
+    'quotes' => ['min' => 7, 'max' => 14, 'max_length' => 140, 'max_age_days' => 60],
+    'consistency_sources' => ['vehicle' => 'Vehículo', 'wellbeing' => 'Bienestar', 'people' => 'Personas', 'home' => 'Hogar'],
     'affinity_bonus_xp' => 6,
     'missions_per_week' => 3,
     'mission_target' => [2, 4],
@@ -52,6 +80,10 @@ return [
         'rarity_max' => 100,
         'legendary_max' => 3,
         'featured_weight_max' => 2,
+        // Temporadas temáticas (CHG-045): hasta 2 tipos destacados, x1,5 dentro de su rareza.
+        'max_featured_types' => 2,
+        'featured_type_weight' => 1.5,
+        'theme_hint_weeks' => 6,
         'propose_window_days' => 7,
         'history_weeks' => 8,
     ],
@@ -61,6 +93,16 @@ return [
     'power_default_base' => 300,
     // Tipos con color propio en _game.css (clase game-type--{slug}); los demás usan el neutro.
     'type_palette' => ['acero', 'agua', 'bicho', 'dragon', 'electrico', 'fantasma', 'fuego', 'hada', 'hielo', 'lucha', 'normal', 'planta', 'psiquico', 'roca', 'siniestro', 'tierra', 'veneno', 'volador'],
+
+    // Temas de temporada (CHG-045). window: [mes-día inicio, mes-día fin]; el cumpleaños usa +-7 días
+    // alrededor del mes-día de users.birth_date (nunca el año). celebration: función en game-celebrations.js.
+    'season_themes' => [
+        'navidad' => ['label' => 'Navidad', 'icon' => 'bi-tree-fill', 'celebration' => 'snow', 'window' => ['12-01', '12-31'], 'suggested_types' => ['hielo', 'hada']],
+        'ano-nuevo' => ['label' => 'Año nuevo', 'icon' => 'bi-stars', 'celebration' => 'sparkles', 'window' => ['01-01', '01-31'], 'suggested_types' => ['electrico', 'psiquico']],
+        'halloween' => ['label' => 'Halloween', 'icon' => 'bi-moon-stars-fill', 'celebration' => 'pumpkins', 'window' => ['10-15', '10-31'], 'suggested_types' => ['fantasma', 'siniestro']],
+        'amor-amistad' => ['label' => 'Amor y amistad', 'icon' => 'bi-heart-fill', 'celebration' => 'hearts', 'window' => ['09-01', '09-30'], 'suggested_types' => ['hada', 'normal']],
+        'cumpleanos' => ['label' => 'Tu cumpleaños', 'icon' => 'bi-cake2-fill', 'celebration' => 'candles', 'window' => null, 'suggested_types' => ['fuego', 'hada']],
+    ],
 
     // Catálogo de celebraciones (resources/js/game-celebrations.js). Para agregar una: clave aquí y función allá.
     'celebration_catalog' => [

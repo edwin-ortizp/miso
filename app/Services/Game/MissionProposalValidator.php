@@ -15,7 +15,7 @@ use App\Models\TaskCategory;
 class MissionProposalValidator
 {
     private const KEYS = ['type', 'title', 'target', 'task_ids', 'category', 'period'];
-    private const PENALTY_WORDS = ['debes', 'obligatorio', 'obligatoria', 'atrasado', 'atrasada', 'fallaste', 'castigo', 'castigar'];
+    public const PENALTY_WORDS = ['debes', 'obligatorio', 'obligatoria', 'atrasado', 'atrasada', 'fallaste', 'castigo', 'castigar'];
 
     /**
      * @param  array<int, mixed>  $missions
@@ -51,7 +51,7 @@ class MissionProposalValidator
             $title = $mission['title'] ?? null;
             if (! is_string($title) || trim($title) === '' || mb_strlen($title) > 120) {
                 $errors[] = "Misión {$n}: el título es obligatorio y tiene máximo 120 caracteres.";
-            } elseif ($word = $this->penaltyWord($title)) {
+            } elseif ($word = self::penaltyWord($title)) {
                 $errors[] = "Misión {$n}: el título no puede usar «{$word}»; las misiones no castigan.";
             }
 
@@ -126,7 +126,8 @@ class MissionProposalValidator
         }
     }
 
-    private function penaltyWord(string $title): ?string
+    /** Palabra de culpa contenida en el texto, si la hay (también la usan las frases, CHG-043). */
+    public static function penaltyWord(string $title): ?string
     {
         $lower = mb_strtolower($title);
         foreach (self::PENALTY_WORDS as $word) {

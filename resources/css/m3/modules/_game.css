@@ -1221,6 +1221,12 @@ a.game-collectible:hover .game-collectible__art img { transform: translate(-50%,
 
 /* Pétalos que caen meciéndose. */
 .game-celebration--petals .game-celebration__particle { animation-name: game-fall; animation-timing-function: ease-in-out; }
+/* Temáticas (CHG-045): reutilizan las animaciones existentes. */
+.game-celebration--snow .game-celebration__particle { color: var(--md-sys-color-primary); animation-name: game-fall; animation-timing-function: ease-in-out; }
+.game-celebration--sparkles .game-celebration__particle { color: var(--game-rarity-legendary); animation-name: game-shoot; }
+.game-celebration--pumpkins .game-celebration__particle,
+.game-celebration--hearts .game-celebration__particle,
+.game-celebration--candles .game-celebration__particle { animation-name: game-rise; }
 
 @media (prefers-reduced-motion: reduce) {
     .game-celebration { display: none; }
@@ -1240,3 +1246,106 @@ a.game-collectible:hover .game-collectible__art img { transform: translate(-50%,
 }
 
 .game-celebration-options legend { grid-column: 1 / -1; margin-bottom: 0.25rem; }
+
+/* Integrante del día (CHG-043): ejemplar al azar con una frase, en el panel de pared y el dashboard. */
+.game-buddy {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--md-sys-shape-corner-large, 16px);
+    border-inline-start: 4px solid var(--game-type, var(--md-sys-color-primary));
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+    text-decoration: none;
+}
+a.game-buddy:hover { background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); }
+a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
+.game-buddy__art { flex: none; display: grid; place-items: center; width: 64px; height: 64px; }
+.game-buddy__art img { width: 100%; height: 100%; object-fit: contain; }
+.game-buddy__body { display: grid; gap: 0.25rem; min-width: 0; }
+.game-buddy__name { font: var(--md-sys-typescale-label-large, 500 0.875rem/1.25rem sans-serif); color: var(--md-sys-color-on-surface-variant); }
+.game-buddy__quote { font: var(--md-sys-typescale-body-large, 400 1rem/1.5rem sans-serif); }
+.game-buddy__action { margin-inline-start: auto; }
+
+/* Sonidos (CHG-044): el interruptor y "Probar sonido" en la misma fila. */
+.game-sound-setting { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0.5rem; }
+
+/* Temporadas temáticas (CHG-045): acento por tema en la pestaña Temporada y tipos destacados. */
+.game-season--theme-navidad { --game-season-accent: #1f7a4d; --game-season-on-accent: #ffffff; }
+.game-season--theme-ano-nuevo { --game-season-accent: #6d4aa8; --game-season-on-accent: #ffffff; }
+.game-season--theme-halloween { --game-season-accent: #b34a00; --game-season-on-accent: #ffffff; }
+.game-season--theme-amor-amistad { --game-season-accent: #b0275f; --game-season-on-accent: #ffffff; }
+.game-season--theme-cumpleanos { --game-season-accent: #8a5a00; --game-season-on-accent: #ffffff; }
+[class*='game-season--theme-'] .game-adventure__cover { border-top: 6px solid var(--game-season-accent); }
+[class*='game-season--theme-'] .game-adventure__eyebrow { background: var(--game-season-accent); color: var(--game-season-on-accent); border-radius: 999px; padding: 0.125rem 0.75rem; }
+.game-season__featured-types { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
+
+/* Integrante del día en el panel (CHG-043 + CHG-049): 5.ª columna de Próximos días como escenario
+   según la familia de su tipo, con reacción al día, balls por abrir y "Otra frase". */
+.wall-days.has-buddy { grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(0, 1.1fr); }
+/* `.wall-day.` sube la especificidad: _wall-panel.css se carga después y pinta .wall-day de blanco. */
+.wall-day.game-buddy-stage {
+    --stage-top: #2f5f8f; --stage-bottom: #7fb0d8; --stage-ground: rgb(0 0 0 / 0.22); --stage-particle: rgb(255 255 255 / 0.6);
+    position: relative;
+    isolation: isolate;
+    gap: 0.375rem;
+    padding: 10px;
+    color: #ffffff;
+    background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom));
+}
+.game-stage--fuego { --stage-top: #7a1f12; --stage-bottom: #c95a1c; --stage-particle: rgb(255 214 120 / 0.85); }
+.game-stage--agua { --stage-top: #0b3d6b; --stage-bottom: #17809a; --stage-particle: rgb(200 240 255 / 0.65); }
+.game-stage--planta { --stage-top: #1d4d2b; --stage-bottom: #4a8030; --stage-particle: rgb(210 255 170 / 0.65); }
+.game-stage--electrico { --stage-top: #2c2052; --stage-bottom: #8a6a0e; --stage-particle: rgb(255 240 120 / 0.9); }
+.game-stage--mistico { --stage-top: #2a1f5c; --stage-bottom: #8a3f7a; --stage-particle: rgb(255 230 255 / 0.8); }
+.game-stage--tierra { --stage-top: #4a3018; --stage-bottom: #835a2c; --stage-particle: rgb(255 230 190 / 0.55); }
+.game-stage--cielo { --stage-top: #2f5f8f; --stage-bottom: #5b8fbd; --stage-particle: rgb(255 255 255 / 0.75); }
+/* Partículas (brasas, burbujas, chispas, estrellas…) y suelo, solo con degradados. */
+.game-buddy-stage__scene {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 18% 22%, var(--stage-particle) 0 2px, transparent 3px),
+        radial-gradient(circle at 72% 14%, var(--stage-particle) 0 2px, transparent 3px),
+        radial-gradient(circle at 86% 38%, var(--stage-particle) 0 1.5px, transparent 2.5px),
+        radial-gradient(circle at 34% 46%, var(--stage-particle) 0 1.5px, transparent 2.5px),
+        radial-gradient(circle at 58% 30%, var(--stage-particle) 0 1px, transparent 2px),
+        radial-gradient(ellipse 55% 7% at 50% 58%, var(--stage-ground) 0 60%, transparent 70%);
+}
+.game-buddy-stage__head { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; font-size: 0.8rem; }
+.game-buddy-stage__mood { font-size: 0.95rem; font-weight: 600; text-align: right; }
+.game-buddy-stage__body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; min-height: 0; color: inherit; text-decoration: none; text-align: center; }
+.game-buddy-stage__body:hover { color: inherit; }
+.game-buddy-stage__body:focus-visible,
+.game-buddy-stage__btn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 8px; }
+.game-buddy-stage__art { display: grid; place-items: center; width: min(150px, 100%); aspect-ratio: 1; min-height: 0; animation: game-buddy-float 4s ease-in-out infinite; }
+.game-buddy-stage.is-celebrate .game-buddy-stage__art { animation: game-buddy-hop 1.2s ease-in-out infinite; }
+.game-buddy-stage__art img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 8px 8px rgb(0 0 0 / 0.35)); }
+.game-buddy-stage__name { font-size: 0.8rem; font-weight: 500; }
+.game-buddy-stage__quote { margin: 0; font-size: 0.95rem; line-height: 1.35; text-align: center; text-wrap: balance; }
+.game-buddy-stage__actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.375rem; }
+.game-buddy-stage__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 32px;
+    padding: 0 0.75rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.18);
+    color: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+}
+.game-buddy-stage__btn:hover { background: rgb(255 255 255 / 0.3); color: inherit; }
+.game-buddy-stage__btn.is-balls { background: rgb(255 255 255 / 0.92); color: #1f1f1f; }
+.game-buddy-stage__btn .game-ball { width: 16px; height: 16px; }
+@keyframes game-buddy-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes game-buddy-hop { 0%, 100% { transform: translateY(0); } 30% { transform: translateY(-14px) rotate(-3deg); } 55% { transform: translateY(0); } 70% { transform: translateY(-6px) rotate(2deg); } }
+@media (prefers-reduced-motion: reduce) { .game-buddy-stage__art, .game-buddy-stage.is-celebrate .game-buddy-stage__art { animation: none; } }

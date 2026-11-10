@@ -42,6 +42,8 @@ class GameRules
             'rarity_weights' => $config['rarity_weights'] ?? null,
             'featured_line' => $config['featured_line'] ?? null,
             'featured_weight' => (int) ($config['featured_weight'] ?? 1),
+            'theme' => $config['theme'] ?? null,
+            'featured_types' => $config['featured_types'] ?? [],
         ];
     }
 
@@ -59,6 +61,7 @@ class GameRules
         }
         $settings['featured_line'] = $rules['featured_line'];
         $settings['featured_weight'] = $rules['featured_weight'];
+        $settings['featured_types'] = $rules['featured_types'];
         $settings['season_id'] = $rules['season_id'];
 
         return $settings;

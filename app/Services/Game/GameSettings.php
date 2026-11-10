@@ -27,6 +27,7 @@ class GameSettings
         $settings['director_enabled'] = (bool) $settings['director_enabled'];
         $settings['seasons_enabled'] = (bool) $settings['seasons_enabled'];
         $settings['celebrations'] = (bool) $settings['celebrations'];
+        $settings['sounds'] = (bool) $settings['sounds'];
         $settings['celebration_set'] = array_values(array_intersect(
             array_keys(config('game.celebration_catalog')),
             array_map('strval', (array) $settings['celebration_set']),

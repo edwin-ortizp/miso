@@ -67,6 +67,10 @@ class SeasonManager
             'director_enabled' => $settings['director_enabled'],
             'seasons_enabled' => $settings['seasons_enabled'],
             'proposal_due' => $this->isDue($userId, $now),
+            // Integrante del día (CHG-043): ¿falta la propuesta de frases de esta semana?
+            'quotes_due' => ! \App\Models\Game\GameQuote::where('user_id', $userId)->whereDate('week_start', WeekPlanner::weekStart($now)->toDateString())->exists(),
+            'quotes_limits' => config('game.quotes'),
+            'calendar_hints' => $this->calendarHints($userId, $now),
             'now' => $now->toIso8601String(),
             'categories' => TaskCategory::withoutGlobalScopes()->where('user_id', $userId)->pluck('name', 'key'),
             'pending_tasks_by_category' => app(MissionPendingTasks::class)->counts($userId),
@@ -354,5 +358,47 @@ class SeasonManager
             'config' => $season->config,
             'errors' => $season->errors,
         ];
+    }
+
+    /**
+     * Temas de temporada cuya ventana empieza o está vigente en las próximas semanas (CHG-045).
+     * Del cumpleaños solo se usa el mes-día de `users.birth_date`; nunca se expone el año ni la edad.
+     *
+     * @return array<int, array{theme: string, label: string, starts_on: string, ends_on: string, suggested_types: array<int, string>}>
+     */
+    public function calendarHints(int $userId, CarbonImmutable $now): array
+    {
+        $today = $now->startOfDay();
+        $horizon = $today->addWeeks((int) config('game.season.theme_hint_weeks'));
+        $birth = \App\Models\User::query()->whereKey($userId)->value('birth_date');
+        $hints = [];
+
+        foreach ((array) config('game.season_themes') as $key => $theme) {
+            foreach ([$today->year, $today->year + 1] as $year) {
+                if ($theme['window'] !== null) {
+                    $start = CarbonImmutable::parse("{$year}-{$theme['window'][0]}")->startOfDay();
+                    $end = CarbonImmutable::parse("{$year}-{$theme['window'][1]}")->endOfDay();
+                } elseif ($birth) {
+                    $day = CarbonImmutable::parse($birth);
+                    $center = CarbonImmutable::create($year, $day->month, min($day->day, CarbonImmutable::create($year, $day->month, 1)->daysInMonth));
+                    $start = $center->subDays(7)->startOfDay();
+                    $end = $center->addDays(7)->endOfDay();
+                } else {
+                    continue;
+                }
+                if ($end >= $today && $start <= $horizon) {
+                    $hints[] = [
+                        'theme' => $key,
+                        'label' => $theme['label'],
+                        'starts_on' => $start->format('m-d'),
+                        'ends_on' => $end->format('m-d'),
+                        'suggested_types' => $theme['suggested_types'],
+                    ];
+                    break;
+                }
+            }
+        }
+
+        return $hints;
     }
 }

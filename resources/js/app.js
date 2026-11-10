@@ -1,5 +1,6 @@
 import { registerGameReveal } from './game-reveal';
 import { registerGameCelebrations } from './game-celebrations';
+import { registerGameSounds } from './game-sounds';
 import { registerWallPanel } from './wall-panel';
 // Dentro del bundle y antes que Alpine: el hosting bloquea las URL bajo /vendor/.
 import '../../vendor/edwin-ortizp/laravel-markdown/resources/assets/editor.js';
@@ -33,6 +34,7 @@ registerTaskGantt(Alpine);
 
 registerInstallPrompt(Alpine);
 registerGameCelebrations(Livewire);
+registerGameSounds();
 
 markPlatform();
 registerPageTransitions();

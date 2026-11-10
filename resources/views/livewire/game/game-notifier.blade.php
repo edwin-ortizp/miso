@@ -1,7 +1,7 @@
 {{-- Avisos del juego como tarjetas de logro arriba a la derecha (CHG-038; lógica de CHG-034).
      La pila es fija SIN transform en el contenedor (corrección de CHG-034) y queda bajo la
      barra superior, así ninguna barra inferior (Debug Bar, navegación móvil) la tapa. --}}
-<div wire:poll.60s.visible="check" class="game-notifier">
+<div wire:poll.60s.visible="check" class="game-notifier" data-game-sound="{{ $sounds ? 1 : 0 }}">
     <div class="game-toasts" role="status" aria-live="polite">
         @foreach ($toasts as $toast)
             <div class="game-toast game-toast--{{ $toast['type'] }}" wire:key="game-toast-{{ $toast['id'] }}"

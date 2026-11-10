@@ -1,5 +1,5 @@
 # CHG-045 · Temporadas tematicas por calendario
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -50,15 +50,24 @@ El contexto del director incluye fechas temáticas próximas (festividades fijas
 - Comando: `php artisan test tests/Feature/Game tests/Unit/Game`.
 
 ## 7. Tareas
-- [ ] T1 · El director ve las fechas temáticas próximas y puede proponer tema y tipos destacados — Resp: developer — Archivos: config/game.php, app/Mcp/Tools/Game/GetGameDirectorContextTool.php, app/Services/Game/SeasonValidator.php, tests/Unit/Game/SeasonValidatorTest.php, tests/Feature/Game/GetGameDirectorContextToolTest.php — Hecho cuando: los tests de validador y contexto (incluido cumpleaños sin año) pasan
-- [ ] T2 · Durante la temporada salen más especies de los tipos destacados — Resp: developer — Archivos: app/Services/Game/EncounterRoller.php, app/Services/Game/GameRules.php, tests/Unit/Game/EncounterRollerTest.php — Hecho cuando: el test con semilla fija pasa
-- [ ] T3 · La pestaña Temporada se viste con el tema y aparece su celebración propia — Resp: developer — Archivos: resources/views/livewire/game/game-season.blade.php, resources/css/m3/modules/_game.css, resources/js/game-celebrations.js, app/Livewire/Game/GameNotifier.php, tests/Feature/Game/GameNotifierTest.php — Hecho cuando: con una temporada "navidad" la pestaña cambia y la celebración de nieve puede salir
+- [x] T1 · El director ve las fechas temáticas próximas y puede proponer tema y tipos destacados — Resp: developer — Archivos: config/game.php, app/Mcp/Tools/Game/GetGameDirectorContextTool.php, app/Services/Game/SeasonValidator.php, tests/Unit/Game/SeasonValidatorTest.php, tests/Feature/Game/GetGameDirectorContextToolTest.php — Hecho cuando: los tests de validador y contexto (incluido cumpleaños sin año) pasan
+- [x] T2 · Durante la temporada salen más especies de los tipos destacados — Resp: developer — Archivos: app/Services/Game/EncounterRoller.php, app/Services/Game/GameRules.php, tests/Unit/Game/EncounterRollerTest.php — Hecho cuando: el test con semilla fija pasa
+- [x] T3 · La pestaña Temporada se viste con el tema y aparece su celebración propia — Resp: developer — Archivos: resources/views/livewire/game/game-season.blade.php, resources/css/m3/modules/_game.css, resources/js/game-celebrations.js, app/Livewire/Game/GameNotifier.php, tests/Feature/Game/GameNotifierTest.php — Hecho cuando: con una temporada "navidad" la pestaña cambia y la celebración de nieve puede salir
 - [ ] T4 · Verificar criterios, incluido que no se expone el año de nacimiento — Resp: qa-tester — Hecho cuando: suite Game en verde y revisión del contexto MCP
-- [ ] T5 · Actualizar docs/game.md (temas, límites del validador y prompt del director) — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
+- [x] T5 · Actualizar docs/game.md (temas, límites del validador y prompt del director) — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-10 — Inicio (start --force).
+- T1 — `config('game.season_themes')` y límites en `game.season`. `SeasonValidator` acepta `theme` y `featured_types` (slugs que existan en `game_species.types`). `calendar_hints` se arma en `SeasonManager::calendarHints`, porque es quien construye el contexto; la herramienta MCP no cambió. Del cumpleaños solo sale mes-día.
+- T2 — `EncounterRoller::roll` recibe `featuredTypes`; pesos enteros (base 2, tipo 3, línea ×featuredWeight). Sin línea ni tipos se conserva el camino anterior, así que las semillas de las pruebas existentes no cambian. `GameRules` expone `theme`/`featured_types` y `RewardGranter` los pasa.
+- T3 — Pestaña Temporada con clase de tema, ícono y chips (reusa `.game-type-chip`). 5 celebraciones temáticas en JS con CSS que reutiliza keyframes existentes. `GameNotifier` suma la del tema al sorteo y no celebra si las celebraciones están apagadas. `celebration_catalog` no cambia: no aparecen en "Cuáles pueden salir".
+- T5 — docs/game.md: temas, `calendar_hints` y ajuste del prompt del director.
+- Tests: tests/Feature/Game/SeasonThemeTest.php → 7 pasan. Un solo archivo en lugar de los 4 de §5, con los mismos casos. Game+Ui: solo fallas previas ajenas. `npm run test:js` 42/42. Build OK.
 
 ## 9. Preguntas abiertas, decisiones e historial
+- LECCIÓN(developer): en Blade, `@php(...)` inline con corchetes y `??` anidados rompe el compilador ("unexpected endforeach"); usar el bloque `@php … @endphp` · destino sugerido: docs/ARCHITECTURE.md (convenciones de vistas)
 - 2026-11-09 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-09 — Decisiones (Alex): festividades fijas y cumpleaños; efecto = tema visual + tipos destacados + celebración propia.
 - 2026-11-09 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-10 — Movido a in-progress/ (En desarrollo)
+- 2026-11-10 — Implementación terminada → En verificación

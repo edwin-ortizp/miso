@@ -1,5 +1,5 @@
 # CHG-043 · Integrante del dia con frase en panel y dashboard
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -35,7 +35,25 @@ Una tarjeta "compañero" en el panel de pared (franja Ahora) y en el dashboard, 
 - Información necesaria: ninguna adicional.
 - Accesibilidad: la tarjeta es un enlace con `aria-label="Ver ficha de {nombre}"`; la frase es texto real.
 
-Panel de pared (franja Ahora):
+Panel de pared — versión final: columna propia en Próximos días (4 días + compañero):
+```
+┌─ Hoy ─┬─ mié ─┬─ jue ─┬─ vie ─┬──── Compañero ────┐
+│ …     │ …     │ …     │ …     │   (arte 160 px)   │
+│       │       │       │       │  Magmar · Nv 1    │
+│       │       │       │       │ “Nada se pierde…” │
+└───────┴───────┴───────┴───────┴───────────────────┘
+```
+Segunda versión (descartada, choca con los anillos):
+```
+┌ Ahora ──────────────────────────────────────────────┐
+│ 08:41                         ◯  ◯  ◯  ◯            │
+│ Martes 10 nov · Mañana                              │
+│                  ╭───────────────────────╮          │
+│                  │ Paso a paso también…  │   (🦊)  │
+│ ─ línea de tiempo ────────────────────────  ╱▔▔▔▔   │
+└─────────────────────────────────────────────────────┘
+```
+Versión inicial (descartada):
 ```
 ┌ Ahora ──────────────────────────────────────────────┐
 │ 07:42  lun 9 nov · Mañana        ◯ ◯ ◯ ◯  anillos   │
@@ -113,15 +131,34 @@ sequenceDiagram
 - Docs a actualizar: `docs/game.md` → "Integrante del día" y la herramienta en "Director y temporadas", con el paso de frases en el prompt sugerido del schedule de Paseo.
 
 ## 7. Tareas
-- [ ] T1 · Catálogo de frases con 30 semilla y elección de integrante + frase al azar — Resp: developer — Archivos: database/migrations/*_create_game_quotes_table.php, database/seeders/GameQuoteSeeder.php, app/Models/Game/GameQuote.php, app/Services/Game/DailyBuddy.php, app/Services/Game/QuoteValidator.php, tests/Unit/Game/DailyBuddyServiceTest.php, tests/Unit/Game/QuoteValidatorTest.php — Hecho cuando: los tests unitarios pasan y la semilla valida
-- [ ] T2 · La tarjeta aparece en el panel de pared y en el dashboard y no cambia con el refresco — Resp: developer — Archivos: resources/views/components/game/daily-buddy.blade.php, app/Livewire/Home/WallPanel.php, resources/views/livewire/home/wall-panel.blade.php, app/Livewire/Home/Dashboard.php, resources/views/livewire/home/dashboard.blade.php, resources/css/m3/modules/_game.css, tests/Feature/Game/DailyBuddyTest.php — Hecho cuando: los criterios 1-4 y 8 pasan
-- [ ] T3 · El director puede agregar frases cada lunes por MCP — Resp: developer — Archivos: app/Mcp/Tools/Game/ProposeGameQuotesTool.php, app/Mcp/Servers/LifeTrackerServer.php, app/Mcp/Tools/Game/GetGameDirectorContextTool.php, tests/Feature/Game/ProposeGameQuotesToolTest.php — Hecho cuando: los criterios 5-7 pasan
+- [x] T1 · Catálogo de frases con 30 semilla y elección de integrante + frase al azar — Resp: developer — Archivos: database/migrations/*_create_game_quotes_table.php, database/seeders/GameQuoteSeeder.php, app/Models/Game/GameQuote.php, app/Services/Game/DailyBuddy.php, app/Services/Game/QuoteValidator.php, tests/Unit/Game/DailyBuddyServiceTest.php, tests/Unit/Game/QuoteValidatorTest.php — Hecho cuando: los tests unitarios pasan y la semilla valida
+- [x] T2 · La tarjeta aparece en el panel de pared y en el dashboard y no cambia con el refresco — Resp: developer — Archivos: resources/views/components/game/daily-buddy.blade.php, app/Livewire/Home/WallPanel.php, resources/views/livewire/home/wall-panel.blade.php, app/Livewire/Home/Dashboard.php, resources/views/livewire/home/dashboard.blade.php, resources/css/m3/modules/_game.css, tests/Feature/Game/DailyBuddyTest.php — Hecho cuando: los criterios 1-4 y 8 pasan
+- [x] T3 · El director puede agregar frases cada lunes por MCP — Resp: developer — Archivos: app/Mcp/Tools/Game/ProposeGameQuotesTool.php, app/Mcp/Servers/LifeTrackerServer.php, app/Mcp/Tools/Game/GetGameDirectorContextTool.php, tests/Feature/Game/ProposeGameQuotesToolTest.php — Hecho cuando: los criterios 5-7 pasan
 - [ ] T4 · Verificar criterios de aceptación — Resp: qa-tester — Hecho cuando: los 8 criterios pasan y las suites están en verde
-- [ ] T5 · Actualizar documentación y prompt del director — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
+- [x] T5 · Actualizar documentación y prompt del director — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-10 — Inicio (start --force).
+- T1 — Migración `game_quotes` con índices; las 30 semilla viven en `GameQuote::SEED` y las inserta la propia migración (en lugar de un seeder: así llegan a producción con `migrate`). `DailyBuddy` (ejemplar `inRandomOrder` + frase vigente, cae a SEED si la tabla está vacía) y `QuoteValidator` (reusa `MissionProposalValidator::penaltyWord`, ahora público y estático).
+- T2 — `x-game.daily-buddy` (variantes wall/card, estado vacío), propiedad `buddy` elegida en `mount()` de WallPanel y Dashboard, estilos `.game-buddy*` en _game.css. Build OK.
+- T3 — `ProposeGameQuotesTool` (ok/rejected/ya_propuestas/director_paused, bloqueo por usuario) registrada en LifeTrackerServer; `quotes_due` y `quotes_limits` se agregan en `SeasonManager::context` (es quien arma el contexto; la herramienta no cambió).
+- T5 — docs/game.md: sección "Integrante del día", paso FRASES en el prompt del director y tabla de datos.
+- Tests: tests/Feature/Game/DailyBuddyTest.php → 9 pasan (un archivo en lugar de los 4 listados en §5; cubre los mismos casos). Game+Home+Ui: solo fallas previas ajenas (NewSources, HomeDashboard, CssLayer, UiCatalog, ProtectedScreen).
+
+- 2026-11-10 — Corrección: `x-game.daily-buddy variant="wall"` ahora es `.game-buddy-peek` (arte de 128 px con `position: absolute` en `.wall-now`, que tiene `overflow: hidden`, y globo hacia la izquierda). La línea de tiempo reserva la esquina con `padding-right`. En < 1200 px solo el arte; en < 768 px se oculta. Tests: +2 en DailyBuddyTest (ubicación y estado vacío); DailyBuddy+WallPanel+PanelFocus 31/31; Ui solo con fallas previas.
+- 2026-11-10 — Columna propia: se revierte el "peek" (CSS y `.wall-now` vuelven a como estaban). La variante wall es un `article.wall-day.game-buddy-stage` dentro de `.wall-days.has-buddy` (4 días + 1,1fr); el rango del encabezado termina en el último día visible. Tests: 2 nuevos (4 días + compañero; 5 días sin ejemplar). DailyBuddy+WallPanel+PanelFocus 32/32; Ui solo con las 4 fallas previas.
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-10 — Reabierto otra vez (Alex): el personaje asomado choca con los anillos y la escena queda recargada. Decisión: sacrificar el 5.º día; "Próximos días" muestra 4 días y la 5.ª columna es el compañero. Sin ejemplares, 5 días.
+- LECCIÓN(developer): en una vista Blade con `@php(...)` inline, un bloque `@php … @endphp` posterior se empareja mal ("Undefined variable"/"unexpected endforeach"); en esas vistas usar solo `@php(...)` inline · destino sugerido: docs/ARCHITECTURE.md (convenciones de vistas). Reemplaza la lección propuesta en CHG-045.
+- 2026-11-10 — Reabierto (Alex): en el panel, la tarjeta dentro de `.wall-now__side` agrandaba la columna, sacaba la línea de tiempo del bloque y se veía como una caja ajena. Decisión: personaje asomado en la esquina inferior derecha del bloque Ahora, recortado por el borde, con la frase en un globo; sin estado vacío en el panel.
+- LECCIÓN: ninguna
 - 2026-11-09 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-09 — Decisiones (Alex): panel de pared y dashboard; cambia solo al recargar la página; en la franja Ahora; el director agrega 7-14 frases cada lunes y se retiran a los 60 días; frases generales sin datos personales.
 - 2026-11-09 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-10 — Movido a in-progress/ (En desarrollo)
+- 2026-11-10 — Implementación terminada → En verificación
+- 2026-11-10 — Reabierto: Panel: la tarjeta rompe el bloque Ahora y no se integra; se rehace como personaje asomado en la esquina
+- 2026-11-10 — Implementación terminada → En verificación
+- 2026-11-10 — Reabierto: Panel: el personaje asomado choca con los anillos; pasa a columna propia en Próximos días
+- 2026-11-10 — Implementación terminada → En verificación

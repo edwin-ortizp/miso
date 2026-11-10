@@ -1,5 +1,5 @@
 # CHG-044 · Sonido sutil al ganar y abrir balls
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -49,14 +49,22 @@ Sonidos sintetizados con Web Audio (sin archivos ni derechos de terceros) en los
 - Comando: `php artisan test tests/Feature/Game`.
 
 ## 7. Tareas
-- [ ] T1 · Suena una campanita suave al ganar, abrir, subir de nivel o cumplir misión/meta — Resp: developer — Archivos: resources/js/game-sounds.js, resources/js/game-celebrations.js, resources/js/app.js, app/Livewire/Game/GameNotifier.php, resources/views/livewire/game/game-notifier.blade.php, resources/views/components/game/opening-ball.blade.php, tests/Feature/Game/GameNotifierTest.php — Hecho cuando: los 4 momentos suenan y el test de despacho pasa
-- [ ] T2 · Interruptor "Sonidos" y "Probar sonido" en Ajustes, encendido por defecto — Resp: developer — Archivos: config/game.php, app/Services/Game/GameSettings.php, app/Livewire/Game/GameSettingsPage.php, resources/views/livewire/game/game-settings.blade.php, tests/Feature/Game/GameSettingsPageTest.php — Hecho cuando: apagar silencia todo y el test de ajustes pasa
+- [x] T1 · Suena una campanita suave al ganar, abrir, subir de nivel o cumplir misión/meta — Resp: developer — Archivos: resources/js/game-sounds.js, resources/js/game-celebrations.js, resources/js/app.js, app/Livewire/Game/GameNotifier.php, resources/views/livewire/game/game-notifier.blade.php, resources/views/components/game/opening-ball.blade.php, tests/Feature/Game/GameNotifierTest.php — Hecho cuando: los 4 momentos suenan y el test de despacho pasa
+- [x] T2 · Interruptor "Sonidos" y "Probar sonido" en Ajustes, encendido por defecto — Resp: developer — Archivos: config/game.php, app/Services/Game/GameSettings.php, app/Livewire/Game/GameSettingsPage.php, resources/views/livewire/game/game-settings.blade.php, tests/Feature/Game/GameSettingsPageTest.php — Hecho cuando: apagar silencia todo y el test de ajustes pasa
 - [ ] T3 · Verificar criterios — Resp: qa-tester — Hecho cuando: prueba manual y suite Game en verde
-- [ ] T4 · Documentar sonidos en docs/game.md (Celebraciones) — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
+- [x] T4 · Documentar sonidos en docs/game.md (Celebraciones) — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-10 — Inicio (start --force).
+- T1 — `game-sounds.js` (4 sonidos Web Audio, ganancia 0.08, desbloqueo en el primer pointerdown/keydown, no suena con `document.hidden` ni con el ajuste apagado). `GameNotifier` despacha `game-sound` con el momento más importante de la tanda y expone `data-game-sound`; `game-reveal.js` suena `open` en `begin()`. La apertura vive en `game-reveal.js`, no en `opening-ball.blade.php` (sin cambios ahí).
+- T2 — `sounds` en config/GameSettings/GameSettingsPage; interruptor y "Probar sonido" en Celebraciones; al guardar se despacha `game-settings-saved` y el notificador actualiza su ajuste.
+- T4 — docs/game.md: sonidos en Celebraciones.
+- Tests: GameNotifierTest +3 (11 pasan); `npm run test:js` 42/42; suite Game 196/197 (falla previa ajena). No se agregó test JS propio de game-sounds (exigía editar package.json, fuera de §4).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- LECCIÓN(developer): los imports entre módulos de resources/js deben llevar extensión `.js`, porque `npm run test:js` los carga con Node ESM sin Vite y falló con ERR_MODULE_NOT_FOUND · destino sugerido: docs/TESTING.md
 - 2026-11-09 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-09 — Decisiones (Alex): sonidos generados con Web Audio; en ganar ball, abrir, nivel/evolución y misión/meta cumplida; encendidos por defecto a volumen bajo.
 - 2026-11-09 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-10 — Movido a in-progress/ (En desarrollo)
+- 2026-11-10 — Implementación terminada → En verificación

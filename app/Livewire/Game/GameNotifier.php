@@ -29,8 +29,12 @@ class GameNotifier extends Component
 
     public string $lastCelebration = '';
 
-    public function mount(): void
+    /** Sonidos activos (CHG-044); el navegador lo lee de `data-game-sound`. */
+    public bool $sounds = true;
+
+    public function mount(GameSettings $settings): void
     {
+        $this->sounds = (bool) $settings->for((int) auth()->id())['sounds'];
         // No repite lo ocurrido antes de cargar la página.
         $this->lastSeenEventId = (int) GameEvent::query()->max('id');
     }
@@ -54,6 +58,38 @@ class GameNotifier extends Component
         if ($result['celebrate']) {
             $this->celebrate($settings);
         }
+
+        if ($sound = $this->soundFor($result['toasts'])) {
+            if ($settings->for((int) auth()->id())['sounds']) {
+                $this->dispatch('game-sound', name: $sound);
+            }
+        }
+    }
+
+    /** Ajustes guardados en Colección → Ajustes: actualiza el ajuste de sonido sin recargar. */
+    #[On('game-settings-saved')]
+    public function refreshSettings(GameSettings $settings): void
+    {
+        $this->sounds = (bool) $settings->for((int) auth()->id())['sounds'];
+    }
+
+    /**
+     * Sonido del momento más importante de la tanda (CHG-044): misión o meta
+     * cumplida > nivel o evolución > ball. La experiencia sola no suena.
+     *
+     * @param  array<int, array<string, mixed>>  $toasts
+     */
+    private function soundFor(array $toasts): ?string
+    {
+        $types = array_column($toasts, 'type');
+        $missionDone = array_filter($toasts, fn ($toast) => ($toast['type'] === 'mission' && str_starts_with((string) $toast['title'], '¡')) || $toast['type'] === 'goal');
+
+        return match (true) {
+            $missionDone !== [] => 'mission',
+            in_array('level', $types, true) || in_array('evolution', $types, true) => 'level',
+            in_array('ball', $types, true) => 'ball',
+            default => null,
+        };
     }
 
     public function dismiss(int $id): void
@@ -64,7 +100,15 @@ class GameNotifier extends Component
     private function celebrate(GameSettings $settings): void
     {
         $current = $settings->for((int) auth()->id());
-        $options = $current['celebrations'] ? $current['celebration_set'] : [];
+        if (! $current['celebrations']) {
+            return;
+        }
+        $options = $current['celebration_set'];
+        // Temporada temática (CHG-045): su celebración se suma al sorteo mientras dure.
+        $theme = app(\App\Services\Game\GameRules::class)->for((int) auth()->id(), now())['theme'];
+        if ($themeCelebration = config("game.season_themes.{$theme}.celebration")) {
+            $options = array_values(array_unique([...$options, $themeCelebration]));
+        }
         if ($options === []) {
             return;
         }

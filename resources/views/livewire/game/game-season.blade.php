@@ -3,12 +3,30 @@
         <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message }}</div>
     @endif
 
-    <div class="game-adventure">
+    @php
+        $themeKey = $active?->config['theme'] ?? null;
+        $theme = $themeKey ? (config('game.season_themes')[$themeKey] ?? null) : null;
+    @endphp
+    <div @class(['game-adventure', 'game-season--theme-'.$themeKey => $theme])>
         <section class="game-adventure__cover" aria-label="Tu temporada">
             <div class="game-adventure__intro">
-                <span class="game-adventure__eyebrow"><i class="bi bi-compass" aria-hidden="true"></i> Tu aventura de colección</span>
+                <span class="game-adventure__eyebrow">
+                    @if ($theme)
+                        <i class="bi {{ $theme['icon'] }}" aria-hidden="true"></i> Temporada · {{ $theme['label'] }}
+                    @else
+                        <i class="bi bi-compass" aria-hidden="true"></i> Tu aventura de colección
+                    @endif
+                </span>
                 <h2>{{ $active?->name ?? 'Cada pequeño paso abre un camino' }}</h2>
                 <p>{{ $active?->narrative ?? 'Completa actividades, gana balls y descubre compañeros a tu ritmo.' }}</p>
+                @if ($active && ! empty($active->config['featured_types']))
+                    <div class="game-season__featured-types">
+                        <span class="md-label-large">Tipos destacados</span>
+                        @foreach ($active->config['featured_types'] as $type)
+                            <span class="game-type-chip {{ \App\Services\Game\CompanionProgress::typeClass($type) }}">{{ \Illuminate\Support\Str::ucfirst($type) }}</span>
+                        @endforeach
+                    </div>
+                @endif
                 @if ($active)
                     <p class="game-adventure__dates">{{ $active->starts_at->translatedFormat('j M') }} – {{ $active->ends_at->translatedFormat('j M Y') }} · {{ $daysLeft }} {{ $daysLeft === 1 ? 'día restante' : 'días restantes' }}</p>
                 @else

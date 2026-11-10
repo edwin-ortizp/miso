@@ -67,6 +67,9 @@
                         </span>
                         <i class="bi ms-auto" :class="open ? 'bi-chevron-up' : 'bi-chevron-down'" aria-hidden="true"></i>
                     </button>
+                    @if ($isToday && $groupedHabits[$timeOfDay]->contains(fn ($h) => empty($completions[$h->id])))
+                        <x-ui.action variant="tonal" size="sm" icon="bi-play-fill" class="habit-routine-start" wire:click="startRoutine('{{ $timeOfDay }}')" wire:loading.attr="disabled">Empezar rutina</x-ui.action>
+                    @endif
                 </div>
                 <div id="{{ $sectionId }}" role="region" aria-labelledby="{{ $headingId }}" x-cloak x-show="open">
                     @foreach ($groupedHabits[$timeOfDay] as $habit)
@@ -101,6 +104,8 @@
             </div>
         @endif
     @endforeach
+
+    @include('livewire.habit.partials.routine-overlay')
 
     @include('livewire.habit.partials.completion-feedback')
 

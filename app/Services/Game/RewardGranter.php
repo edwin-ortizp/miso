@@ -179,6 +179,7 @@ class RewardGranter
         $picked = $this->roller->roll(
             $species, $knownLines, $settings['rarity_weights'], $forceNew, $seed,
             $settings['featured_line'] ?? null, (int) ($settings['featured_weight'] ?? 1),
+            (array) ($settings['featured_types'] ?? []),
         );
 
         if (! $picked) {
