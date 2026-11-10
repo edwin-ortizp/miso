@@ -15,6 +15,8 @@
         <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F')) }}</p>
     </x-slot:controls>
 
+    <livewire:game.guardian-card module="exercise" variant="top" />
+
     <x-ui.management-card id="exercise-day-logs" title="Actividades del día" icon="bi-list-ul"
                           :count="'('.$logs->total().' / '.$totalLogs.')'" search="search" search-placeholder="Buscar actividades"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
@@ -98,6 +100,7 @@
         @endphp
 
         <x-context-widget :title="$selectedDay->isToday() ? 'Objetivo de hoy' : 'Objetivo del '.$selectedDay->translatedFormat('j \d\e F')" icon="bi-bullseye">
+            <livewire:game.guardian-card module="exercise" variant="rail" />
             <p class="goal-today"><strong>{{ $minutes($done) }} <span>/ {{ $minutes($dailyGoal) }}</span></strong><b>{{ $rawPercentage }} %</b></p>
             <x-ui.progress :value="min($rawPercentage, 100)" tone="primary" label="Avance de la meta diaria" :valueText="$rawPercentage.'% de la meta'" />
             <p class="md-body-small mb-1">

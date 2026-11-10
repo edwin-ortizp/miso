@@ -3,6 +3,9 @@
         <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F')) }}</p>
     </x-slot:controls>
 
+    @if ($hasGuardian)
+        <livewire:game.guardian-card module="habits" variant="top" />
+    @else
     <section class="habit-coach-card habit-coach-card--{{ $coachCard['tone'] }} mb-3" aria-labelledby="habit-coach-title">
         <div class="habit-coach-card__glow" aria-hidden="true"></div>
         <div class="habit-coach-card__icon" aria-hidden="true"><i class="bi {{ $coachCard['icon'] }}"></i></div>
@@ -29,6 +32,7 @@
             </div>
         </div>
     </section>
+    @endif
 
     {{-- Habits grouped by time of day --}}
     @php
@@ -110,15 +114,18 @@
     @include('livewire.habit.partials.completion-feedback')
 
     <x-slot:rail>
-        <x-context-widget title="{{ $monthData['label'] }}" icon="bi-calendar3">
-            @include('livewire.habit.partials.month-calendar')
-        </x-context-widget>
         <x-context-widget title="Constancia" icon="bi-fire" tone="success">
+            @if ($hasGuardian)
+                <livewire:game.guardian-card module="habits" variant="rail" />
+            @endif
             <dl class="md-context-list">
                 <div><dt>Mejor racha activa</dt><dd>{{ $monthData['best_streak'] }} días</dd></div>
                 <div><dt>Progreso de hoy</dt><dd>{{ $completedCount }}/{{ $totalCount }}</dd></div>
             </dl>
             <a href="{{ route('habits.weekly', ['date' => $selectedDate]) }}" class="md-btn-text w-100 mt-2">Abrir resumen semanal</a>
+        </x-context-widget>
+        <x-context-widget title="{{ $monthData['label'] }}" icon="bi-calendar3">
+            @include('livewire.habit.partials.month-calendar')
         </x-context-widget>
     </x-slot:rail>
 

@@ -359,7 +359,7 @@
 .fc-event:hover .md-calendar-task-actions,
 .fc-event:focus-within .md-calendar-task-actions,
 .md-calendar-task-actions[aria-expanded="true"] { opacity: 1; }
-.md-calendar-action-menu.md-menu__surface { position: fixed; z-index: 1500; min-width: 210px; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow-y: auto; }
+.md-calendar-action-menu.md-menu__surface { position: fixed; right: auto; width: max-content; z-index: 1500; min-width: 210px; max-width: calc(100vw - 16px); max-height: calc(100dvh - 16px); overflow-y: auto; }
 @media (hover: none), (pointer: coarse) {
     .md-calendar-task-actions.md-btn-icon { opacity: 1; }
 }

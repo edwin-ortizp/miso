@@ -51,6 +51,10 @@ return [
     'module_guardians' => [
         'tasks' => ['psiquico', 'acero'],
         'health' => ['hada', 'normal'],
+        'habits' => ['fuego', 'planta'],
+        'water' => ['agua', 'hielo'],
+        'exercise' => ['lucha', 'roca'],
+        'pomodoro' => ['electrico', 'psiquico'],
     ],
     'guardian_lines' => [
         'tasks' => [
@@ -67,6 +71,46 @@ return [
             'cheer' => 'Un cuidado a la vez.',
             'happy' => 'Te estás cuidando bien.',
             'celebrate' => '¡Pendientes de salud al día!',
+        ],
+    ],
+    // Consejos del guardián (CHG-057): plantillas por regla; {variables} se escapan al reemplazar.
+    'guardian_advice' => [
+        'refresh_seconds' => 300,
+        'tasks' => [
+            'next' => 'Tu próxima es {task} a las {time}.',
+            'overload' => 'Tienes {planned} planificadas y quedan {left} de día: mueve algo.',
+            'stale' => '{count} vencidas de {category} llevan más de 7 días: ¿cerramos o movemos una?',
+            'streak' => 'Ya cerraste {count} hoy, más que tus {weekday} de costumbre.',
+            'single' => 'Hoy todo es {category}; ¿cabe algo distinto?',
+        ],
+        'health' => [
+            'followup' => 'Hoy toca seguimiento de {event} (día {day}).',
+            'unlogged' => 'Llevas {days} días sin anotar cómo sigue {event}.',
+            'next' => 'Próximo cuidado: {event} {when}.',
+            'calm' => '{month} va con {count} eventos; {peak} tuvo {peak_count}.',
+        ],
+        'water' => [
+            'left' => 'Te faltan {left} para tu meta de hoy.',
+            'pace' => 'Vas {now}; a esta hora sueles llevar {usual}.',
+            'gap' => 'Llevas {hours} h sin tomar agua; un vaso ahora ayuda.',
+            'streak' => '{days} días seguidos cumpliendo tu meta de agua.',
+        ],
+        'exercise' => [
+            'left' => 'Te faltan {minutes} min de movimiento para tu meta.',
+            'idle' => 'Llevas {days} días sin moverte; ¿algo corto hoy?',
+            'forgotten' => 'Hace {days} días no haces {type}; antes era de tus favoritos.',
+            'week' => 'Esta semana llevas {now} min, más que los {last} de la anterior.',
+        ],
+        'pomodoro' => [
+            'left' => 'Te faltan {minutes} min de foco para tu meta.',
+            'top' => 'Tu tarea con más foco esta semana: {task} ({minutes} min).',
+            'slot' => 'La {slot} es tu mejor franja de foco: aprovéchala.',
+            'now' => 'Ahora toca {task}; ¿un bloque de foco?',
+        ],
+        'habits' => [
+            'moment' => 'Te faltan {count} de la {moment}; {habit} es el más corto.',
+            'risk' => '{habit} lleva {days} días seguidos; hoy mantiene la racha.',
+            'forgotten' => '{habit} se ha quedado {days} días este mes; ¿lo retomamos?',
         ],
     ],
     'buddy_moods' => [

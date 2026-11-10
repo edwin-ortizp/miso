@@ -16,6 +16,8 @@
         <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F')) }}</p>
     </x-slot:controls>
 
+    <livewire:game.guardian-card module="water" variant="top" />
+
     <x-ui.management-card id="water-day-logs" title="Registro del día" icon="bi-clock-history"
                           :count="'('.$logs->total().' / '.$totalLogs.')'" search="search" search-placeholder="Buscar registros"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
@@ -88,6 +90,7 @@
         @endphp
 
         <x-context-widget :title="$selectedDay->isToday() ? 'Objetivo de hoy' : 'Objetivo del '.$selectedDay->translatedFormat('j \d\e F')" icon="bi-droplet">
+            <livewire:game.guardian-card module="water" variant="rail" />
             <p class="goal-today"><strong>{{ $liters($consumed) }} <span>/ {{ $liters($dailyGoal) }}</span></strong><b>{{ $rawPercentage }} %</b></p>
             <x-ui.progress :value="min($rawPercentage, 100)" tone="primary" label="Avance de la meta diaria" :valueText="$rawPercentage.'% de la meta'" />
             <p class="md-body-small mb-0">

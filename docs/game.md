@@ -124,7 +124,23 @@ Cada módulo tiene un guardián que asoma en la esquina de una tarjeta de su pan
 - **Quién:** el ejemplar de mayor nivel con un tipo afín al módulo (`game.module_guardians`: Tareas = psíquico/acero, Salud = hada/normal); empate → el más antiguo; sin afinidad → el de mayor nivel. Se elige al montar la página y no cambia con los re-renders.
 - **Frase:** `ModuleGuardian::line()` usa los umbrales de `DailyBuddy::mood` y los textos de `game.guardian_lines`. Tareas: completadas/planificadas hoy. Salud: si hay un evento en seguimiento (tipo de evolución sin fecha de fin) dice la frase `care`; si no, completados en 7 días / (esos + pendientes de salud).
 - **Oculto** con el juego apagado o sin ejemplares.
-- **Agregar otro módulo:** añadir sus tipos en `module_guardians` y sus frases en `guardian_lines`, elegir el guardián en `mount()` con `ModuleGuardian::pick($userId, 'modulo')`, y poner `<x-game.module-guardian>` dentro de la tarjeta con la clase `has-guardian`.
+- **Agregar otro módulo:** añadir sus tipos en `module_guardians` y sus frases en `guardian_lines`, elegir el guardián en `mount()` con `ModuleGuardian::pick($userId, 'modulo')`, y poner `<livewire:game.guardian-card>` (ver Consejos del guardián).
+
+### Consejos del guardián (CHG-057)
+
+El guardián es un componente Livewire aislado (`<livewire:game.guardian-card module="tasks|health" variant="top|rail" />`). Su globo muestra un consejo calculado con reglas sobre tus datos (sin IA); el botón "Otro consejo" pide uno distinto y se renueva solo cada `game.guardian_advice.refresh_seconds` (300 s) con la pestaña visible, sin re-renderizar la lista.
+
+- `GuardianAdvisor` pide candidatos al proveedor del módulo y elige al azar ponderado sin repetir el actual; sin candidatos vuelve a la frase por avance.
+- **Tareas** (`TaskAdvice`): próxima tarea con hora; carga del día (estimado de pendientes de hoy contra lo que queda hasta las 23:59); ≥ 3 vencidas de una categoría con más de 7 días; racha (completadas hoy ≥ 2 y por encima del promedio del mismo día de la semana en las 4 semanas previas); día de una sola categoría raíz (≥ 3 tareas).
+- **Salud** (`HealthAdvice`): seguimiento de eventos abiertos (día n); días sin registro (≥ 3); próximo cuidado en ≤ 2 días; mes actual frente al mes con más eventos del año.
+- Textos en `game.guardian_advice.{módulo}.{clave}`; los valores se escapan y los nombres van en negrita.
+- **Hidratación** (`WaterAdvice`): lo que falta para la meta; ritmo frente al promedio a la misma hora de los 7 días previos; ≥ 3 h sin registrar (7:00-22:00); racha de días con meta (≥ 2).
+- **Ejercicio** (`ExerciseAdvice`): minutos que faltan; ≥ 2 días sin registro; tipo sin hacer en 14 días con ≥ 3 registros antes (75 días); semana actual vs anterior si vas por encima.
+- **Pomodoro** (`PomodoroAdvice`): foco que falta (meta entre semana / fin de semana, `PomodoroAdvice::goalFor`); tarea con más foco en 7 días; mejor franja (mañana/tarde/noche) en 14 días si estás en ella; bloque para la tarea agendada a esta hora sin foco hoy.
+- **Hábitos** (`HabitAdvice`): el mensaje del coach (`HabitGamificationService::coachCard`) con la acción "Ir al hábito sugerido"; pendientes del momento del día con el más corto; racha ≥ 3 días aún sin completar hoy; hábito más olvidado del mes (≥ 5 días). Con guardián, la tarjeta coach de arriba desaparece y el guardián va en "Constancia" (primera tarjeta del panel); sin guardián, vuelve el coach.
+- **Afinidades** (`game.module_guardians`): Tareas psíquico/acero, Salud hada/normal, Hábitos fuego/planta, Hidratación agua/hielo, Ejercicio lucha/roca, Pomodoro eléctrico/psíquico.
+- Un candidato puede traer `action` (`label`, `target` = id del elemento a enfocar).
+- **Nuevo proveedor:** clase con `candidates(CarbonInterface $now)` que use el trait `Advice`, registrarla en `GuardianAdvisor::PROVIDERS` y agregar sus plantillas.
 
 ## Director y temporadas
 

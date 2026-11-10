@@ -91,6 +91,9 @@ return [
         'archetype' => 'daily-log',
         'title' => 'Hábitos', 'subtitle' => 'Constancia diaria y perspectiva semanal.', 'icon' => 'bi-check2-square',
         'patterns' => ['habits*'], 'preserve' => ['date'],
+        // CHG-058: el registro diario muestra Constancia (con el guardián) y el calendario en el panel contextual.
+        'rail' => true,
+        'rail_routes' => ['habits'],
         'tabs' => [
             ['label' => 'Registro diario', 'route' => 'habits', 'icon' => 'bi-check2-square', 'active' => ['habits']],
             ['label' => 'Resumen semanal', 'route' => 'habits.weekly', 'archetype' => 'dashboard', 'icon' => 'bi-bar-chart-line', 'active' => ['habits.weekly']],

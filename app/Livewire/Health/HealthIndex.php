@@ -130,13 +130,9 @@ class HealthIndex extends Component
 
     public ?int $recoveryIntensity = null;
 
-    /** CHG-055: guardián del módulo, elegido una vez para que no cambie con los re-renders. */
-    public ?array $guardian = null;
-
     public function mount(): void
     {
         $this->normalizeFilters();
-        $this->guardian = app(\App\Services\Game\ModuleGuardian::class)->pick((int) auth()->id(), 'health');
 
         // "Registrar evento en esta zona" desde la Vista del cuerpo.
         $area = request()->query('new_area');
@@ -485,19 +481,7 @@ class HealthIndex extends Component
             'pendingHealthTasks' => Task::query()->whereIn('category', \App\Models\TaskCategory::expandSelection(['salud'], auth()->id(), 'key'))->where('completed', false)->count(),
             'healthTasks' => $this->healthTasks(),
             'moments' => $this->illnessMoments(),
-            'guardianLine' => $this->guardian ? $this->guardianLine() : null,
         ]);
-    }
-
-    /** CHG-055: cuidado si hay un evento en seguimiento; si no, avance de pendientes de salud (7 días). */
-    private function guardianLine(): string
-    {
-        $care = HealthEvent::query()->whereIn('type', HealthEvent::EVOLUTION_TYPES)->whereNull('end_date')->exists();
-        $tasks = Task::query()->whereIn('category', \App\Models\TaskCategory::expandSelection(['salud'], auth()->id(), 'key'));
-        $done = (clone $tasks)->where('completed', true)->where('completed_at', '>=', now()->subDays(7))->count();
-        $pending = (clone $tasks)->where('completed', false)->count();
-
-        return \App\Services\Game\ModuleGuardian::line('health', $done, $done + $pending, $care, now());
     }
 
     /**

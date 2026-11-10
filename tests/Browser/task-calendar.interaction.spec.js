@@ -60,6 +60,11 @@ for (const width of [1440, 768, 390]) {
         await expect(menu).toBeVisible();
         await expect(menu.getByRole('menuitem', { name: 'Mover para mañana' })).toBeVisible();
         const box = await menu.boundingBox();
+        expect(box.width).toBeGreaterThanOrEqual(210);
+        expect(box.width).toBeLessThan(320);
+        const triggerBox = await trigger.boundingBox();
+        expect(Math.abs(box.x - Math.max(8, triggerBox.x + triggerBox.width - box.width))).toBeLessThan(2);
+        await page.screenshot({ path: testInfo.outputPath('calendar-menu.png') });
         expect(box.x).toBeGreaterThanOrEqual(0);
         expect(box.x + box.width).toBeLessThanOrEqual(width);
         await page.keyboard.press('Escape');
@@ -72,6 +77,21 @@ for (const width of [1440, 768, 390]) {
             await action.focus();
             await page.keyboard.press('Enter');
             await expect(menu).toBeVisible();
+            await expect.poll(async () => {
+                const rect = await menu.boundingBox();
+                return rect && Math.abs(rect.width - box.width) < 2 && rect.x >= 8 && rect.x + rect.width <= width - 8;
+            }).toBe(true);
+            if (view === 'timeGridWeek') {
+                await page.keyboard.press('Escape');
+                const other = page.getByRole('button', { name: 'Más acciones de Calendar browser task', exact: true }).first();
+                await other.focus();
+                await page.keyboard.press('Enter');
+                await expect(menu).toBeVisible();
+                await expect.poll(async () => (await menu.boundingBox())?.x ?? -1).toBeGreaterThanOrEqual(8);
+                const otherBox = await menu.boundingBox();
+                expect(Math.abs(otherBox.width - box.width)).toBeLessThan(2);
+                expect(otherBox.x + otherBox.width).toBeLessThanOrEqual(width - 8);
+            }
             await page.keyboard.press('ArrowDown');
             await expect(menu.getByRole('menuitem', { name: 'Completar', exact: true })).toBeFocused();
             await page.keyboard.press('Escape');

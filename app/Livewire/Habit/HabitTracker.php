@@ -227,6 +227,8 @@ class HabitTracker extends Component
             'isToday' => $this->selectedDate === now()->toDateString(),
             'routineHabit' => ($id = $this->currentRoutineHabitId()) ? $habits->firstWhere('id', $id) : null,
             'routineHabits' => $this->routine ? $habits->keyBy('id') : collect(),
+            // CHG-058: con guardián, el coach pasa a ser uno de sus consejos (panel derecho).
+            'hasGuardian' => \App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'habits'),
             'coachCard' => $gamification->coachCard(
                 Carbon::parse($this->selectedDate),
                 $habits,

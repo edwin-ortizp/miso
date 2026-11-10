@@ -24,8 +24,11 @@
         <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F \d\e Y')) }}</p>
     </x-slot:controls>
 
+    <livewire:game.guardian-card module="pomodoro" variant="top" />
+
     <x-slot:rail>
         <x-context-widget :title="$displayDate->isToday() ? 'Meta de hoy' : 'Meta del '.$displayDate->translatedFormat('j \d\e F')" icon="bi-trophy">
+            <livewire:game.guardian-card module="pomodoro" variant="rail" />
             <p class="goal-today"><strong>{{ $minutesLabel($totalMinutes) }} <span>/ {{ $minutesLabel($dailyGoal) }}</span></strong><b>{{ $progressPercentage }} %</b></p>
             <x-ui.progress :value="min($progressPercentage, 100)" tone="primary" label="Avance de la meta diaria" :valueText="$progressPercentage.'% de la meta'" />
             <p class="md-body-small mb-0">

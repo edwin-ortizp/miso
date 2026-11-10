@@ -30,7 +30,7 @@
         </div>
         <div wire:ignore x-ref="calendar" class="md-task-calendar__surface"></div>
         <template x-teleport="body">
-            <div x-ref="actionMenu" class="md-menu__surface md-calendar-action-menu" role="menu" aria-label="Acciones de la tarea"
+            <div wire:ignore x-ref="actionMenu" class="md-menu__surface md-calendar-action-menu" role="menu" aria-label="Acciones de la tarea"
                  x-cloak x-show="actionEvent"
                  @keydown="menuKey($event)" @click.outside="if (!$event.target.closest('.md-calendar-task-actions')) closeActions()">
                 <x-ui.menu-item icon="bi-arrow-right" @click="runAction('advance')" x-bind:disabled="actionBusy"><span x-text="actionEvent?.advanceLabel"></span></x-ui.menu-item>

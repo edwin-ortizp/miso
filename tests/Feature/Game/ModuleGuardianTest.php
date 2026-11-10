@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Game;
 
+use App\Livewire\Game\GuardianCard;
 use App\Livewire\Health\HealthIndex;
 use App\Livewire\Task\TaskList;
 use App\Models\Game\GameCompanion;
@@ -108,43 +109,79 @@ class ModuleGuardianTest extends TestCase
         }
     }
 
-    public function test_tasks_panel_shows_guardian_and_line_updates_without_changing_it(): void
+    public function test_tasks_page_shows_guardian_card_and_refresh_keeps_companion(): void
     {
         $companion = $this->companion('Chispin', ['Psíquico'], 4);
 
-        $list = Livewire::test(TaskList::class)
+        Livewire::test(TaskList::class)->assertSeeLivewire(GuardianCard::class);
+
+        $card = Livewire::test(GuardianCard::class, ['module' => 'tasks'])
             ->assertSee('Ver ficha de Chispin')
             ->assertSee('/game/collection?species='.$companion->species_id, false)
             ->assertSeeHtml('game-stage--')->assertSee('Chispin · Nv 4')
+            ->assertSeeHtml('wire:poll.300s.visible="refreshAdvice"')
+            ->assertSee('Otro consejo')
             ->assertSee('Día libre, disfrútalo.');
-        $before = $list->get('guardian');
+        $before = $card->get('guardian');
 
         $this->companion('Gotin', ['Psíquico'], 50);
         \App\Models\Task::create(['title' => 'Llamar al banco', 'start_date' => today()]);
         $this->completeTask('Pagar arriendo');
-        $list->dispatch('task-records-changed');
+        $card->call('refreshAdvice');
 
-        $this->assertSame($before, $list->get('guardian'));
-        $list->assertDontSee('Día libre, disfrútalo.');
+        $this->assertSame($before, $card->get('guardian'));
+        $card->assertDontSee('Día libre, disfrútalo.');
     }
 
-    public function test_tasks_panel_hidden_with_game_off(): void
+    public function test_guardian_hidden_with_game_off(): void
     {
         $this->companion('Chispin', ['Psíquico']);
         $this->gameSettings(['enabled' => false]);
 
-        Livewire::test(TaskList::class)->assertDontSeeHtml('game-guardian');
+        Livewire::test(GuardianCard::class, ['module' => 'tasks'])->assertDontSeeHtml('game-guardian');
     }
 
     public function test_health_guardian_cares_when_an_event_is_in_progress(): void
     {
         $this->companion('Gotin', ['Hada']);
 
-        Livewire::test(HealthIndex::class)
+        Livewire::test(HealthIndex::class)->assertSeeLivewire(GuardianCard::class);
+        Livewire::test(GuardianCard::class, ['module' => 'health'])
             ->assertSee('Ver ficha de Gotin')
             ->assertSee('Todo en orden, cuídate.');
+    }
 
-        HealthEvent::create(['type' => 'illness', 'title' => 'Gripa', 'event_date' => today()]);
-        Livewire::test(HealthIndex::class)->assertSee('Recupérate con calma, aquí estoy.');
+    public function test_new_modules_pick_by_affinity_and_mount_the_card(): void
+    {
+        $this->companion('Brotelo', ['Planta'], 3);
+        $this->companion('Gotin', ['Hielo'], 2);
+        $this->companion('Rocon', ['Roca'], 4);
+        $this->companion('Chispin', ['Eléctrico'], 1);
+
+        foreach (['habits' => 'Brotelo', 'water' => 'Gotin', 'exercise' => 'Rocon', 'pomodoro' => 'Chispin'] as $module => $name) {
+            $this->assertSame($name, $this->service()->pick($this->user->id, $module)['name'], $module);
+        }
+        foreach ([\App\Livewire\Water\WaterDaily::class, \App\Livewire\Exercise\ExerciseDaily::class, \App\Livewire\Pomodoro\PomodoroTimer::class, \App\Livewire\Habit\HabitTracker::class] as $page) {
+            Livewire::test($page)->assertSeeLivewire(GuardianCard::class);
+        }
+    }
+
+    public function test_habits_replaces_coach_card_only_with_a_guardian(): void
+    {
+        \App\Models\HabitDefinition::create(['name' => 'Caminar', 'time_of_day' => 'morning']);
+        Livewire::test(\App\Livewire\Habit\HabitTracker::class)
+            ->assertSeeHtml('habit-coach-card')->assertDontSeeLivewire(GuardianCard::class);
+
+        $this->companion('Brotelo', ['Planta']);
+        Livewire::test(\App\Livewire\Habit\HabitTracker::class)
+            ->assertDontSeeHtml('habit-coach-card')->assertSeeLivewire(GuardianCard::class);
+    }
+
+    public function test_coach_advice_brings_its_action(): void
+    {
+        $habit = \App\Models\HabitDefinition::create(['name' => 'Caminar', 'time_of_day' => 'morning']);
+        $coach = collect(app(\App\Services\Game\Guardian\HabitAdvice::class)->candidates(now()))->firstWhere('key', 'coach');
+
+        $this->assertSame(['label' => 'Ir al hábito sugerido', 'target' => 'habit-item-'.$habit->id], $coach['action']);
     }
 }

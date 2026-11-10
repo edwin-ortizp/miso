@@ -390,14 +390,6 @@ class TaskList extends Component
         $this->resetValidation('bulkTitles');
     }
 
-    /** CHG-055: guardián del módulo, elegido una vez para que no cambie con los re-renders. */
-    public ?array $guardian = null;
-
-    public function mount(): void
-    {
-        $this->guardian = app(\App\Services\Game\ModuleGuardian::class)->pick((int) auth()->id(), 'tasks');
-    }
-
     #[\Livewire\Attributes\On('task-records-changed')]
     public function refreshRecords(): void {}
 
@@ -441,9 +433,6 @@ class TaskList extends Component
             'completedCount' => (int) $stats->completed_count,
             'completedToday' => (int) $stats->completed_today,
             'plannedToday' => (int) $stats->planned_today,
-            'guardianLine' => $this->guardian
-                ? \App\Services\Game\ModuleGuardian::line('tasks', (int) $stats->completed_today, (int) $stats->planned_today, false, now())
-                : null,
             'overdueCount' => Task::query()->overdue()->count(),
             'todayStats' => $todayStats,
             'weekStats' => $weekStats,
