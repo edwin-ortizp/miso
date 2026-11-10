@@ -7,7 +7,7 @@
     $drinksState = DataState::resolve(visible: $drinkTypes->count(), total: $drinkTypes->count());
 @endphp
 
-<x-module-shell module="water" x-data="{ showDialog: $wire.entangle('showForm') }">
+<x-module-shell module="water">
     <x-slot:actions>
         <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
     </x-slot:actions>
@@ -136,28 +136,58 @@
         @endif
     </x-slot:rail>
 
-    <x-ui.dialog state="showDialog" title="{{ $editingId ? 'Editar bebida' : 'Nueva bebida' }}">
-        <x-ui.select name="drinkTypeId" label="Tipo de bebida" placeholder="Seleccionar..."
-                     :options="$drinkTypes->mapWithKeys(fn ($type) => [$type->id => ($type->icon ?? '💧').' '.$type->name.' (x'.$type->hydration_factor.')'])->all()"
-                     wire:model="drinkTypeId" />
-
-        <x-ui.field name="amount" label="Cantidad (ml)" type="number" min="1" step="50" wire:model="amount" />
-
-        <x-ui.field name="time" label="Hora" type="time" wire:model="time" />
-
-        <x-ui.filter-bar label="Cantidades habituales">
-            <x-slot:chips>
-                @foreach ([100, 200, 250, 330, 500] as $preset)
-                    <x-ui.chip variant="suggestion" wire:click="$set('amount', {{ $preset }})">{{ $preset }} ml</x-ui.chip>
-                @endforeach
-            </x-slot:chips>
-        </x-ui.filter-bar>
-
-        <x-slot:actions>
-            <x-ui.action variant="text" x-on:click="showDialog = false">Cancelar</x-ui.action>
-            <x-ui.action variant="filled" icon="bi-check-lg" wire:click="save">{{ $editingId ? 'Actualizar' : 'Guardar' }}</x-ui.action>
-        </x-slot:actions>
-    </x-ui.dialog>
+    @if ($showForm)
+        <div wire:key="water-form-{{ $editingId ?? 'new' }}" x-data="{
+            initial: @js([(string) $drinkTypeId, (string) $amount, substr($time, 0, 5)]),
+            confirming: false,
+            returnFocus: null,
+            requestClose() {
+                if (this.confirming) { this.keepEditing(); return; }
+                const current = [String($wire.drinkTypeId ?? ''), String($wire.amount ?? ''), String($wire.time ?? '').slice(0, 5)];
+                if (JSON.stringify(current) === JSON.stringify(this.initial)) { $wire.closeForm(); return; }
+                this.returnFocus = document.activeElement;
+                this.confirming = true;
+                this.$nextTick(() => this.$refs.keepEditing.focus());
+            },
+            keepEditing() {
+                this.confirming = false;
+                this.$nextTick(() => {
+                    if (this.returnFocus?.isConnected && this.returnFocus.closest('[role=dialog]')) this.returnFocus.focus();
+                    else document.getElementById('water-drink-type').focus();
+                });
+            }
+        }">
+            <x-ui.form-dialog :open="$showForm" close="closeForm" close-expression="requestClose()"
+                              title="{{ $editingId ? 'Editar bebida' : 'Nueva bebida' }}"
+                              submit-action="save" id="water-log-form"
+                              x-on:submit.capture="if (confirming) { $event.preventDefault(); $event.stopImmediatePropagation(); }">
+                <div x-show="!confirming">
+                    <x-ui.combobox id="water-drink-type" name="drinkTypeId" label="Tipo de bebida" placeholder="Buscar bebida…"
+                                 :options="$drinkTypes->mapWithKeys(fn ($type) => [$type->id => ($type->icon ?? '💧').' '.$type->name.' (x'.$type->hydration_factor.')'])->all()"
+                                 wire:model="drinkTypeId" />
+                    <x-ui.field name="amount" label="Cantidad (ml)" type="number" min="1" step="50" wire:model="amount" />
+                    <x-ui.field name="time" label="Hora" type="time" wire:model="time" />
+                    <x-ui.filter-bar label="Cantidades habituales">
+                        <x-slot:chips>
+                            @foreach ([100, 200, 250, 330, 500] as $preset)
+                                <x-ui.chip variant="suggestion" wire:click="$set('amount', {{ $preset }})">{{ $preset }} ml</x-ui.chip>
+                            @endforeach
+                        </x-slot:chips>
+                    </x-ui.filter-bar>
+                </div>
+                <div x-show="confirming" x-cloak role="alert" aria-labelledby="water-discard-title">
+                    <h3 id="water-discard-title" class="md-title-medium">¿Descartar los cambios?</h3>
+                    <p>Tienes cambios sin guardar. Si sales, se perderán.</p>
+                </div>
+                <x-slot:actions>
+                    <x-ui.action variant="text" x-show="!confirming" x-on:click="requestClose()">Cancelar</x-ui.action>
+                    <x-ui.action variant="filled" type="submit" x-show="!confirming" wire:loading.attr="disabled">{{ $editingId ? 'Actualizar' : 'Guardar' }}</x-ui.action>
+                    <x-ui.action variant="text" x-show="confirming" x-cloak x-ref="keepEditing" x-on:click="keepEditing()">Seguir editando</x-ui.action>
+                    <x-ui.action variant="filled" x-show="confirming" x-cloak wire:click="closeForm" wire:loading.attr="disabled">Descartar cambios</x-ui.action>
+                </x-slot:actions>
+            </x-ui.form-dialog>
+        </div>
+    @endif
 
     @if ($showCatalog)
         <div x-data="{ open: true }">

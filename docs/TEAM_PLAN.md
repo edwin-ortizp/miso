@@ -52,6 +52,7 @@ _Última actualización: 2026-11-09_
 | CHG-044 | S | Sonido sutil al ganar y abrir balls | to-do | Aprobado | 0/4 |
 | CHG-045 | S | Temporadas tematicas por calendario | to-do | Aprobado | 0/5 |
 | CHG-046 | M | Modo rutina inmersivo de habitos | to-do | Borrador | 0/0 |
+| CHG-047 | S | Bebidas con buscador y cierre protegido | in-progress | En verificación | 2/2 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

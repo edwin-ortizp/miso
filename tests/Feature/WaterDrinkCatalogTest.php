@@ -183,4 +183,32 @@ class WaterDrinkCatalogTest extends TestCase
             'timestamp' => Carbon::parse('2026-07-20 14:35')->timestamp,
         ]);
     }
+    public function test_closing_a_draft_clears_values_and_errors_without_saving(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $drink = DrinkType::create(['name' => 'Té', 'icon' => '🍵', 'hydration_factor' => 0.9]);
+
+        Livewire::test(WaterDaily::class)
+            ->call('openForm')
+            ->call('save')
+            ->assertHasErrors('drinkTypeId')
+            ->assertSet('showForm', true)
+            ->set('drinkTypeId', $drink->id)
+            ->set('amount', 330)
+            ->set('time', '10:30')
+            ->call('closeForm')
+            ->assertHasNoErrors()
+            ->assertSet('showForm', false)
+            ->assertSet('drinkTypeId', '')
+            ->assertSet('amount', 250)
+            ->assertSet('time', '')
+            ->assertSet('editingId', null)
+            ->call('openForm')
+            ->assertHasNoErrors()
+            ->assertSet('drinkTypeId', '')
+            ->assertSet('amount', 250);
+
+        $this->assertDatabaseCount('drink_logs', 0);
+    }
+
 }

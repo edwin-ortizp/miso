@@ -162,6 +162,7 @@ Base visual de **todos** los formularios, no solo de los modales:
 - Ícono inicial opcional; los select muestran chevron propio.
 - Estados: hover (borde on-surface), focus (borde 2 px del acento y label del mismo color), error (borde, label y ayuda en rojo), disabled (opacidad .38).
 - Obligatorio: asterisco rojo junto al label.
+- **Formulario modal** (`x-ui.form-dialog`): `closeExpression` permite centralizar el cierre en el cliente; el slot opcional `actions` reemplaza las acciones predeterminadas. En el registro de bebidas, el descarte se confirma dentro de la misma superficie modal, conservando los datos y el foco.
 - **Select con buscador** (`x-ui.combobox`): recibir foco no abre la lista. Clic/toque en el campo o su flecha alterna la apertura; escribir o usar las flechas del teclado abre. Seleccionar, pulsar fuera, Tab o salir del campo cierra y restaura la etiqueta seleccionada. Escape cierra primero la lista sin cerrar el diálogo.
 
 ## Menús, filtros y botón flotante

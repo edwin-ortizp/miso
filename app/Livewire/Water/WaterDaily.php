@@ -141,6 +141,7 @@ class WaterDaily extends Component
 
     public function openForm(?string $id = null)
     {
+        $this->resetErrorBag();
         if ($id) {
             $log = DrinkLog::find($id);
             if ($log) {
@@ -160,6 +161,7 @@ class WaterDaily extends Component
 
     public function closeForm()
     {
+        $this->resetErrorBag();
         $this->showForm = false;
         $this->editingId = null;
         $this->resetForm();
