@@ -87,3 +87,8 @@
 .home-checkin__block { padding-block: .5rem; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
 .home-checkin__block:last-child { border-bottom: 0; }
 .home-checkin__block h3 { margin-bottom: .5rem; }
+
+/* CHG-070: hallazgos semanales. */
+.insights-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
+.insights-list__item { display: grid; grid-template-columns: 4rem 1fr; gap: .75rem; align-items: baseline; }
+.insights-list__value { color: var(--md-sys-color-primary); }

@@ -120,6 +120,8 @@ class NotificationDispatcher
 
     private function withVia(string $url): string
     {
-        return $url.(str_contains($url, '?') ? '&' : '?').'via=push';
+        [$path, $hash] = array_pad(explode('#', $url, 2), 2, null);
+
+        return $path.(str_contains($path, '?') ? '&' : '?').'via=push'.($hash !== null ? '#'.$hash : '');
     }
 }

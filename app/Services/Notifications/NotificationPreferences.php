@@ -14,6 +14,8 @@ class NotificationPreferences
         'guardian_nudges' => false, 'nudge_morning' => true, 'nudge_afternoon' => true, 'nudge_night' => false,
         // CHG-067: qué otros tipos de aviso también llegan al celular.
         'push_birthday' => false, 'push_task_due' => false, 'push_plan_due' => false, 'push_reminder' => false,
+        // CHG-070: el resumen del domingo llega al celular por defecto.
+        'push_weekly_insights' => true,
     ];
 
     /** ¿Este tipo de notificación debe salir por push para este usuario? */

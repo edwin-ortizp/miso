@@ -103,6 +103,8 @@ class StatisticsDashboard extends Component
         $journalCount = count($journalDays);
 
         return view('livewire.statistics.statistics-dashboard', [
+            // CHG-070: hallazgos de la última semana cerrada (domingo); se calculan una vez por semana.
+            'insights' => app(\App\Services\Insights\WeeklyInsights::class)->forWeek(auth()->user(), now()->isSunday() ? now() : now()->previous(\Carbon\Carbon::SUNDAY))->findings,
             'dates' => $dates,
             'waterData' => $waterData,
             'exerciseData' => $exerciseData,

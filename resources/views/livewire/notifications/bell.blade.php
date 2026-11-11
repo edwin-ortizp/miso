@@ -10,7 +10,7 @@
                     <x-ui.action variant="outlined" icon="bi-funnel" data-popover-trigger x-on:click="filtersOpen = !filtersOpen" x-bind:aria-expanded="filtersOpen">Filtros</x-ui.action>
                     <x-ui.popover state="filtersOpen" title="Filtros de notificaciones">
                         <x-ui.select name="reading" label="Lectura" wire:model="reading" :options="['all' => 'Todas', 'unread' => 'Sin leer', 'read' => 'Leídas']" />
-                        <x-ui.select name="type" label="Tipo" wire:model="type" :options="['' => 'Todos', 'birthday' => 'Cumpleaños', 'task_due' => 'Tareas', 'plan_due' => 'Planes', 'reminder' => 'Recordatorios']" />
+                        <x-ui.select name="type" label="Tipo" wire:model="type" :options="['' => 'Todos', 'birthday' => 'Cumpleaños', 'task_due' => 'Tareas', 'plan_due' => 'Planes', 'reminder' => 'Recordatorios', 'guardian_nudge' => 'Guardián', 'weekly_insights' => 'Resumen semanal']" />
                         <x-slot:actions>
                             <x-ui.action variant="outlined" wire:click="clearFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>
                             <x-ui.action wire:click="applyFilters" x-on:click="filtersOpen = false">Filtrar</x-ui.action>

@@ -4,6 +4,9 @@
     {{-- CHG-071: bienvenida al volver tras una ausencia. --}}
     <livewire:home.welcome-back />
 
+    {{-- CHG-070: resumen del domingo. --}}
+    <livewire:home.weekly-insights-card />
+
     {{-- CHG-068: check-in de 20 s. --}}
     <div class="d-flex justify-content-end mb-2">
         <x-ui.action type="button" variant="tonal" wire:click="$set('checkin', true)"><i class="bi bi-lightning-charge" aria-hidden="true"></i> Check-in</x-ui.action>

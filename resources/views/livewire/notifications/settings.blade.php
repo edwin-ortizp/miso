@@ -33,7 +33,7 @@
                             <x-ui.switch :name="'preferences.nudge_'.$key" :label="$slot['label'].' '.$slot['from'].'–'.$slot['to']" wire:model="preferences.nudge_{{ $key }}" />
                         @endforeach
                         <p class="md-label-large mb-1 mt-2">También al celular</p>
-                        @foreach (['push_birthday' => 'Cumpleaños de hoy', 'push_task_due' => 'Tareas que vencen mañana', 'push_plan_due' => 'Planes para mañana', 'push_reminder' => 'Recordatorios'] as $key => $label)
+                        @foreach (['push_birthday' => 'Cumpleaños de hoy', 'push_task_due' => 'Tareas que vencen mañana', 'push_plan_due' => 'Planes para mañana', 'push_reminder' => 'Recordatorios', 'push_weekly_insights' => 'Resumen del domingo'] as $key => $label)
                             <x-ui.switch :name="'preferences.'.$key" :label="$label" wire:model="preferences.{{ $key }}" />
                         @endforeach
                         <x-ui.action type="submit">Guardar</x-ui.action>

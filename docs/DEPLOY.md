@@ -29,6 +29,7 @@ Tareas que ejecuta `schedule:run`:
 |---|---|---|
 | `notifications:generate` | Crea avisos de cumpleaños, tareas, planes y recordatorios | Índice único de `notifications` (usuario, origen, tipo, ocurrencia) |
 | `miso:guardian-nudges` | Crea el aviso del guardián de la franja actual | Ocurrencia `{fecha}:{franja}` en el mismo índice único |
+| `miso:weekly-insights` | Domingos 14–21 h: resumen semanal y su aviso | Único `weekly_insights` (usuario, semana) y el índice de `notifications` |
 | `notifications:dispatch` | Envía por push lo disponible | Cada fila se reclama con `UPDATE … WHERE push_sent_at IS NULL` antes de enviar |
 
 Además, cada tarea usa `withoutOverlapping`: si una corrida sigue viva, la siguiente no arranca. Cada corrida se detiene sola a los 40 s o 200 envíos (`config/game.php` › `nudges`) y la siguiente continúa.
@@ -49,7 +50,7 @@ GUARDIAN_NUDGES_ENABLED=true
 ## 4. Comprobar
 
 ```sh
-/ruta/php84 artisan schedule:list                 # las tres tareas aparecen
+/ruta/php84 artisan schedule:list                 # las cuatro tareas aparecen
 /ruta/php84 artisan miso:push-check               # extensiones, claves, hora, salida HTTPS y última corrida
 /ruta/php84 artisan miso:guardian-nudges --dry-run  # qué aviso recibiría cada usuario ahora
 /ruta/php84 artisan notifications:dispatch --dry-run

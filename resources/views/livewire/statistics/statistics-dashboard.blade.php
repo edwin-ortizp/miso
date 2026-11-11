@@ -23,6 +23,13 @@
         </x-ui.filter-bar>
     </x-slot:controls>
 
+    {{-- CHG-070: hallazgos de las últimas 8 semanas. --}}
+    <x-ui.section title="Lo que dicen tus datos" description="Patrones de las últimas 8 semanas. Muestran tendencias, no causas." :level="2" id="insights">
+        <x-ui.card>
+            <x-insights.findings :findings="$insights" />
+        </x-ui.card>
+    </x-ui.section>
+
     <x-ui.section title="Promedios del periodo" :level="2">
         <x-ui.metric-grid label="Promedios del periodo">
             <x-ui.metric label="Hidratación" icon="bi-droplet" tone="primary"

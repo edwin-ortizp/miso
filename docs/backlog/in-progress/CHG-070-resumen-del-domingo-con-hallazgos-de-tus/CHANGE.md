@@ -1,5 +1,5 @@
 # CHG-070 · Resumen del domingo con hallazgos de tus datos
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -77,16 +77,19 @@ Los datos registrados no le devuelven nada al usuario, así que registrar se sie
 - Docs a actualizar: `docs/notifications.md` (tipo `weekly_insights`), `docs/game.md` (recurrencia).
 
 ## 7. Tareas
-- [ ] T1 · Cálculo semanal de hallazgos — Resp: developer — Modelo: estandar — Archivos: `WeeklyInsights`, migración — Hecho cuando: produce hasta 3 hallazgos con umbrales y es idempotente por semana.
-- [ ] T2 · Tarjeta en Inicio domingo y lunes — Resp: developer — Modelo: estandar — Archivos: `WeeklyInsightsCard` — Hecho cuando: se ve, se cierra y no vuelve esa semana.
-- [ ] T3 · Sección en Estadísticas — Resp: developer — Modelo: estandar — Archivos: `StatisticsDashboard` — Hecho cuando: muestra la última semana calculada.
-- [ ] T4 · Aviso push del domingo — Resp: developer — Modelo: estandar — Archivos: `GenerateNotifications`, `NotificationPreferences`, campana — Hecho cuando: se crea una vez por semana y sale por push si está activado.
-- [ ] T5 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/WeeklyInsightsTest.php`, docs — Hecho cuando: pasan los casos de §5.
+- [x] T1 · Cálculo semanal de hallazgos — Resp: developer — Modelo: estandar — Archivos: `WeeklyInsights`, migración — Hecho cuando: produce hasta 3 hallazgos con umbrales y es idempotente por semana.
+- [x] T2 · Tarjeta en Inicio domingo y lunes — Resp: developer — Modelo: estandar — Archivos: `WeeklyInsightsCard` — Hecho cuando: se ve, se cierra y no vuelve esa semana.
+- [x] T3 · Sección en Estadísticas — Resp: developer — Modelo: estandar — Archivos: `StatisticsDashboard` — Hecho cuando: muestra la última semana calculada.
+- [x] T4 · Aviso push del domingo — Resp: developer — Modelo: estandar — Archivos: `GenerateNotifications`, `NotificationPreferences`, campana — Hecho cuando: se crea una vez por semana y sale por push si está activado.
+- [x] T5 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/WeeklyInsightsTest.php`, docs — Hecho cuando: pasan los casos de §5.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-11 — `WeeklyInsights` (8 semanas, umbrales ≥ 6 días por grupo y ≥ 0,5 puntos / ≥ 25 % en tareas, máx. 3), tabla `weekly_insights` (único usuario+semana; semana lunes–domingo), tarjeta `Home\WeeklyInsightsCard` (domingo y lunes, se cierra), sección "Lo que dicen tus datos" en Estadísticas (última semana cerrada), comando `miso:weekly-insights` programado domingos 14–21 h Bogotá, aviso tipo `weekly_insights` (push por defecto activo), filtro en la campana para `guardian_nudge` y `weekly_insights`. Pruebas en `tests/Feature/Engagement/WeeklyInsightsTest.php`. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - Pregunta: ¿mostrarlo en Inicio, en Estadísticas o como aviso push del domingo? → 2026-11-11 Decisión (usuario): en los tres.
 - Necesita: datos de CHG-066 para medir si aumenta la recurrencia.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Implementación terminada → En verificación
