@@ -53,6 +53,23 @@
         </div>
     </div>
 
+    <x-ui.fab compact label="Crear tarea" event="task-editor" :detail="['action' => 'openForm']" module="home" :actions="[
+        ['label' => 'Agregar plan', 'icon' => 'bi-map', 'event' => 'panel-plan'],
+        ['label' => 'Registrar sesión de enfoque', 'icon' => 'bi-stopwatch', 'event' => 'panel-focus-manual'],
+        ['label' => 'Agregar compra', 'icon' => 'bi-cart-plus', 'event' => 'panel-shopping'],
+        ['label' => 'Registrar bebida', 'icon' => 'bi-droplet', 'event' => 'panel-quick', 'detail' => ['kind' => 'water']],
+        ['label' => 'Registrar ánimo', 'icon' => 'bi-emoji-smile', 'event' => 'panel-quick', 'detail' => ['kind' => 'mood']],
+        ['label' => 'Escribir diario', 'icon' => 'bi-journal-text', 'event' => 'panel-quick', 'detail' => ['kind' => 'journal']],
+        ['label' => 'Registrar avance', 'icon' => 'bi-flag', 'href' => route('goals')],
+        ['label' => 'Agregar hábito', 'icon' => 'bi-check2-square', 'event' => 'panel-habit'],
+    ]" />
+    <livewire:task.task-editor :key="'home-task-editor'" />
+    <livewire:home.panel.shopping-editor :key="'home-panel-shopping-editor'" />
+    <livewire:home.panel.habit-editor :key="'home-panel-habit-editor'" />
+    <livewire:home.panel.plan-editor :key="'home-panel-plan-editor'" />
+    <livewire:home.panel.quick-editor :key="'home-panel-quick-editor'" />
+    <livewire:home.panel.focus-timer :key="'home-panel-focus-timer'" />
+
     @include('livewire.habit.partials.completion-feedback')
     @include('livewire.task.partials.completion-celebration')
     @include('livewire.task.partials.recurring-completion-dialog')
