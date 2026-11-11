@@ -176,6 +176,10 @@ Base visual de **todos** los formularios, no solo de los modales:
 - **Botón flotante**: ver [Acciones de creación](#acciones-de-creación).
 - **Pestañas de módulo**: sin fondo ni pastilla; el estado activo es el color de acento con un indicador inferior de 3 px.
 
+## Elementos con posición fija
+
+- Los componentes con `position: fixed` (como `md-snackbar`) no se anidan dentro de un contenedor con `transform`: el `transform` crea un nuevo bloque contenedor y el hijo fijo queda desplazado y estrecho.
+
 ## Definición de terminado para una superficie nueva
 
 Una pantalla o componente no está terminado hasta que cumple todo lo siguiente:

@@ -30,6 +30,7 @@ Pantallas: menú **Productividad → Colección** (`/game`), con las pestañas B
 | Ejercicio del día | Los minutos del día alcanzan tu meta de ejercicio (30 por defecto) | `exercise:{fecha}` |
 
 - Todas cuentan igual desde la app o el MCP: se detectan en los modelos (`app/Observers/GameTaskObserver.php` y `app/Observers/Game/*`) y otorgan tras confirmar la transacción.
+  - Los efectos del juego que dependen de datos escritos en la misma transacción (p. ej. la serie de una tarea recurrente) se ejecutan en `DB::afterCommit`. Si se otorgan antes, la ocurrencia recurrente no se reconoce en las misiones (CHG-026).
 - **Ámbitos** (`config('game.scopes')`): `habits` (Hábitos), `focus` (Foco), `goals` (Metas) y `health` (Salud), además de las categorías de tarea. Cada uno puede ser afinidad del equipo, cuenta en el progreso de variedad y se admite en los bonos de temporada. Las nuevas misiones `category_tasks` requieren una categoría real con pendientes elegibles.
 - En Ajustes puedes apagar cada fuente: tareas, hábitos, foco, metas y salud, y las de constancia (vehículo, bienestar, personas y hogar).
 
@@ -43,10 +44,12 @@ El primer registro del día de cada fuente da **+1 xp** (`consistency_xp`) a cad
 | Bienestar (`wellbeing`) | `JournalEntry`, `MoodEntry`, `EnergyEntry` | `micro:wellbeing:{fecha}` |
 | Personas (`people`) | `RelationshipEvent`, `PlanVisit` | `micro:people:{fecha}` |
 | Hogar (`home`) | `MealPreparation`, `PreparedMeal`, `Purchase` | `micro:home:{fecha}` |
+| Tareas personales (`personal_tasks`) | Tareas completadas de categoría exacta `personal` | `micro:personal_tasks:{fecha}` |
 
 - Se detecta en `App\Observers\Game\ConsistencySourceObserver` (app y MCP) y lo otorga `App\Services\Game\ConsistencyXp`.
 - Aviso de experiencia sin celebración: "Constancia · {Fuente} · Gotin +1 · …".
 - Cada fuente se apaga en Ajustes → Constancia.
+- Las tareas de categoría exacta `personal` dan constancia en lugar de ball y no avanzan misiones ni consumen el límite diario. No incluye subcategorías. El interruptor es «Tareas personales (categoría Personal)». Al apagarlo, vuelven al flujo normal de recompensas por tareas, sujeto a sus interruptores y límites. Esta fuente se deriva en `RewardGranter::forTask`, no en `ConsistencySourceObserver`.
 
 - Máximo diario configurable (por defecto **5**). Al alcanzarlo, la actividad se registra sin ball y no se muestra error.
 - La especie se decide **al conceder** la ball, con una semilla registrada. Solo salen especies de etapa 1, por rareza ponderada.
@@ -124,6 +127,7 @@ Cada módulo tiene un guardián que asoma en la esquina de una tarjeta de su pan
 - **Quién:** el ejemplar de mayor nivel con un tipo afín al módulo (`game.module_guardians`: Tareas = psíquico/acero, Salud = hada/normal); empate → el más antiguo; sin afinidad → el de mayor nivel. Se elige al montar la página y no cambia con los re-renders.
 - **Frase:** `ModuleGuardian::line()` usa los umbrales de `DailyBuddy::mood` y los textos de `game.guardian_lines`. Tareas: completadas/planificadas hoy. Salud: si hay un evento en seguimiento (tipo de evolución sin fecha de fin) dice la frase `care`; si no, completados en 7 días / (esos + pendientes de salud).
 - **Oculto** con el juego apagado o sin ejemplares.
+- **Ficha (CHG-062):** tocar al guardián abre su ficha en un modal dentro del módulo, en solo lectura (sin evolucionar ni "Ver más"), con "Ver colección" para ir a la Colección. La ficha la arma `SpeciesSheet::build()`, compartido con la Colección, y solo se calcula al abrir.
 - **Agregar otro módulo:** añadir sus tipos en `module_guardians` y sus frases en `guardian_lines`, elegir el guardián en `mount()` con `ModuleGuardian::pick($userId, 'modulo')`, y poner `<livewire:game.guardian-card>` (ver Consejos del guardián).
 
 ### Consejos del guardián (CHG-057)
@@ -139,6 +143,18 @@ El guardián es un componente Livewire aislado (`<livewire:game.guardian-card mo
 - **Pomodoro** (`PomodoroAdvice`): foco que falta (meta entre semana / fin de semana, `PomodoroAdvice::goalFor`); tarea con más foco en 7 días; mejor franja (mañana/tarde/noche) en 14 días si estás en ella; bloque para la tarea agendada a esta hora sin foco hoy.
 - **Hábitos** (`HabitAdvice`): el mensaje del coach (`HabitGamificationService::coachCard`) con la acción "Ir al hábito sugerido"; pendientes del momento del día con el más corto; racha ≥ 3 días aún sin completar hoy; hábito más olvidado del mes (≥ 5 días). Con guardián, la tarjeta coach de arriba desaparece y el guardián va en "Constancia" (primera tarjeta del panel); sin guardián, vuelve el coach.
 - **Afinidades** (`game.module_guardians`): Tareas psíquico/acero, Salud hada/normal, Hábitos fuego/planta, Hidratación agua/hielo, Ejercicio lucha/roca, Pomodoro eléctrico/psíquico.
+- **Objetivos** (`GoalAdvice`): meta activa que vence en ≤ 14 días (con avance si es numérica); meta sin registros hace ≥ 7 días; hito en los últimos 7 días.
+- **Ánimo y energía** (`MoodAdvice`): sin registro de ánimo hoy; tendencia de 7 días vs los 7 previos (diferencia ≥ 0,5); franja con más energía en 14 días.
+- **Hábitos a evitar** (`NegativeHabitAdvice`): días limpios (≥ 2); cerca de la mejor racha (≥ 80 %); apoyo si hubo registro en las últimas 48 h (lo nombra sin culpa).
+- **Diario** (`JournalAdvice`): días sin escribir (≥ 2); racha (≥ 3); recuerdo "Hace un mes/un año escribiste: “…”" con una cita de ≤ 80 caracteres, sin HTML y escapada. La cita solo se muestra al propio usuario dentro de la app.
+- Estos cuatro módulos estrenan panel lateral (`rail_routes` en su ruta principal) con la tarjeta "Tu guardián"; solo se muestra si hay guardián. Sin consejos usan `game.guardian_default_line`.
+- **Afinidades CHG-063:** Objetivos dragón/volador, Ánimo hada/normal, Diario psíquico/fantasma, Hábitos a evitar siniestro/lucha.
+- **Comidas** (`MealAdvice`): próxima comida planificada hoy; comida de hoy sin marcar una hora después de su horario; días restantes de la semana sin plan (≥ 2).
+- **Relaciones** (`RelationshipAdvice`): cumpleaños en ≤ 7 días (apodo o nombre); persona con ≥ 2 eventos y sin registros hace ≥ 60 días.
+- **Planes** (`PlanAdvice`): plan agendado en ≤ 7 días; ≥ 3 planes pendientes sin visitas (sugiere uno al azar); última visita hace ≥ 30 días.
+- **Vehículos** (`VehicleAdvice`): mantenimiento vencido o que vence en ≤ 14 días por fecha (`VehicleMaintenanceStatus::forPlan`); ≥ 21 días sin registrar carga.
+- Relaciones y Planes muestran al guardián dentro de su panel actual; Comidas (`meals.weekly`) y Vehículos estrenan panel con "Tu guardián" (solo con guardián). La lista de Vehículos ahora usa `x-module-shell`.
+- **Afinidades CHG-064:** Comidas planta/bicho, Relaciones hada/normal, Planes volador/tierra, Vehículos acero/eléctrico.
 - Un candidato puede traer `action` (`label`, `target` = id del elemento a enfocar).
 - **Nuevo proveedor:** clase con `candidates(CarbonInterface $now)` que use el trait `Advice`, registrarla en `GuardianAdvisor::PROVIDERS` y agregar sus plantillas.
 
@@ -309,3 +325,9 @@ No se modifica ningún otro atributo de las especies. La sincronización no corr
 La ficha usa el diálogo estándar ancho (hasta 1200 px), con las secciones Ficha e Historial en la navegación izquierda compartida. Historial solo aparece cuando hay un ejemplar descubierto. La imagen, descripción y cadena evolutiva viven en Ficha; los eventos conservan su orden y el botón Ver más en Historial.
 
 La experiencia del ejemplar actual aparece en una tarjeta central bajo el Pokémon: XP total acumulada, nivel, avance y XP restante para subir. Al alcanzar el nivel máximo se conserva la experiencia y no se anuncia un siguiente nivel. El panel Características reúne poder y estadísticas, junto a los datos del ejemplar y sus opciones de evolución. Permanece a la derecha en escritorio y pasa debajo del contenido en pantallas menores. Cabecera y footer permanecen accesibles; la navegación se colapsa en móvil con el control Secciones. No se revelan datos de especies sin descubrir.
+
+## Compañero de foco (CHG-059)
+- Mientras usas el temporizador (página Pomodoro y pantalla completa "Foco de hoy"), el guardián de Pomodoro (`ModuleGuardian::pick(…, 'pomodoro')`) aparece quieto junto al reloj ("Foco de hoy": bajo el reloj con su globo; Pomodoro: bajo el dial). Cada frase empieza con su grito (`App\Support\Game\SpeciesCry`, p. ej. "¡Pika-pika!"). "Foco de hoy" toma el tema de su tipo (`focus-themed game-stage--*`).
+- Su frase cambia solo al cambiar de etapa: listo, inicio, mitad (50 %), tramo final (80 % o últimos 5 min), en pausa, terminado y descanso. Textos en `config/game.php` → `focus_companion`.
+- Para no distraer: quieto mientras corre un ciclo de trabajo, sin sonido; un único salto al terminar (nada con movimiento reducido). Se oculta con su botón y la preferencia queda en el navegador (`life-tracker:focus-companion-hidden:{userId}`).
+- La etapa se calcula en el navegador (`resources/js/focus-companion.js`) sobre el estado de `pomodoroTimer`; no hace consultas durante la sesión. Con el juego apagado o sin ejemplares no se muestra.

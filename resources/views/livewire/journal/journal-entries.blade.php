@@ -3,6 +3,8 @@
         <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F')) }}</p>
     </x-slot:controls>
 
+    <livewire:game.guardian-card module="journal" variant="top" />
+
     <div class="md-module-workspace journal-workspace">
         <div class="md-module-primary">
 
@@ -74,4 +76,12 @@
 
         <livewire:journal.journal-mood-rail :selected-date="$selectedDate" :key="'journal-context-'.$selectedDate" />
     </div>
+    {{-- CHG-063: panel lateral con el guardián (solo si hay guardián; si no, el módulo se ve como antes). --}}
+    @if (\App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'journal'))
+        <x-slot:rail>
+            <x-context-widget title="Tu guardián" icon="bi-stars">
+                <livewire:game.guardian-card module="journal" variant="rail" />
+            </x-context-widget>
+        </x-slot:rail>
+    @endif
 </x-module-shell>

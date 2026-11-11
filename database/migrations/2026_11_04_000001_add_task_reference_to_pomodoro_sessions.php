@@ -18,6 +18,14 @@ return new class extends Migration
 
     public function down(): void
     {
+        // MySQL may reuse pomodoro_task_date_index for the user_id foreign key
+        // and drop the original implicit index; restore one before removing it.
+        if (! Schema::hasIndex('pomodoro_sessions', ['user_id'])) {
+            Schema::table('pomodoro_sessions', function (Blueprint $table): void {
+                $table->index('user_id', 'pomodoro_sessions_user_id_foreign');
+            });
+        }
+
         Schema::table('pomodoro_sessions', function (Blueprint $table): void {
             $table->dropForeign(['task_id']);
             $table->dropIndex('pomodoro_task_date_index');

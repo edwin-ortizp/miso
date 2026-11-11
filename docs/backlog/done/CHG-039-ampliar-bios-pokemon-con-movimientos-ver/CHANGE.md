@@ -33,7 +33,7 @@ JSON válido; conserva las 1025 especies, sus demás campos y las 13 descripcion
 - 2026-11-09 — Alcance aprobado por el usuario: ampliar texto, Escarlata/Púrpura primero, elegir un juego alternativo con datos por especie y usar de 3 a 5 ejemplos.
 - 2026-11-09 — Iniciado con `start --force` porque el CLI encontró otros cambios en desarrollo; esos cambios no se modificaron.
 - 2026-11-09 — Implementación y validaciones de T1/T2 completadas.
-- LECCIÓN(developer): filtrar primero el learnset por grupo de versiones y confirmar idioma, categoría dañina y potencia antes de incluir un movimiento.
+- LECCIÓN(developer): filtrar primero el learnset por grupo de versiones y confirmar idioma, categoría dañina y potencia antes de incluir un movimiento. → descartada: no relevante
 - 2026-11-09 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-09 — Movido a in-progress/ (En desarrollo)
 - 2026-11-09 — Implementación terminada → En verificación

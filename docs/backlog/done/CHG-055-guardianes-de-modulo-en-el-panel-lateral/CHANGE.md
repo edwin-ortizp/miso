@@ -124,7 +124,7 @@ sequenceDiagram
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-10 — Verificado por Alex en el navegador (franja de escenario OK); cierre pedido por él. Lo contextual pasa a CHG-056.
 - 2026-11-10 — Reabierto (Alex): el arte en la esquina queda escondido y en móvil no aparece. Decisión: franja de escenario con arte completo; en móvil igual, más compacta; y < 1200 px arriba de la lista porque el panel baja al final.
-- LECCIÓN(developer): antes de decidir dónde vive un elemento del panel lateral, comprobar cómo se reacomoda el panel en < 1200 px (baja debajo de la lista completa) — evidencia: el guardián "no cargaba" en móvil por estar al final de 190 tareas · destino sugerido: docs/UI-DESIGN.md (responsive del panel lateral).
+- LECCIÓN(developer): antes de decidir dónde vive un elemento del panel lateral, comprobar cómo se reacomoda el panel en < 1200 px (baja debajo de la lista completa) — evidencia: el guardián "no cargaba" en móvil por estar al final de 190 tareas · destino sugerido: docs/UI-DESIGN.md (responsive del panel lateral). → docs/UI-DESIGN.md
 - 2026-11-10 — Decisiones (Alex): rol "guardián del módulo" por afinidad de tipo; integrado asomando en una tarjeta existente; Tareas en "Hoy"; Salud en "Próximo cuidado"; Salud reacciona a eventos en seguimiento y, si no hay, a pendientes de salud.
 - 2026-11-10 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-10 — Aprobado por el usuario (Compuerta 2)

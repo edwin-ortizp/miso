@@ -64,6 +64,6 @@ PHP de WaterDrinkCatalogTest y WaterDailyProgressTest. Browser aislado SQLite a 
 - 2026-11-09 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-09 — Movido a in-progress/ (En desarrollo)
 
-- LECCIÓN: ninguna; se aplicaron los patrones vigentes y se documentó la extensión mínima del formulario canónico.
+- LECCIÓN: ninguna; se aplicaron los patrones vigentes y se documentó la extensión mínima del formulario canónico. → descartada: no relevante
 - 2026-11-09 — Implementación terminada → En verificación
 - 2026-11-10 — Cerrado por el usuario (Compuerta 3) → done/

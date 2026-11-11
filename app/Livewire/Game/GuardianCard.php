@@ -30,12 +30,20 @@ class GuardianCard extends Component
     /** Acción opcional del consejo (CHG-058), p. ej. "Ir al hábito sugerido". */
     public ?array $action = null;
 
+    /** CHG-062: ficha del guardián en un modal (se arma solo cuando está abierto). */
+    public bool $showSheet = false;
+
     public function mount(): void
     {
         $this->guardian = app(ModuleGuardian::class)->pick((int) auth()->id(), $this->module);
         if ($this->guardian) {
             $this->advise(null);
         }
+    }
+
+    public function openSheet(): void
+    {
+        $this->showSheet = $this->guardian !== null;
     }
 
     public function another(): void
@@ -90,6 +98,10 @@ class GuardianCard extends Component
                     \App\Models\HabitDefinition::count());
         }
 
+        if ($this->module !== 'tasks') {
+            return ['done' => 0, 'total' => 0, 'care' => false];
+        }
+
         $today = today()->toDateString();
         $stats = Task::selectRaw('
             SUM(CASE WHEN completed = 1 AND DATE(completed_at) = ? THEN 1 ELSE 0 END) as done,
@@ -109,6 +121,9 @@ class GuardianCard extends Component
     {
         return view('livewire.game.guardian-card', [
             'refresh' => (int) config('game.guardian_advice.refresh_seconds', 300),
+            'sheet' => $this->showSheet && $this->guardian
+                ? app(\App\Services\Game\SpeciesSheet::class)->build((int) $this->guardian['species_id'])
+                : null,
         ]);
     }
 }

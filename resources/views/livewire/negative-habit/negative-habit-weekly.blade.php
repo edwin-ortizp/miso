@@ -3,6 +3,8 @@
         <div class="md-date-navigator"><button wire:click="previousWeek" class="md-btn-icon" aria-label="Semana anterior"><i class="bi bi-chevron-left"></i></button><button wire:click="thisWeek" class="md-date-navigator__today">Esta semana</button><span class="md-date-navigator__label">{{ $weekStart->format('d M') }} – {{ $weekEnd->format('d M') }}</span><button wire:click="nextWeek" class="md-btn-icon" aria-label="Semana siguiente"><i class="bi bi-chevron-right"></i></button></div>
     </x-slot:controls>
 
+    <livewire:game.guardian-card module="negative-habits" variant="top" />
+
     {{-- Weekly Summary --}}
     <div class="md-card-filled text-center mb-3" style="padding: 20px;">
         <div class="md-headline-medium {{ $weeklyCount > 0 ? '' : '' }}" style="color: {{ $weeklyCount > 0 ? 'var(--md-sys-color-error)' : 'var(--md-custom-color-success)' }};">{{ $weeklyCount }}</div>
@@ -63,4 +65,12 @@
             </div>
         </div>
     </template>
+    {{-- CHG-063: panel lateral con el guardián (solo si hay guardián; si no, el módulo se ve como antes). --}}
+    @if (\App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'negative-habits'))
+        <x-slot:rail>
+            <x-context-widget title="Tu guardián" icon="bi-stars">
+                <livewire:game.guardian-card module="negative-habits" variant="rail" />
+            </x-context-widget>
+        </x-slot:rail>
+    @endif
 </x-module-shell>

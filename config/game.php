@@ -55,6 +55,26 @@ return [
         'water' => ['agua', 'hielo'],
         'exercise' => ['lucha', 'roca'],
         'pomodoro' => ['electrico', 'psiquico'],
+        'goals' => ['dragon', 'volador'],
+        'mood' => ['hada', 'normal'],
+        'journal' => ['psiquico', 'fantasma'],
+        'negative-habits' => ['siniestro', 'lucha'],
+        'meals' => ['planta', 'bicho'],
+        'relationships' => ['hada', 'normal'],
+        'plans' => ['volador', 'tierra'],
+        'vehicles' => ['acero', 'electrico'],
+    ],
+    // Frase cuando un módulo sin frases propias no tiene consejos (CHG-063).
+    'guardian_default_line' => 'Aquí estoy contigo.',
+    // Compañero de foco (CHG-059): frases por etapa del ciclo; cambian solo al cambiar de etapa.
+    'focus_companion' => [
+        'ready' => ['Cuando quieras, empezamos.', 'Elige una cosa y vamos por ella.'],
+        'start' => ['Arrancamos. Yo vigilo; tú enfócate.', 'Un paso a la vez; aquí estoy.'],
+        'half' => ['Ya vas por la mitad; sigue a tu ritmo.', 'Mitad lograda. Buen foco.'],
+        'final' => ['Último tramo. Cierra con calma.', 'Quedan pocos minutos; tú puedes.'],
+        'paused' => ['Te espero aquí.', 'Pausa tomada; seguimos cuando vuelvas.'],
+        'done' => ['¡Bloque completo! Bien hecho.', '¡Lo lograste! Tómate un respiro.'],
+        'break' => ['Estira, toma agua y mira lejos.', 'Descansa; el siguiente bloque te espera.'],
     ],
     'guardian_lines' => [
         'tasks' => [
@@ -106,6 +126,46 @@ return [
             'top' => 'Tu tarea con más foco esta semana: {task} ({minutes} min).',
             'slot' => 'La {slot} es tu mejor franja de foco: aprovéchala.',
             'now' => 'Ahora toca {task}; ¿un bloque de foco?',
+        ],
+        'goals' => [
+            'due' => 'A {goal} le quedan {days} días y vas en {percent} %.',
+            'due_plain' => 'A {goal} le quedan {days} días; ¿cuál es el siguiente paso?',
+            'idle' => '{goal} lleva {days} días sin avances; ¿un paso pequeño hoy?',
+            'milestone' => '¡Hito en {goal}! Eso merece celebrarse.',
+        ],
+        'mood' => [
+            'missing' => 'Aún no anotas cómo te sientes hoy; ¿cómo vas?',
+            'up' => 'Tu ánimo de esta semana va mejor que la anterior.',
+            'down' => 'Esta semana ha pesado un poco más; aquí estoy contigo.',
+            'energy' => 'Tu energía suele estar más alta en la {slot}.',
+        ],
+        'negative' => [
+            'clean' => '{days} días sin {habit}. Cada día cuenta.',
+            'record' => 'Estás a {left} días de tu mejor racha sin {habit}.',
+            'support' => 'Lo de {habit} no borra tu camino; hoy empiezas de nuevo.',
+        ],
+        'meals' => [
+            'next' => 'Hoy toca {meal} a las {time}.',
+            'pending' => '{meal} de hoy sigue sin marcar; ¿ya comiste?',
+            'unplanned' => '{days} días de esta semana aún no tienen plan de comidas.',
+        ],
+        'relationships' => [
+            'birthday' => '{person} cumple años {when}.',
+            'distance' => 'Hace {days} días no registras nada con {person}; ¿un saludo?',
+        ],
+        'plans' => [
+            'soon' => '{plan} está agendado {when}.',
+            'pending' => 'Tienes {count} planes por estrenar; ¿qué tal {plan}?',
+            'idle' => 'Tu último plan fue hace {days} días; ¿salimos?',
+        ],
+        'vehicles' => [
+            'maintenance' => '{task} de {vehicle} {when}.',
+            'fuel' => 'Hace {days} días no registras carga en {vehicle}.',
+        ],
+        'journal' => [
+            'gap' => 'Llevas {days} días sin escribir; ¿qué te ronda hoy?',
+            'streak' => '{days} días seguidos escribiendo. Qué buena constancia.',
+            'memory' => '{when} escribiste: “{quote}”',
         ],
         'habits' => [
             'moment' => 'Te faltan {count} de la {moment}; {habit} es el más corto.',

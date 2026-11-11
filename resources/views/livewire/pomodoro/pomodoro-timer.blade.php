@@ -89,17 +89,20 @@
                         :class="mode === 'longBreak' ? 'selected' : ''" :aria-pressed="mode === 'longBreak'">Descanso largo</button>
             </div>
 
-            <div class="pomodoro-dial">
-                <svg viewBox="0 0 200 200" class="pomodoro-dial__svg" aria-hidden="true">
-                    <circle cx="100" cy="100" r="90" fill="none" stroke="var(--md-sys-color-surface-container-highest)" stroke-width="8"/>
-                    <circle cx="100" cy="100" r="90" fill="none"
-                            :stroke="mode === 'work' ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'" stroke-width="8"
-                            :stroke-dasharray="2 * 3.14159 * 90" :stroke-dashoffset="2 * 3.14159 * 90 * (1 - progress)" stroke-linecap="round"/>
-                </svg>
-                <div class="pomodoro-dial__readout">
-                    <span class="md-display-small pomodoro-dial__time" x-text="displayTime" role="timer" aria-live="off"></span>
-                    <span class="md-label-medium pomodoro-dial__mode" x-text="mode === 'work' ? 'Trabajo' : 'Descanso'"></span>
+            <div class="pomodoro-guard">
+                <div class="pomodoro-dial">
+                    <svg viewBox="0 0 200 200" class="pomodoro-dial__svg" aria-hidden="true">
+                        <circle cx="100" cy="100" r="90" fill="none" stroke="var(--md-sys-color-surface-container-highest)" stroke-width="8"/>
+                        <circle cx="100" cy="100" r="90" fill="none"
+                                :stroke="mode === 'work' ? 'var(--md-sys-color-error)' : 'var(--md-sys-color-primary)'" stroke-width="8"
+                                :stroke-dasharray="2 * 3.14159 * 90" :stroke-dashoffset="2 * 3.14159 * 90 * (1 - progress)" stroke-linecap="round"/>
+                    </svg>
+                    <div class="pomodoro-dial__readout">
+                        <span class="md-display-small pomodoro-dial__time" x-text="displayTime" role="timer" aria-live="off"></span>
+                        <span class="md-label-medium pomodoro-dial__mode" x-text="mode === 'work' ? 'Trabajo' : 'Descanso'"></span>
+                    </div>
                 </div>
+                <x-game.focus-companion :companion="$focusCompanion" variant="dial" />
             </div>
 
             <div class="pomodoro-controls">

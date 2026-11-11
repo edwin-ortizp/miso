@@ -74,6 +74,10 @@ class PomodoroTimer extends Component
     #[\Livewire\Attributes\Locked]
     public ?string $manualTaskId = null;
 
+    /** Compañero de foco (CHG-059): guardián de Pomodoro junto al reloj; null = juego apagado o sin ejemplares. */
+    #[\Livewire\Attributes\Locked]
+    public ?array $focusCompanion = null;
+
     public function mount(): void
     {
         $this->initializeSelectedDate();
@@ -87,6 +91,10 @@ class PomodoroTimer extends Component
         $this->longBreak = (int) ($settings['long_break_minutes'] ?? 15);
         $this->weekdayGoal = (int) ($settings['weekday_goal_minutes'] ?? 300);
         $this->weekendGoal = (int) ($settings['weekend_goal_minutes'] ?? 120);
+        $this->focusCompanion = app(\App\Services\Game\ModuleGuardian::class)->pick((int) auth()->id(), 'pomodoro');
+        if ($this->focusCompanion) {
+            $this->focusCompanion['cry'] = \App\Support\Game\SpeciesCry::for($this->focusCompanion['name']);
+        }
     }
 
     public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken, ?string $taskId = null): void

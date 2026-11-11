@@ -1,4 +1,6 @@
 <x-module-shell module="relationships">
+
+    <livewire:game.guardian-card module="relationships" variant="top" />
     <x-slot:actions>
         <x-module-actions
             :primary="['label' => 'Agregar persona', 'icon' => 'bi-person-plus', 'action' => 'openForm']"
@@ -143,6 +145,7 @@
 
     <x-slot:rail>
         <x-context-widget title="Resumen" icon="bi-people" tone="success">
+            <livewire:game.guardian-card module="relationships" variant="rail" />
             <dl class="md-context-list">
                 <div><dt>Activas</dt><dd>{{ $activeCount }}</dd></div>
                 <div><dt>Archivadas</dt><dd>{{ $archivedCount }}</dd></div>

@@ -20,12 +20,13 @@
         loadTask: (id) => $wire.focusTask(id),
         saveSession: (start, end, description, token, taskId) => $wire.saveSession(start, end, description, token, taskId)
     })" @if($taskHost) @task-focus-timer.window="focusOpen = true; openFocus($event.detail)" @else @panel-focus.window="focusOpen = true; openFocus($event.detail)" @endif>
-        <x-ui.dialog standard expanded state="focusOpen" title="Foco de hoy" size="fullscreen" icon="bi-stopwatch" class="wall-focus-dialog">
+        <x-ui.dialog standard expanded state="focusOpen" title="Foco de hoy" size="fullscreen" icon="bi-stopwatch" :class="'wall-focus-dialog'.($focusCompanion ? ' focus-themed game-stage--'.($focusCompanion['stage'] ?? 'cielo').' '.$focusCompanion['type_class'] : '')">
             <div class="wall-focus-layout" :class="{ 'has-task': taskId }">
                 <div class="wall-focus">
                     <strong x-text="displayTime" role="timer" aria-live="off"></strong>
                     <p>Tiempo de enfoque</p>
                     <p>{{ $workDuration }} min de trabajo · {{ $shortBreak }} min de pausa corta</p>
+                    <x-game.focus-companion :companion="$focusCompanion" variant="wall" />
                     <div class="md-chip-rail" role="group" aria-label="Modo del temporizador">
                         <x-ui.chip variant="filter" x-bind:class="{ selected: mode === 'work' }" x-bind:aria-pressed="mode === 'work'" @click="setMode('work')">Trabajo</x-ui.chip>
                         <x-ui.chip variant="filter" x-bind:class="{ selected: mode === 'shortBreak' }" x-bind:aria-pressed="mode === 'shortBreak'" @click="setMode('shortBreak')">Pausa corta</x-ui.chip>

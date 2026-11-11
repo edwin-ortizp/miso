@@ -15,6 +15,10 @@ class GuardianAdvisor
         'tasks' => TaskAdvice::class, 'health' => HealthAdvice::class,
         'water' => WaterAdvice::class, 'exercise' => ExerciseAdvice::class,
         'pomodoro' => PomodoroAdvice::class, 'habits' => HabitAdvice::class,
+        'goals' => GoalAdvice::class, 'mood' => MoodAdvice::class,
+        'negative-habits' => NegativeHabitAdvice::class, 'journal' => JournalAdvice::class,
+        'meals' => MealAdvice::class, 'relationships' => RelationshipAdvice::class,
+        'plans' => PlanAdvice::class, 'vehicles' => VehicleAdvice::class,
     ];
 
     /**

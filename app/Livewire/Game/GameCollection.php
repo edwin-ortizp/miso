@@ -161,7 +161,7 @@ class GameCollection extends Component
             'rarities' => config('game.rarities'),
             'states' => self::STATES,
             'sheet' => $this->showSheet && $this->selectedId
-                ? $this->sheet($this->selectedId, $found, $teamLookup, $images, $progress)
+                ? $this->sheet($this->selectedId, $found, $teamLookup)
                 : null,
         ]);
     }
@@ -187,53 +187,9 @@ class GameCollection extends Component
             ->whereNotNull('types')->pluck('types')->flatten()->unique()->sort()->values()->all();
     }
 
-    /** @return array<string, mixed>|null */
-    private function sheet(int $speciesId, Collection $discoveredIds, Collection $teamLookup, SpeciesImageProvider $images, CompanionProgress $progress): ?array
+    /** @return array<string, mixed>|null Lógica compartida con los guardianes (CHG-062). */
+    private function sheet(int $speciesId, Collection $discoveredIds, Collection $teamLookup): ?array
     {
-        $species = GameSpecies::find($speciesId);
-        if (! $species) {
-            return null;
-        }
-
-        $discovered = $discoveredIds->has($species->id);
-        $companion = $discovered ? GameCompanion::query()->with('species')->where('line_key', $species->line_key)->first() : null;
-        $chain = GameSpecies::query()->where('line_key', $species->line_key)->where('active', true)
-            ->orderBy('stage')->orderBy('number')->get()
-            ->map(fn (GameSpecies $item) => [
-                'species' => $item,
-                'discovered' => $discoveredIds->has($item->id),
-                'image' => $images->url($item),
-            ]);
-
-        $history = collect();
-        $historyTotal = 0;
-        $options = collect();
-        $xpPerLevel = max(1, (int) config('game.xp_per_level'));
-        if ($companion) {
-            $query = GameEvent::query()->where('effect->companion_id', $companion->id)->latest('occurred_at')->latest('id');
-            $historyTotal = (clone $query)->count();
-            $history = $query->limit($this->historyLimit)->get();
-            $options = $progress->options($companion);
-        }
-
-        return [
-            'species' => $species,
-            'image' => $images->url($species),
-            'discovered' => $discovered,
-            'companion' => $companion,
-            'isCurrent' => $companion && $companion->species_id === $species->id,
-            'power' => $companion ? $progress->power($companion) : null,
-            'inTeam' => $companion !== null && $teamLookup->has($companion->species_id),
-            'levelXp' => $companion ? $companion->xp % $xpPerLevel : 0,
-            'xpPerLevel' => $xpPerLevel,
-            'nextLevel' => $options->count() === 1 ? $options->first()->requiredLevel() : null,
-            'branchOptions' => $options->count() > 1
-                ? $options->filter(fn (GameSpecies $s) => $companion->level >= $s->requiredLevel())->values()
-                : collect(),
-            'isFinal' => $companion && $options->isEmpty(),
-            'history' => $history,
-            'historyTotal' => $historyTotal,
-            'chain' => $chain,
-        ];
+        return app(\App\Services\Game\SpeciesSheet::class)->build($speciesId, $discoveredIds, $teamLookup, $this->historyLimit);
     }
 }

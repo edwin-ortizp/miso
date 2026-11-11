@@ -92,3 +92,7 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 }
+
+/* CHG-059: el compañero de foco se posa sobre el anillo del dial. */
+.pomodoro-guard { position: relative; display: grid; justify-items: center; gap: var(--md-sys-space-sm); width: 100%; }
+.pomodoro-guard .pomodoro-dial { margin-bottom: 0; }

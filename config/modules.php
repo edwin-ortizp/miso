@@ -86,6 +86,9 @@ return [
         'archetype' => 'list',
         'title' => 'Vehículos', 'subtitle' => 'Mantenimiento, consumo y próximos cuidados.', 'icon' => 'bi-car-front',
         'patterns' => ['vehicles*'], 'preserve' => [],
+        // CHG-064: panel lateral con el guardián en la página principal.
+        'rail' => true,
+        'rail_routes' => ['vehicles'],
     ],
     'habits' => [
         'archetype' => 'daily-log',
@@ -104,6 +107,9 @@ return [
         'archetype' => 'daily-log',
         'title' => 'Ánimo y energía', 'subtitle' => 'Registra cómo te sientes y con cuánta energía cuentas.', 'icon' => 'bi-emoji-smile',
         'patterns' => ['mood*'], 'preserve' => ['date'],
+        // CHG-063: panel lateral con el guardián en la página principal.
+        'rail' => true,
+        'rail_routes' => ['mood'],
         'tabs' => [
             ['label' => 'Registro diario', 'route' => 'mood', 'icon' => 'bi-emoji-smile', 'active' => ['mood']],
             ['label' => 'Ajustes', 'route' => 'mood.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['mood.settings']],
@@ -113,6 +119,9 @@ return [
         'archetype' => 'list',
         'title' => 'Diario', 'subtitle' => 'Pensamientos, emociones y perspectiva en un mismo lugar.', 'icon' => 'bi-journal-text',
         'patterns' => ['journal*'], 'preserve' => ['date', 'week', 'period', 'from', 'to'],
+        // CHG-063: panel lateral con el guardián en la página principal.
+        'rail' => true,
+        'rail_routes' => ['journal'],
         'tabs' => [
             ['label' => 'Entradas', 'route' => 'journal', 'icon' => 'bi-journal-text', 'active' => ['journal']],
             ['label' => 'Resumen', 'route' => 'journal.summary', 'icon' => 'bi-card-list', 'active' => ['journal.summary']],
@@ -147,6 +156,9 @@ return [
         'archetype' => 'list',
         'title' => 'Comidas', 'subtitle' => 'Planifica la semana sin perder de vista el día.', 'icon' => 'bi-egg-fried',
         'patterns' => ['meals*'], 'preserve' => ['date'],
+        // CHG-064: panel lateral con el guardián en la página principal.
+        'rail' => true,
+        'rail_routes' => ['meals.weekly'],
         'tabs' => [
             ['label' => 'Planificación', 'route' => 'meals.weekly', 'icon' => 'bi-calendar-week', 'active' => ['meals.weekly']],
             ['label' => 'Preparaciones', 'route' => 'meals.preparations', 'icon' => 'bi-egg-fried', 'active' => ['meals.preparations']],
@@ -210,6 +222,9 @@ return [
         'archetype' => 'list',
         'title' => 'Objetivos', 'subtitle' => 'Resultados, avances y próximos pasos.', 'icon' => 'bi-flag',
         'patterns' => ['goals*'], 'preserve' => ['status'],
+        // CHG-063: panel lateral con el guardián en la página principal.
+        'rail' => true,
+        'rail_routes' => ['goals'],
     ],
     'statistics' => [
         'archetype' => 'dashboard',
@@ -220,6 +235,9 @@ return [
         'archetype' => 'daily-log',
         'title' => 'Hábitos a evitar', 'subtitle' => 'Observa patrones sin perder de vista tu progreso.', 'icon' => 'bi-shield-check',
         'patterns' => ['negative-habits*'], 'preserve' => ['date'],
+        // CHG-063: panel lateral con el guardián en la página principal.
+        'rail' => true,
+        'rail_routes' => ['negative-habits'],
     ],
     'settings' => [
         'archetype' => 'settings',

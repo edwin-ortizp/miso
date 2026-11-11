@@ -1,4 +1,6 @@
 <x-module-shell module="plans" class="plans-page" :active-route="$scheduled ? 'plans.scheduled' : 'plans'" :navigation-query="['q'=>$q,'group'=>$group,'status'=>$status,'sort'=>$sort,'city'=>$city,'types'=>$types,'circles'=>$circles,'people'=>$people,'tags'=>$tags,'category'=>$category]">
+
+    <livewire:game.guardian-card module="plans" variant="top" />
     <x-slot:actions>
         <x-module-actions :primary="['label' => 'Agregar plan', 'icon' => 'bi-plus-lg', 'action' => 'openPlanForm']" :fab-always="true" />
     </x-slot:actions>
@@ -66,6 +68,7 @@
                 <h2 id="plans-summary-title">Resumen de planes</h2>
             </header>
             <div class="plan-card__body">
+                <livewire:game.guardian-card module="plans" variant="rail" />
                 <dl class="plans-kpis">
                     <div><dt>Pendientes</dt><dd>{{ $statusCounts['pending'] ?? 0 }}</dd></div>
                     <div><dt>Programados</dt><dd>{{ $statusCounts['scheduled'] ?? 0 }}</dd></div>

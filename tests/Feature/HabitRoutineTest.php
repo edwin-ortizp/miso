@@ -49,6 +49,17 @@ class HabitRoutineTest extends TestCase
             ->assertSee('02:00');
     }
 
+    public function test_routine_shows_music_toggle(): void
+    {
+        $this->habit('Lavarme los dientes', '20:00', '2 min');
+
+        Livewire::test(HabitTracker::class)
+            ->call('startRoutine', 'night')
+            ->assertSeeHtml('aria-label="Silenciar música"')
+            ->assertSeeHtml('aria-label="Activar música"')
+            ->assertSeeHtml('routineMusic.start(');
+    }
+
     public function test_done_completes_habit_and_skip_records_nothing(): void
     {
         $teeth = $this->habit('Lavarme los dientes', '20:00', '2 min');

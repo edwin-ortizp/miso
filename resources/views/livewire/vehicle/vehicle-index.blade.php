@@ -1,5 +1,5 @@
-<div data-module="vehicles" class="lt-page">
-    <x-page-header subtitle="Mantenimiento, consumo y próximos cuidados." />
+<x-module-shell module="vehicles">
+    <livewire:game.guardian-card module="vehicles" variant="top" />
 
     <x-ui.management-card id="vehicle-garage" title="Garaje" icon="bi-car-front" :count="'('.$vehicles->total().')'" :paginator="$vehicles" noun="vehículos">
         <x-slot:menu>
@@ -40,4 +40,12 @@
             :primary="['label' => 'Añadir vehículo', 'icon' => 'bi-plus-lg', 'action' => 'openVehicleForm']"
             :secondary="[['label' => 'Catálogo de mantenimientos', 'icon' => 'bi-tools', 'href' => route('vehicles.catalog')]]" />
     </div>
-</div>
+    {{-- CHG-064: panel lateral con el guardián (solo si hay guardián). --}}
+    @if (\App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'vehicles'))
+        <x-slot:rail>
+            <x-context-widget title="Tu guardián" icon="bi-stars">
+                <livewire:game.guardian-card module="vehicles" variant="rail" />
+            </x-context-widget>
+        </x-slot:rail>
+    @endif
+</x-module-shell>

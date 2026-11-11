@@ -184,4 +184,65 @@ class ModuleGuardianTest extends TestCase
 
         $this->assertSame(['label' => 'Ir al hábito sugerido', 'target' => 'habit-item-'.$habit->id], $coach['action']);
     }
+
+    public function test_guardian_sheet_opens_in_a_modal_without_leaving_the_module(): void
+    {
+        $companion = $this->companion('Gotin', ['Agua'], 3);
+        $card = Livewire::test(GuardianCard::class, ['module' => 'water']);
+
+        $this->assertNull($card->viewData('sheet'), 'la ficha no se arma antes de abrir');
+        $card->assertDontSeeHtml('href="http://localhost/game/collection?species='.$companion->species_id.'" wire:navigate
+               class="game-guardian__art"');
+
+        $card->call('openSheet')
+            ->assertNoRedirect()
+            ->assertSet('showSheet', true)
+            ->assertSee('Ver colección')
+            ->assertSee('Lo conociste el')
+            ->assertDontSeeHtml('wire:click="evolve(')
+            ->assertDontSeeHtml('wire:click="moreHistory"');
+        $this->assertSame($companion->species_id, $card->viewData('sheet')['species']->id);
+
+        $card->call('refreshAdvice');
+        $this->assertTrue($card->get('showSheet'));
+    }
+
+    public function test_chg063_modules_get_a_rail_only_with_a_guardian(): void
+    {
+        $pages = ['/goals' => 'goals', '/mood' => 'mood', '/journal' => 'journal', '/negative-habits' => 'negative-habits'];
+        foreach ($pages as $url => $module) {
+            $this->get($url)->assertOk()->assertDontSee('Tu guardián');
+        }
+
+        $this->companion('Rocon', ['Dragón'], 5);
+        $this->companion('Gotin', ['Fantasma'], 4);
+        $this->companion('Brotelo', ['Siniestro'], 3);
+        $this->companion('Chispin', ['Hada'], 2);
+        foreach (['goals' => 'Rocon', 'journal' => 'Gotin', 'negative-habits' => 'Brotelo', 'mood' => 'Chispin'] as $module => $name) {
+            $this->assertSame($name, $this->service()->pick($this->user->id, $module)['name'], $module);
+        }
+        foreach ($pages as $url => $module) {
+            $this->get($url)->assertOk()->assertSee('Tu guardián')->assertSee('md-module-workspace--rail', false);
+        }
+    }
+
+    public function test_chg064_modules_show_the_guardian(): void
+    {
+        $this->get('/meals/weekly')->assertOk()->assertDontSee('Tu guardián');
+        $this->get('/vehicles')->assertOk()->assertDontSee('Tu guardián');
+
+        $this->companion('Brotelo', ['Bicho'], 5);
+        $this->companion('Chispin', ['Acero'], 4);
+        $this->companion('Rocon', ['Tierra'], 3);
+        $this->companion('Gotin', ['Normal'], 2);
+        foreach (['meals' => 'Brotelo', 'vehicles' => 'Chispin', 'plans' => 'Rocon', 'relationships' => 'Gotin'] as $module => $name) {
+            $this->assertSame($name, $this->service()->pick($this->user->id, $module)['name'], $module);
+        }
+        foreach (['/meals/weekly', '/vehicles'] as $url) {
+            $this->get($url)->assertOk()->assertSee('Tu guardián')->assertSee('md-module-workspace--rail', false);
+        }
+        foreach ([\App\Livewire\Relationship\RelationshipIndex::class, \App\Livewire\Plan\PlanIndex::class] as $page) {
+            Livewire::test($page)->assertSeeLivewire(GuardianCard::class);
+        }
+    }
 }

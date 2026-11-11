@@ -3,6 +3,13 @@
 namespace Tests\Feature\Game;
 
 use App\Models\DrinkLog;
+use App\Models\EnergyEntry;
+use App\Models\Goal;
+use App\Models\GoalEntry;
+use App\Models\JournalEntry;
+use App\Models\MoodEntry;
+use App\Models\NegativeHabitDefinition;
+use App\Models\NegativeHabitLog;
 use App\Models\ExerciseLog;
 use App\Models\ExerciseType;
 use App\Models\HabitCompletion;
@@ -15,6 +22,14 @@ use App\Models\TaskCategory;
 use App\Models\User;
 use App\Services\Game\Guardian\GuardianAdvisor;
 use App\Services\Game\Guardian\ExerciseAdvice;
+use App\Services\Game\Guardian\MealAdvice;
+use App\Services\Game\Guardian\PlanAdvice;
+use App\Services\Game\Guardian\RelationshipAdvice;
+use App\Services\Game\Guardian\VehicleAdvice;
+use App\Services\Game\Guardian\GoalAdvice;
+use App\Services\Game\Guardian\JournalAdvice;
+use App\Services\Game\Guardian\MoodAdvice;
+use App\Services\Game\Guardian\NegativeHabitAdvice;
 use App\Services\Game\Guardian\HabitAdvice;
 use App\Services\Game\Guardian\HealthAdvice;
 use App\Services\Game\Guardian\PomodoroAdvice;
@@ -131,6 +146,123 @@ class GuardianAdviceTest extends TestCase
         $this->assertSame('Leer se ha quedado 10 días este mes; ¿lo retomamos?', $advice['forgotten']);
     }
 
+    public function test_goals_due_idle_and_milestone(): void
+    {
+        $run = Goal::create(['title' => 'Correr 10K', 'status' => 'active', 'due_date' => today()->addDays(12)]);
+        GoalEntry::create(['goal_id' => $run->id, 'text' => 'Primer 5K', 'date' => today()->subDays(2), 'is_milestone' => true]);
+        $read = Goal::create(['title' => 'Leer 12 libros', 'status' => 'active']);
+        Goal::whereKey($read->id)->update(['created_at' => now()->subDays(9)]);
+
+        $advice = $this->of(GoalAdvice::class);
+        $this->assertSame('A Correr 10K le quedan 12 días; ¿cuál es el siguiente paso?', $advice['due_plain']);
+        $this->assertSame('Leer 12 libros lleva 9 días sin avances; ¿un paso pequeño hoy?', $advice['idle']);
+        $this->assertSame('¡Hito en Correr 10K! Eso merece celebrarse.', $advice['milestone']);
+    }
+
+    public function test_mood_missing_trend_and_energy(): void
+    {
+        foreach (range(1, 6) as $d) {
+            MoodEntry::create(['date' => today()->subDays($d)->toDateString(), 'emoji' => '🙂', 'text' => 'Bien', 'value' => 4, 'time' => '09:00', 'timestamp' => 0]);
+            MoodEntry::create(['date' => today()->subDays($d + 7)->toDateString(), 'emoji' => '😕', 'text' => 'Regular', 'value' => 2, 'time' => '09:00', 'timestamp' => 0]);
+        }
+        foreach ([1, 2] as $d) {
+            EnergyEntry::create(['date' => today()->subDays($d)->toDateString(), 'level' => 5, 'time' => '08:00', 'timestamp' => 0]);
+            EnergyEntry::create(['date' => today()->subDays($d)->toDateString(), 'level' => 2, 'time' => '20:00', 'timestamp' => 0]);
+        }
+
+        $advice = $this->of(MoodAdvice::class);
+        $this->assertArrayHasKey('missing', $advice);
+        $this->assertSame('Tu ánimo de esta semana va mejor que la anterior.', $advice['up']);
+        $this->assertSame('Tu energía suele estar más alta en la mañana.', $advice['energy']);
+    }
+
+    public function test_negative_habits_clean_record_and_support(): void
+    {
+        $sugar = NegativeHabitDefinition::create(['name' => 'Azúcar']);
+        foreach ([26, 15, 9] as $d) {
+            NegativeHabitLog::create(['habit_id' => $sugar->id, 'timestamp' => now()->subDays($d)->timestamp]);
+        }
+
+        $advice = $this->of(NegativeHabitAdvice::class);
+        $this->assertSame('9 días sin Azúcar. Cada día cuenta.', $advice['clean']);
+        $this->assertSame('Estás a 2 días de tu mejor racha sin Azúcar.', $advice['record']);
+        $this->assertArrayNotHasKey('support', $advice);
+
+        NegativeHabitLog::create(['habit_id' => $sugar->id, 'timestamp' => now()->subHours(5)->timestamp]);
+        $this->assertSame('Lo de Azúcar no borra tu camino; hoy empiezas de nuevo.', $this->of(NegativeHabitAdvice::class)['support']);
+    }
+
+    public function test_journal_gap_streak_and_escaped_memory(): void
+    {
+        JournalEntry::create(['date' => today()->subDays(30)->toDateString(), 'text' => '<b>Hoy por fin</b> terminé el proyecto que tanto me costó y quiero recordar cómo me sentí al entregarlo']);
+        foreach ([3, 4, 5] as $d) {
+            JournalEntry::create(['date' => today()->subDays($d)->toDateString(), 'text' => 'Nota']);
+        }
+
+        $advice = $this->of(JournalAdvice::class);
+        $this->assertSame('Llevas 3 días sin escribir; ¿qué te ronda hoy?', $advice['gap']);
+        $this->assertStringStartsWith('Hace un mes escribiste: “Hoy por fin terminé', $advice['memory']);
+        $html = collect(app(JournalAdvice::class)->candidates(now()))->firstWhere('key', 'memory')['html'];
+        $this->assertStringNotContainsString('<b>', $html);
+
+        JournalEntry::create(['date' => today()->subDays(1)->toDateString(), 'text' => 'Ayer']);
+        JournalEntry::create(['date' => today()->subDays(2)->toDateString(), 'text' => 'Antier']);
+        $this->assertSame('5 días seguidos escribiendo. Qué buena constancia.', $this->of(JournalAdvice::class)['streak']);
+    }
+
+    public function test_meals_next_pending_and_unplanned(): void
+    {
+        \App\Models\MealPlanEntry::create(['user_id' => auth()->id(), 'date' => today(), 'meal_type' => 'almuerzo', 'scheduled_time' => '13:00', 'status' => 'planned']);
+        \App\Models\MealPlanEntry::create(['user_id' => auth()->id(), 'date' => today(), 'meal_type' => 'desayuno', 'scheduled_time' => '07:30', 'status' => 'planned']);
+
+        $advice = $this->of(MealAdvice::class);
+        $this->assertSame('Hoy toca Almuerzo a las 13:00.', $advice['next']);
+        $this->assertSame('Desayuno de hoy sigue sin marcar; ¿ya comiste?', $advice['pending']);
+        $this->assertSame('5 días de esta semana aún no tienen plan de comidas.', $advice['unplanned']);
+    }
+
+    public function test_relationships_birthday_and_distance(): void
+    {
+        $ana = \App\Models\Relationship::create(['full_name' => 'Ana Pérez', 'category' => 'friend', 'birthday_month' => 11, 'birthday_day' => 13]);
+        $leo = \App\Models\Relationship::create(['full_name' => 'Leonardo Ruiz', 'category' => 'friend', 'nickname' => 'Leo']);
+        foreach ([90, 120] as $d) {
+            \App\Models\RelationshipEvent::create(['relationship_id' => $leo->id, 'title' => 'Café', 'event_type' => 'encounter', 'event_date' => today()->subDays($d)]);
+        }
+
+        $advice = $this->of(RelationshipAdvice::class);
+        $this->assertSame('Ana Pérez cumple años el viernes.', $advice['birthday']);
+        $this->assertSame('Hace 90 días no registras nada con Leo; ¿un saludo?', $advice['distance']);
+    }
+
+    public function test_plans_soon_pending_and_idle(): void
+    {
+        $base = ['type' => 'place', 'status' => 'pending'];
+        \App\Models\Plan::create(['title' => 'Museo', 'status' => 'scheduled', 'scheduled_on' => today()->addDay()] + $base);
+        foreach (['Parque', 'Mirador', 'Cine'] as $title) {
+            \App\Models\Plan::create(['title' => $title] + $base);
+        }
+        $old = \App\Models\Plan::create(['title' => 'Lago', 'status' => 'done'] + $base);
+        \App\Models\PlanVisit::create(['plan_id' => $old->id, 'visited_on' => today()->subDays(40)]);
+
+        $advice = $this->of(PlanAdvice::class);
+        $this->assertSame('Museo está agendado para mañana.', $advice['soon']);
+        $this->assertStringStartsWith('Tienes 3 planes por estrenar; ¿qué tal ', $advice['pending']);
+        $this->assertSame('Tu último plan fue hace 40 días; ¿salimos?', $advice['idle']);
+    }
+
+    public function test_vehicles_maintenance_and_fuel(): void
+    {
+        $car = \App\Models\Vehicle::create(['name' => 'Mazda', 'vehicle_type' => 'car', 'power_source' => 'gasoline']);
+        $oil = \App\Models\MaintenanceTemplate::create(['user_id' => auth()->id(), 'name' => 'Cambio de aceite', 'category' => 'engine']);
+        \App\Models\VehicleMaintenancePlan::create(['vehicle_id' => $car->id, 'maintenance_template_id' => $oil->id, 'interval_days' => 90,
+            'baseline_date' => today()->subDays(84), 'active' => true]);
+        \App\Models\VehicleEnergyLog::create(['vehicle_id' => $car->id, 'recorded_on' => today()->subDays(25), 'energy_source' => 'gasoline', 'quantity' => 10, 'unit' => 'gal']);
+
+        $advice = $this->of(VehicleAdvice::class);
+        $this->assertSame('Cambio de aceite de Mazda vence en 6 días.', $advice['maintenance']);
+        $this->assertSame('Hace 25 días no registras carga en Mazda.', $advice['fuel']);
+    }
+
     /** @return array<string, string> */
     private function health(): array
     {
@@ -239,7 +371,10 @@ class GuardianAdviceTest extends TestCase
             'when' => 'mañana', 'month' => 'Noviembre', 'peak' => 'septiembre', 'peak_count' => 3];
         $sample += ['left' => '1,7 L', 'now' => '0,8 L', 'usual' => '1,2 L', 'hours' => 3, 'minutes' => 120, 'type' => 'Natación',
             'last' => 90, 'slot' => 'mañana', 'moment' => 'mañana', 'habit' => 'Meditar 10 minutos'];
-        foreach (['tasks', 'health', 'water', 'exercise', 'pomodoro', 'habits'] as $module) {
+        $sample += ['goal' => 'Correr una media maratón', 'percent' => 60, 'quote' => str_repeat('a', 60).'…'];
+        $sample += ['meal' => 'Media mañana', 'person' => 'María Fernanda', 'plan' => 'Museo de Arte Moderno', 'vehicle' => 'Mazda CX-30',
+            'task' => 'Cambio de aceite y filtros'];
+        foreach (['tasks', 'health', 'water', 'exercise', 'pomodoro', 'habits', 'goals', 'mood', 'negative', 'journal', 'meals', 'relationships', 'plans', 'vehicles'] as $module) {
             foreach (config("game.guardian_advice.{$module}") as $text) {
                 $filled = strtr($text, collect($sample)->mapWithKeys(fn ($v, $k) => ['{'.$k.'}' => (string) $v])->all());
                 $this->assertLessThanOrEqual(90, mb_strlen($filled), $filled);

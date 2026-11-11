@@ -19,6 +19,8 @@
         <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F')) }}</p>
     </x-slot:controls>
 
+    <livewire:game.guardian-card module="mood" variant="top" />
+
     {{-- Registro directo: las emociones prioritarias primero, el catálogo a una acción. --}}
     <x-ui.section title="¿Cómo te sientes?" :level="2">
         <x-ui.card variant="elevated">
@@ -189,4 +191,12 @@
             <x-ui.field name="energyComment" label="Comentario (opcional)" wire:model="energyComment" />
         </div>
     </x-ui.form-dialog>
+    {{-- CHG-063: panel lateral con el guardián (solo si hay guardián; si no, el módulo se ve como antes). --}}
+    @if (\App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'mood'))
+        <x-slot:rail>
+            <x-context-widget title="Tu guardián" icon="bi-stars">
+                <livewire:game.guardian-card module="mood" variant="rail" />
+            </x-context-widget>
+        </x-slot:rail>
+    @endif
 </x-module-shell>

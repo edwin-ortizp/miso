@@ -9,7 +9,7 @@
 @endphp
 
 <div class="game-sheet {{ $discovered ? $typeClass : '' }} game-rarity--{{ $species->rarity }}" wire:key="sheet-{{ $species->id }}">
-    @if ($sheetMessage)
+    @if ($sheetMessage ?? '')
         <div class="md-card-filled mb-3 py-2" role="status" aria-live="polite">{{ $sheetMessage }}</div>
     @endif
 
@@ -118,7 +118,7 @@
                                     </li>
                                 @endforeach
                             </ol>
-                            @if ($sheet['historyTotal'] > $sheet['history']->count())
+                            @if (! ($readonly ?? false) && $sheet['historyTotal'] > $sheet['history']->count())
                                 <button type="button" class="md-btn-text mt-2" wire:click="moreHistory">Ver más</button>
                             @endif
                         @endif
@@ -163,11 +163,15 @@
                                 <p class="md-body-medium mb-1">Evoluciona en el nivel {{ $sheet['nextLevel'] }}</p>
                             @elseif ($sheet['branchOptions']->isNotEmpty())
                                 <p class="md-body-medium mb-2"><strong>Listo para evolucionar</strong></p>
+                                @if ($readonly ?? false)
+                                    <p class="md-body-medium mb-0">Elige su evolución desde la Colección.</p>
+                                @else
                                 <div class="d-flex flex-wrap gap-2">
                                     @foreach ($sheet['branchOptions'] as $option)
                                         <button type="button" class="md-btn-tonal" wire:click="evolve({{ $companion->id }}, {{ $option->id }})">Evolucionar a {{ $option->name }}</button>
                                     @endforeach
                                 </div>
+                                @endif
                             @elseif ($sheet['isFinal'])
                                 <p class="md-body-medium mb-1">Ya está en su última etapa</p>
                             @endif

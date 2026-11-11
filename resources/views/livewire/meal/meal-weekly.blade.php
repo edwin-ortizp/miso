@@ -9,6 +9,8 @@
 
 <x-module-shell module="meals">
 
+    <livewire:game.guardian-card module="meals" variant="top" />
+
     <nav class="meal-week-toolbar" aria-label="Semana">
         <x-ui.icon-action icon="bi-chevron-left" label="Semana anterior" wire:click="previousWeek" />
         <p class="meal-week-toolbar__label">
@@ -266,4 +268,12 @@
                            wire:model="formNotes" :disabled="$formStatus === 'consumed'" />
         </x-ui.form-dialog-section>
     </x-ui.form-dialog>
+    {{-- CHG-064: panel lateral con el guardián (solo si hay guardián). --}}
+    @if (\App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'meals'))
+        <x-slot:rail>
+            <x-context-widget title="Tu guardián" icon="bi-stars">
+                <livewire:game.guardian-card module="meals" variant="rail" />
+            </x-context-widget>
+        </x-slot:rail>
+    @endif
 </x-module-shell>

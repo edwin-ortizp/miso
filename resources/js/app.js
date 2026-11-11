@@ -10,6 +10,7 @@ import { registerEnergyPricing } from './energy-pricing';
 import { registerDialogViewport } from './dialog-viewport';
 import { Alpine, Livewire } from '../../vendor/livewire/livewire/dist/livewire.esm';
 import { registerPomodoroTimer } from './pomodoro-timer';
+import { registerFocusCompanion } from './focus-companion';
 import { registerUiSurfaces } from './ui-surfaces';
 import { markPlatform, registerAppFrame, registerPageTransitions } from './app-frame';
 import { registerInstallPrompt, registerServiceWorker } from './pwa';
@@ -17,9 +18,11 @@ import { registerFeedback } from './feedback';
 import { registerHealthBodyMap } from './health-body-map';
 import { registerTaskCalendar } from './task-calendar';
 import { registerTaskGantt } from './task-gantt';
+import { registerRoutineMusic } from './routine-music';
 
 registerGameReveal(Alpine);
 registerPomodoroTimer(Alpine);
+registerFocusCompanion(Alpine);
 registerWallPanel(Alpine);
 registerUiSurfaces(Alpine);
 registerEnergyPricing(Alpine);
@@ -31,6 +34,7 @@ registerFeedback(Alpine);
 registerHealthBodyMap(Alpine);
 registerTaskCalendar(Alpine);
 registerTaskGantt(Alpine);
+registerRoutineMusic(Alpine);
 
 registerInstallPrompt(Alpine);
 registerGameCelebrations(Livewire);

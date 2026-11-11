@@ -20,5 +20,5 @@
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-09 — Cambio rápido (XS) aprobado por solicitud directa del usuario → in-progress/
 - 2026-11-09 — Implementado: phpunit.xml fija APP_URL=http://localhost; las pruebas ya no dependen del .env local (instalación bajo subruta). Juego: 163 pasan sin variables manuales.
-- LECCIÓN: ver CHG-033 (las pruebas deben fijar APP_URL).
+- LECCIÓN: ver CHG-033 (las pruebas deben fijar APP_URL). → descartada: no relevante
 - 2026-11-09 — Cerrado por el usuario (Compuerta 3) → done/

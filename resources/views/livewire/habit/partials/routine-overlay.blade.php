@@ -10,7 +10,7 @@
         $companion = $routine['companion'];
         $stateLabels = ['done' => 'hecho', 'skipped' => 'saltado', 'pending' => 'pendiente'];
     @endphp
-    <div x-data wire:key="habit-routine-shell">
+    <div x-data="{ init() { $store.routineMusic.start(@js(asset('audio/routine'))); }, destroy() { $store.routineMusic.stop(); } }" wire:key="habit-routine-shell">
         <template x-teleport="body">
             {{-- Raíz estable: si su wire:key cambia, Livewire reemplaza el nodo teletransportado y la pantalla queda congelada. --}}
             <div class="habit-routine habit-routine--{{ $routine['period'] }}"
@@ -39,6 +39,9 @@
                      init() {
                          this.$nextTick(() => this.$refs.done?.focus());
                          if (this.total) this.timer = setInterval(() => { if (!this.paused && this.left > 0) this.left--; }, 1000);
+                         $store.routineMusic.step();
+                         this.$watch('paused', (p) => p ? $store.routineMusic.pause() : $store.routineMusic.resume());
+                         this.$watch('left', (v) => { if (this.total && v === 0) $store.routineMusic.timeUp(); });
                      },
                      destroy() { clearInterval(this.timer); },
                      get clock() {
@@ -70,7 +73,11 @@
                                 {{ $period['label'] }}
                             @endif
                         </span>
-                        <x-ui.icon-action icon="bi-x-lg" label="Cerrar rutina" wire:click="closeRoutine" />
+                        <span class="habit-routine__music">
+                            <x-ui.icon-action icon="bi-volume-up" label="Silenciar música" x-show="!$store.routineMusic.muted" x-on:click="$store.routineMusic.toggle()" />
+                            <x-ui.icon-action icon="bi-volume-mute" label="Activar música" x-show="$store.routineMusic.muted" x-cloak x-on:click="$store.routineMusic.toggle()" />
+                            <x-ui.icon-action icon="bi-x-lg" label="Cerrar rutina" wire:click="closeRoutine" />
+                        </span>
                     </header>
 
                     @if ($routineHabit)

@@ -10,6 +10,8 @@
 @endphp
 
 <x-module-shell module="goals">
+
+    <livewire:game.guardian-card module="goals" variant="top" />
     <x-slot:actions>
         <x-module-actions :primary="['label' => 'Agregar objetivo', 'icon' => 'bi-flag', 'action' => 'openForm']" />
     </x-slot:actions>
@@ -144,4 +146,12 @@
             </div>
         </x-ui.form-dialog-section>
     </x-ui.form-dialog>
+    {{-- CHG-063: panel lateral con el guardián (solo si hay guardián; si no, el módulo se ve como antes). --}}
+    @if (\App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'goals'))
+        <x-slot:rail>
+            <x-context-widget title="Tu guardián" icon="bi-stars">
+                <livewire:game.guardian-card module="goals" variant="rail" />
+            </x-context-widget>
+        </x-slot:rail>
+    @endif
 </x-module-shell>

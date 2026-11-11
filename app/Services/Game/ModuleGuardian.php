@@ -53,6 +53,9 @@ class ModuleGuardian
     public static function line(string $module, int $done, int $total, bool $care, CarbonInterface $now): string
     {
         $lines = config("game.guardian_lines.{$module}", []);
+        if ($lines === [] && ! in_array($module, ['tasks', 'health', 'habits', 'water', 'exercise', 'pomodoro'], true)) {
+            return (string) config('game.guardian_default_line');
+        }
         $key = $care && isset($lines['care']) ? 'care' : DailyBuddy::mood($done, $total, $now)['key'];
 
         return (string) ($lines[$key] ?? config("game.buddy_moods.{$key}.text"));

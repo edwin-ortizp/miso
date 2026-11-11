@@ -30,4 +30,4 @@
 - 2026-11-10 — Implementación terminada → En verificación
 - 2026-11-10 — Cerrado por el usuario (Compuerta 3) → done/
 
-- LECCIÓN(qa-tester): Verificar ancho y anclaje del menú abierto, además de límites del viewport; repetir tras actualizaciones Livewire para detectar pérdida de estilos de posición.
+- LECCIÓN(qa-tester): Verificar ancho y anclaje del menú abierto, además de límites del viewport; repetir tras actualizaciones Livewire para detectar pérdida de estilos de posición. → docs/TESTING.md
