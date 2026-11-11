@@ -16,7 +16,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-/** CHG-070: resumen del domingo con hallazgos de tus datos. */
+/** CHG-071: resumen del domingo con hallazgos de tus datos. */
 class WeeklyInsightsTest extends TestCase
 {
     use RefreshDatabase;

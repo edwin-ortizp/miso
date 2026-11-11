@@ -163,7 +163,7 @@ self.addEventListener('fetch', (event) => {
 });
 
 /**
- * CHG-067: aviso push del guardián (o de otra notificación). El servidor envía
+ * CHG-068: aviso push del guardián (o de otra notificación). El servidor envía
  * JSON con title, body, url y tag; si llega sin datos se muestra un aviso genérico.
  */
 self.addEventListener('push', (event) => {
@@ -180,7 +180,7 @@ self.addEventListener('push', (event) => {
         icon: data.icon || '/icons/icon-192x192.png',
         badge: '/icons/icon-96x96.png',
         tag: data.tag || 'miso',
-        // CHG-068: botones del aviso; los navegadores sin soporte los ignoran.
+        // CHG-069: botones del aviso; los navegadores sin soporte los ignoran.
         actions: Array.isArray(data.actions) ? data.actions.slice(0, 2) : [],
         data: { url: data.url || '/?via=push', quickUrl: data.quick_url || null, checkinUrl: data.checkin_url || null },
     }));
@@ -191,7 +191,7 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
     const data = event.notification.data || {};
 
-    // CHG-068: "+1 vaso" registra en segundo plano con la URL firmada; si falla, abre Agua.
+    // CHG-069: "+1 vaso" registra en segundo plano con la URL firmada; si falla, abre Agua.
     if (event.action === 'quick-water' && data.quickUrl) {
         event.waitUntil(
             fetch(data.quickUrl, { method: 'POST', headers: { Accept: 'application/json' } })

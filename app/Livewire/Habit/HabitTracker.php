@@ -161,7 +161,7 @@ class HabitTracker extends Component
         return $this->routine['queue'][$this->routine['index'] ?? 0] ?? null;
     }
 
-    /** CHG-065: el guardián de Hábitos (del equipo semanal); la rutina funciona igual sin él. */
+    /** CHG-066: el guardián de Hábitos (del equipo semanal); la rutina funciona igual sin él. */
     private function routineCompanion(): ?array
     {
         try {

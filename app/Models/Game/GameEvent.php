@@ -33,7 +33,7 @@ class GameEvent extends Model
             if (auth()->check() && (int) $event->user_id === (int) auth()->id()) {
                 app(RequestGameActivity::class)->touch();
             }
-            // CHG-066: cada actividad cuenta como registro del día activo.
+            // CHG-067: cada actividad cuenta como registro del día activo.
             if ($event->kind === self::KIND_ACTIVITY && (int) $event->user_id > 0) {
                 try {
                     UserActiveDay::countRecord((int) $event->user_id);

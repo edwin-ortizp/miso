@@ -1,4 +1,4 @@
-# CHG-072 · Atajos de la app instalada
+# CHG-073 · Atajos de la app instalada
 **Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
@@ -12,7 +12,7 @@
 - Cómo comprobarlo tú: reinstala o actualiza la app, mantén presionado el ícono y toca un atajo: abre directo esa pantalla.
 
 ## 1. Resumen
-Registrar exige abrir la app y navegar al módulo. Agregamos `shortcuts` al `public/manifest.json` de la PWA para llegar en un toque desde el ícono. Cada URL lleva `?via=shortcut` para medirlo con CHG-066.
+Registrar exige abrir la app y navegar al módulo. Agregamos `shortcuts` al `public/manifest.json` de la PWA para llegar en un toque desde el ícono. Cada URL lleva `?via=shortcut` para medirlo con CHG-067.
 
 ## 3. UX/UI
 ```
@@ -41,7 +41,7 @@ Nombres ≤ 20 caracteres (`short_name` ≤ 12), íconos 96×96 por atajo con el
 - [x] T3 · Pruebas — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/PwaShortcutsTest.php` — Hecho cuando: pasan los casos de §5.
 
 ## 8. Bitácora de implementación (developer)
-- 2026-11-11 — `shortcuts` en `public/manifest.json` (4 atajos con `?via=shortcut`), íconos 96×96 `public/icons/shortcut-*.png` en el azul de marca, canal `shortcut` (y `return` para CHG-071) en `UserActiveDay::CHANNELS`, pruebas en `tests/Feature/Engagement/PwaShortcutsTest.php`. "Escribir en el diario" pasó a "Escribir mi diario" para cumplir ≤ 20 caracteres. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
+- 2026-11-11 — `shortcuts` en `public/manifest.json` (4 atajos con `?via=shortcut`), íconos 96×96 `public/icons/shortcut-*.png` en el azul de marca, canal `shortcut` (y `return` para CHG-072) en `UserActiveDay::CHANNELS`, pruebas en `tests/Feature/Engagement/PwaShortcutsTest.php`. "Escribir en el diario" pasó a "Escribir mi diario" para cumplir ≤ 20 caracteres. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.

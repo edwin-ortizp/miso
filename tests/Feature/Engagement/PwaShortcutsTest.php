@@ -7,7 +7,7 @@ use App\Models\UserActiveDay;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** CHG-072: atajos de la app instalada. */
+/** CHG-073: atajos de la app instalada. */
 class PwaShortcutsTest extends TestCase
 {
     use RefreshDatabase;

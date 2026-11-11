@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
-/** CHG-066: registra el día activo una sola vez por usuario y día, sin consultar en cada request. */
+/** CHG-067: registra el día activo una sola vez por usuario y día, sin consultar en cada request. */
 class TrackActiveDay
 {
     public function handle(Request $request, Closure $next): Response

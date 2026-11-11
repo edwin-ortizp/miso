@@ -8,7 +8,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 use Throwable;
 
-/** CHG-067: diagnóstico del canal push en el servidor (hosting compartido). */
+/** CHG-068: diagnóstico del canal push en el servidor (hosting compartido). */
 class PushCheck extends Command
 {
     protected $signature = 'miso:push-check {--skip-network : No prueba la salida HTTPS}';

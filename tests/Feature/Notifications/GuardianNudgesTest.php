@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** CHG-067: avisos del guardián como notificaciones `guardian_nudge`, idempotentes por franja. */
+/** CHG-068: avisos del guardián como notificaciones `guardian_nudge`, idempotentes por franja. */
 class GuardianNudgesTest extends TestCase
 {
     use RefreshDatabase;

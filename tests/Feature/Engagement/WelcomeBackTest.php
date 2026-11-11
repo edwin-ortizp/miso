@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-/** CHG-071: volver sin culpa después de una ausencia. */
+/** CHG-072: volver sin culpa después de una ausencia. */
 class WelcomeBackTest extends TestCase
 {
     use RefreshDatabase;

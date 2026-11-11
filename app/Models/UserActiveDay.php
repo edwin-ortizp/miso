@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Un día en que el usuario usó MiSo (CHG-066). `first_channel` es por dónde
+ * Un día en que el usuario usó MiSo (CHG-067). `first_channel` es por dónde
  * entró primero ese día; `records_count` cuenta las actividades del juego.
  */
 class UserActiveDay extends Model

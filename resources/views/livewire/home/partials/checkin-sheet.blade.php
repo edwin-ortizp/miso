@@ -1,4 +1,4 @@
-{{-- CHG-068: check-in de 20 s. Reutiliza los métodos de Inicio (saveMood, saveEnergy, quickAddWater, toggleHabit). --}}
+{{-- CHG-069: check-in de 20 s. Reutiliza los métodos de Inicio (saveMood, saveEnergy, quickAddWater, toggleHabit). --}}
 <div x-data="{ checkinOpen: $wire.entangle('checkin').live }">
     <x-ui.sheet state="checkinOpen" title="Check-in" persistent class="home-checkin">
         <section class="home-checkin__block" aria-label="¿Cómo te sientes?">

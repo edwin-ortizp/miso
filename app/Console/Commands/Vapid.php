@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use Minishlink\WebPush\VAPID as VapidKeys;
 
-/** CHG-067: genera las claves VAPID una sola vez. No escribe .env: se copian a mano. */
+/** CHG-068: genera las claves VAPID una sola vez. No escribe .env: se copian a mano. */
 class Vapid extends Command
 {
     protected $signature = 'miso:vapid';

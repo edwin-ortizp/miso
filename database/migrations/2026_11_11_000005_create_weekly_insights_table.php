@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/** CHG-070: hallazgos semanales calculados una vez por semana (único usuario + semana). */
+/** CHG-071: hallazgos semanales calculados una vez por semana (único usuario + semana). */
 return new class extends Migration
 {
     public function up(): void

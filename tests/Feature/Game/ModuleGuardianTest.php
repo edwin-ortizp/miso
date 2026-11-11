@@ -62,7 +62,7 @@ class ModuleGuardianTest extends TestCase
         $this->assertSame('Gotin', $this->service()->pick($this->user->id, 'tasks')['name']);
     }
 
-    /** CHG-065: deja el equipo de la semana solo con estos ejemplares. */
+    /** CHG-066: deja el equipo de la semana solo con estos ejemplares. */
     private function teamOf(GameCompanion ...$companions): void
     {
         $week = app(WeekPlanner::class)->forWeek($this->user->id, now());

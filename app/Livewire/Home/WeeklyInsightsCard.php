@@ -6,7 +6,7 @@ use App\Models\WeeklyInsight;
 use App\Services\Insights\WeeklyInsights;
 use Livewire\Component;
 
-/** CHG-070: "Lo que dicen tus datos" en Inicio, domingo y lunes; se puede cerrar. */
+/** CHG-071: "Lo que dicen tus datos" en Inicio, domingo y lunes; se puede cerrar. */
 class WeeklyInsightsCard extends Component
 {
     public ?int $insightId = null;

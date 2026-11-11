@@ -1,4 +1,4 @@
-# CHG-071 · Volver sin culpa después de una ausencia
+# CHG-072 · Volver sin culpa después de una ausencia
 **Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
@@ -12,12 +12,12 @@
 - Cómo comprobarlo tú: no abras la app 3 días (o simúlalo) y entra: ves la bienvenida, eliges qué hacer con lo vencido y empiezas el día limpio.
 
 ## 1. Resumen
-Volver tras una ausencia es el momento con más riesgo de abandono: el usuario encuentra vencidos, ceros y misiones atrasadas, y siente culpa. Mostramos una bienvenida de una sola vez por regreso, con el guardián, un resumen amable de lo pendiente, acciones en bloque sobre lo vencido y una primera acción pequeña. Usa `user_active_days` (CHG-066) para detectar la ausencia y medir si quien vuelve se queda (canal `?via=return`).
+Volver tras una ausencia es el momento con más riesgo de abandono: el usuario encuentra vencidos, ceros y misiones atrasadas, y siente culpa. Mostramos una bienvenida de una sola vez por regreso, con el guardián, un resumen amable de lo pendiente, acciones en bloque sobre lo vencido y una primera acción pequeña. Usa `user_active_days` (CHG-067) para detectar la ausencia y medir si quien vuelve se queda (canal `?via=return`).
 
 ## 2. Producto (product-manager)
 - Problema / usuario: quien deja de usar la app unos días vuelve a una pantalla que lo regaña y la abandona del todo.
 - Incluye: detección de ausencia (≥ 3 días sin día activo, configurable en `config/game.php` o config propia); bienvenida en Inicio una vez por regreso; tareas vencidas con acciones en bloque (pasar a hoy, reprogramar, archivar) y opción de revisarlas una por una; una sugerencia pequeña (el hábito más fácil o 1 vaso de agua); enlace para marcar en retroactivo los hábitos de los días ausentes (reusa Hábitos con fecha); misiones de la semana sin ningún aviso de atraso.
-- No incluye: avisos push de reenganche (eso es CHG-067); cambios a rachas (no hay rachas con castigo).
+- No incluye: avisos push de reenganche (eso es CHG-068); cambios a rachas (no hay rachas con castigo).
 - Criterios de aceptación:
   - Dado que mi último día activo fue hace 4 días, cuando abro Inicio, entonces veo la bienvenida del guardián y no el listado normal de vencidos.
   - Dado que elijo "Pasar todo a hoy", entonces las tareas vencidas quedan con fecha de hoy y la bienvenida desaparece.
@@ -62,7 +62,7 @@ Volver tras una ausencia es el momento con más riesgo de abandono: el usuario e
 ## 4. Diseño técnico (software-architect)
 - Archivos a crear / modificar: `app/Services/Engagement/ReturnDetector.php` (último día activo antes de hoy en `user_active_days`), componente Livewire `app/Livewire/Home/WelcomeBack.php` y su vista, acción en bloque sobre tareas reutilizando el servicio de tareas existente, marca de "bienvenida vista" por regreso (columna o tabla con único user_id+fecha).
 - Enfoque y patrones a seguir: detección barata (una consulta indexada); la bienvenida se registra como vista con restricción única para que no reaparezca ni se duplique; acciones en bloque en una transacción.
-- Riesgos y mitigación: usuarios nuevos sin historial (sin bienvenida si no hay días activos previos); `user_active_days` empezó con CHG-066, así que las ausencias anteriores no se detectan; archivar por error (botón Deshacer en el mensaje de éxito).
+- Riesgos y mitigación: usuarios nuevos sin historial (sin bienvenida si no hay días activos previos); `user_active_days` empezó con CHG-067, así que las ausencias anteriores no se detectan; archivar por error (botón Deshacer en el mensaje de éxito).
 - Qué NO tocar: la lógica de misiones y XP del juego; las tareas no vencidas.
 
 ## 5. Pruebas (qa-tester)
@@ -94,7 +94,7 @@ Volver tras una ausencia es el momento con más riesgo de abandono: el usuario e
 - 2026-11-11 — Decisión (developer): las tareas no tienen estado "archivada"; "Archivar" se implementa como "Dejar sin fecha" (la tarea sigue pendiente pero deja de aparecer como atrasada). Se puede deshacer.
 - Pregunta: ¿3 días de ausencia está bien como umbral? → 2026-11-11 Decisión (usuario): sí, 3 días.
 - Pregunta: ¿los hábitos de los días ausentes se dejan como están (sin registrar) o se ofrece marcar alguno como hecho? → 2026-11-11 Decisión (usuario): se pueden marcar en retroactivo, como ya permite la app, y debe seguir así. La bienvenida ofrece el enlace "¿Hiciste algún hábito estos días? Márcalo" que abre Hábitos en el primer día ausente; no se crea lógica nueva ni restricciones.
-- Depende de: CHG-066.
+- Depende de: CHG-067.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)

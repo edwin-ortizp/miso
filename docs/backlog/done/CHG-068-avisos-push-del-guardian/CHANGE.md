@@ -1,4 +1,4 @@
-# CHG-067 · Avisos push del guardián
+# CHG-068 · Avisos push del guardián
 **Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
@@ -12,12 +12,12 @@
 - Cómo comprobarlo tú: instala la PWA, activa avisos en Ajustes, elige una franja y espera el aviso; tócalo y llegas al módulo.
 
 ## 1. Resumen
-Estrategia de recurrencia (2026-11-11): MiSo hoy es solo pull — notificaciones solo dentro de la app, sin push ni scheduler. Agregamos Web Push a la PWA y un job programado que, por franja elegida, decide si vale la pena avisar (hay algo pendiente) y envía un mensaje en voz del guardián del módulo (`ModuleGuardian`, `GuardianAdvisor`). Tope diario, sin culpa, sin un aviso por módulo. Depende de CHG-066 para medir el efecto (`?via=push`).
+Estrategia de recurrencia (2026-11-11): MiSo hoy es solo pull — notificaciones solo dentro de la app, sin push ni scheduler. Agregamos Web Push a la PWA y un job programado que, por franja elegida, decide si vale la pena avisar (hay algo pendiente) y envía un mensaje en voz del guardián del módulo (`ModuleGuardian`, `GuardianAdvisor`). Tope diario, sin culpa, sin un aviso por módulo. Depende de CHG-067 para medir el efecto (`?via=push`).
 
 ## 2. Producto (product-manager)
 - Problema / usuario: a la gente se le olvida registrar; nada la trae de vuelta.
 - Incluye: suscripción push opt-in, franjas (mañana / tarde / noche), tope diario (por defecto 2), un aviso agrupado con lo más relevante pendiente, deep link al módulo, desactivar desde Ajustes.
-- No incluye: acciones dentro de la notificación (CHG-068), cierre del día (CHG-069), email/WhatsApp.
+- No incluye: acciones dentro de la notificación (CHG-069), cierre del día (CHG-070), email/WhatsApp.
 - Criterios de aceptación:
   - Dado avisos activos y un hábito pendiente, cuando llega la franja de la tarde, entonces recibo un aviso del guardián de Hábitos que abre `/habits?via=push`.
   - Dado que ya completé todo, cuando llega la franja, entonces no recibo aviso.
@@ -84,7 +84,7 @@ Aviso:  [foto] Chispin · MiSo
 - [x] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Notifications/`, `docs/game.md` — Hecho cuando: hay pruebas de franja, tope, sin pendiente y texto sin culpa.
 
 ## 8. Bitácora de implementación (developer)
-- 2026-11-11 — Migración (`push_sent_at`, `push_subscriptions`), `GuardianNudgePlanner`, `NotificationDispatcher`, `PushGateway`/`WebPushGateway` (minishlink/web-push ^11, compatible con Guzzle 8), comandos `miso:guardian-nudges`, `notifications:dispatch`, `miso:push-check`, `miso:vapid`, scheduler en `routes/console.php`, `ModuleProgress` extraído de `GuardianCard`, tarjeta en Ajustes → Notificaciones, `pwa.js` (`ltPushToggle`) y `sw.js` v7 (push y notificationclick), `docs/DEPLOY.md`, `docs/notifications.md`. Assets recompilados (incluye el CSS pendiente de CHG-065). Pruebas escritas y no ejecutadas en la nube (PHP 8.3 vs 8.4).
+- 2026-11-11 — Migración (`push_sent_at`, `push_subscriptions`), `GuardianNudgePlanner`, `NotificationDispatcher`, `PushGateway`/`WebPushGateway` (minishlink/web-push ^11, compatible con Guzzle 8), comandos `miso:guardian-nudges`, `notifications:dispatch`, `miso:push-check`, `miso:vapid`, scheduler en `routes/console.php`, `ModuleProgress` extraído de `GuardianCard`, tarjeta en Ajustes → Notificaciones, `pwa.js` (`ltPushToggle`) y `sw.js` v7 (push y notificationclick), `docs/DEPLOY.md`, `docs/notifications.md`. Assets recompilados (incluye el CSS pendiente de CHG-066). Pruebas escritas y no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
@@ -92,7 +92,7 @@ Aviso:  [foto] Chispin · MiSo
 - 2026-11-11 — Decisión (usuario): todo lo que corra en el servidor queda documentado (cron/script) y es idempotente por ventana; regla agregada en `docs/ARCHITECTURE.md`.
 - Pregunta: ¿franjas fijas (8–10, 14–16, 19–21) o horas que elige cada usuario? → 2026-11-11 Decisión: hoy no existen franjas; se crean tres fijas (mañana 8–10, tarde 14–16, noche 19–21) que el usuario activa o desactiva en Ajustes. Horas personalizadas quedan para después.
 - Pregunta: ¿el servidor de producción ya corre `schedule:run` por cron? → 2026-11-11 Decisión (usuario): no hay cron hoy, pero puede configurarse. El CHG documenta cómo y el despliegue requiere activarlo (ver T5).
-- Depende de: CHG-066.
+- Depende de: CHG-067.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)

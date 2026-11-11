@@ -13,7 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
-/** CHG-067: entrega push de la tabla `notifications`, una sola vez por notificación. */
+/** CHG-068: entrega push de la tabla `notifications`, una sola vez por notificación. */
 class NotificationDispatchTest extends TestCase
 {
     use RefreshDatabase;

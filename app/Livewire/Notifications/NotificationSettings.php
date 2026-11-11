@@ -25,7 +25,7 @@ class NotificationSettings extends Component
         $this->message = 'Preferencias guardadas.';
     }
 
-    /** CHG-067: el navegador entrega su suscripción push (PushSubscription.toJSON()). */
+    /** CHG-068: el navegador entrega su suscripción push (PushSubscription.toJSON()). */
     public function saveSubscription(array $subscription): void
     {
         $data = Validator::make($subscription, [

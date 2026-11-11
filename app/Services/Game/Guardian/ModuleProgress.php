@@ -8,7 +8,7 @@ use App\Models\TaskCategory;
 
 /**
  * Avance del día por módulo (CHG-055), extraído de GuardianCard para reutilizarlo
- * en los avisos push (CHG-067). Usa los scopes del usuario autenticado.
+ * en los avisos push (CHG-068). Usa los scopes del usuario autenticado.
  */
 class ModuleProgress
 {

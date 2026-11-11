@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 /**
- * CHG-071: bienvenida al volver tras 3+ días sin entrar. Sin culpa: no dice
+ * CHG-072: bienvenida al volver tras 3+ días sin entrar. Sin culpa: no dice
  * cuántos días faltaste ni habla de "vencidas"; ofrece empezar limpio.
  */
 class WelcomeBack extends Component

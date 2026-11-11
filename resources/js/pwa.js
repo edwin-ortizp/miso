@@ -134,7 +134,7 @@ function vapidKeyToBytes(key) {
 }
 
 /**
- * CHG-067: activar o desactivar los avisos push del guardián en este dispositivo.
+ * CHG-068: activar o desactivar los avisos push del guardián en este dispositivo.
  * Estados: unsupported | unconfigured | denied | off | on. El permiso del
  * navegador se pide solo al pulsar "Activar", nunca al cargar la página.
  */

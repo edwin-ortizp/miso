@@ -76,19 +76,19 @@
     color: var(--md-sys-color-on-surface-variant);
 }
 
-/* CHG-071: bienvenida al volver tras una ausencia. */
+/* CHG-072: bienvenida al volver tras una ausencia. */
 .welcome-back { border-inline-start: 4px solid var(--md-sys-color-primary); }
 .welcome-back__guardian { flex-shrink: 0; object-fit: contain; }
 @media (max-width: 575.98px) {
     .welcome-back__guardian { width: 56px; height: 56px; }
 }
 
-/* CHG-068: check-in de 20 s. */
+/* CHG-069: check-in de 20 s. */
 .home-checkin__block { padding-block: .5rem; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
 .home-checkin__block:last-child { border-bottom: 0; }
 .home-checkin__block h3 { margin-bottom: .5rem; }
 
-/* CHG-070: hallazgos semanales. */
+/* CHG-071: hallazgos semanales. */
 .insights-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
 .insights-list__item { display: grid; grid-template-columns: 4rem 1fr; gap: .75rem; align-items: baseline; }
 .insights-list__value { color: var(--md-sys-color-primary); }

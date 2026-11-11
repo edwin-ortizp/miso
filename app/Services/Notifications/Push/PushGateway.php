@@ -4,7 +4,7 @@ namespace App\Services\Notifications\Push;
 
 use App\Models\PushSubscription;
 
-/** Canal de entrega (CHG-067). Telegram o WhatsApp serían otra implementación con su columna `*_sent_at`. */
+/** Canal de entrega (CHG-068). Telegram o WhatsApp serían otra implementación con su columna `*_sent_at`. */
 interface PushGateway
 {
     public const SENT = 'sent';

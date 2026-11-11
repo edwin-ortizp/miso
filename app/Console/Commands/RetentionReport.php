@@ -6,7 +6,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
-/** CHG-066: retención D1/D7/D30 y registros por día activo a partir de `user_active_days`. */
+/** CHG-067: retención D1/D7/D30 y registros por día activo a partir de `user_active_days`. */
 class RetentionReport extends Command
 {
     protected $signature = 'miso:retention {--days=30 : Ventana de días a analizar}';

@@ -48,7 +48,7 @@ return [
         'volador' => 'cielo', 'normal' => 'cielo',
     ],
     // Guardianes de módulo (CHG-055): tipos afines por módulo y frase por estado.
-    // Avisos push del guardián (CHG-067). Franjas en America/Bogota, [hora inicio, hora fin).
+    // Avisos push del guardián (CHG-068). Franjas en America/Bogota, [hora inicio, hora fin).
     'nudges' => [
         'enabled' => (bool) env('GUARDIAN_NUDGES_ENABLED', true),
         'slots' => [

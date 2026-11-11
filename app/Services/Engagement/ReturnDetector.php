@@ -6,8 +6,8 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
- * CHG-071: ¿el usuario vuelve hoy tras una ausencia? Compara con el último día
- * activo ANTERIOR a hoy en `user_active_days` (CHG-066). Sin historial no hay
+ * CHG-072: ¿el usuario vuelve hoy tras una ausencia? Compara con el último día
+ * activo ANTERIOR a hoy en `user_active_days` (CHG-067). Sin historial no hay
  * regreso: un usuario nuevo nunca ve la bienvenida.
  */
 class ReturnDetector

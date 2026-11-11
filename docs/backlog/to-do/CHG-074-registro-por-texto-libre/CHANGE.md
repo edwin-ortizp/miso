@@ -1,4 +1,4 @@
-# CHG-073 · Registro por texto libre
+# CHG-074 · Registro por texto libre
 **Estado:** Borrador
 **Nivel:** M
 **Modelo sugerido:** estandar
@@ -12,7 +12,7 @@
 - Cómo comprobarlo tú: escribe una frase con varios registros y confirma la vista previa.
 
 ## 1. Resumen
-Separado de CHG-068 por decisión del usuario. Interpretar texto libre requiere un modelo de lenguaje: la frase se convierte en llamadas a las mismas acciones que ya expone el MCP de MiSo, con vista previa y confirmación. Necesita definir proveedor, costo y dónde vive la clave.
+Separado de CHG-069 por decisión del usuario. Interpretar texto libre requiere un modelo de lenguaje: la frase se convierte en llamadas a las mismas acciones que ya expone el MCP de MiSo, con vista previa y confirmación. Necesita definir proveedor, costo y dónde vive la clave.
 
 ## 2. Producto (product-manager)
 - Problema / usuario:

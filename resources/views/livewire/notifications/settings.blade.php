@@ -11,7 +11,7 @@
         </x-ui.card>
     </x-ui.section>
 
-    {{-- CHG-067: avisos push del guardián. El permiso del navegador se pide solo al activar. --}}
+    {{-- CHG-068: avisos push del guardián. El permiso del navegador se pide solo al activar. --}}
     <x-ui.section title="Avisos de tu guardián" :level="2">
         <x-ui.card icon="bi-phone-vibrate">
             <div x-data="ltPushToggle(@js($vapidKey))">

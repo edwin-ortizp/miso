@@ -20,7 +20,7 @@ use Illuminate\Support\Collection;
 use Ramsey\Uuid\Uuid;
 
 /**
- * CHG-070: hasta 3 hallazgos sobre las últimas 8 semanas, sin IA. Solo se
+ * CHG-071: hasta 3 hallazgos sobre las últimas 8 semanas, sin IA. Solo se
  * muestra un hallazgo con datos suficientes en cada grupo y una diferencia
  * mínima; el lenguaje es prudente ("tiende a"), nunca causal.
  */

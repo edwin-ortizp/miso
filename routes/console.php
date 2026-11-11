@@ -9,7 +9,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 /*
- * Tareas programadas (CHG-067). El servidor solo ejecuta `php artisan schedule:run`
+ * Tareas programadas (CHG-068). El servidor solo ejecuta `php artisan schedule:run`
  * (ver docs/DEPLOY.md). Corren en cada llamada del cron, sea cada minuto o cada 15:
  * todas son idempotentes dentro de su ventana, así que una corrida extra no repite nada.
  */
@@ -17,6 +17,6 @@ Schedule::command('notifications:generate')->everyMinute()->withoutOverlapping(1
 Schedule::command('miso:guardian-nudges')->everyMinute()->withoutOverlapping(10)
     ->when(fn () => (bool) config('game.nudges.enabled'));
 Schedule::command('notifications:dispatch')->everyMinute()->withoutOverlapping(10);
-// CHG-070: resumen del domingo en la franja de la tarde (idempotente por semana).
+// CHG-071: resumen del domingo en la franja de la tarde (idempotente por semana).
 Schedule::command('miso:weekly-insights')->sundays()->everyFifteenMinutes()->between('14:00', '21:00')
     ->timezone('America/Bogota')->withoutOverlapping(10);

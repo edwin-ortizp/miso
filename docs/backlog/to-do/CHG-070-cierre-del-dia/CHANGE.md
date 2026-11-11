@@ -1,4 +1,4 @@
-# CHG-069 · Cierre del día
+# CHG-070 · Cierre del día
 **Estado:** Borrador
 **Nivel:** S
 **Modelo sugerido:** estandar
@@ -12,7 +12,7 @@
 - Cómo comprobarlo tú: abre el cierre desde Inicio o desde el aviso nocturno y termínalo.
 
 ## 1. Resumen
-Un ritual nocturno corto que cierra el ciclo diario y donde se cobran las metas diarias (en desarrollo por el usuario). Recompensa única por cerrar, sin rachas que castiguen. Entra con `?via=close` para CHG-066.
+Un ritual nocturno corto que cierra el ciclo diario y donde se cobran las metas diarias (en desarrollo por el usuario). Recompensa única por cerrar, sin rachas que castiguen. Entra con `?via=close` para CHG-067.
 
 ## 7. Tareas
 <!-- Primero lo que cambia para el usuario; el detalle técnico después. Formato:
@@ -22,5 +22,5 @@ Un ritual nocturno corto que cierra el ciclo diario y donde se cobran las metas 
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-11 — Decisión (usuario): queda en Borrador hasta que existan sus metas diarias (en desarrollo por su lado); el cierre se especifica sobre ellas.
-- Depende de: CHG-067 (aviso nocturno) y de las metas diarias en desarrollo; coordinar para no duplicar.
+- Depende de: CHG-068 (aviso nocturno) y de las metas diarias en desarrollo; coordinar para no duplicar.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)

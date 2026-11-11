@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/** Días activos por usuario y canal de entrada (CHG-066): línea base de recurrencia. */
+/** Días activos por usuario y canal de entrada (CHG-067): línea base de recurrencia. */
 return new class extends Migration
 {
     public function up(): void

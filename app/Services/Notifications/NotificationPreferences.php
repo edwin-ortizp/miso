@@ -10,11 +10,11 @@ class NotificationPreferences
 {
     public const DEFAULTS = [
         'birthdays' => false, 'tasks' => false, 'plans' => false,
-        // CHG-067: avisos del guardián y sus franjas.
+        // CHG-068: avisos del guardián y sus franjas.
         'guardian_nudges' => false, 'nudge_morning' => true, 'nudge_afternoon' => true, 'nudge_night' => false,
-        // CHG-067: qué otros tipos de aviso también llegan al celular.
+        // CHG-068: qué otros tipos de aviso también llegan al celular.
         'push_birthday' => false, 'push_task_due' => false, 'push_plan_due' => false, 'push_reminder' => false,
-        // CHG-070: el resumen del domingo llega al celular por defecto.
+        // CHG-071: el resumen del domingo llega al celular por defecto.
         'push_weekly_insights' => true,
     ];
 

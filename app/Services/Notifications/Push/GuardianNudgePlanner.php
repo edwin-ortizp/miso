@@ -17,7 +17,7 @@ use Illuminate\Support\Str;
 use Ramsey\Uuid\Uuid;
 
 /**
- * Aviso del guardián (CHG-067): en cada franja activa, si queda algo pendiente
+ * Aviso del guardián (CHG-068): en cada franja activa, si queda algo pendiente
  * en un módulo con meta diaria, crea UNA notificación `guardian_nudge` en la
  * tabla `notifications`. El índice único (usuario, origen, tipo, ocurrencia)
  * con ocurrencia `{fecha}:{franja}` hace que correrlo dos veces no duplique.

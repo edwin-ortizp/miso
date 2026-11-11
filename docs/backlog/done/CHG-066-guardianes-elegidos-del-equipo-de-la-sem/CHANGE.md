@@ -1,4 +1,4 @@
-# CHG-065 · Guardianes elegidos del equipo de la semana
+# CHG-066 · Guardianes elegidos del equipo de la semana
 **Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar

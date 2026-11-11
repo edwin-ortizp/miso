@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 /**
- * Canal push (CHG-067): `push_sent_at` sigue el patrón de `telegram_sent_at` (una
+ * Canal push (CHG-068): `push_sent_at` sigue el patrón de `telegram_sent_at` (una
  * columna por canal) y `push_subscriptions` guarda la vinculación de cada navegador.
  */
 return new class extends Migration

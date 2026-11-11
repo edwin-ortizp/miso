@@ -8,7 +8,7 @@ use App\Services\Notifications\NotificationPreferences;
 use Illuminate\Support\Facades\Log;
 
 /**
- * Entrega por push las notificaciones disponibles (CHG-067). Cada fila se RECLAMA
+ * Entrega por push las notificaciones disponibles (CHG-068). Cada fila se RECLAMA
  * con un UPDATE condicional sobre `push_sent_at` antes de enviar: dos corridas a la
  * vez (cron duplicado, ejecución manual) nunca envían la misma notificación dos veces.
  * Un fallo no se reintenta, para no duplicar ni insistir.
@@ -93,7 +93,7 @@ class NotificationDispatcher
     }
 
     /**
-     * CHG-068: botones del aviso. Agua → "+1 vaso" (registra sin abrir la app, URL firmada 12 h);
+     * CHG-069: botones del aviso. Agua → "+1 vaso" (registra sin abrir la app, URL firmada 12 h);
      * el resto → "Check-in". Los navegadores sin acciones (iPhone) ignoran estos campos.
      *
      * @return array{actions: list<array{action: string, title: string}>, quick_url?: string, checkin_url: string}

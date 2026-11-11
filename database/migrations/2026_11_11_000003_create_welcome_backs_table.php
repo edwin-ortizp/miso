@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-/** CHG-071: una bienvenida por regreso; el único impide que reaparezca o se duplique. */
+/** CHG-072: una bienvenida por regreso; el único impide que reaparezca o se duplique. */
 return new class extends Migration
 {
     public function up(): void

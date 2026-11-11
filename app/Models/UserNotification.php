@@ -27,11 +27,11 @@ class UserNotification extends Model
 
     public function destination(): string
     {
-        // CHG-070: el resumen semanal vive en Estadísticas.
+        // CHG-071: el resumen semanal vive en Estadísticas.
         if ($this->source_type === \App\Services\Insights\WeeklyInsights::SOURCE) {
             return route('statistics').'#insights';
         }
-        // CHG-067: el aviso del guardián lleva al módulo que tiene algo pendiente.
+        // CHG-068: el aviso del guardián lleva al módulo que tiene algo pendiente.
         if ($this->source_type === \App\Services\Notifications\Push\GuardianNudgePlanner::SOURCE) {
             return route(match (\App\Services\Notifications\Push\GuardianNudgePlanner::moduleFor((string) $this->source_id)) {
                 'habits' => 'habits', 'water' => 'water.daily', 'tasks' => 'tasks.list', 'exercise' => 'exercise', default => 'home',

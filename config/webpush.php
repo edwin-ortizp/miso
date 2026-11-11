@@ -1,6 +1,6 @@
 <?php
 
-/** Canal push (CHG-067). Claves VAPID: `php artisan miso:vapid` (ver docs/DEPLOY.md). */
+/** Canal push (CHG-068). Claves VAPID: `php artisan miso:vapid` (ver docs/DEPLOY.md). */
 return [
     'public_key' => env('VAPID_PUBLIC_KEY'),
     'private_key' => env('VAPID_PRIVATE_KEY'),

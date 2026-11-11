@@ -35,7 +35,7 @@ class Dashboard extends Component
 {
     use HandlesHabitActionPrompt, HandlesRecurringTaskCompletion, HasUrlDate, LogsMoodProgressively;
 
-    /** CHG-068: hoja de check-in de 20 s (`/?checkin=1`, botón en Inicio o acción del aviso). */
+    /** CHG-069: hoja de check-in de 20 s (`/?checkin=1`, botón en Inicio o acción del aviso). */
     #[Url(as: 'checkin', except: false)]
     public bool $checkin = false;
 

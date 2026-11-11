@@ -37,7 +37,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // CHG-067: canal push; las pruebas lo reemplazan por un doble.
+        // CHG-068: canal push; las pruebas lo reemplazan por un doble.
         $this->app->bind(\App\Services\Notifications\Push\PushGateway::class, \App\Services\Notifications\Push\WebPushGateway::class);
         $this->app->singleton(
             HabitActionRegistry::class,

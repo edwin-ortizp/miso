@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-/** CHG-068: check-in de 20 s y acciones del aviso push. */
+/** CHG-069: check-in de 20 s y acciones del aviso push. */
 class QuickCheckinTest extends TestCase
 {
     use RefreshDatabase;

@@ -1,4 +1,4 @@
-{{-- CHG-071: bienvenida al volver tras una ausencia. Una vez por regreso, sin culpa. --}}
+{{-- CHG-072: bienvenida al volver tras una ausencia. Una vez por regreso, sin culpa. --}}
 <div>
     @if ($visible)
         <section class="md-card-elevated welcome-back mb-3" aria-labelledby="welcome-back-title" x-data x-init="$el.querySelector('h2')?.focus()">

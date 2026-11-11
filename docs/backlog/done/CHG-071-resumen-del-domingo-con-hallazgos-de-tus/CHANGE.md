@@ -1,4 +1,4 @@
-# CHG-070 · Resumen del domingo con hallazgos de tus datos
+# CHG-071 · Resumen del domingo con hallazgos de tus datos
 **Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
@@ -58,7 +58,7 @@ Los datos registrados no le devuelven nada al usuario, así que registrar se sie
 ## 4. Diseño técnico (software-architect)
 - Archivos a crear / modificar: `app/Services/Insights/WeeklyInsights.php`, tabla `weekly_insights` (único `user_id + week_start`, JSON de hallazgos, `dismissed_at`), componente `app/Livewire/Home/WeeklyInsightsCard.php` en Inicio, sección en `app/Livewire/Statistics/StatisticsDashboard.php`, generación del aviso en `GenerateNotifications` (tipo `weekly_insights`, origen = usuario no aplica: origen `insights` con UUID v5 de la semana), preferencia `push_weekly_insights` en `NotificationPreferences`, filtro en la campana.
 - Enfoque y patrones a seguir: consultas agregadas por día (una por fuente, no por día) sobre `EnergyEntry`, `MoodEntry`, `ExerciseLog`, `DrinkLog`, `HabitCompletion`, `Task`, usando los scopes del usuario; `firstOrCreate` por semana para idempotencia; el aviso usa el índice único de `notifications`.
-- Riesgos y mitigación: conclusiones engañosas con pocos datos (umbrales mínimos y lenguaje prudente); costo de cálculo (una vez por semana y en caché); `source_id` no nulo (UUID v5 como en CHG-067).
+- Riesgos y mitigación: conclusiones engañosas con pocos datos (umbrales mínimos y lenguaje prudente); costo de cálculo (una vez por semana y en caché); `source_id` no nulo (UUID v5 como en CHG-068).
 - Qué NO tocar: los gráficos existentes de Estadísticas.
 
 ## 5. Pruebas (qa-tester)
@@ -89,7 +89,7 @@ Los datos registrados no le devuelven nada al usuario, así que registrar se sie
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
 - Pregunta: ¿mostrarlo en Inicio, en Estadísticas o como aviso push del domingo? → 2026-11-11 Decisión (usuario): en los tres.
-- Necesita: datos de CHG-066 para medir si aumenta la recurrencia.
+- Necesita: datos de CHG-067 para medir si aumenta la recurrencia.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)

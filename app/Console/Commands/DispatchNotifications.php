@@ -6,7 +6,7 @@ use App\Services\Notifications\Push\NotificationDispatcher;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
-/** CHG-067: entrega por push las notificaciones disponibles. Cada una se envía una sola vez. */
+/** CHG-068: entrega por push las notificaciones disponibles. Cada una se envía una sola vez. */
 class DispatchNotifications extends Command
 {
     protected $signature = 'notifications:dispatch {--dry-run : Cuenta lo que se enviaría sin enviar ni marcar}';

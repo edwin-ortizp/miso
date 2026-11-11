@@ -8,7 +8,7 @@ use App\Services\Notifications\Push\GuardianNudgePlanner;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
-/** CHG-067: crea el aviso del guardián de la franja actual. Idempotente por (usuario, fecha, franja). */
+/** CHG-068: crea el aviso del guardián de la franja actual. Idempotente por (usuario, fecha, franja). */
 class GuardianNudges extends Command
 {
     protected $signature = 'miso:guardian-nudges {--user= : ID del usuario} {--dry-run : Muestra qué se crearía sin escribir}';

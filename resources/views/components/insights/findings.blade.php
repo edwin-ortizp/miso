@@ -1,5 +1,5 @@
 @props(['findings' => []])
-{{-- CHG-070: lista de hallazgos (Inicio y Estadísticas). --}}
+{{-- CHG-071: lista de hallazgos (Inicio y Estadísticas). --}}
 @if ($findings)
     <ul class="insights-list">
         @foreach ($findings as $finding)

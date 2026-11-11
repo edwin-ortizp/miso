@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
-/** CHG-066: días activos, canal de entrada, registros y reporte de retención. */
+/** CHG-067: días activos, canal de entrada, registros y reporte de retención. */
 class ActiveDayTrackingTest extends TestCase
 {
     use RefreshDatabase;

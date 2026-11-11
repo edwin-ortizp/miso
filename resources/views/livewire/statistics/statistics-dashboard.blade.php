@@ -23,7 +23,7 @@
         </x-ui.filter-bar>
     </x-slot:controls>
 
-    {{-- CHG-070: hallazgos de las últimas 8 semanas. --}}
+    {{-- CHG-071: hallazgos de las últimas 8 semanas. --}}
     <x-ui.section title="Lo que dicen tus datos" description="Patrones de las últimas 8 semanas. Muestran tendencias, no causas." :level="2" id="insights">
         <x-ui.card>
             <x-insights.findings :findings="$insights" />

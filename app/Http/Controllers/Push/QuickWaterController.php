@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * CHG-068: "+1 vaso" desde el aviso push, sin abrir la app. Lo autoriza la URL
+ * CHG-069: "+1 vaso" desde el aviso push, sin abrir la app. Lo autoriza la URL
  * firmada (12 h, una por notificación), no la sesión. La notificación se reclama
  * con un UPDATE condicional sobre `action_done_at`: repetir la petición no suma otro vaso.
  */

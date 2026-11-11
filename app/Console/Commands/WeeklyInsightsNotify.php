@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Services\Insights\WeeklyInsights;
 use Illuminate\Console\Command;
 
-/** CHG-070: calcula los hallazgos de la semana y crea el aviso del domingo. Idempotente por semana. */
+/** CHG-071: calcula los hallazgos de la semana y crea el aviso del domingo. Idempotente por semana. */
 class WeeklyInsightsNotify extends Command
 {
     protected $signature = 'miso:weekly-insights {--user= : ID del usuario}';

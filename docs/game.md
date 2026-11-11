@@ -124,7 +124,7 @@ Aparece un ejemplar **al azar** del usuario con una frase (`x-game.daily-buddy`)
 Cada módulo tiene un guardián que asoma en la esquina de una tarjeta de su panel lateral, con una frase según el avance del día.
 
 - **Dónde:** Tareas → tarjeta "Hoy"; Salud → tarjeta "Próximo cuidado".
-- **Quién (CHG-065):** se elige entre los integrantes del **equipo de la semana**, así el equipo se ve en toda la app y rota cada lunes; la tarjeta muestra "Equipo de la semana · {habilidad}". Sin equipo se usa toda la colección. Dentro de ese grupo: el ejemplar de mayor nivel con un tipo afín al módulo (`game.module_guardians`: Tareas = psíquico/acero, Salud = hada/normal); empate → el más antiguo; sin afinidad → el de mayor nivel. Se elige al montar la página y no cambia con los re-renders.
+- **Quién (CHG-066):** se elige entre los integrantes del **equipo de la semana**, así el equipo se ve en toda la app y rota cada lunes; la tarjeta muestra "Equipo de la semana · {habilidad}". Sin equipo se usa toda la colección. Dentro de ese grupo: el ejemplar de mayor nivel con un tipo afín al módulo (`game.module_guardians`: Tareas = psíquico/acero, Salud = hada/normal); empate → el más antiguo; sin afinidad → el de mayor nivel. Se elige al montar la página y no cambia con los re-renders.
 - **Frase:** `ModuleGuardian::line()` usa los umbrales de `DailyBuddy::mood` y los textos de `game.guardian_lines`. Tareas: completadas/planificadas hoy. Salud: si hay un evento en seguimiento (tipo de evolución sin fecha de fin) dice la frase `care`; si no, completados en 7 días / (esos + pendientes de salud).
 - **Oculto** con el juego apagado o sin ejemplares.
 - **Ficha (CHG-062):** tocar al guardián abre su ficha en un modal dentro del módulo, en solo lectura (sin evolucionar ni "Ver más"), con "Ver colección" para ir a la Colección. La ficha la arma `SpeciesSheet::build()`, compartido con la Colección, y solo se calcula al abrir.
@@ -332,15 +332,15 @@ La experiencia del ejemplar actual aparece en una tarjeta central bajo el Pokém
 - Para no distraer: quieto mientras corre un ciclo de trabajo, sin sonido; un único salto al terminar (nada con movimiento reducido). Se oculta con su botón y la preferencia queda en el navegador (`life-tracker:focus-companion-hidden:{userId}`).
 - La etapa se calcula en el navegador (`resources/js/focus-companion.js`) sobre el estado de `pomodoroTimer`; no hace consultas durante la sesión. Con el juego apagado o sin ejemplares no se muestra.
 
-## Medición de recurrencia (CHG-066)
+## Medición de recurrencia (CHG-067)
 
 - `user_active_days`: una fila por usuario y día con `first_channel` (`direct`, `push`, `checkin`, `close`, `shortcut`, `return`, leído de `?via=`) y `records_count` (actividades del juego de ese día, incluidas las del MCP).
 - El middleware `TrackActiveDay` escribe una sola vez por día gracias a la caché.
 - `php artisan miso:retention --days=30` muestra D1/D7/D30, canales de entrada y registros por día activo.
 - Con el juego apagado no hay actividades, así que `records_count` queda en 0.
 
-## Volver sin culpa (CHG-071)
+## Volver sin culpa (CHG-072)
 
 - Si el último día activo anterior a hoy (`user_active_days`) fue hace 3 días o más (`config/engagement.php`), Inicio muestra `Home\WelcomeBack` una sola vez por regreso (`welcome_backs`, único usuario + fecha).
 - Ofrece mover lo atrasado a hoy, a otra fecha o dejarlo sin fecha (con Deshacer), un enlace para marcar hábitos de los días ausentes y +1 vaso de agua.
-- Usuarios sin historial nunca la ven; las ausencias anteriores a CHG-066 no se detectan.
+- Usuarios sin historial nunca la ven; las ausencias anteriores a CHG-067 no se detectan.

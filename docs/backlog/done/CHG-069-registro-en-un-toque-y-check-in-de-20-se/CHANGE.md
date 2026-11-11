@@ -1,4 +1,4 @@
-# CHG-068 · Registro en un toque y check-in de 20 segundos
+# CHG-069 · Registro en un toque y check-in de 20 segundos
 **Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
@@ -12,12 +12,12 @@
 - Cómo comprobarlo tú: toca "Hecho" en un aviso y verifica el hábito; abre el check-in y registra todo en menos de 20 s.
 
 ## 1. Resumen
-Registrar cuesta: cada dato vive en su módulo. Inicio ya tiene registros rápidos (agua, ánimo, energía en `partials/quick-log` y hábitos en `partials/habits-today`), pero no hay un camino directo de 20 s ni acciones desde el aviso. Agregamos: (1) un check-in guiado en Inicio que reutiliza esos mismos métodos del `Dashboard`, abierto con `/?checkin=1`; (2) botones en los avisos push del CHG-067 ("+1 vaso" registra sin abrir la app; "Check-in" abre la hoja). Sin texto libre (CHG-073).
+Registrar cuesta: cada dato vive en su módulo. Inicio ya tiene registros rápidos (agua, ánimo, energía en `partials/quick-log` y hábitos en `partials/habits-today`), pero no hay un camino directo de 20 s ni acciones desde el aviso. Agregamos: (1) un check-in guiado en Inicio que reutiliza esos mismos métodos del `Dashboard`, abierto con `/?checkin=1`; (2) botones en los avisos push del CHG-068 ("+1 vaso" registra sin abrir la app; "Check-in" abre la hoja). Sin texto libre (CHG-074).
 
 ## 2. Producto (product-manager)
 - Problema / usuario: registrar varias cosas exige recorrer Inicio o varios módulos; el aviso push solo abre la app.
 - Incluye: hoja "Check-in" en Inicio (ánimo, energía, +1 vaso y hábitos pendientes de hoy, en ese orden, con "Listo"); botón "Check-in" en Inicio; `/?checkin=1&via=checkin` la abre; acciones en el aviso push: agua → "+1 vaso" y "Abrir"; otros → "Check-in" y "Abrir"; "+1 vaso" registra en segundo plano con un enlace firmado, una sola vez por aviso.
-- No incluye: texto libre o voz (CHG-073); nuevos tipos de registro.
+- No incluye: texto libre o voz (CHG-074); nuevos tipos de registro.
 - Criterios de aceptación:
   - Dado que abro `/?checkin=1`, entonces veo la hoja con ánimo, energía, agua y mis hábitos pendientes de hoy.
   - Dado que marco un hábito en la hoja, entonces se completa con el mismo XP y feedback que desde Hábitos.
@@ -90,8 +90,8 @@ Aviso: [foto] Gotin · MiSo — Te falta un vaso.
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
 - 2026-11-11 — Decisión (developer): Inicio ya tiene los registros rápidos; el check-in los reutiliza en una hoja en vez de crear un componente paralelo.
-- Depende de: CHG-067.
-- Pregunta: ¿incluir captura por texto libre ("tomé 2 vasos y fui al gym") usando las herramientas MCP, o dejarlo para otro CHG? → 2026-11-11 Decisión (usuario): otro CHG (CHG-073).
+- Depende de: CHG-068.
+- Pregunta: ¿incluir captura por texto libre ("tomé 2 vasos y fui al gym") usando las herramientas MCP, o dejarlo para otro CHG? → 2026-11-11 Decisión (usuario): otro CHG (CHG-074).
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)

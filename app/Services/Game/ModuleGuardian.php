@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 /**
  * Guardián de módulo (CHG-055): el ejemplar del usuario con mejor afinidad de
  * tipo para un módulo y una frase según el avance del día en ese módulo.
- * CHG-065: se elige primero entre los integrantes del equipo de la semana.
+ * CHG-066: se elige primero entre los integrantes del equipo de la semana.
  */
 class ModuleGuardian
 {
@@ -38,7 +38,7 @@ class ModuleGuardian
         $matches = fn ($c) => collect($c->species->types ?? [])
             ->contains(fn ($type) => in_array(Str::slug((string) $type), $affinity, true));
 
-        // CHG-065: el equipo de la semana tiene prioridad; sin equipo, toda la colección.
+        // CHG-066: el equipo de la semana tiene prioridad; sin equipo, toda la colección.
         $team = $this->teamMembers($userId);
         $pool = $team->isNotEmpty()
             ? $companions->filter(fn ($c) => $team->has($c->id))->values()

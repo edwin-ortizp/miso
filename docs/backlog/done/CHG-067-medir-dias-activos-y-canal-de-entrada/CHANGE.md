@@ -1,4 +1,4 @@
-# CHG-066 · Medir días activos y canal de entrada
+# CHG-067 · Medir días activos y canal de entrada
 **Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
@@ -12,7 +12,7 @@
 - Cómo comprobarlo tú: tras usar la app un día, el comando `php artisan miso:retention` muestra ese día como activo.
 
 ## 1. Resumen
-Estrategia de recurrencia (2026-11-11): MiSo hoy es solo pull — notificaciones solo dentro de la app, sin push ni scheduler. Antes de construir avisos necesitamos medir si sirven: guardar un registro por usuario y día activo con el canal de entrada, y un comando que reporte retención D1/D7/D30 y registros por día activo. Es la línea base de CHG-067 a CHG-070.
+Estrategia de recurrencia (2026-11-11): MiSo hoy es solo pull — notificaciones solo dentro de la app, sin push ni scheduler. Antes de construir avisos necesitamos medir si sirven: guardar un registro por usuario y día activo con el canal de entrada, y un comando que reporte retención D1/D7/D30 y registros por día activo. Es la línea base de CHG-068 a CHG-071.
 
 ## 4. Diseño técnico
 - Tabla `user_active_days` (user_id, date, first_channel, records_count; único user_id+date).
