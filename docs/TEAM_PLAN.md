@@ -76,6 +76,8 @@ _Última actualización: 2026-11-11_
 | CHG-068 | M | Registro en un toque y check-in de 20 segundos | to-do | Borrador | 0/0 |
 | CHG-069 | S | Cierre del día | to-do | Borrador | 0/0 |
 | CHG-070 | M | Resumen del domingo con hallazgos de tus datos | to-do | Borrador | 0/0 |
+| CHG-071 | M | Volver sin culpa después de una ausencia | to-do | Borrador | 0/0 |
+| CHG-072 | S | Atajos de la app instalada | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
