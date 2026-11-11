@@ -1,9 +1,9 @@
 # CHG-071 · Volver sin culpa después de una ausencia
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -16,7 +16,7 @@ Volver tras una ausencia es el momento con más riesgo de abandono: el usuario e
 
 ## 2. Producto (product-manager)
 - Problema / usuario: quien deja de usar la app unos días vuelve a una pantalla que lo regaña y la abandona del todo.
-- Incluye: detección de ausencia (≥ 3 días sin día activo, configurable en `config/game.php` o config propia); bienvenida en Inicio una vez por regreso; tareas vencidas con acciones en bloque (pasar a hoy, reprogramar, archivar) y opción de revisarlas una por una; una sugerencia pequeña (el hábito más fácil o 1 vaso de agua); misiones de la semana sin ningún aviso de atraso.
+- Incluye: detección de ausencia (≥ 3 días sin día activo, configurable en `config/game.php` o config propia); bienvenida en Inicio una vez por regreso; tareas vencidas con acciones en bloque (pasar a hoy, reprogramar, archivar) y opción de revisarlas una por una; una sugerencia pequeña (el hábito más fácil o 1 vaso de agua); enlace para marcar en retroactivo los hábitos de los días ausentes (reusa Hábitos con fecha); misiones de la semana sin ningún aviso de atraso.
 - No incluye: avisos push de reenganche (eso es CHG-067); cambios a rachas (no hay rachas con castigo).
 - Criterios de aceptación:
   - Dado que mi último día activo fue hace 4 días, cuando abro Inicio, entonces veo la bienvenida del guardián y no el listado normal de vencidos.
@@ -89,7 +89,8 @@ Volver tras una ausencia es el momento con más riesgo de abandono: el usuario e
 ## 8. Bitácora de implementación (developer)
 
 ## 9. Preguntas abiertas, decisiones e historial
-- Pregunta: ¿3 días de ausencia está bien como umbral?
-- Pregunta: ¿los hábitos de los días ausentes se dejan como están (sin registrar) o se ofrece marcar alguno como hecho?
+- Pregunta: ¿3 días de ausencia está bien como umbral? → 2026-11-11 Decisión (usuario): sí, 3 días.
+- Pregunta: ¿los hábitos de los días ausentes se dejan como están (sin registrar) o se ofrece marcar alguno como hecho? → 2026-11-11 Decisión (usuario): se pueden marcar en retroactivo, como ya permite la app, y debe seguir así. La bienvenida ofrece el enlace "¿Hiciste algún hábito estos días? Márcalo" que abre Hábitos en el primer día ausente; no se crea lógica nueva ni restricciones.
 - Depende de: CHG-066.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
+- 2026-11-11 — Aprobado por el usuario (Compuerta 2)

@@ -1,9 +1,9 @@
 # CHG-072 · Atajos de la app instalada
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -43,5 +43,6 @@ Nombres ≤ 20 caracteres (`short_name` ≤ 12), íconos 96×96 por atajo con el
 ## 8. Bitácora de implementación (developer)
 
 ## 9. Preguntas abiertas, decisiones e historial
-- Pregunta: ¿estos cuatro atajos u otros (p. ej. "Tareas de hoy", "Iniciar foco")? Máximo recomendado: 4.
+- Pregunta: ¿estos cuatro atajos u otros (p. ej. "Tareas de hoy", "Iniciar foco")? Máximo recomendado: 4. → 2026-11-11 Decisión (usuario): los cuatro propuestos para empezar.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
+- 2026-11-11 — Aprobado por el usuario (Compuerta 2)
