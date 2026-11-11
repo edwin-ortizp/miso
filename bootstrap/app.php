@@ -4,6 +4,7 @@ use App\Http\Middleware\AddGameEventHeader;
 use App\Http\Middleware\AuthenticateIntegrationToken;
 use App\Http\Middleware\AuthenticateMcpRequest;
 use App\Http\Middleware\MeasurePerformance;
+use App\Http\Middleware\TrackActiveDay;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -19,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->prepend(MeasurePerformance::class);
         $middleware->appendToGroup('web', AddGameEventHeader::class);
+        $middleware->appendToGroup('web', TrackActiveDay::class);
         $middleware->alias([
             'integration.token' => AuthenticateIntegrationToken::class,
             'mcp.auth' => AuthenticateMcpRequest::class,

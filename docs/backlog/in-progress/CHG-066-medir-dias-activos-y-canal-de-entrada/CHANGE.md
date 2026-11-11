@@ -1,5 +1,5 @@
 # CHG-066 · Medir días activos y canal de entrada
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -22,14 +22,17 @@ Estrategia de recurrencia (2026-11-11): MiSo hoy es solo pull — notificaciones
 - Privacidad: solo datos propios, sin terceros.
 
 ## 7. Tareas
-- [ ] T1 · Se guarda cada día activo y el canal de entrada — Resp: developer — Modelo: estandar — Archivos: migración, `app/Models/UserActiveDay.php`, middleware — Hecho cuando: un día con varias visitas deja una sola fila con el primer canal.
-- [ ] T2 · Se cuentan los registros del día — Resp: developer — Modelo: estandar — Archivos: punto común de actividad del juego — Hecho cuando: completar un hábito incrementa `records_count`.
-- [ ] T3 · Reporte de retención — Resp: developer — Modelo: estandar — Archivos: `routes/console.php` o `app/Console/Commands` — Hecho cuando: el comando imprime D1/D7/D30.
-- [ ] T4 · Pruebas — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/` — Hecho cuando: cubren upsert diario, canal y reporte.
+- [x] T1 · Se guarda cada día activo y el canal de entrada — Resp: developer — Modelo: estandar — Archivos: migración, `app/Models/UserActiveDay.php`, middleware — Hecho cuando: un día con varias visitas deja una sola fila con el primer canal.
+- [x] T2 · Se cuentan los registros del día — Resp: developer — Modelo: estandar — Archivos: punto común de actividad del juego — Hecho cuando: completar un hábito incrementa `records_count`.
+- [x] T3 · Reporte de retención — Resp: developer — Modelo: estandar — Archivos: `routes/console.php` o `app/Console/Commands` — Hecho cuando: el comando imprime D1/D7/D30.
+- [x] T4 · Pruebas — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/` — Hecho cuando: cubren upsert diario, canal y reporte.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-11 — Tabla `user_active_days`, modelo `UserActiveDay` (touch/countRecord), middleware `TrackActiveDay` en el grupo web (Cache::add por usuario y día; canal por `?via=`), `GameEvent` de tipo activity suma `records_count` (también desde MCP), comando `miso:retention {--days}`, pruebas en `tests/Feature/Engagement/ActiveDayTrackingTest.php`. Límite: con el juego apagado no se generan GameEvent y `records_count` queda en 0; los días activos sí se registran. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - Pregunta: ¿el reporte basta como comando o lo quieres ver en Estadísticas? → 2026-11-11 Decisión (usuario): basta el comando.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Implementación terminada → En verificación

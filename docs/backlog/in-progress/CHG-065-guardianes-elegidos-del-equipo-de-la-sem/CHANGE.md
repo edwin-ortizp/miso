@@ -1,5 +1,5 @@
 # CHG-065 · Guardianes elegidos del equipo de la semana
-**Estado:** En desarrollo
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -27,3 +27,4 @@ El equipo de la semana solo se veía en la vista del juego y los guardianes sal�
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Implementación terminada → En verificación

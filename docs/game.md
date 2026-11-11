@@ -331,3 +331,10 @@ La experiencia del ejemplar actual aparece en una tarjeta central bajo el Pokém
 - Su frase cambia solo al cambiar de etapa: listo, inicio, mitad (50 %), tramo final (80 % o últimos 5 min), en pausa, terminado y descanso. Textos en `config/game.php` → `focus_companion`.
 - Para no distraer: quieto mientras corre un ciclo de trabajo, sin sonido; un único salto al terminar (nada con movimiento reducido). Se oculta con su botón y la preferencia queda en el navegador (`life-tracker:focus-companion-hidden:{userId}`).
 - La etapa se calcula en el navegador (`resources/js/focus-companion.js`) sobre el estado de `pomodoroTimer`; no hace consultas durante la sesión. Con el juego apagado o sin ejemplares no se muestra.
+
+## Medición de recurrencia (CHG-066)
+
+- `user_active_days`: una fila por usuario y día con `first_channel` (`direct`, `push`, `checkin`, `close`, leído de `?via=`) y `records_count` (actividades del juego de ese día, incluidas las del MCP).
+- El middleware `TrackActiveDay` escribe una sola vez por día gracias a la caché.
+- `php artisan miso:retention --days=30` muestra D1/D7/D30, canales de entrada y registros por día activo.
+- Con el juego apagado no hay actividades, así que `records_count` queda en 0.
