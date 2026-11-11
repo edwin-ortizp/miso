@@ -79,7 +79,7 @@ class NotificationDispatcher
             'body' => $notice->body,
             'url' => $this->withVia($notice->destination()),
             'tag' => $notice->type.':'.$notice->occurrence_key,
-        ];
+        ] + self::actions($notice);
         $ok = false;
         foreach (PushSubscription::where('user_id', $notice->user_id)->get() as $subscription) {
             $status = $this->gateway->send($subscription, $payload);
@@ -90,6 +90,32 @@ class NotificationDispatcher
             $ok = $ok || $status === PushGateway::SENT;
         }
         $ok ? $result['sent']++ : $result['failed']++;
+    }
+
+    /**
+     * CHG-068: botones del aviso. Agua → "+1 vaso" (registra sin abrir la app, URL firmada 12 h);
+     * el resto → "Check-in". Los navegadores sin acciones (iPhone) ignoran estos campos.
+     *
+     * @return array{actions: list<array{action: string, title: string}>, quick_url?: string, checkin_url: string}
+     */
+    public static function actions(UserNotification $notice): array
+    {
+        $checkin = route('home', ['checkin' => 1, 'via' => 'checkin']);
+        $isWater = $notice->type === GuardianNudgePlanner::TYPE
+            && GuardianNudgePlanner::moduleFor((string) $notice->source_id) === 'water';
+
+        if ($isWater) {
+            return [
+                'actions' => [['action' => 'quick-water', 'title' => '+1 vaso'], ['action' => 'open', 'title' => 'Abrir']],
+                'quick_url' => \Illuminate\Support\Facades\URL::temporarySignedRoute('push.quick-water', now()->addHours(12), ['notification' => $notice->id]),
+                'checkin_url' => $checkin,
+            ];
+        }
+
+        return [
+            'actions' => [['action' => 'checkin', 'title' => 'Check-in'], ['action' => 'open', 'title' => 'Abrir']],
+            'checkin_url' => $checkin,
+        ];
     }
 
     private function withVia(string $url): string

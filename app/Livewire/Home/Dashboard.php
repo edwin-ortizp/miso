@@ -26,6 +26,7 @@ use App\Support\WaterGoal;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 #[Layout('layouts.app')]
@@ -33,6 +34,23 @@ use Livewire\Component;
 class Dashboard extends Component
 {
     use HandlesHabitActionPrompt, HandlesRecurringTaskCompletion, HasUrlDate, LogsMoodProgressively;
+
+    /** CHG-068: hoja de check-in de 20 s (`/?checkin=1`, botón en Inicio o acción del aviso). */
+    #[Url(as: 'checkin', except: false)]
+    public bool $checkin = false;
+
+    /** El check-in siempre registra hoy. */
+    public function updatedCheckin(bool $open): void
+    {
+        if ($open) {
+            $this->selectedDate = now()->toDateString();
+        }
+    }
+
+    public function closeCheckin(): void
+    {
+        $this->checkin = false;
+    }
 
     public const MEAL_TYPES = [
         'desayuno' => 'Desayuno',
@@ -49,6 +67,9 @@ class Dashboard extends Component
     {
         $this->buddy = app(\App\Services\Game\DailyBuddy::class)->pick((int) auth()->id());
         $this->initializeSelectedDate();
+        if ($this->checkin) {
+            $this->selectedDate = now()->toDateString();
+        }
     }
 
     public function previousDay()

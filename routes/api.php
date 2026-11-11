@@ -14,3 +14,9 @@ Route::middleware(['integration.token', 'throttle:60,1'])
         Route::post('/mood-entries', [MoodImportController::class, 'store']);
         Route::post('/energy-entries', [EnergyImportController::class, 'store']);
     });
+
+// CHG-068: acción "+1 vaso" del aviso push. La autoriza la firma temporal, sin sesión ni CSRF.
+Route::post('/push/quick-water/{notification}', \App\Http\Controllers\Push\QuickWaterController::class)
+    ->middleware(['signed', 'throttle:30,1'])
+    ->whereUuid('notification')
+    ->name('push.quick-water');

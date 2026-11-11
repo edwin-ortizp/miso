@@ -75,3 +75,8 @@ La copia recuperable previa está en `storage/framework/testing/notifications-be
 - **Envío:** `NotificationDispatcher` toma lo disponible, no cancelado, no leído, de las últimas 12 h y sin `push_sent_at`; lo reclama con un `UPDATE` condicional y envía a cada dispositivo. Un 404/410 borra la suscripción. Un fallo no se reintenta.
 - **Preferencias** (`module_settings`, módulo `notifications`): `guardian_nudges`, `nudge_morning|afternoon|night` y `push_birthday|task_due|plan_due|reminder` (qué otros tipos van al celular; apagados por defecto).
 - **Pruebas:** `php artisan test --filter='GuardianNudges|NotificationDispatch'`.
+
+### Acciones del aviso (CHG-068)
+
+- El payload push incluye `actions`, `checkin_url` y, en avisos de agua, `quick_url`: URL firmada (12 h) a `POST /api/push/quick-water/{notificación}` que registra 250 ml de agua sin abrir la app. La columna `action_done_at` se reclama con un UPDATE condicional: repetir la petición no suma otro vaso.
+- "Check-in" abre `/?checkin=1&via=checkin`, la hoja de 20 s de Inicio. iPhone no muestra botones: el aviso abre la app como siempre.

@@ -6,7 +6,7 @@
  * caducada del bundle (que dejaria Livewire inservible tras un despliegue).
  */
 
-const VERSION = 'life-tracker-v7';
+const VERSION = 'life-tracker-v8';
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const PAGE_CACHE = `${VERSION}-pages`;
@@ -180,14 +180,34 @@ self.addEventListener('push', (event) => {
         icon: data.icon || '/icons/icon-192x192.png',
         badge: '/icons/icon-96x96.png',
         tag: data.tag || 'miso',
-        data: { url: data.url || '/?via=push' },
+        // CHG-068: botones del aviso; los navegadores sin soporte los ignoran.
+        actions: Array.isArray(data.actions) ? data.actions.slice(0, 2) : [],
+        data: { url: data.url || '/?via=push', quickUrl: data.quick_url || null, checkinUrl: data.checkin_url || null },
     }));
 });
 
 /** Abre la pantalla del aviso; si MiSo ya está abierta, la reutiliza. */
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-    const target = new URL(event.notification.data?.url || '/', self.location.origin);
+    const data = event.notification.data || {};
+
+    // CHG-068: "+1 vaso" registra en segundo plano con la URL firmada; si falla, abre Agua.
+    if (event.action === 'quick-water' && data.quickUrl) {
+        event.waitUntil(
+            fetch(data.quickUrl, { method: 'POST', headers: { Accept: 'application/json' } })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('quick-water');
+                    }
+                })
+                .catch(() => self.clients.openWindow('/water/daily?via=push'))
+        );
+
+        return;
+    }
+
+    const destination = event.action === 'checkin' && data.checkinUrl ? data.checkinUrl : (data.url || '/');
+    const target = new URL(destination, self.location.origin);
 
     // Solo se navega dentro del propio origen.
     const url = target.origin === self.location.origin ? target.href : self.location.origin;

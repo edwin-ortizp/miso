@@ -4,6 +4,12 @@
     {{-- CHG-071: bienvenida al volver tras una ausencia. --}}
     <livewire:home.welcome-back />
 
+    {{-- CHG-068: check-in de 20 s. --}}
+    <div class="d-flex justify-content-end mb-2">
+        <x-ui.action type="button" variant="tonal" wire:click="$set('checkin', true)"><i class="bi bi-lightning-charge" aria-hidden="true"></i> Check-in</x-ui.action>
+    </div>
+    @include('livewire.home.partials.checkin-sheet')
+
     @if ($vehicleAlerts->isNotEmpty())
         <a href="{{ route('vehicles') }}" class="md-card-outlined d-block text-decoration-none mb-3" style="color: inherit; border-color: var(--md-custom-color-warning);">
             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">

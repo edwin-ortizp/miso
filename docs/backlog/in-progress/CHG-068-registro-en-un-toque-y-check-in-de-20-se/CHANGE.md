@@ -1,5 +1,5 @@
 # CHG-068 · Registro en un toque y check-in de 20 segundos
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -79,12 +79,13 @@ Aviso: [foto] Gotin · MiSo — Te falta un vaso.
 - Docs a actualizar: `docs/notifications.md` (acciones y enlace firmado), `docs/game.md` (recurrencia).
 
 ## 7. Tareas
-- [ ] T1 · Check-in de 20 s en Inicio — Resp: developer — Modelo: estandar — Archivos: `Dashboard.php`, `partials/checkin-sheet.blade.php` — Hecho cuando: `/?checkin=1` y el botón abren la hoja y cada registro usa la lógica existente.
-- [ ] T2 · Botones en el aviso push — Resp: developer — Modelo: estandar — Archivos: `NotificationDispatcher`, `public/sw.js` — Hecho cuando: los avisos traen acciones según tipo y "Check-in" abre la hoja.
-- [ ] T3 · +1 vaso sin abrir la app — Resp: developer — Modelo: estandar — Archivos: migración `action_done_at`, ruta firmada, `QuickWaterController` — Hecho cuando: registra una sola vez y rechaza firmas inválidas o vencidas.
-- [ ] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/QuickCheckinTest.php`, docs — Hecho cuando: pasan los casos de §5.
+- [x] T1 · Check-in de 20 s en Inicio — Resp: developer — Modelo: estandar — Archivos: `Dashboard.php`, `partials/checkin-sheet.blade.php` — Hecho cuando: `/?checkin=1` y el botón abren la hoja y cada registro usa la lógica existente.
+- [x] T2 · Botones en el aviso push — Resp: developer — Modelo: estandar — Archivos: `NotificationDispatcher`, `public/sw.js` — Hecho cuando: los avisos traen acciones según tipo y "Check-in" abre la hoja.
+- [x] T3 · +1 vaso sin abrir la app — Resp: developer — Modelo: estandar — Archivos: migración `action_done_at`, ruta firmada, `QuickWaterController` — Hecho cuando: registra una sola vez y rechaza firmas inválidas o vencidas.
+- [x] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/QuickCheckinTest.php`, docs — Hecho cuando: pasan los casos de §5.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-11 — `Dashboard::$checkin` (`#[Url]`, siempre registra hoy), hoja `partials/checkin-sheet.blade.php` (persistente, claves `checkin-*` para no chocar con las de Inicio) y botón "Check-in"; `NotificationDispatcher::actions()` agrega botones y URL firmada; `QuickWaterController` en `routes/api.php` (firma 12 h, throttle, `action_done_at` reclamado con UPDATE condicional); `sw.js` v8 maneja `event.action`. Pruebas en `tests/Feature/Engagement/QuickCheckinTest.php`. Assets recompilados. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-11 — Decisión (developer): Inicio ya tiene los registros rápidos; el check-in los reutiliza en una hoja en vez de crear un componente paralelo.
@@ -92,3 +93,5 @@ Aviso: [foto] Gotin · MiSo — Te falta un vaso.
 - Pregunta: ¿incluir captura por texto libre ("tomé 2 vasos y fui al gym") usando las herramientas MCP, o dejarlo para otro CHG? → 2026-11-11 Decisión (usuario): otro CHG (CHG-073).
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Implementación terminada → En verificación
