@@ -48,6 +48,23 @@ return [
         'volador' => 'cielo', 'normal' => 'cielo',
     ],
     // Guardianes de módulo (CHG-055): tipos afines por módulo y frase por estado.
+    // Avisos push del guardián (CHG-067). Franjas en America/Bogota, [hora inicio, hora fin).
+    'nudges' => [
+        'enabled' => (bool) env('GUARDIAN_NUDGES_ENABLED', true),
+        'slots' => [
+            'morning' => ['label' => 'Mañana', 'from' => 8, 'to' => 10],
+            'afternoon' => ['label' => 'Tarde', 'from' => 14, 'to' => 16],
+            'night' => ['label' => 'Noche', 'from' => 19, 'to' => 21],
+        ],
+        'daily_cap' => 2,
+        // Módulos con meta diaria medible: solo se avisa si queda algo pendiente.
+        'modules' => ['habits', 'water', 'tasks', 'exercise'],
+        // Límites por corrida para no chocar con los cortes del hosting compartido.
+        'max_seconds' => 40,
+        'max_sends' => 200,
+        // No se envían por push avisos más viejos que esto (evita ráfagas tras activar el canal).
+        'max_age_hours' => 12,
+    ],
     'module_guardians' => [
         'tasks' => ['psiquico', 'acero'],
         'health' => ['hada', 'normal'],

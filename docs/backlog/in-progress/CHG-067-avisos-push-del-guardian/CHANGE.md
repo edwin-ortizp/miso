@@ -1,5 +1,5 @@
 # CHG-067 · Avisos push del guardián
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -57,7 +57,7 @@ Aviso:  [foto] Chispin · MiSo
 - Criterios de aceptación de los textos: pasan `MissionProposalValidator::penaltyWord` y miden ≤ 60 caracteres.
 
 ## 4. Diseño técnico (software-architect)
-- Archivos a crear / modificar: `resources/js/pwa.js` + service worker (push y notificationclick), tabla `push_subscriptions`, paquete `laravel-notification-channels/webpush` (VAPID en .env), job `SendGuardianNudges` registrado en el scheduler (`routes/console.php`), preferencias en `NotificationPreferences`, reutilizar `app/Services/Notifications/*` como fuente de "qué está pendiente".
+- Archivos a crear / modificar: (actualizado 2026-11-11: se reutiliza la tabla `notifications`, ver §9) `resources/js/pwa.js` + service worker (push y notificationclick), tabla `push_subscriptions`, paquete `laravel-notification-channels/webpush` (VAPID en .env), job `SendGuardianNudges` registrado en el scheduler (`routes/console.php`), preferencias en `NotificationPreferences`, reutilizar `app/Services/Notifications/*` como fuente de "qué está pendiente".
 - Enfoque y patrones a seguir: el job elige el módulo con más pendiente del día, pide la frase a `GuardianAdvisor`/`ModuleGuardian::line`, guarda el envío (idempotencia por usuario+franja+día) y respeta zona horaria del usuario.
 - Riesgos y mitigación: hoy no hay cron en producción (T5, requisito de despliegue); iOS solo permite push con la PWA instalada (explicarlo en Ajustes); fatiga de avisos (tope y "no hay pendiente → no aviso"); el servidor necesita cron activo (`schedule:run`).
 - Qué NO tocar: las notificaciones dentro de la app (siguen igual), la lógica del juego y los guardianes.
@@ -77,18 +77,22 @@ Aviso:  [foto] Chispin · MiSo
 - Docs a actualizar: `docs/game.md` (sección Guardianes: avisos push) y la documentación de despliegue (cron y VAPID).
 
 ## 7. Tareas
-- [ ] T1 · Puedo activar los avisos y elegir franjas — Resp: developer — Modelo: estandar — Archivos: Ajustes, `pwa.js`, service worker, `push_subscriptions` — Hecho cuando: la suscripción se guarda y se puede desactivar.
-- [ ] T2 · El guardián decide si avisar y qué decir — Resp: developer — Modelo: estandar — Archivos: `app/Jobs/SendGuardianNudges.php`, scheduler — Hecho cuando: respeta franja, pendiente real y tope; es idempotente según `docs/ARCHITECTURE.md` § Tareas programadas: tabla `guardian_nudges_sent` con único (user_id, date, slot) escrito antes de enviar, `->withoutOverlapping()->onOneServer()`, y una prueba que corre el job dos veces y verifica un solo aviso.
-- [ ] T3 · Tocar el aviso abre el módulo — Resp: developer — Modelo: estandar — Archivos: service worker — Hecho cuando: abre la URL con `?via=push`.
-- [ ] T5 · Dejar documentado el cron del servidor — Resp: developer — Modelo: estandar — Archivos: `docs/DEPLOY.md` (nuevo) — Hecho cuando: documenta la línea de crontab (`* * * * * cd /ruta/miso && php artisan schedule:run >> /dev/null 2>&1`), el script bash si se usa, las claves VAPID en `.env`, cómo comprobar (`php artisan schedule:list`) y qué pasa si el cron corre dos veces (nada: idempotente).
-- [ ] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Notifications/`, `docs/game.md` — Hecho cuando: hay pruebas de franja, tope, sin pendiente y texto sin culpa.
+- [x] T1 · Puedo activar los avisos y elegir franjas — Resp: developer — Modelo: estandar — Archivos: Ajustes, `pwa.js`, service worker, `push_subscriptions` — Hecho cuando: la suscripción se guarda y se puede desactivar.
+- [x] T2 · El guardián decide si avisar y qué decir — Resp: developer — Modelo: estandar — Archivos: `app/Jobs/SendGuardianNudges.php`, scheduler — Hecho cuando: respeta franja, pendiente real y tope; es idempotente según `docs/ARCHITECTURE.md` § Tareas programadas usando el índice único de `notifications` (ocurrencia `{fecha}:{franja}`) y el reclamo condicional de `push_sent_at`, con pruebas que corren los comandos dos veces.
+- [x] T3 · Tocar el aviso abre el módulo — Resp: developer — Modelo: estandar — Archivos: service worker — Hecho cuando: abre la URL con `?via=push`.
+- [x] T5 · Dejar documentado el cron del servidor — Resp: developer — Modelo: estandar — Archivos: `docs/DEPLOY.md` (nuevo) — Hecho cuando: documenta la línea de crontab (`* * * * * cd /ruta/miso && php artisan schedule:run >> /dev/null 2>&1`), el script bash si se usa, las claves VAPID en `.env`, cómo comprobar (`php artisan schedule:list`) y qué pasa si el cron corre dos veces (nada: idempotente).
+- [x] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Notifications/`, `docs/game.md` — Hecho cuando: hay pruebas de franja, tope, sin pendiente y texto sin culpa.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-11 — Migración (`push_sent_at`, `push_subscriptions`), `GuardianNudgePlanner`, `NotificationDispatcher`, `PushGateway`/`WebPushGateway` (minishlink/web-push ^11, compatible con Guzzle 8), comandos `miso:guardian-nudges`, `notifications:dispatch`, `miso:push-check`, `miso:vapid`, scheduler en `routes/console.php`, `ModuleProgress` extraído de `GuardianCard`, tarjeta en Ajustes → Notificaciones, `pwa.js` (`ltPushToggle`) y `sw.js` v7 (push y notificationclick), `docs/DEPLOY.md`, `docs/notifications.md`. Assets recompilados (incluye el CSS pendiente de CHG-065). Pruebas escritas y no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — Decisión (usuario): reutilizar el modelo multicanal existente (`notifications` + columna `*_sent_at` por canal) en vez de tablas propias. El aviso del guardián es el tipo `guardian_nudge`; se agrega `push_sent_at` y `push_subscriptions`. Hosting compartido: un solo cron a `schedule:run` (cada 1–15 min), sin colas, lotes con límite de tiempo.
 - 2026-11-11 — Decisión (usuario): todo lo que corra en el servidor queda documentado (cron/script) y es idempotente por ventana; regla agregada en `docs/ARCHITECTURE.md`.
 - Pregunta: ¿franjas fijas (8–10, 14–16, 19–21) o horas que elige cada usuario? → 2026-11-11 Decisión: hoy no existen franjas; se crean tres fijas (mañana 8–10, tarde 14–16, noche 19–21) que el usuario activa o desactiva en Ajustes. Horas personalizadas quedan para después.
 - Pregunta: ¿el servidor de producción ya corre `schedule:run` por cron? → 2026-11-11 Decisión (usuario): no hay cron hoy, pero puede configurarse. El CHG documenta cómo y el despliegue requiere activarlo (ver T5).
 - Depende de: CHG-066.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Implementación terminada → En verificación

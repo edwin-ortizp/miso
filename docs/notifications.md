@@ -15,7 +15,7 @@ El comando llama a `GenerateNotifications::run(User $user)`. Sin `--user`, proce
 * * * * * cd /ruta/a/miso && php artisan notifications:generate
 ```
 
-El cron no se instala automáticamente. La generación solo inserta en la base: no envía mensajes externos.
+El cron no se instala automáticamente. Desde CHG-067 la línea única es `php artisan schedule:run` (ver `docs/DEPLOY.md`), que ejecuta este comando, `miso:guardian-nudges` y `notifications:dispatch`. La generación solo inserta en la base; el envío externo lo hace `notifications:dispatch`.
 
 ## Reglas y fechas
 
@@ -66,3 +66,12 @@ La copia recuperable previa está en `storage/framework/testing/notifications-be
 - Navegador: tres escenarios completos a 390, 768 y 1440 px, con filtros, lectura, Escape y retorno del foco, ajustes y campos de recordatorio. Axe no encontró infracciones en bandeja ni ajustes. Sin errores JavaScript ni desbordamiento horizontal.
 - Build y conformidad UI correctos; sin deuda visual nueva. El build conserva el aviso de chunks mayores de 500 kB.
 - La base local contiene las dos tablas nuevas y no conserva las seis tablas retiradas; la tabla `reminders` se recreó con la estructura simplificada. No existen rutas del runner.
+
+
+## Canal push y avisos del guardián (CHG-067)
+
+- **Patrón de canales:** cada canal tiene su columna `*_sent_at` en `notifications` (`telegram_sent_at`, `push_sent_at`) y su tabla de vinculación (`push_subscriptions`). La entrega pasa por `PushGateway` (`WebPushGateway` con VAPID). Para Telegram o WhatsApp: otra implementación del gateway, su columna y su vinculación. Con más de tres canales conviene pasar a una tabla `notification_deliveries`.
+- **Aviso del guardián:** tipo `guardian_nudge`, origen `guardian` con `source_id` = UUID v5 del módulo, ocurrencia `{fecha}:{franja}`. Lo crea `GuardianNudgePlanner` solo si el usuario activó los avisos, tiene un dispositivo vinculado, la franja está activa, no superó el tope diario y queda algo pendiente en hábitos, agua, tareas o ejercicio. Aparece también en la campana y lleva al módulo.
+- **Envío:** `NotificationDispatcher` toma lo disponible, no cancelado, no leído, de las últimas 12 h y sin `push_sent_at`; lo reclama con un `UPDATE` condicional y envía a cada dispositivo. Un 404/410 borra la suscripción. Un fallo no se reintenta.
+- **Preferencias** (`module_settings`, módulo `notifications`): `guardian_nudges`, `nudge_morning|afternoon|night` y `push_birthday|task_due|plan_due|reminder` (qué otros tipos van al celular; apagados por defecto).
+- **Pruebas:** `php artisan test --filter='GuardianNudges|NotificationDispatch'`.

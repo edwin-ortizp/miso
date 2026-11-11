@@ -16,6 +16,7 @@
         "laravel/passport": "^13.8",
         "laravel/tinker": "^3.0",
         "livewire/livewire": "^4.3",
+        "minishlink/web-push": "^11.0",
         "monicahq/laravel-sabre": "^1.10",
         "opcodesio/log-viewer": "^3.24"
     },

@@ -6,7 +6,7 @@
  * caducada del bundle (que dejaria Livewire inservible tras un despliegue).
  */
 
-const VERSION = 'life-tracker-v6';
+const VERSION = 'life-tracker-v7';
 const SHELL_CACHE = `${VERSION}-shell`;
 const ASSET_CACHE = `${VERSION}-assets`;
 const PAGE_CACHE = `${VERSION}-pages`;
@@ -162,15 +162,45 @@ self.addEventListener('fetch', (event) => {
     }
 });
 
+/**
+ * CHG-067: aviso push del guardián (o de otra notificación). El servidor envía
+ * JSON con title, body, url y tag; si llega sin datos se muestra un aviso genérico.
+ */
+self.addEventListener('push', (event) => {
+    let data = {};
+
+    try {
+        data = event.data ? event.data.json() : {};
+    } catch {
+        data = { body: event.data?.text() };
+    }
+
+    event.waitUntil(self.registration.showNotification(data.title || 'MiSo', {
+        body: data.body || 'Tienes algo pendiente en MiSo.',
+        icon: data.icon || '/icons/icon-192x192.png',
+        badge: '/icons/icon-96x96.png',
+        tag: data.tag || 'miso',
+        data: { url: data.url || '/?via=push' },
+    }));
+});
+
+/** Abre la pantalla del aviso; si MiSo ya está abierta, la reutiliza. */
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
+    const target = new URL(event.notification.data?.url || '/', self.location.origin);
+
+    // Solo se navega dentro del propio origen.
+    const url = target.origin === self.location.origin ? target.href : self.location.origin;
+
     event.waitUntil(
-        self.clients.matchAll({ type: 'window' }).then((clients) => {
-            if (clients.length > 0) {
-                return clients[0].focus();
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+            const client = clients.find((c) => c.url.startsWith(self.location.origin));
+
+            if (client) {
+                return client.focus().then((focused) => (focused.navigate ? focused.navigate(url) : focused));
             }
 
-            return self.clients.openWindow('/');
+            return self.clients.openWindow(url);
         })
     );
 });

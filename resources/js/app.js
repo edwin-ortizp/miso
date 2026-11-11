@@ -13,7 +13,7 @@ import { registerPomodoroTimer } from './pomodoro-timer';
 import { registerFocusCompanion } from './focus-companion';
 import { registerUiSurfaces } from './ui-surfaces';
 import { markPlatform, registerAppFrame, registerPageTransitions } from './app-frame';
-import { registerInstallPrompt, registerServiceWorker } from './pwa';
+import { registerInstallPrompt, registerPushToggle, registerServiceWorker } from './pwa';
 import { registerFeedback } from './feedback';
 import { registerHealthBodyMap } from './health-body-map';
 import { registerTaskCalendar } from './task-calendar';
@@ -37,6 +37,7 @@ registerTaskGantt(Alpine);
 registerRoutineMusic(Alpine);
 
 registerInstallPrompt(Alpine);
+registerPushToggle(Alpine);
 registerGameCelebrations(Livewire);
 registerGameSounds();
 

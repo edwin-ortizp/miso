@@ -124,3 +124,83 @@ export function registerInstallPrompt(Alpine) {
         },
     }));
 }
+
+/** Clave VAPID pública (base64url) al formato que pide `pushManager.subscribe`. */
+function vapidKeyToBytes(key) {
+    const padded = (key + '='.repeat((4 - (key.length % 4)) % 4)).replace(/-/g, '+').replace(/_/g, '/');
+    const raw = window.atob(padded);
+
+    return Uint8Array.from(raw, (char) => char.charCodeAt(0));
+}
+
+/**
+ * CHG-067: activar o desactivar los avisos push del guardián en este dispositivo.
+ * Estados: unsupported | unconfigured | denied | off | on. El permiso del
+ * navegador se pide solo al pulsar "Activar", nunca al cargar la página.
+ */
+export function registerPushToggle(Alpine) {
+    Alpine.data('ltPushToggle', (vapidKey) => ({
+        state: 'off',
+        busy: false,
+
+        async init() {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
+                this.state = 'unsupported';
+
+                return;
+            }
+            if (!vapidKey) {
+                this.state = 'unconfigured';
+
+                return;
+            }
+            if (Notification.permission === 'denied') {
+                this.state = 'denied';
+
+                return;
+            }
+            const registration = await navigator.serviceWorker.getRegistration();
+            const subscription = await registration?.pushManager.getSubscription();
+            this.state = subscription ? 'on' : 'off';
+        },
+
+        async enable() {
+            this.busy = true;
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    this.state = permission === 'denied' ? 'denied' : 'off';
+
+                    return;
+                }
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription()
+                    ?? await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: vapidKeyToBytes(vapidKey),
+                    });
+                await this.$wire.saveSubscription(subscription.toJSON());
+                this.state = 'on';
+            } catch {
+                this.state = 'off';
+            } finally {
+                this.busy = false;
+            }
+        },
+
+        async disable() {
+            this.busy = true;
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const subscription = await registration.pushManager.getSubscription();
+                if (subscription) {
+                    await this.$wire.removeSubscription(subscription.endpoint);
+                    await subscription.unsubscribe();
+                }
+                this.state = 'off';
+            } finally {
+                this.busy = false;
+            }
+        },
+    }));
+}

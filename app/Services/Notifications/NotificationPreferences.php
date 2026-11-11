@@ -8,7 +8,21 @@ use Illuminate\Support\Facades\DB;
 
 class NotificationPreferences
 {
-    public const DEFAULTS = ['birthdays' => false, 'tasks' => false, 'plans' => false];
+    public const DEFAULTS = [
+        'birthdays' => false, 'tasks' => false, 'plans' => false,
+        // CHG-067: avisos del guardián y sus franjas.
+        'guardian_nudges' => false, 'nudge_morning' => true, 'nudge_afternoon' => true, 'nudge_night' => false,
+        // CHG-067: qué otros tipos de aviso también llegan al celular.
+        'push_birthday' => false, 'push_task_due' => false, 'push_plan_due' => false, 'push_reminder' => false,
+    ];
+
+    /** ¿Este tipo de notificación debe salir por push para este usuario? */
+    public static function pushAllowed(array $preferences, string $type): bool
+    {
+        return $type === 'guardian_nudge'
+            ? (bool) $preferences['guardian_nudges']
+            : (bool) ($preferences['push_'.$type] ?? false);
+    }
 
     public function get(int $userId): array
     {

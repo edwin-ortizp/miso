@@ -18,6 +18,7 @@
 ## Tareas programadas y comandos de servidor
 Regla para todo cambio que agregue algo que corra solo en el servidor (cron, scheduler, jobs periódicos):
 - **Documentado:** en `docs/DEPLOY.md` debe quedar la línea de cron, el script bash si existe, las variables de entorno que necesita y cómo comprobarlo (`php artisan schedule:list`, un `--dry-run` o el log). Si no está documentado, no se puede desplegar.
-- **Un solo punto de entrada:** el cron solo llama a `php artisan schedule:run` cada minuto; la frecuencia de cada tarea se define en `routes/console.php`, no en el crontab.
-- **Idempotente:** correrlo dos veces (cron duplicado, reintento, dos servidores) no repite la acción en su ventana (día, franja, minuto). Se garantiza en base de datos con una restricción única sobre (usuario, ventana) o una clave de idempotencia, no solo con banderas en memoria; además `->withoutOverlapping()` y `->onOneServer()` en el scheduler.
+- **Un solo punto de entrada:** el cron solo llama a `php artisan schedule:run` a la frecuencia que permita el hosting (idealmente cada minuto); la frecuencia de cada tarea se define en `routes/console.php`, no en el crontab.
+- **Hosting compartido:** sin colas ni procesos permanentes; cada corrida tiene un límite de tiempo y de lote y la siguiente continúa.
+- **Idempotente:** correrlo dos veces (cron duplicado, reintento, dos servidores) no repite la acción en su ventana (día, franja, minuto). Se garantiza en base de datos con una restricción única sobre (usuario, ventana) o una clave de idempotencia, no solo con banderas en memoria; además `->withoutOverlapping()` en el scheduler (`->onOneServer()` solo si algún día hay más de un servidor).
 - **Probado:** cada tarea tiene una prueba que la ejecuta dos veces seguidas y comprueba que el efecto ocurre una sola vez.

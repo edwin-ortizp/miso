@@ -15,7 +15,7 @@ class UserNotification extends Model
 
     protected function casts(): array
     {
-        return ['scheduled_for' => 'immutable_datetime', 'read_at' => 'immutable_datetime', 'cancelled_at' => 'immutable_datetime', 'telegram_sent_at' => 'immutable_datetime'];
+        return ['scheduled_for' => 'immutable_datetime', 'read_at' => 'immutable_datetime', 'cancelled_at' => 'immutable_datetime', 'telegram_sent_at' => 'immutable_datetime', 'push_sent_at' => 'immutable_datetime'];
     }
 
     protected $table = 'notifications';
@@ -27,6 +27,12 @@ class UserNotification extends Model
 
     public function destination(): string
     {
+        // CHG-067: el aviso del guardián lleva al módulo que tiene algo pendiente.
+        if ($this->source_type === \App\Services\Notifications\Push\GuardianNudgePlanner::SOURCE) {
+            return route(match (\App\Services\Notifications\Push\GuardianNudgePlanner::moduleFor((string) $this->source_id)) {
+                'habits' => 'habits', 'water' => 'water.daily', 'tasks' => 'tasks.list', 'exercise' => 'exercise', default => 'home',
+            });
+        }
         if ($this->source_type && ! app(NotificationSource::class)->find($this->user_id, $this->source_type, $this->source_id)) {
             return route(match ($this->source_type) {
                 'task' => 'tasks.list', 'plan' => 'plans', 'goal' => 'goals', 'relationship' => 'relationships', default => 'home',
