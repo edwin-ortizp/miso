@@ -323,7 +323,7 @@ Un reto pequeño al día, pensado para lo que la persona tiene pendiente hoy. Si
   - `category_tasks`: «Cierra {n} de {categoría}» (la categoría con más pendientes).
   - `habit_period`: «Completa los hábitos de {momento}» (un momento que aún no termina y tiene hábitos sin marcar).
   - `water_logs`: «Registra agua {n} veces» (2–3).
-  - `checkin`: «Haz tu check-in de hoy» (solo si falta ánimo o energía de hoy; en el Inicio «Ir» abre la hoja de check-in).
+  - `checkin`: «Haz tu check-in de hoy». Apagada por defecto desde CHG-080: en el Inicio el check-in ya lo pide la burbuja del compañero.
 - **Elección:** se calcula el avance de la semana de cada área (tareas, hábitos, agua, check-in) frente a lo esperado por día (`weekly_per_day`). Solo compiten las plantillas del área más descuidada, y entre ellas decide una semilla estable `crc32(usuario|fecha)`. El reto se guarda en `game_daily_challenges` (único por usuario y fecha) con sus parámetros congelados.
 - **Avance:** se deriva de los datos del día; no hay eventos nuevos. Funciona igual desde la app que desde MCP. Antifarmeo: no cuentan las tareas creadas hoy sin fecha ni recurrencia.
 - **Premio:** al cumplirlo se fija `completed_at` y se paga una ball extra con `grantBonusBall` (clave `daily-challenge:{fecha}`, sujeta al tope semanal). `rewarded_at` evita un segundo intento.

@@ -45,18 +45,19 @@ class GameDashboardTest extends TestCase
     public function test_hero_shows_the_streak_line_without_history(): void
     {
         Livewire::test(Dashboard::class)
-            ->assertSee('Hoy empieza tu racha: te faltan 3 acciones.')
-            ->assertSeeHtml('game-streak-line');
+            ->assertSee('Empieza hoy')
+            ->assertSee('Hoy 0 de 3 acciones · te faltan 3.')
+            ->assertSeeHtml('game-day-tile');
     }
 
     public function test_hero_shows_progress_and_completed_day(): void
     {
         $this->act('tasks');
         $this->act('habits');
-        Livewire::test(Dashboard::class)->assertSee('Hoy empieza tu racha: te falta 1 acción.');
+        Livewire::test(Dashboard::class)->assertSee('Hoy 2 de 3 acciones · te falta 1.');
 
         $this->act('habits');
-        Livewire::test(Dashboard::class)->assertSee('1 día · Hoy ya está');
+        Livewire::test(Dashboard::class)->assertSee('1 día')->assertSee('Hoy ya está: 3 de 3 acciones.');
     }
 
     public function test_broken_streak_is_not_mentioned_on_a_return_day(): void
@@ -69,14 +70,14 @@ class GameDashboardTest extends TestCase
 
         Livewire::test(Dashboard::class)
             ->assertDontSee('Tu mejor racha fue de')
-            ->assertSee('Hoy empieza tu racha');
+            ->assertSee('Empieza hoy');
     }
 
     public function test_hidden_streak_is_not_rendered(): void
     {
         app(GameSettings::class)->save(auth()->id(), ['streak_visible' => false]);
 
-        Livewire::test(Dashboard::class)->assertDontSeeHtml('game-streak-line');
+        Livewire::test(Dashboard::class)->assertDontSee('Acciones de hoy para la racha');
         Livewire::test(GameBalls::class)->assertDontSee('Tu racha');
     }
 

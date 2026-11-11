@@ -4,45 +4,53 @@
 @props(['buddy', 'variant' => 'card', 'mood' => null, 'balls' => 0, 'date' => null, 'checkinDone' => false, 'streak' => null, 'challenge' => null])
 
 @if ($variant === 'hero')
-    {{-- CHG-075: bienvenida del Inicio. El compañero, sobre su escenario, pide el check-in del día. --}}
-    @php $empty = ! $buddy || $buddy['empty']; @endphp
-    <section {{ $attributes->class(['game-buddy-hero', 'game-buddy-stage', 'game-stage--'.($empty ? 'cielo' : ($buddy['stage'] ?? 'cielo')), $empty ? '' : $buddy['type_class']]) }} aria-label="Bienvenida del día">
+    {{-- CHG-075/081: bienvenida del Inicio. Izquierda: el compañero saluda y pide el check-in.
+         Derecha: «Tu día» con la racha (CHG-076) y el reto (CHG-077) como mosaicos. --}}
+    @php
+        $empty = ! $buddy || $buddy['empty'];
+        $hasDay = $streak || $challenge;
+    @endphp
+    <section {{ $attributes->class(['game-buddy-hero', 'game-buddy-stage', 'game-buddy-hero--with-day' => $hasDay, 'game-stage--'.($empty ? 'cielo' : ($buddy['stage'] ?? 'cielo')), $empty ? '' : $buddy['type_class']]) }} aria-label="Bienvenida del día">
         <span class="game-buddy-stage__scene" aria-hidden="true"></span>
-        @if ($empty)
-            <a href="{{ route('game.balls') }}" wire:navigate class="game-buddy-hero__art" aria-label="Ir a Balls"><x-game.ball class="game-buddy__ball" /></a>
-        @else
-            <a href="{{ route('game.collection', ['species' => $buddy['species_id']]) }}" wire:navigate class="game-buddy-hero__art game-buddy-stage__art" aria-label="Ver ficha de {{ $buddy['name'] }}">
-                @if ($buddy['image'])
-                    <img src="{{ $buddy['image'] }}" width="120" height="120" loading="lazy" alt="">
-                @else
-                    <span class="game-placeholder" aria-hidden="true"><i class="bi bi-stars"></i></span>
+        <div class="game-buddy-hero__greeting">
+            @if ($empty)
+                <a href="{{ route('game.balls') }}" wire:navigate class="game-buddy-hero__art" aria-label="Ir a Balls"><x-game.ball class="game-buddy__ball" /></a>
+            @else
+                <a href="{{ route('game.collection', ['species' => $buddy['species_id']]) }}" wire:navigate class="game-buddy-hero__art game-buddy-stage__art" aria-label="Ver ficha de {{ $buddy['name'] }}">
+                    @if ($buddy['image'])
+                        <img src="{{ $buddy['image'] }}" width="120" height="120" loading="lazy" alt="">
+                    @else
+                        <span class="game-placeholder" aria-hidden="true"><i class="bi bi-stars"></i></span>
+                    @endif
+                </a>
+            @endif
+            <div class="game-buddy-hero__body">
+                <p class="game-buddy-hero__meta md-label-medium">
+                    @if ($date)<span>{{ $date }}</span>@endif
+                    @unless ($empty)<span>{{ $buddy['name'] }} · Nv {{ $buddy['level'] }}</span>@endunless
+                </p>
+                <p class="game-buddy-hero__quote md-title-large">{{ $empty ? 'Abre tu primera ball para conocer a tu compañero.' : '“'.$buddy['quote'].'”' }}</p>
+                <div class="game-buddy-hero__bubble md-body-medium">
+                    @if ($checkinDone)
+                        <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Ya hiciste tu check-in de hoy.</span>
+                        <button type="button" class="md-btn-text game-buddy-hero__cta" wire:click="$set('checkin', true)">Editar</button>
+                    @else
+                        <span>¿Cómo vas hoy?</span>
+                        <button type="button" class="md-btn-filled game-buddy-hero__cta" wire:click="$set('checkin', true)"><i class="bi bi-lightning-charge" aria-hidden="true"></i> Hacer check-in</button>
+                    @endif
+                </div>
+            </div>
+        </div>
+        @if ($hasDay)
+            <div class="game-buddy-hero__day" role="group" aria-label="Tu día">
+                @if ($streak)
+                    <x-game.streak-line :streak="$streak" />
                 @endif
-            </a>
-        @endif
-        <div class="game-buddy-hero__body">
-            <p class="game-buddy-hero__meta">
-                @if ($date)<span>{{ $date }}</span>@endif
-                @unless ($empty)<span>{{ $buddy['name'] }} · Nv {{ $buddy['level'] }}</span>@endunless
-            </p>
-            <p class="game-buddy-hero__quote">{{ $empty ? 'Abre tu primera ball para conocer a tu compañero.' : '“'.$buddy['quote'].'”' }}</p>
-            <div class="game-buddy-hero__bubble">
-                @if ($checkinDone)
-                    <span>Ya hiciste tu check-in de hoy.</span>
-                    <button type="button" class="md-btn-text game-buddy-hero__cta" wire:click="$set('checkin', true)">Editar</button>
-                @else
-                    <span>¿Cómo vas hoy?</span>
-                    <button type="button" class="md-btn-filled game-buddy-hero__cta" wire:click="$set('checkin', true)"><i class="bi bi-lightning-charge" aria-hidden="true"></i> Hacer check-in</button>
+                @if ($challenge)
+                    <x-game.daily-challenge :challenge="$challenge" in-home />
                 @endif
             </div>
-            @if ($streak)
-                {{-- CHG-076: la racha en una línea; el detalle vive en Balls. --}}
-                <x-game.streak-line :streak="$streak" class="game-buddy-hero__streak" />
-            @endif
-            @if ($challenge)
-                {{-- CHG-077: el reto del día, una línea bajo la racha. --}}
-                <x-game.daily-challenge :challenge="$challenge" in-home />
-            @endif
-        </div>
+        @endif
     </section>
 @elseif ($buddy && $variant === 'wall')
     @unless ($buddy['empty'])

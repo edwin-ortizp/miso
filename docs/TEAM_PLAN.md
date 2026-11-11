@@ -85,6 +85,10 @@ _Última actualización: 2026-11-11_
 | CHG-077 | M | Reto del día | done | Cerrado | 5/5 |
 | CHG-078 | M | Álbumes de la colección por tipo | done | Cerrado | 5/5 |
 | CHG-079 | M | Camino de temporada con hitos y recompensas | done | Cerrado | 5/5 |
+| CHG-080 | XS | Pulir cabecera del Inicio: check-in duplicado, contraste y sombra | done | Cerrado | 1/1 |
+| CHG-081 | S | Rediseño de la cabecera del Inicio | in-progress | En desarrollo | 0/4 |
+| CHG-082 | S | Tipografía Nunito en web y mockups | in-progress | En verificación | 2/2 |
+| CHG-083 | M | Pulir álbumes y rediseñar Balls como aventura Pokémon | in-progress | En verificación | 3/3 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

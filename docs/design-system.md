@@ -4,6 +4,10 @@
 
 La interfaz se comporta como una cabina serena: alta densidad de información, jerarquía clara y pocas decoraciones sin función. Material 3 aporta tokens, color, forma y estados; Bootstrap queda limitado a utilidades de transición y grids existentes.
 
+## Tipografía
+
+La interfaz web y los mockups usan Nunito, alojada localmente, en pesos 400, 500, 600 y 700. La familia se define en el token `--md-sys-typescale-font-family`; iconos y código conservan sus fuentes específicas.
+
 ## Anatomía de un módulo
 
 1. `x-module-shell` genera la identidad del módulo desde `config/modules.php`.

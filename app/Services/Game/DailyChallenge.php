@@ -85,9 +85,12 @@ class DailyChallenge
     {
         $date = $now->toDateString();
         $existing = GameDailyChallenge::withoutGlobalScopes()->where('user_id', $userId)->whereDate('date', $date)->first();
-        if ($existing) {
+        // Una plantilla que se deshabilitó (p. ej. `checkin`, CHG-081) no se sigue mostrando si
+        // aún no se cumplió; uno ya cumplido se conserva para no quitar lo ganado.
+        if ($existing && ($existing->completed_at || in_array($existing->key, (array) config('game.daily_challenge.templates', []), true))) {
             return $existing;
         }
+        $existing?->delete();
 
         $picked = $this->pick($userId, $now);
         if (! $picked) {

@@ -165,7 +165,7 @@
 /* ---------- Balls por abrir ---------- */
 .game-balls {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
     gap: 1rem;
     margin: 0;
     padding: 0;
@@ -790,7 +790,7 @@ button.game-balls__item:focus-visible {
 .game-discovery__types { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; }
 .game-discovery__bio { padding: 16px; border-radius: 16px; text-align: left; background: var(--md-sys-color-surface-container-low); overflow-wrap: anywhere; }
 .game-discovery__actions { display: flex; justify-content: end; flex-wrap: wrap; gap: 8px; width: 100%; }
-@media (min-width: 1200px) { .game-balls { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
 @media (max-width: 639px) { .game-balls { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: reduce) {
     .game-discovery--shake .game-discovery__ball { animation: none; }
@@ -1328,8 +1328,8 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
 .game-buddy__art { flex: none; display: grid; place-items: center; width: 64px; height: 64px; }
 .game-buddy__art img { width: 100%; height: 100%; object-fit: contain; }
 .game-buddy__body { display: grid; gap: 0.25rem; min-width: 0; }
-.game-buddy__name { font: var(--md-sys-typescale-label-large, 500 0.875rem/1.25rem sans-serif); color: var(--md-sys-color-on-surface-variant); }
-.game-buddy__quote { font: var(--md-sys-typescale-body-large, 400 1rem/1.5rem sans-serif); }
+.game-buddy__name { font-family: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: var(--md-sys-typescale-label-large-weight); color: var(--md-sys-color-on-surface-variant); }
+.game-buddy__quote { font-family: inherit; font-size: var(--md-sys-typescale-body-large-size); line-height: var(--md-sys-typescale-body-large-line-height); font-weight: var(--md-sys-typescale-body-large-weight); }
 .game-buddy__action { margin-inline-start: auto; }
 
 /* Sonidos (CHG-044): el interruptor y "Probar sonido" en la misma fila. */
@@ -1569,9 +1569,9 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
 .game-buddy-hero__art:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 .game-buddy-hero__art .game-buddy__ball { width: 64px; height: 64px; }
 .game-buddy-hero__body { display: grid; gap: 0.375rem; min-width: 0; flex: 1; }
-.game-buddy-hero__meta { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; margin: 0; font: var(--md-sys-typescale-label-medium, 500 0.75rem/1rem sans-serif); opacity: 0.88; }
+.game-buddy-hero__meta { display: flex; flex-wrap: wrap; gap: 0.25rem 0.75rem; margin: 0; font-family: inherit; font-size: var(--md-sys-typescale-label-medium-size); line-height: var(--md-sys-typescale-label-medium-line-height); font-weight: var(--md-sys-typescale-label-medium-weight); opacity: 0.88; }
 .game-buddy-hero__meta span + span::before { content: '·'; margin-inline-end: 0.75rem; }
-.game-buddy-hero__quote { margin: 0; font: var(--md-sys-typescale-title-medium, 500 1rem/1.5rem sans-serif); text-wrap: balance; }
+.game-buddy-hero__quote { margin: 0; font-family: inherit; font-size: var(--md-sys-typescale-title-medium-size); line-height: var(--md-sys-typescale-title-medium-line-height); font-weight: var(--md-sys-typescale-title-medium-weight); text-wrap: balance; }
 .game-buddy-hero__bubble {
     position: relative;
     justify-self: start;
@@ -1584,7 +1584,7 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
     border-radius: 999px;
     background: rgb(255 255 255 / 0.94);
     color: #1f1f1f;
-    font: var(--md-sys-typescale-body-medium, 400 0.875rem/1.25rem sans-serif);
+    font-family: inherit; font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); font-weight: var(--md-sys-typescale-body-medium-weight);
 }
 .game-buddy-hero__bubble::before {
     content: '';
@@ -1606,16 +1606,16 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
 }
 
 /* Racha de constancia (CHG-076): línea del hero y bloque de Balls. */
-.game-streak-line { display: inline-flex; align-items: center; gap: 0.375rem; margin-top: 0.5rem; color: inherit; text-decoration: none; font: var(--md-sys-typescale-label-large, 500 0.875rem/1.25rem sans-serif); }
+.game-streak-line { display: inline-flex; align-items: center; gap: 0.375rem; margin-top: 0.5rem; color: inherit; text-decoration: none; font-family: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: var(--md-sys-typescale-label-large-weight); }
 .game-streak-line:hover { text-decoration: underline; }
 .game-streak-line .bi-fire { color: var(--game-rarity-legendary); }
 .game-streak-line__muted { opacity: 0.8; font-weight: 400; }
 .game-streak { display: grid; gap: 0.75rem; }
 .game-streak__head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; }
-.game-streak__days { display: inline-flex; align-items: center; gap: 0.5rem; margin: 0; font: var(--md-sys-typescale-headline-medium, 400 1.75rem/2.25rem sans-serif); }
+.game-streak__days { display: inline-flex; align-items: center; gap: 0.5rem; margin: 0; font-family: inherit; font-size: var(--md-sys-typescale-headline-medium-size); line-height: var(--md-sys-typescale-headline-medium-line-height); font-weight: var(--md-sys-typescale-headline-medium-weight); }
 .game-streak__days .bi-fire { color: var(--game-rarity-legendary); }
 .game-streak__week { display: flex; gap: 0.5rem; margin: 0; padding: 0; list-style: none; overflow-x: auto; scroll-snap-type: x mandatory; }
-.game-streak__day { scroll-snap-align: start; display: grid; justify-items: center; gap: 0.25rem; min-width: 2.25rem; font: var(--md-sys-typescale-label-small, 500 0.6875rem/1rem sans-serif); color: var(--md-sys-color-on-surface-variant); }
+.game-streak__day { scroll-snap-align: start; display: grid; justify-items: center; gap: 0.25rem; min-width: 2.25rem; font-family: inherit; font-size: var(--md-sys-typescale-label-small-size); line-height: var(--md-sys-typescale-label-small-line-height); font-weight: var(--md-sys-typescale-label-small-weight); color: var(--md-sys-color-on-surface-variant); }
 .game-streak__dot { width: 1.25rem; height: 1.25rem; border-radius: 50%; display: grid; place-items: center; background: var(--md-sys-color-surface-container-highest); color: var(--md-sys-color-on-surface-variant); font-size: 0.75rem; }
 .game-streak__day--met .game-streak__dot { background: var(--game-rarity-legendary); color: var(--md-sys-color-on-primary); }
 .game-streak__day--grace .game-streak__dot { background: transparent; box-shadow: inset 0 0 0 2px var(--game-rarity-legendary); }
@@ -1624,31 +1624,31 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
 
 /* Reto del día (CHG-077): una línea con texto, barra fina y acción. */
 .game-challenge { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.25rem 0.75rem; margin-top: 0.5rem; }
-.game-challenge__label { margin: 0; font: var(--md-sys-typescale-label-small, 500 0.6875rem/1rem sans-serif); opacity: 0.8; }
-.game-challenge__text { margin: 0; font: var(--md-sys-typescale-title-small, 500 0.875rem/1.25rem sans-serif); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.game-challenge__label { margin: 0; font-family: inherit; font-size: var(--md-sys-typescale-label-small-size); line-height: var(--md-sys-typescale-label-small-line-height); font-weight: var(--md-sys-typescale-label-small-weight); opacity: 0.8; }
+.game-challenge__text { margin: 0; font-family: inherit; font-size: var(--md-sys-typescale-title-small-size); line-height: var(--md-sys-typescale-title-small-line-height); font-weight: var(--md-sys-typescale-title-small-weight); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .game-challenge__progress { grid-column: 1 / -1; }
-.game-challenge__done { display: inline-flex; align-items: center; gap: 0.375rem; margin: 0; font: var(--md-sys-typescale-label-large, 500 0.875rem/1.25rem sans-serif); }
+.game-challenge__done { display: inline-flex; align-items: center; gap: 0.375rem; margin: 0; font-family: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: var(--md-sys-typescale-label-large-weight); }
 
 /* Álbumes por tipo (CHG-078): franja con desplazamiento; el color sale del tipo. */
 .game-albums { margin-block: 0.75rem; }
-.game-albums__rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(9rem, 45%); gap: 0.5rem; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 0.25rem; }
+.game-albums__rail { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(9rem, 45%); gap: 0.5rem; overflow-x: auto; scroll-snap-type: x mandatory; padding: 3px 3px 12px; scroll-padding-inline: 3px; }
 @media (min-width: 768px) { .game-albums__rail { grid-auto-columns: minmax(9rem, 23%); } }
 @media (min-width: 1200px) { .game-albums__rail { grid-auto-columns: minmax(8rem, 1fr); } }
 .game-album { scroll-snap-align: start; display: grid; gap: 0.25rem; align-content: start; text-align: start; padding: 0.625rem 0.75rem; border-radius: 12px; border: 1px solid var(--game-type, var(--md-sys-color-outline-variant)); background: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-surface); cursor: pointer; }
 .game-album[aria-pressed="true"] { background: var(--md-sys-color-secondary-container); box-shadow: inset 0 0 0 2px var(--game-type, var(--md-sys-color-primary)); }
 .game-album:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
-.game-album__name { font: var(--md-sys-typescale-title-small, 500 0.875rem/1.25rem sans-serif); }
-.game-album__count { font: var(--md-sys-typescale-label-medium, 500 0.75rem/1rem sans-serif); color: var(--md-sys-color-on-surface-variant); }
+.game-album__name { font-family: inherit; font-size: var(--md-sys-typescale-title-small-size); line-height: var(--md-sys-typescale-title-small-line-height); font-weight: var(--md-sys-typescale-title-small-weight); }
+.game-album__count { font-family: inherit; font-size: var(--md-sys-typescale-label-medium-size); line-height: var(--md-sys-typescale-label-medium-line-height); font-weight: var(--md-sys-typescale-label-medium-weight); color: var(--md-sys-color-on-surface-variant); }
 .game-album--complete { border-color: var(--game-rarity-legendary); }
-.game-album__seal { display: inline-flex; gap: 0.25rem; align-items: center; font: var(--md-sys-typescale-label-small, 500 0.6875rem/1rem sans-serif); color: var(--game-rarity-legendary); }
+.game-album__seal { display: inline-flex; gap: 0.25rem; align-items: center; font-family: inherit; font-size: var(--md-sys-typescale-label-small-size); line-height: var(--md-sys-typescale-label-small-line-height); font-weight: var(--md-sys-typescale-label-small-weight); color: var(--game-rarity-legendary); }
 
 /* Camino de temporada (CHG-079): vertical en móvil, horizontal desde 768 px. */
 .game-path { display: grid; gap: 0.75rem; }
 .game-path__stops { display: grid; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
 .game-path__stop { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 0.5rem; color: var(--md-sys-color-on-surface-variant); }
 .game-path__dot { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; background: var(--md-sys-color-surface-container-highest); }
-.game-path__n { font: var(--md-sys-typescale-label-large, 500 0.875rem/1.25rem sans-serif); }
-.game-path__reward { font: var(--md-sys-typescale-label-small, 500 0.6875rem/1rem sans-serif); }
+.game-path__n { font-family: inherit; font-size: var(--md-sys-typescale-label-large-size); line-height: var(--md-sys-typescale-label-large-line-height); font-weight: var(--md-sys-typescale-label-large-weight); }
+.game-path__reward { font-family: inherit; font-size: var(--md-sys-typescale-label-small-size); line-height: var(--md-sys-typescale-label-small-line-height); font-weight: var(--md-sys-typescale-label-small-weight); }
 .game-path__stop--reached { color: var(--md-sys-color-on-surface); }
 .game-path__stop--reached .game-path__dot { background: var(--game-rarity-legendary); color: var(--md-sys-color-on-primary); }
 .game-path__stop--current { color: var(--md-sys-color-on-surface); }
@@ -1657,4 +1657,107 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
 @media (min-width: 768px) {
     .game-path__stops { grid-template-columns: repeat(7, minmax(4.5rem, 1fr)); overflow-x: auto; scroll-snap-type: x mandatory; }
     .game-path__stop { scroll-snap-align: start; grid-template-columns: 1fr; justify-items: center; text-align: center; }
+}
+
+/* CHG-081: cabecera del Inicio en dos columnas — saludo del compañero y «Tu día» (mosaicos). */
+.game-buddy-hero.game-buddy-stage { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; gap: 1rem 1.5rem; padding: 1.25rem 1.5rem; }
+.game-buddy-hero__greeting { display: flex; align-items: center; gap: 1.25rem; min-width: 0; }
+.game-buddy-hero__quote { margin: 0; font-family: inherit; text-wrap: balance; }
+.game-buddy-hero__meta { opacity: 0.88; }
+.game-buddy-hero__art { position: relative; }
+/* La sombra del suelo pertenece al compañero: va bajo su imagen en cualquier tamaño. */
+.game-buddy-hero__art::after { content: ''; position: absolute; inset-inline: 14%; bottom: 2px; height: 12px; border-radius: 50%; background: radial-gradient(closest-side, var(--stage-ground), transparent); z-index: -1; }
+.game-buddy-hero .game-buddy-stage__scene {
+    background:
+        radial-gradient(circle at 18% 22%, var(--stage-particle) 0 2px, transparent 3px),
+        radial-gradient(circle at 72% 14%, var(--stage-particle) 0 2px, transparent 3px),
+        radial-gradient(circle at 86% 38%, var(--stage-particle) 0 1.5px, transparent 2.5px),
+        radial-gradient(circle at 58% 30%, var(--stage-particle) 0 1px, transparent 2px);
+    background-size: auto; background-position: 0 0;
+}
+.game-buddy-hero__day { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.75rem; }
+.game-day-tile { display: grid; align-content: start; gap: 0.25rem; min-width: 0; padding: 0.875rem 1rem; border-radius: 12px; background: rgb(0 0 0 / 0.2); color: inherit; }
+.game-day-tile p { margin: 0; }
+.game-day-tile__title { display: inline-flex; align-items: center; gap: 0.375rem; color: inherit; text-decoration: none; opacity: 0.9; }
+.game-day-tile__title:hover { text-decoration: underline; }
+.game-day-tile__title:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 4px; }
+.game-day-tile__more { font-size: 0.75em; }
+.game-day-tile__value { font-family: inherit; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.game-day-tile__text { opacity: 0.9; }
+.game-day-tile__row { display: flex; align-items: center; gap: 0.75rem; margin-top: 0.25rem; }
+.game-day-tile__row .game-day-tile__bar { flex: 1; }
+.game-day-tile__bar { margin-top: 0.25rem; }
+.game-day-tile .md-progress-label { color: inherit; opacity: 0.9; }
+.game-day-tile .md-progress-label > span:first-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.game-day-tile .md-progress-linear { background: rgb(255 255 255 / 0.25); }
+.game-day-tile .md-progress-linear-bar { background: currentColor; }
+.game-day-tile__go { color: inherit; flex: none; }
+.game-day-tile--done { background: rgb(0 0 0 / 0.14); }
+@media (min-width: 768px) {
+    .game-buddy-hero__day { grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); grid-auto-flow: column; }
+}
+@media (min-width: 1200px) {
+    .game-buddy-hero--with-day.game-buddy-stage { grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); }
+}
+@media (max-width: 575.98px) {
+    .game-buddy-hero.game-buddy-stage { padding: 0.875rem 1rem; }
+    .game-buddy-hero__greeting { align-items: flex-start; gap: 0.75rem; }
+}
+
+/* CHG-083 · Balls: panel de aventura, independiente de los mosaicos de Inicio. */
+.game-balls-summary { display: grid; align-items: start; grid-template-columns: minmax(0, 1fr); gap: 1rem; margin-bottom: 1.75rem; }
+.game-balls-summary > :only-child { grid-column: 1 / -1; }
+.game-adventure-panel { position: relative; min-width: 0; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 24px; padding: 1.25rem; box-shadow: 0 4px 0 var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); }
+.game-adventure-panel__eyebrow { margin: .2rem 0 0; font-size: .8rem; color: var(--md-sys-color-on-surface-variant); }
+.game-streak.game-adventure-panel { gap: .875rem; background: radial-gradient(ellipse at 0 0, color-mix(in srgb, var(--game-rarity-legendary) 15%, transparent), transparent 70%), var(--md-sys-color-surface); }
+.game-streak__identity, .game-challenge-quest__head { display: flex; align-items: center; gap: .875rem; }
+.game-streak__flame { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; flex: none; border-radius: 18px; background: linear-gradient(145deg, #fff1c2, #ffc56b); box-shadow: inset 0 2px 0 #fff8, 0 3px 0 #b9622726; }
+.game-streak__flame i { font-size: 2.5rem; color: #bc4d10; filter: drop-shadow(0 2px 0 #fff7); }
+.game-adventure-panel .game-streak__days { justify-self: start; margin: 0; font-size: 2rem; line-height: 1.2; font-weight: 700; color: var(--md-sys-color-on-surface); }
+.game-adventure-panel .game-streak__days i { display: none; }
+.game-adventure-panel .game-streak__week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: .35rem; width: 100%; }
+.game-adventure-panel .game-streak__dot { width: 2.25rem; height: 2.25rem; border-radius: 12px; font-size: 1.1rem; }
+.game-adventure-panel .game-streak__day--met .game-streak__dot { background: #fbd78b; color: #673800; box-shadow: 0 3px 0 #a9652526; }
+.game-adventure-panel .game-streak__day--today .game-streak__dot { color: var(--md-sys-color-primary); background: var(--md-sys-color-primary-container); }
+.game-adventure-panel .game-streak__meta { padding-top: .75rem; border-top: 1px solid var(--md-sys-color-outline-variant); }
+.game-challenge-quest { display: flex; flex-direction: column; align-items: start; gap: 1rem; background: radial-gradient(ellipse at 100% 0, color-mix(in srgb, var(--md-sys-color-primary) 14%, transparent), transparent 75%), var(--md-sys-color-surface); }
+.game-challenge-quest__head { width: 100%; flex-wrap: wrap; }
+.game-challenge-quest__emblem { display: grid; place-items: center; width: 3.5rem; height: 3.5rem; flex: none; border-radius: 18px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); box-shadow: inset 0 2px 0 #fff4, 0 3px 0 var(--md-sys-color-surface-container-highest); font-size: 2rem; }
+.game-challenge-quest__objective { margin: 0; font-size: 1.4rem; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.game-challenge-quest > .md-progress { width: 100%; }
+.game-challenge-quest__go { margin-top: .25rem; }
+.game-challenge-quest__seal { display: inline-flex; gap: .3rem; align-items: center; margin-left: auto; padding: .35rem .65rem; border-radius: 99px; color: var(--md-sys-color-on-primary-container); background: var(--md-sys-color-primary-container); font-size: .8rem; font-weight: 700; }
+.game-challenge-quest__success { margin: .25rem 0 0; font-weight: 600; }
+.game-ball-card__art { min-height: 190px; isolation: isolate; background: radial-gradient(ellipse at 50% 30%, var(--md-sys-color-surface) 0, transparent 65%), linear-gradient(145deg, var(--md-sys-color-primary-container), var(--md-sys-color-secondary-container)); }
+.game-ball-card__art::before { content: ''; position: absolute; width: 144px; height: 144px; border-radius: 50%; border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent); box-shadow: 0 0 0 12px color-mix(in srgb, var(--md-sys-color-surface) 25%, transparent), 0 0 0 28px color-mix(in srgb, var(--md-sys-color-surface) 15%, transparent); z-index: -1; }
+.game-ball-card__art::after { content: ''; position: absolute; bottom: 22px; width: 100px; height: 16px; background: radial-gradient(ellipse, #14243e38, transparent 70%); z-index: -1; }
+.game-ball-card__art .game-opening-ball { --opening-size: 112px; transform: rotate(-12deg); }
+.game-ball-card__spark { right: 20%; top: 32px; text-shadow: 0 0 12px var(--md-sys-color-surface); }
+.game-ball-card__spark::after { content: '✧'; position: absolute; top: 82px; right: 180px; font-size: .9rem; }
+.game-opening-ball__top { background: radial-gradient(ellipse at 32% 25%, #ff9990, transparent 48%), linear-gradient(145deg, #f65357 25%, #cf2437 70%, #86152b); box-shadow: inset -5px 0 9px #580d2933, inset 0 3px 2px #fff6; }
+.game-opening-ball__bottom { background: radial-gradient(ellipse at 35% 10%, #fff 20%, #e8edf3 65%, #9daac0); box-shadow: inset -5px -5px 8px #35445b33; }
+.game-opening-ball__button { background: radial-gradient(circle at 35% 30%, #fff 30%, #e5ebf2 65%, #98a5b8); box-shadow: inset 0 0 0 2px #bec8d6, 1px 3px 4px #14243e55; }
+@media (min-width: 1200px) { .game-balls-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 399px) { .game-adventure-panel { padding: 1rem; } .game-adventure-panel .game-streak__dot { width: 2rem; height: 2rem; } }
+
+/* Revisión CHG-083: resumen compacto en escritorio y rejilla según el ancho disponible. */
+@media (min-width: 900px) {
+    .game-streak.game-adventure-panel { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+    .game-adventure-panel .game-streak__head { grid-column: 1 / -1; grid-row: 1; padding-inline-end: 100px; }
+    .game-adventure-panel .game-streak__days { grid-column: 2; grid-row: 1; justify-self: end; font-size: 1.75rem; white-space: nowrap; }
+    .game-streak.game-adventure-panel > .md-body-medium,
+    .game-streak.game-adventure-panel > .md-progress,
+    .game-adventure-panel .game-streak__week,
+    .game-adventure-panel .game-streak__meta { grid-column: 1 / -1; }
+    .game-adventure-panel .game-streak__week { max-width: 320px; }
+    .game-ball-card__art { min-height: 150px; padding: 16px; }
+    .game-ball-card__art .game-opening-ball { --opening-size: 96px; }
+    .game-ball-card__body { padding: 16px; gap: 8px; }
+}
+@media (min-width: 1200px) {
+    .game-streak.game-adventure-panel { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    .game-streak.game-adventure-panel > .md-progress { grid-column: 1; grid-row: 3; }
+    .game-adventure-panel .game-streak__week { grid-column: 2; grid-row: 3; justify-self: end; }
+    .game-adventure-panel .game-streak__day { min-width: 0; }
+    .game-adventure-panel .game-streak__dot { width: 1.875rem; height: 1.875rem; border-radius: 10px; }
 }

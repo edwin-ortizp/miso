@@ -167,6 +167,20 @@ class DailyChallengeTest extends TestCase
         $this->assertNull($this->today(), 'Sin hábitos, sin pendientes y con check-in hecho no hay reto.');
     }
 
+    public function test_a_disabled_template_stored_today_is_replaced_unless_completed(): void
+    {
+        $this->only('checkin');
+        $this->assertTrue($this->today()['checkin']);
+
+        $this->only('water_logs');
+        $this->assertSame('water_logs', $this->today()['key']);
+        $this->assertSame('water_logs', GameDailyChallenge::sole()->key);
+
+        GameDailyChallenge::sole()->update(['completed_at' => now()]);
+        $this->only('tasks_done');
+        $this->assertSame('water_logs', $this->today()['key'], 'Un reto cumplido se conserva.');
+    }
+
     public function test_next_day_brings_a_new_challenge(): void
     {
         $this->only('water_logs');

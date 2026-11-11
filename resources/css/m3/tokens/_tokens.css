@@ -105,7 +105,7 @@
   --md-sys-space-3xl: 64px;
 
   /* Typescale — familia y roles */
-  --md-sys-typescale-font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --md-sys-typescale-font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif;
 
   --md-sys-typescale-display-large-size: 3.5625rem;
   --md-sys-typescale-display-large-line-height: 4rem;

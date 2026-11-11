@@ -58,7 +58,8 @@ return [
     // Reto del día (CHG-077): plantillas v1, metas (mín, máx) y lo esperado por día de cada área
     // para saber cuál va más descuidada en la semana.
     'daily_challenge' => [
-        'templates' => ['tasks_done', 'category_tasks', 'habit_period', 'water_logs', 'checkin'],
+        // Sin 'checkin': en el Inicio ya lo pide la burbuja del compañero (CHG-080).
+        'templates' => ['tasks_done', 'category_tasks', 'habit_period', 'water_logs'],
         'targets' => ['tasks_done' => [2, 3], 'category_tasks' => [2, 2], 'water_logs' => [2, 3]],
         'weekly_per_day' => ['tasks' => 2, 'water' => 3, 'checkin' => 1],
     ],

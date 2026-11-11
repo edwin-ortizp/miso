@@ -183,6 +183,7 @@ sequenceDiagram
 - 2026-11-11 — T5: `docs/game.md` → «Reto del día»; tabla de datos y servicios actualizadas.
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — CHG-080: se quita `checkin` de las plantillas por defecto; duplicaba el llamado de la burbuja del compañero.
 - LECCIÓN: ninguna
 - 2026-11-11 — Decisiones (usuario) antifarmeo: las tareas creadas y cerradas el mismo día no cuentan; el reto prioriza el área más descuidada de la semana.
 - 2026-11-11 — Revisión: v1 con 5 plantillas (tareas, categoría, hábitos, agua, check-in); sin componente Livewire ni poll propio; va en el hero de CHG-075; premio con `grantBonusBall` de CHG-076. Depende de: CHG-076. El cierre del día (CHG-070) podrá mostrar el reto.

@@ -5,11 +5,16 @@
         @endif
     </div>
 
+    @if ($streak || $challenge)
+    <div class="game-balls-summary">
     @if ($streak)
-        <x-game.streak-card :streak="$streak" class="mb-3" />
+        <x-game.streak-card :streak="$streak" />
     @endif
     @if ($challenge)
-        <x-game.daily-challenge :challenge="$challenge" class="md-card-filled mb-3" />
+        <x-game.daily-challenge :challenge="$challenge" />
+    @endif
+
+    </div>
     @endif
 
     <section aria-label="Tus Poké Balls">

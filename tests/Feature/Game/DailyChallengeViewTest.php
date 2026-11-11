@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
+
 /** CHG-077 · T3: el reto en el hero del Inicio, en Balls y su interruptor. */
 class DailyChallengeViewTest extends TestCase
 {
@@ -23,7 +24,7 @@ class DailyChallengeViewTest extends TestCase
         Carbon::setTestNow(Carbon::parse('2026-11-11 10:00:00', 'America/Bogota'));
         $this->actingAs(User::factory()->create());
         $this->seedSpecies();
-        config(['game.daily_challenge.templates' => ['checkin']]);
+        config(['game.daily_challenge.templates' => ['water_logs'], 'game.daily_challenge.targets.water_logs' => [2, 2]]);
     }
 
     protected function tearDown(): void
@@ -32,19 +33,26 @@ class DailyChallengeViewTest extends TestCase
         parent::tearDown();
     }
 
-    public function test_home_hero_shows_the_challenge_and_opens_the_checkin(): void
+    public function test_home_hero_shows_the_challenge_once_with_a_single_checkin_call(): void
     {
         Livewire::test(Dashboard::class)
-            ->assertSee('Reto de hoy · Uno al día')
-            ->assertSee('Haz tu check-in de hoy')
+            ->assertSee('Reto de hoy')->assertSeeHtml('aria-label="Tu día"')
+            ->assertSee('Registra agua 2 veces')
+            ->assertDontSee('Haz tu check-in de hoy')
             ->assertSeeHtml('role="progressbar"');
+    }
+
+    public function test_checkin_is_not_a_default_challenge(): void
+    {
+        $defaults = (require config_path('game.php'))['daily_challenge']['templates'];
+        $this->assertNotContains('checkin', $defaults);
     }
 
     public function test_balls_shows_the_challenge_with_a_link(): void
     {
         Livewire::test(GameBalls::class)
-            ->assertSee('Haz tu check-in de hoy')
-            ->assertSeeHtml('checkin=1');
+            ->assertSee('Registra agua 2 veces')
+            ->assertSeeHtml('water/daily');
     }
 
     public function test_switch_hides_it(): void

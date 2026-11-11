@@ -1,0 +1,1457 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="css/app.css"></head><body><main class="container-fluid py-3" style="max-width:1400px"><div wire:snapshot="{&quot;data&quot;:{&quot;checkin&quot;:false,&quot;buddy&quot;:[{&quot;empty&quot;:false,&quot;species_id&quot;:114,&quot;name&quot;:&quot;Tangela&quot;,&quot;level&quot;:1,&quot;image&quot;:&quot;https:\/\/raw.githubusercontent.com\/PokeAPI\/sprites\/master\/sprites\/pokemon\/other\/official-artwork\/114.png&quot;,&quot;type_class&quot;:&quot;game-type--planta&quot;,&quot;stage&quot;:&quot;planta&quot;,&quot;quote&quot;:&quot;Vamos juntos, un paso m\u00e1s.&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;showHabitActionPrompt&quot;:false,&quot;promptingHabitId&quot;:null,&quot;promptingHabitName&quot;:&quot;&quot;,&quot;habitActionFields&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;habitActionInput&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;showRecurringCompletion&quot;:false,&quot;recurringTaskId&quot;:null,&quot;nextOccurrenceDate&quot;:null,&quot;selectedDate&quot;:&quot;2026-11-11&quot;,&quot;lastMoodEntryId&quot;:null,&quot;showMoodCatalog&quot;:false,&quot;moodCatalogSearch&quot;:&quot;&quot;,&quot;showMoodContext&quot;:false,&quot;contextEntryId&quot;:null,&quot;contextIntensity&quot;:null,&quot;contextSituation&quot;:&quot;&quot;,&quot;contextRelationshipSearch&quot;:&quot;&quot;,&quot;contextRelationshipIds&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;n4Kb49fmJo6G1LS2u2Yl&quot;,&quot;name&quot;:&quot;home.dashboard&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:{&quot;lw-1806504655-0&quot;:[&quot;div&quot;,&quot;ltB4h9h5bZn1o2I21BjX&quot;],&quot;lw-1806504655-1&quot;:[&quot;div&quot;,&quot;wUCqjEXGkVnZVj3Net2c&quot;],&quot;home-task-editor&quot;:[&quot;div&quot;,&quot;5PnzVMshp87n5UPULzGv&quot;],&quot;home-panel-shopping-editor&quot;:[&quot;div&quot;,&quot;a23ijn8qohCm3eRMdzyu&quot;],&quot;home-panel-habit-editor&quot;:[&quot;div&quot;,&quot;EvtiJUdbcy0FMicyC6Xb&quot;],&quot;home-panel-plan-editor&quot;:[&quot;div&quot;,&quot;nyQ76I6yDpkIg6ulQWXY&quot;],&quot;home-panel-quick-editor&quot;:[&quot;div&quot;,&quot;NdDM21pe5mXrgLHdqxaq&quot;],&quot;home-panel-focus-timer&quot;:[&quot;div&quot;,&quot;F77DSt1invh8hBRyYwHe&quot;]},&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;fabe06f3049f76e9768804e5d15774420282ccc271251e09be8ca7bede7e492f&quot;}" wire:effects="{&quot;url&quot;:{&quot;checkin&quot;:{&quot;as&quot;:&quot;checkin&quot;,&quot;use&quot;:&quot;replace&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:false},&quot;selectedDate&quot;:{&quot;as&quot;:&quot;date&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:true,&quot;except&quot;:null}},&quot;listeners&quot;:[&quot;panel-changed&quot;,&quot;task-calendar-refresh&quot;,&quot;panel-mood-recorded&quot;]}" wire:id="n4Kb49fmJo6G1LS2u2Yl" wire:name="home.dashboard" data-module="home" class="lt-page" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+
+    
+    <div wire:key="lw-1806504655-0" wire:snapshot="{&quot;data&quot;:{&quot;absence&quot;:null,&quot;undo&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;message&quot;:&quot;&quot;,&quot;choosingDate&quot;:false,&quot;targetDate&quot;:&quot;2026-11-11&quot;},&quot;memo&quot;:{&quot;id&quot;:&quot;ltB4h9h5bZn1o2I21BjX&quot;,&quot;name&quot;:&quot;home.welcome-back&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;87517d1790907932239973270fe0186922405c6629eae817dad17d30cce2147f&quot;}" wire:effects="[]" wire:id="ltB4h9h5bZn1o2I21BjX" wire:name="home.welcome-back">
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+
+    
+    <div wire:key="lw-1806504655-1" wire:snapshot="{&quot;data&quot;:{&quot;insightId&quot;:null},&quot;memo&quot;:{&quot;id&quot;:&quot;wUCqjEXGkVnZVj3Net2c&quot;,&quot;name&quot;:&quot;home.weekly-insights-card&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;be4928cf1b345d17cdf8f0e1d50419416ba4cd7ccf87c08a094529f9925537b3&quot;}" wire:effects="[]" wire:id="wUCqjEXGkVnZVj3Net2c" wire:name="home.weekly-insights-card">
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+
+    
+    <!--[if BLOCK]><![endif]-->    
+        <section class="game-buddy-hero game-buddy-stage game-buddy-hero--with-day game-stage--planta game-type--planta mb-3" aria-label="Bienvenida del día">
+        <span class="game-buddy-stage__scene" aria-hidden="true"></span>
+        <div class="game-buddy-hero__greeting">
+            <!--[if BLOCK]><![endif]-->                <a href="http://localhost:8080/miso/public/game/collection?species=114" wire:navigate class="game-buddy-hero__art game-buddy-stage__art" aria-label="Ver ficha de Tangela">
+                    <!--[if BLOCK]><![endif]-->                        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/114.png" width="120" height="120" loading="lazy" alt="">
+                    <!--[if ENDBLOCK]><![endif]-->                </a>
+            <!--[if ENDBLOCK]><![endif]-->            <div class="game-buddy-hero__body">
+                <p class="game-buddy-hero__meta md-label-medium">
+                    <!--[if BLOCK]><![endif]--><span>Miércoles 11 de noviembre</span><!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]--><span>Tangela · Nv 1</span><!--[if ENDBLOCK]><![endif]-->                </p>
+                <p class="game-buddy-hero__quote md-title-large">“Vamos juntos, un paso más.”</p>
+                <div class="game-buddy-hero__bubble md-body-medium">
+                    <!--[if BLOCK]><![endif]-->                        <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Ya hiciste tu check-in de hoy.</span>
+                        <button type="button" class="md-btn-text game-buddy-hero__cta" wire:click="$set('checkin', true)">Editar</button>
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+            </div>
+        </div>
+        <!--[if BLOCK]><![endif]-->            <div class="game-buddy-hero__day" role="group" aria-label="Tu día">
+                <!--[if BLOCK]><![endif]-->                    <article class="game-day-tile" aria-labelledby="game-day-streak">
+    <a href="http://localhost:8080/miso/public/game" wire:navigate class="game-day-tile__title md-label-large" id="game-day-streak">
+        <i class="bi bi-fire" aria-hidden="true"></i> Racha <i class="bi bi-chevron-right game-day-tile__more" aria-hidden="true"></i>
+    </a>
+    <p class="game-day-tile__value md-headline-small">Empieza hoy</p>
+    <p class="game-day-tile__text md-body-medium">Hoy 1 de 3 acciones · te faltan 2.</p>
+    <div class="md-progress game-day-tile__bar">
+    <!--[if BLOCK]><![endif]-->        <p class="md-progress-label md-label-medium">
+            <!--[if BLOCK]><![endif]--><span>Acciones de hoy para la racha</span><!--[if ENDBLOCK]><![endif]-->            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        </p>
+    <!--[if ENDBLOCK]><![endif]-->
+    <div class="md-progress-linear  "
+         role="progressbar"
+                      aria-valuenow="33.33"
+             aria-valuemin="0"
+             aria-valuemax="100"
+                   aria-label="Acciones de hoy para la racha" >
+        <div class="md-progress-linear-bar" style="--md-progress-value: 33.33%;"></div>
+    </div>
+</div>
+</article>
+                <!--[if ENDBLOCK]><![endif]-->                <!--[if BLOCK]><![endif]-->                    <article class="game-day-tile game-day-tile--done"
+         aria-labelledby="game-day-challenge-home" aria-live="polite">
+    <p class="game-day-tile__title md-label-large" id="game-day-challenge-home">
+        <i class="bi bi-bullseye" aria-hidden="true"></i> Reto de hoy
+    </p>
+    <p class="game-day-tile__value md-title-medium" title="Haz tu check-in de hoy">Haz tu check-in de hoy</p>
+    <!--[if BLOCK]><![endif]-->        <p class="game-day-tile__text md-body-medium"><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Cumplido. Mañana hay otro.</p>
+    <!--[if ENDBLOCK]><![endif]--></article>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        <!--[if ENDBLOCK]><![endif]-->    </section>
+<!--[if ENDBLOCK]><![endif]-->    <div x-data="{ checkinOpen: $wire.entangle('checkin').live }">
+    <!--[if BLOCK]><![endif]--><div x-show="checkinOpen" x-cloak>
+<!--[if ENDBLOCK]><![endif]-->    <div>
+        <div class="md-sheet-scrim" @click="checkinOpen = false"></div>
+        <div class="md-sheet home-checkin"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="sheet-check-in"
+                          x-md-surface="checkinOpen"
+             @md-surface-close="checkinOpen = false"
+             @click.stop>
+            <span class="md-sheet__handle" aria-hidden="true"></span>
+
+            <div class="md-sheet__header">
+                <h2 id="sheet-check-in" class="md-title-large">Check-in</h2>
+                <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-icon" x-on:click="checkinOpen = false"
+            aria-label="Cerrar"
+            title="Cerrar"
+                        >
+        <i class="bi bi-x-lg md-btn__icon" aria-hidden="true"></i>
+        <span class="md-btn__spinner" aria-hidden="true"></span>
+    </button>
+<!--[if ENDBLOCK]><![endif]-->            </div>
+
+            <div class="md-sheet__body"><section class="home-checkin__block" aria-label="¿Cómo te sientes?">
+            <h3 class="md-title-small">¿Cómo te sientes?</h3>
+            <!--[if BLOCK]><![endif]-->                <div class="home-quick-row">
+                    <!--[if BLOCK]><![endif]-->                        <button type="button" wire:key="checkin-mood-01a015ad-7043-7126-a770-d9caef3fdc1b"
+                                class="home-mood-btn is-selected"
+                                wire:click="saveMood('01a015ad-7043-7126-a770-d9caef3fdc1b')" wire:loading.attr="disabled"
+                                aria-label="Acompañado" title="Acompañado">🫂</button>
+                                            <button type="button" wire:key="checkin-mood-01a015ad-7090-7394-b565-fe8289346e8f"
+                                class="home-mood-btn "
+                                wire:click="saveMood('01a015ad-7090-7394-b565-fe8289346e8f')" wire:loading.attr="disabled"
+                                aria-label="Feliz" title="Feliz">😊</button>
+                                            <button type="button" wire:key="checkin-mood-01a015ad-708f-7304-aa27-3c0bf939a59b"
+                                class="home-mood-btn "
+                                wire:click="saveMood('01a015ad-708f-7304-aa27-3c0bf939a59b')" wire:loading.attr="disabled"
+                                aria-label="Enamorado" title="Enamorado">😍</button>
+                                            <button type="button" wire:key="checkin-mood-01a015ad-7099-716a-9503-d7bcd3a74874"
+                                class="home-mood-btn "
+                                wire:click="saveMood('01a015ad-7099-716a-9503-d7bcd3a74874')" wire:loading.attr="disabled"
+                                aria-label="Cansado" title="Cansado">😪</button>
+                                            <button type="button" wire:key="checkin-mood-01a015ad-7095-73e0-99e1-110b9bf2e5dc"
+                                class="home-mood-btn "
+                                wire:click="saveMood('01a015ad-7095-73e0-99e1-110b9bf2e5dc')" wire:loading.attr="disabled"
+                                aria-label="Pereza" title="Pereza">😴</button>
+                                            <button type="button" wire:key="checkin-mood-01a015ad-709c-7077-a889-819f1e678944"
+                                class="home-mood-btn "
+                                wire:click="saveMood('01a015ad-709c-7077-a889-819f1e678944')" wire:loading.attr="disabled"
+                                aria-label="Enfermo" title="Enfermo">🤒</button>
+                                            <button type="button" wire:key="checkin-mood-01a015ad-7091-7019-8f2a-d5f7c216d67f"
+                                class="home-mood-btn "
+                                wire:click="saveMood('01a015ad-7091-7019-8f2a-d5f7c216d67f')" wire:loading.attr="disabled"
+                                aria-label="Energético" title="Energético">🌟</button>
+                                            <button type="button" wire:key="checkin-mood-01a015ad-7040-73c6-a6c2-6be911e4aa4b"
+                                class="home-mood-btn "
+                                wire:click="saveMood('01a015ad-7040-73c6-a6c2-6be911e4aa4b')" wire:loading.attr="disabled"
+                                aria-label="Orgulloso" title="Orgulloso">🏅</button>
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+            <!--[if ENDBLOCK]><![endif]-->        </section>
+
+        <section class="home-checkin__block" aria-label="Energía">
+            <h3 class="md-title-small">Energía</h3>
+            <div class="home-quick-row">
+                <!--[if BLOCK]><![endif]-->                    <button type="button" wire:key="checkin-energy-1"
+                            class="home-mood-btn "
+                            wire:click="saveEnergy(1)" wire:loading.attr="disabled"
+                            aria-label="Energía 1 de 5">1</button>
+                                    <button type="button" wire:key="checkin-energy-2"
+                            class="home-mood-btn "
+                            wire:click="saveEnergy(2)" wire:loading.attr="disabled"
+                            aria-label="Energía 2 de 5">2</button>
+                                    <button type="button" wire:key="checkin-energy-3"
+                            class="home-mood-btn is-selected"
+                            wire:click="saveEnergy(3)" wire:loading.attr="disabled"
+                            aria-label="Energía 3 de 5">3</button>
+                                    <button type="button" wire:key="checkin-energy-4"
+                            class="home-mood-btn "
+                            wire:click="saveEnergy(4)" wire:loading.attr="disabled"
+                            aria-label="Energía 4 de 5">4</button>
+                                    <button type="button" wire:key="checkin-energy-5"
+                            class="home-mood-btn "
+                            wire:click="saveEnergy(5)" wire:loading.attr="disabled"
+                            aria-label="Energía 5 de 5">5</button>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </section>
+
+        <section class="home-checkin__block" aria-label="Agua">
+            <h3 class="md-title-small">Agua <span class="md-label-small">0 / 2,500 ml</span></h3>
+            <div class="d-flex flex-wrap gap-2">
+                <!--[if BLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-tonal" wire:key="checkin-drink-019f7b34-79ae-72ed-b9fc-a17feb326776" wire:click="quickAddWater('019f7b34-79ae-72ed-b9fc-a17feb326776', 250)" wire:loading.attr="disabled"
+                        >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <span class="md-btn__spinner" aria-hidden="true"></span>
+        <span>💧 Agua +250 ml</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </button>
+<!--[if ENDBLOCK]><![endif]-->                                    <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-tonal" wire:key="checkin-drink-01a0a326-d8b1-709a-bd3b-9efdb273b6cc" wire:click="quickAddWater('01a0a326-d8b1-709a-bd3b-9efdb273b6cc', 250)" wire:loading.attr="disabled"
+                        >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <span class="md-btn__spinner" aria-hidden="true"></span>
+        <span>☕ Café +250 ml</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </button>
+<!--[if ENDBLOCK]><![endif]-->                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </section>
+
+        <section class="home-checkin__block" aria-label="Hábitos de hoy">
+            <h3 class="md-title-small">Hábitos de hoy</h3>
+            <!--[if BLOCK]><![endif]-->                <button type="button" wire:key="checkin-habit-10"
+                        wire:click="toggleHabit(10)" wire:loading.attr="disabled" wire:target="toggleHabit(10)"
+                        class="md-list-item habit-list-action w-100 text-start">
+                    <div class="md-list-item-leading"><div class="md-list-checkbox"></div></div>
+                    <span class="me-2" aria-hidden="true">🍽️</span>
+                    <span class="md-list-item-headline">Almuerzo</span>
+                </button>
+                            <button type="button" wire:key="checkin-habit-11"
+                        wire:click="toggleHabit(11)" wire:loading.attr="disabled" wire:target="toggleHabit(11)"
+                        class="md-list-item habit-list-action w-100 text-start">
+                    <div class="md-list-item-leading"><div class="md-list-checkbox"></div></div>
+                    <span class="me-2" aria-hidden="true">🛌</span>
+                    <span class="md-list-item-headline">Siesta</span>
+                </button>
+                            <button type="button" wire:key="checkin-habit-12"
+                        wire:click="toggleHabit(12)" wire:loading.attr="disabled" wire:target="toggleHabit(12)"
+                        class="md-list-item habit-list-action w-100 text-start">
+                    <div class="md-list-item-leading"><div class="md-list-checkbox"></div></div>
+                    <span class="me-2" aria-hidden="true">🪥</span>
+                    <span class="md-list-item-headline">Lavarme los dientes</span>
+                </button>
+                            <button type="button" wire:key="checkin-habit-13"
+                        wire:click="toggleHabit(13)" wire:loading.attr="disabled" wire:target="toggleHabit(13)"
+                        class="md-list-item habit-list-action w-100 text-start">
+                    <div class="md-list-item-leading"><div class="md-list-checkbox"></div></div>
+                    <span class="me-2" aria-hidden="true">🦷</span>
+                    <span class="md-list-item-headline">Seda Dental</span>
+                </button>
+                            <button type="button" wire:key="checkin-habit-14"
+                        wire:click="toggleHabit(14)" wire:loading.attr="disabled" wire:target="toggleHabit(14)"
+                        class="md-list-item habit-list-action w-100 text-start">
+                    <div class="md-list-item-leading"><div class="md-list-checkbox"></div></div>
+                    <span class="me-2" aria-hidden="true">💧</span>
+                    <span class="md-list-item-headline">Tomar agua (tarde)</span>
+                </button>
+            <!--[if ENDBLOCK]><![endif]-->        </section></div>
+
+            <!--[if BLOCK]><![endif]-->                <div class="md-sheet__actions"><!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-filled" wire:click="closeCheckin"
+                        >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <span class="md-btn__spinner" aria-hidden="true"></span>
+        <span>Listo</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </button>
+<!--[if ENDBLOCK]><![endif]--></div>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+    </div>
+<!--[if BLOCK]><![endif]--></div>
+<!--[if ENDBLOCK]><![endif]--></div>
+
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+    
+    <div class="row g-3">
+        <div class="col-12 col-lg-7">
+            <div class="md-card-elevated h-100">
+    <div class="home-card-head">
+    <span class="home-card-head__icon home-tone--warning" aria-hidden="true"><i class="bi bi-lightning-charge"></i></span>
+    <div class="home-card-head__text">
+        <h2 class="md-title-small mb-0">Registro rápido</h2>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </div>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+
+    
+    <div class="mb-3">
+        <div class="home-section-label md-label-medium">
+            <i class="home-tone-text--primary bi bi-droplet"></i>
+            <span>Hidratación</span>
+            <span class="ms-auto md-label-small">0 / 2,500 ml</span>
+        </div>
+        <div class="md-progress-linear mb-2">
+            <div class="md-progress-linear-bar" style="width: 0%"></div>
+        </div>
+        <div class="home-quick-row">
+            <!--[if BLOCK]><![endif]-->                <button type="button" class="home-chip"
+                        wire:click="quickAddWater('019f7b34-79ae-72ed-b9fc-a17feb326776', 250)"
+                        wire:loading.attr="disabled"
+                        title="Agua 250 ml">
+                    💧 Agua +250
+                </button>
+                <!--[if BLOCK]><![endif]-->                    <button type="button" class="home-chip"
+                            wire:click="quickAddWater('019f7b34-79ae-72ed-b9fc-a17feb326776', 500)"
+                            wire:loading.attr="disabled"
+                            title="Agua 500 ml">
+                        💧 +500
+                    </button>
+                <!--[if ENDBLOCK]><![endif]-->                            <button type="button" class="home-chip"
+                        wire:click="quickAddWater('01a0a326-d8b1-709a-bd3b-9efdb273b6cc', 250)"
+                        wire:loading.attr="disabled"
+                        title="Café 250 ml">
+                    ☕ Café +250
+                </button>
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                            <button type="button" class="home-chip"
+                        wire:click="quickAddWater('01a0a327-fbfd-7046-959f-1da846a9497b', 250)"
+                        wire:loading.attr="disabled"
+                        title="Café en leche 250 ml">
+                    🥛 Café en leche +250
+                </button>
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                            <button type="button" class="home-chip"
+                        wire:click="quickAddWater('019f81ae-6eff-7175-b3c0-19c3f91d8f35', 250)"
+                        wire:loading.attr="disabled"
+                        title="Cerveza 250 ml">
+                    🍻 Cerveza +250
+                </button>
+                <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <!--[if ENDBLOCK]><![endif]-->        </div>
+    </div>
+
+    
+    <div class="mb-3">
+        <div class="home-section-label md-label-medium">
+            <i class="home-tone-text--tertiary bi bi-emoji-smile"></i>
+            <span>¿Cómo te sientes?</span>
+            <!--[if BLOCK]><![endif]-->                <span class="ms-auto md-label-small">🫂 Acompañado · 15:09</span>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+        <!--[if BLOCK]><![endif]-->            <div class="home-quick-row">
+                <!--[if BLOCK]><![endif]-->                    <button type="button"
+                            class="home-mood-btn is-selected"
+                            wire:click="saveMood('01a015ad-7043-7126-a770-d9caef3fdc1b')"
+                            wire:loading.attr="disabled"
+                            title="Acompañado"
+                            aria-label="Acompañado">
+                        🫂
+                    </button>
+                                    <button type="button"
+                            class="home-mood-btn "
+                            wire:click="saveMood('01a015ad-7090-7394-b565-fe8289346e8f')"
+                            wire:loading.attr="disabled"
+                            title="Feliz"
+                            aria-label="Feliz">
+                        😊
+                    </button>
+                                    <button type="button"
+                            class="home-mood-btn "
+                            wire:click="saveMood('01a015ad-708f-7304-aa27-3c0bf939a59b')"
+                            wire:loading.attr="disabled"
+                            title="Enamorado"
+                            aria-label="Enamorado">
+                        😍
+                    </button>
+                                    <button type="button"
+                            class="home-mood-btn "
+                            wire:click="saveMood('01a015ad-7099-716a-9503-d7bcd3a74874')"
+                            wire:loading.attr="disabled"
+                            title="Cansado"
+                            aria-label="Cansado">
+                        😪
+                    </button>
+                                    <button type="button"
+                            class="home-mood-btn "
+                            wire:click="saveMood('01a015ad-7095-73e0-99e1-110b9bf2e5dc')"
+                            wire:loading.attr="disabled"
+                            title="Pereza"
+                            aria-label="Pereza">
+                        😴
+                    </button>
+                                    <button type="button"
+                            class="home-mood-btn "
+                            wire:click="saveMood('01a015ad-709c-7077-a889-819f1e678944')"
+                            wire:loading.attr="disabled"
+                            title="Enfermo"
+                            aria-label="Enfermo">
+                        🤒
+                    </button>
+                                    <button type="button"
+                            class="home-mood-btn "
+                            wire:click="saveMood('01a015ad-7091-7019-8f2a-d5f7c216d67f')"
+                            wire:loading.attr="disabled"
+                            title="Energético"
+                            aria-label="Energético">
+                        🌟
+                    </button>
+                                    <button type="button"
+                            class="home-mood-btn "
+                            wire:click="saveMood('01a015ad-7040-73c6-a6c2-6be911e4aa4b')"
+                            wire:loading.attr="disabled"
+                            title="Orgulloso"
+                            aria-label="Orgulloso">
+                        🏅
+                    </button>
+                <!--[if ENDBLOCK]><![endif]-->                <button type="button" class="home-mood-btn" wire:click="openMoodCatalog"
+                        title="Más emociones" aria-label="Más emociones">
+                    <i class="bi bi-three-dots"></i>
+                </button>
+            </div>
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+
+    
+    <div>
+        <div class="home-section-label md-label-medium">
+            <i class="home-tone-text--warning bi bi-battery-charging"></i>
+            <span>Energía</span>
+            <!--[if BLOCK]><![endif]-->                <span class="ms-auto md-label-small">3/5 · 15:09</span>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+        <div class="home-quick-row">
+            <!--[if BLOCK]><![endif]-->                <button type="button"
+                        class="home-chip "
+                        wire:click="saveEnergy(1)"
+                        wire:loading.attr="disabled"
+                        aria-label="Energía nivel 1">
+                    <i class="home-tone-text--warning bi bi-lightning-charge-fill"></i> 1
+                </button>
+                            <button type="button"
+                        class="home-chip "
+                        wire:click="saveEnergy(2)"
+                        wire:loading.attr="disabled"
+                        aria-label="Energía nivel 2">
+                    <i class="home-tone-text--warning bi bi-lightning-charge-fill"></i> 2
+                </button>
+                            <button type="button"
+                        class="home-chip is-selected"
+                        wire:click="saveEnergy(3)"
+                        wire:loading.attr="disabled"
+                        aria-label="Energía nivel 3">
+                    <i class="home-tone-text--warning bi bi-lightning-charge-fill"></i> 3
+                </button>
+                            <button type="button"
+                        class="home-chip "
+                        wire:click="saveEnergy(4)"
+                        wire:loading.attr="disabled"
+                        aria-label="Energía nivel 4">
+                    <i class="home-tone-text--warning bi bi-lightning-charge-fill"></i> 4
+                </button>
+                            <button type="button"
+                        class="home-chip "
+                        wire:click="saveEnergy(5)"
+                        wire:loading.attr="disabled"
+                        aria-label="Energía nivel 5">
+                    <i class="home-tone-text--warning bi bi-lightning-charge-fill"></i> 5
+                </button>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+    </div>
+</div>
+        </div>
+        <div class="col-12 col-lg-5">
+            <div class="md-card-elevated h-100">
+    <div class="home-card-head">
+    <span class="home-card-head__icon home-tone--success" aria-hidden="true"><i class="bi bi-check2-square"></i></span>
+    <div class="home-card-head__text">
+        <h2 class="md-title-small mb-0">Hábitos</h2>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </div>
+    <!--[if BLOCK]><![endif]--><span class="md-chip-tonal home-card-head__count home-tone--success">0/23</span><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><a href="http://localhost:8080/miso/public/habits?date=2026-11-11" class="md-btn-text home-card-head__action">Ver todos</a><!--[if ENDBLOCK]><![endif]--></div>
+    <div class="md-progress-linear md-progress-linear--success mb-2">
+        <div class="md-progress-linear-bar" style="width: 0%"></div>
+    </div>
+
+    <!--[if BLOCK]><![endif]-->        <button type="button"
+                wire:click="toggleHabit(10)"
+                wire:loading.attr="disabled"
+                wire:target="toggleHabit(10)"
+                class="md-list-item habit-list-action w-100 text-start"
+                wire:key="home-habit-2026-11-11-10">
+            <div class="md-list-item-leading">
+                <div class="md-list-checkbox"></div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <span style="font-size: 1.25rem;">🍽️</span>
+                <div class="md-list-item-content">
+                    <div class="md-list-item-headline">Almuerzo</div>
+                    <div class="md-list-item-supporting">60 min · 12:30</div>
+                </div>
+            </div>
+        </button>
+            <button type="button"
+                wire:click="toggleHabit(11)"
+                wire:loading.attr="disabled"
+                wire:target="toggleHabit(11)"
+                class="md-list-item habit-list-action w-100 text-start"
+                wire:key="home-habit-2026-11-11-11">
+            <div class="md-list-item-leading">
+                <div class="md-list-checkbox"></div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <span style="font-size: 1.25rem;">🛌</span>
+                <div class="md-list-item-content">
+                    <div class="md-list-item-headline">Siesta</div>
+                    <div class="md-list-item-supporting">15 min · 13:00</div>
+                </div>
+            </div>
+        </button>
+            <button type="button"
+                wire:click="toggleHabit(12)"
+                wire:loading.attr="disabled"
+                wire:target="toggleHabit(12)"
+                class="md-list-item habit-list-action w-100 text-start"
+                wire:key="home-habit-2026-11-11-12">
+            <div class="md-list-item-leading">
+                <div class="md-list-checkbox"></div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <span style="font-size: 1.25rem;">🪥</span>
+                <div class="md-list-item-content">
+                    <div class="md-list-item-headline">Lavarme los dientes</div>
+                    <div class="md-list-item-supporting">2 min · 13:15</div>
+                </div>
+            </div>
+        </button>
+            <button type="button"
+                wire:click="toggleHabit(13)"
+                wire:loading.attr="disabled"
+                wire:target="toggleHabit(13)"
+                class="md-list-item habit-list-action w-100 text-start"
+                wire:key="home-habit-2026-11-11-13">
+            <div class="md-list-item-leading">
+                <div class="md-list-checkbox"></div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <span style="font-size: 1.25rem;">🦷</span>
+                <div class="md-list-item-content">
+                    <div class="md-list-item-headline">Seda Dental</div>
+                    <div class="md-list-item-supporting">2 min · 13:30</div>
+                </div>
+            </div>
+        </button>
+            <button type="button"
+                wire:click="toggleHabit(14)"
+                wire:loading.attr="disabled"
+                wire:target="toggleHabit(14)"
+                class="md-list-item habit-list-action w-100 text-start"
+                wire:key="home-habit-2026-11-11-14">
+            <div class="md-list-item-leading">
+                <div class="md-list-checkbox"></div>
+            </div>
+            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                <span style="font-size: 1.25rem;">💧</span>
+                <div class="md-list-item-content">
+                    <div class="md-list-item-headline">Tomar agua (tarde)</div>
+                    <div class="md-list-item-supporting">5 min · 15:00</div>
+                </div>
+            </div>
+        </button>
+    <!--[if ENDBLOCK]><![endif]--></div>
+        </div>
+
+        <div class="col-12 col-lg-5">
+            <div class="md-card-elevated h-100">
+    <div class="home-card-head">
+    <span class="home-card-head__icon home-tone--info" aria-hidden="true"><i class="bi bi-list-task"></i></span>
+    <div class="home-card-head__text">
+        <h2 class="md-title-small mb-0">Tareas de hoy</h2>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </div>
+    <!--[if BLOCK]><![endif]--><span class="md-chip-tonal home-card-head__count home-tone--info">143 pendientes</span><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><a href="http://localhost:8080/miso/public/tasks/list" class="md-btn-text home-card-head__action">Ver todas</a><!--[if ENDBLOCK]><![endif]--></div>
+
+    <!--[if BLOCK]><![endif]-->                <div class="md-list-item w-100" wire:key="home-task-019fa4aa-1c01-714b-8cb3-0497a4042c49">
+            <button type="button"
+                    class="md-list-item-leading"
+                    style="border: 0; background: transparent; padding: 0; cursor: pointer;"
+                    wire:click="toggleTask('019fa4aa-1c01-714b-8cb3-0497a4042c49')"
+                    wire:loading.attr="disabled"
+                    wire:target="toggleTask('019fa4aa-1c01-714b-8cb3-0497a4042c49')"
+                    aria-label="Completar Conversación sobre el futuro de Gesthor, la IA y el software SaaS">
+                <div class="md-list-checkbox"></div>
+            </button>
+            <div class="md-list-item-content">
+                <div class="md-list-item-headline">
+                    <!--[if BLOCK]><![endif]-->                        <span title="Urgente e importante">🔴</span>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]--><span class="md-task-code md-body-small d-inline-flex flex-wrap align-items-center gap-1" style="color: var(--md-sys-color-on-surface-variant); max-width: 100%;" >
+    <code style="font-family: monospace; font-size: inherit; color: inherit; overflow-wrap: anywhere;">GES-00003</code>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></span>
+<!--[if ENDBLOCK]><![endif]--> Conversación sobre el futuro de Gesthor, la IA y el software SaaS
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                </div>
+                <div class="md-list-item-supporting">
+                    <!--[if BLOCK]><![endif]-->                        <span class="home-tone-text--error">Vencida · 22 oct.</span>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                        · Gesthor
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+            </div>
+        </div>
+                    <div class="md-list-item w-100" wire:key="home-task-01a05f10-e7c4-7338-a882-fed1b259e7c5">
+            <button type="button"
+                    class="md-list-item-leading"
+                    style="border: 0; background: transparent; padding: 0; cursor: pointer;"
+                    wire:click="toggleTask('01a05f10-e7c4-7338-a882-fed1b259e7c5')"
+                    wire:loading.attr="disabled"
+                    wire:target="toggleTask('01a05f10-e7c4-7338-a882-fed1b259e7c5')"
+                    aria-label="Completar Actualizar Jira diariamente con avances">
+                <div class="md-list-checkbox"></div>
+            </button>
+            <div class="md-list-item-content">
+                <div class="md-list-item-headline">
+                    <!--[if BLOCK]><![endif]-->                        <span title="Importante">🟡</span>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]--><span class="md-task-code md-body-small d-inline-flex flex-wrap align-items-center gap-1" style="color: var(--md-sys-color-on-surface-variant); max-width: 100%;" >
+    <code style="font-family: monospace; font-size: inherit; color: inherit; overflow-wrap: anywhere;">SGX-00026</code>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></span>
+<!--[if ENDBLOCK]><![endif]--> Actualizar Jira diariamente con avances
+                    <!--[if BLOCK]><![endif]-->                        <i class="home-muted bi bi-arrow-repeat" title="Recurrente"></i>
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+                <div class="md-list-item-supporting">
+                    <!--[if BLOCK]><![endif]-->                        <span class="home-tone-text--error">Vencida · 22 oct.</span>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                        · Siigo
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+            </div>
+        </div>
+                    <div class="md-list-item w-100" wire:key="home-task-01a0d9c2-dc1c-717a-be86-0abd8be282b3">
+            <button type="button"
+                    class="md-list-item-leading"
+                    style="border: 0; background: transparent; padding: 0; cursor: pointer;"
+                    wire:click="toggleTask('01a0d9c2-dc1c-717a-be86-0abd8be282b3')"
+                    wire:loading.attr="disabled"
+                    wire:target="toggleTask('01a0d9c2-dc1c-717a-be86-0abd8be282b3')"
+                    aria-label="Completar Combos – Definición de impresión y generación del CFDI">
+                <div class="md-list-checkbox"></div>
+            </button>
+            <div class="md-list-item-content">
+                <div class="md-list-item-headline">
+                    <!--[if BLOCK]><![endif]-->                        <span title="Importante">🟡</span>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]--><span class="md-task-code md-body-small d-inline-flex flex-wrap align-items-center gap-1" style="color: var(--md-sys-color-on-surface-variant); max-width: 100%;" >
+    <code style="font-family: monospace; font-size: inherit; color: inherit; overflow-wrap: anywhere;">SGX-00062</code>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></span>
+<!--[if ENDBLOCK]><![endif]--> Combos – Definición de impresión y generación del CFDI
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                </div>
+                <div class="md-list-item-supporting">
+                    <!--[if BLOCK]><![endif]-->                        <span class="home-tone-text--error">Vencida · 25 oct.</span>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                        · Siigo
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+            </div>
+        </div>
+                    <div class="md-list-item w-100" wire:key="home-task-019f7884-8975-725b-b853-0f0a9bf62f9e">
+            <button type="button"
+                    class="md-list-item-leading"
+                    style="border: 0; background: transparent; padding: 0; cursor: pointer;"
+                    wire:click="toggleTask('019f7884-8975-725b-b853-0f0a9bf62f9e')"
+                    wire:loading.attr="disabled"
+                    wire:target="toggleTask('019f7884-8975-725b-b853-0f0a9bf62f9e')"
+                    aria-label="Completar Revisión de simuladores de ingeniería de contexto.">
+                <div class="md-list-checkbox"></div>
+            </button>
+            <div class="md-list-item-content">
+                <div class="md-list-item-headline">
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]--><span class="md-task-code md-body-small d-inline-flex flex-wrap align-items-center gap-1" style="color: var(--md-sys-color-on-surface-variant); max-width: 100%;" >
+    <code style="font-family: monospace; font-size: inherit; color: inherit; overflow-wrap: anywhere;">CER-00011</code>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></span>
+<!--[if ENDBLOCK]><![endif]--> Revisión de simuladores de ingeniería de contexto.
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                </div>
+                <div class="md-list-item-supporting">
+                    <!--[if BLOCK]><![endif]-->                        <span class="home-tone-text--error">Vencida · 02 ago.</span>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                        · Certmind
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+            </div>
+        </div>
+                    <div class="md-list-item w-100" wire:key="home-task-01a0ca13-a743-736b-bea2-e2bd4c8fdbf4">
+            <button type="button"
+                    class="md-list-item-leading"
+                    style="border: 0; background: transparent; padding: 0; cursor: pointer;"
+                    wire:click="toggleTask('01a0ca13-a743-736b-bea2-e2bd4c8fdbf4')"
+                    wire:loading.attr="disabled"
+                    wire:target="toggleTask('01a0ca13-a743-736b-bea2-e2bd4c8fdbf4')"
+                    aria-label="Completar Seguimiento sesión con PROEFEX">
+                <div class="md-list-checkbox"></div>
+            </button>
+            <div class="md-list-item-content">
+                <div class="md-list-item-headline">
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]--><span class="md-task-code md-body-small d-inline-flex flex-wrap align-items-center gap-1" style="color: var(--md-sys-color-on-surface-variant); max-width: 100%;" >
+    <code style="font-family: monospace; font-size: inherit; color: inherit; overflow-wrap: anywhere;">CER-00031</code>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></span>
+<!--[if ENDBLOCK]><![endif]--> Seguimiento sesión con PROEFEX
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                </div>
+                <div class="md-list-item-supporting">
+                    <!--[if BLOCK]><![endif]-->                        <span class="home-tone-text--error">Vencida · 19 oct.</span>
+                    <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                        · Certmind
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+            </div>
+        </div>
+    <!--[if ENDBLOCK]><![endif]-->
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+        </div>
+        <div class="col-12 col-lg-7">
+            <div class="md-card-elevated h-100">
+    <div class="home-card-head">
+    <span class="home-card-head__icon home-tone--primary" aria-hidden="true"><i class="bi bi-graph-up"></i></span>
+    <div class="home-card-head__text">
+        <h2 class="md-title-small mb-0">Tendencia semanal</h2>
+        <!--[if BLOCK]><![endif]--><p class="home-card-head__hint md-label-small mb-0">Hidratación y hábitos de los últimos 7 días (%)</p><!--[if ENDBLOCK]><![endif]-->    </div>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+    <div wire:ignore
+         wire:key="dashboard-chart-007af412379991611890116e69a353ed"
+         data-dashboard-chart='[{"date":"jue. 05","water":0,"habits":0},{"date":"vie. 06","water":0,"habits":0},{"date":"s\u00e1b. 07","water":0,"habits":0},{"date":"dom. 08","water":0,"habits":0},{"date":"lun. 09","water":44,"habits":61},{"date":"mar. 10","water":12,"habits":17},{"date":"mi\u00e9. 11","water":0,"habits":0}]'
+         aria-label="Tendencia semanal de hidratación y hábitos"></div>
+</div>
+        </div>
+
+        <div class="col-12 col-md-6 col-lg-7">
+            <div class="md-card-elevated h-100">
+    <div class="home-card-head">
+    <span class="home-card-head__icon home-tone--tertiary" aria-hidden="true"><i class="bi bi-egg-fried"></i></span>
+    <div class="home-card-head__text">
+        <h2 class="md-title-small mb-0">Comidas de hoy</h2>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </div>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><a href="http://localhost:8080/miso/public/meals/weekly?date=2026-11-11" class="md-btn-text home-card-head__action">Ver semana</a><!--[if ENDBLOCK]><![endif]--></div>
+
+    <!--[if BLOCK]><![endif]-->        <p class="home-muted md-body-small mb-0">
+            No hay comidas planificadas para este día.
+            <a href="http://localhost:8080/miso/public/meals/weekly?date=2026-11-11">Planificar menú</a>
+        </p>
+    <!--[if ENDBLOCK]><![endif]--></div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-5">
+            <div class="md-card-elevated h-100">
+                <div class="home-card-head">
+    <span class="home-card-head__icon home-tone--secondary" aria-hidden="true"><i class="bi bi-journal-text"></i></span>
+    <div class="home-card-head__text">
+        <h2 class="md-title-small mb-0">Bitácora del día</h2>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </div>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><a href="http://localhost:8080/miso/public/journal?date=2026-11-11" class="md-btn-text home-card-head__action">Abrir diario</a><!--[if ENDBLOCK]><![endif]--></div>
+                <!--[if BLOCK]><![endif]-->                    <p class="home-muted md-body-small mb-2">Todavía no has escrito una entrada para este día.</p>
+                    <a href="http://localhost:8080/miso/public/journal?date=2026-11-11" class="md-btn-tonal"><i class="bi bi-pencil"></i> Escribir entrada</a>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+        </div>
+    </div>
+
+    <template x-teleport="body">
+    <div class="md-fab-layer md-fab-host" data-module="home"
+          x-data="{ fabOpen: false }" @keydown.escape.stop="fabOpen = false" @keydown.escape.window="fabOpen = false" @click.outside="fabOpen = false" :class="{ 'is-open': fabOpen }" >
+        <!--[if BLOCK]><![endif]-->            <div class="md-create-fab__menu" x-show="fabOpen" x-cloak x-transition.origin.bottom.right role="menu" aria-label="Crear tarea">
+                <!--[if BLOCK]><![endif]-->                    <button  type="button"  x-on:click="$dispatch(&quot;task-editor&quot;, {&quot;action&quot;:&quot;openForm&quot;})"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Crear tarea</span><i class="bi bi-plus-lg" aria-hidden="true"></i>
+                    </button>
+                                    <button  type="button"  x-on:click="$dispatch(&quot;panel-plan&quot;, {})"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Agregar plan</span><i class="bi bi-map" aria-hidden="true"></i>
+                    </button>
+                                    <button  type="button"  x-on:click="$dispatch(&quot;panel-focus-manual&quot;, {})"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Registrar sesión de enfoque</span><i class="bi bi-stopwatch" aria-hidden="true"></i>
+                    </button>
+                                    <button  type="button"  x-on:click="$dispatch(&quot;panel-shopping&quot;, {})"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Agregar compra</span><i class="bi bi-cart-plus" aria-hidden="true"></i>
+                    </button>
+                                    <button  type="button"  x-on:click="$dispatch(&quot;panel-quick&quot;, {&quot;kind&quot;:&quot;water&quot;})"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Registrar bebida</span><i class="bi bi-droplet" aria-hidden="true"></i>
+                    </button>
+                                    <button  type="button"  x-on:click="$dispatch(&quot;panel-quick&quot;, {&quot;kind&quot;:&quot;mood&quot;})"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Registrar ánimo</span><i class="bi bi-emoji-smile" aria-hidden="true"></i>
+                    </button>
+                                    <button  type="button"  x-on:click="$dispatch(&quot;panel-quick&quot;, {&quot;kind&quot;:&quot;journal&quot;})"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Escribir diario</span><i class="bi bi-journal-text" aria-hidden="true"></i>
+                    </button>
+                                    <a  href="http://localhost:8080/miso/public/goals"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Registrar avance</span><i class="bi bi-flag" aria-hidden="true"></i>
+                    </a>
+                                    <button  type="button"  x-on:click="$dispatch(&quot;panel-habit&quot;, {})"
+                        class="md-create-fab__item" role="menuitem" @click="fabOpen = false">
+                        <span>Agregar hábito</span><i class="bi bi-check2-square" aria-hidden="true"></i>
+                    </button>
+                <!--[if ENDBLOCK]><![endif]-->            </div>
+            <button type="button" class="md-fab  md-create-fab md-module-primary-fab" @click="fabOpen = !fabOpen"
+                    :aria-expanded="fabOpen.toString()" aria-haspopup="menu" aria-label="Crear" title="Crear">
+                <i class="bi" :class="fabOpen ? 'bi-x-lg' : 'bi-plus-lg'" aria-hidden="true"></i><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            </button>
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+</template>
+    <div wire:key="home-task-editor" wire:snapshot="{&quot;data&quot;:{&quot;statusQuery&quot;:[[&quot;cea980ea-69a1-4fea-8253-372a01ea3cf0&quot;,&quot;9d267a04-3937-457e-89aa-8e1585e9de4a&quot;,&quot;01a161ce-2daa-7062-bd8f-1e2e9d4426dd&quot;,&quot;8f2dd113-92dc-4c94-bb82-657f753a2d18&quot;],{&quot;s&quot;:&quot;arr&quot;}],&quot;filter&quot;:[[&quot;cea980ea-69a1-4fea-8253-372a01ea3cf0&quot;,&quot;9d267a04-3937-457e-89aa-8e1585e9de4a&quot;,&quot;01a161ce-2daa-7062-bd8f-1e2e9d4426dd&quot;,&quot;8f2dd113-92dc-4c94-bb82-657f753a2d18&quot;],{&quot;s&quot;:&quot;arr&quot;}],&quot;categoryFilter&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;priorityFilter&quot;:&quot;&quot;,&quot;dateFilter&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;sizeFilter&quot;:&quot;&quot;,&quot;search&quot;:&quot;&quot;,&quot;editTask&quot;:null,&quot;expanded&quot;:false,&quot;recurringSnapshot&quot;:null,&quot;draftTaskId&quot;:&quot;39d2643a-d473-43ef-8a57-9fe25d78aa9d&quot;,&quot;editorIntent&quot;:&quot;&quot;,&quot;sort&quot;:&quot;updated&quot;,&quot;showForm&quot;:false,&quot;descriptionMode&quot;:&quot;write&quot;,&quot;editingId&quot;:null,&quot;title&quot;:&quot;&quot;,&quot;description&quot;:&quot;&quot;,&quot;category&quot;:&quot;&quot;,&quot;priority&quot;:&quot;&quot;,&quot;statusId&quot;:&quot;&quot;,&quot;size&quot;:&quot;&quot;,&quot;startDate&quot;:null,&quot;endDate&quot;:null,&quot;estimatedTime&quot;:null,&quot;isPrivate&quot;:false,&quot;isRecurrent&quot;:false,&quot;recurrenceIntervalDays&quot;:7,&quot;nativeRecurrenceRule&quot;:&quot;&quot;,&quot;bulkTitles&quot;:&quot;&quot;,&quot;priorities&quot;:[{&quot;urgent-important&quot;:&quot;\ud83d\udd34 Urgente e Importante&quot;,&quot;not-urgent-important&quot;:&quot;\ud83d\udfe1 No Urgente pero Importante&quot;,&quot;urgent-not-important&quot;:&quot;\ud83d\udfe0 Urgente No Importante&quot;,&quot;not-urgent-not-important&quot;:&quot;\u26aa No Urgente No Importante&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;sizes&quot;:[{&quot;XS&quot;:&quot;XS (&lt; 30 min)&quot;,&quot;S&quot;:&quot;S (30 min - 1h)&quot;,&quot;M&quot;:&quot;M (1-2h)&quot;,&quot;L&quot;:&quot;L (2-4h)&quot;,&quot;XL&quot;:&quot;XL (&gt; 4h)&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;reminders&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;relations&quot;:[[[{&quot;type&quot;:&quot;&quot;,&quot;id&quot;:&quot;&quot;},{&quot;s&quot;:&quot;arr&quot;}]],{&quot;s&quot;:&quot;arr&quot;}],&quot;categories&quot;:[{&quot;personal&quot;:&quot;Personal&quot;,&quot;salud&quot;:&quot;Salud&quot;,&quot;finanzas&quot;:&quot;Finanzas&quot;,&quot;educacion&quot;:&quot;Educaci\u00f3n&quot;,&quot;hogar&quot;:&quot;Hogar&quot;,&quot;social&quot;:&quot;Trabajo&quot;,&quot;certmind&quot;:&quot;Trabajo \/ CertMind&quot;,&quot;entreagiles&quot;:&quot;Trabajo \/ EntreAgiles&quot;,&quot;gesthor&quot;:&quot;Trabajo \/ Gesthor&quot;,&quot;jikko&quot;:&quot;Trabajo \/ Jikko&quot;,&quot;siigo&quot;:&quot;Trabajo \/ Siigo&quot;,&quot;unicauca&quot;:&quot;Trabajo \/ Unicauca&quot;,&quot;creatividad&quot;:&quot;Creatividad&quot;,&quot;tecnologia&quot;:&quot;Tecnolog\u00eda&quot;,&quot;compras&quot;:&quot;Compras&quot;,&quot;tramites&quot;:&quot;Tr\u00e1mites&quot;,&quot;otros&quot;:&quot;Otros&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;showRecurringCompletion&quot;:false,&quot;recurringTaskId&quot;:null,&quot;nextOccurrenceDate&quot;:null,&quot;startTime&quot;:null,&quot;endTime&quot;:null,&quot;perPage&quot;:25,&quot;paginators&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;5PnzVMshp87n5UPULzGv&quot;,&quot;name&quot;:&quot;task.task-editor&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;1f9bdd11578b48f4bd247430ec306a8894a5062a92b52acabe9fa17f98c03309&quot;}" wire:effects="{&quot;url&quot;:{&quot;sort&quot;:{&quot;as&quot;:&quot;sort&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;updated&quot;},&quot;perPage&quot;:{&quot;as&quot;:&quot;per_page&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:25}},&quot;listeners&quot;:[&quot;focus-session-saved&quot;,&quot;task-records-changed&quot;]}" wire:id="5PnzVMshp87n5UPULzGv" wire:name="task.task-editor" x-data="ltFormEditor($wire, JSON.parse('{\u0022editTask\u0022:null,\u0022descriptionMode\u0022:\u0022write\u0022,\u0022editingId\u0022:null,\u0022title\u0022:\u0022\u0022,\u0022description\u0022:\u0022\u0022,\u0022category\u0022:\u0022\u0022,\u0022priority\u0022:\u0022\u0022,\u0022statusId\u0022:\u0022\u0022,\u0022size\u0022:\u0022\u0022,\u0022startDate\u0022:null,\u0022endDate\u0022:null,\u0022estimatedTime\u0022:null,\u0022isPrivate\u0022:false,\u0022isRecurrent\u0022:false,\u0022recurrenceIntervalDays\u0022:7,\u0022nativeRecurrenceRule\u0022:\u0022\u0022,\u0022bulkTitles\u0022:\u0022\u0022,\u0022reminders\u0022:[],\u0022relations\u0022:[{\u0022type\u0022:\u0022\u0022,\u0022id\u0022:\u0022\u0022}],\u0022startTime\u0022:null,\u0022endTime\u0022:null}'), {openForm:'showForm', openScheduleForm:'showForm'})" x-init="editingContent = !$wire.editingId" @task-editor.window="openEditor($event.detail)" @task-editor-saved.window="editingContent = false"
+     x-effect="if (!$wire.showForm && typeof $wire.$parent?.editTask === 'string') $wire.$parent.$set('editTask', null, false)">
+    <!--[if BLOCK]><![endif]-->    <template x-teleport="body">
+        <div class="md-form-dialog-layer" data-module="tasks" x-dialog-viewport="showDialog"
+              x-show="showDialog" x-cloak :class="{'lt-editor-pristine': !submitted}"               @task-editor-section.window="section = $event.detail.section"              x-data="{ section: 'basic', navCollapsed: window.matchMedia('(max-width: 767.98px)').matches, expanded: false }"  x-effect="if (showDialog) { section = 'basic'; expanded = false; navCollapsed = window.matchMedia('(max-width: 767.98px)').matches }" >
+            <div class="md-dialog-scrim"  x-on:click="closeEditor()" ></div>
+            <section class="md-form-dialog md-form-dialog--sections task-properties-dialog"
+                     id="task-editor"
+                     :class="{ 'is-expanded': expanded, 'is-nav-collapsed': navCollapsed }"
+                     role="dialog"
+                     aria-modal="true"
+                     aria-labelledby="task-editor-title"
+                     x-md-surface="showDialog"
+                     @md-surface-close="closeEditor()">
+                <form class="md-form-dialog__form" novalidate  @submit="submitted = true"   wire:submit="save" >
+                    <header class="md-form-dialog__head" role="presentation">
+                        <!--[if BLOCK]><![endif]-->                            <button type="button" class="md-btn-icon" @click="navCollapsed = !navCollapsed"
+                                    :aria-expanded="(!navCollapsed).toString()" aria-controls="task-editor-nav"
+                                    aria-label="Mostrar u ocultar secciones" title="Secciones">
+                                <i class="bi bi-layout-sidebar" aria-hidden="true"></i>
+                            </button>
+                        <!--[if ENDBLOCK]><![endif]-->                        <!--[if BLOCK]><![endif]-->                            <span class="md-form-dialog__icon"><i class="bi bi-list-task" aria-hidden="true"></i></span>
+                        <!--[if ENDBLOCK]><![endif]-->                        <h2 id="task-editor-title" class="md-form-dialog__title"  x-text="$wire.editingId ? &#039;Editar tarea&#039; : &#039;Nueva tarea&#039;" >Nueva tarea</h2>
+                        <button type="button" class="md-btn-icon" x-show="$wire.editingId && !editingContent" @click="editingContent = true" aria-label="Editar contenido" title="Editar contenido"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+                        <button type="button" class="md-btn-icon" @click="expanded = !expanded"
+                                :aria-pressed="expanded.toString()" :aria-label="expanded ? 'Restaurar' : 'Expandir'" :title="expanded ? 'Restaurar' : 'Expandir'">
+                            <i class="bi" :class="expanded ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="md-btn-icon"  x-on:click="closeEditor()"  aria-label="Cerrar" title="Cerrar">
+                            <i class="bi bi-x-lg" aria-hidden="true"></i>
+                        </button>
+                    </header>
+
+                    <div class="md-form-dialog__main">
+                        <!--[if BLOCK]><![endif]-->                            <nav id="task-editor-nav" class="md-form-dialog__nav" aria-label="Secciones del formulario">
+                                <!--[if BLOCK]><![endif]-->                                    <button type="button" class="md-form-dialog__nav-item"
+                                            @click="section = 'basic'; if (window.matchMedia('(max-width: 767.98px)').matches) navCollapsed = true"
+                                            :aria-current="section === 'basic' ? 'true' : null">
+                                        <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+                                        <span>Información básica</span>
+                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                                    </button>
+                                                                    <button type="button" class="md-form-dialog__nav-item"
+                                            @click="section = 'privacy'; if (window.matchMedia('(max-width: 767.98px)').matches) navCollapsed = true"
+                                            :aria-current="section === 'privacy' ? 'true' : null">
+                                        <i class="bi bi-lock" aria-hidden="true"></i>
+                                        <span>Privacidad</span>
+                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                                    </button>
+                                                                    <button type="button" class="md-form-dialog__nav-item"
+                                            @click="section = 'schedule'; if (window.matchMedia('(max-width: 767.98px)').matches) navCollapsed = true"
+                                            :aria-current="section === 'schedule' ? 'true' : null">
+                                        <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                        <span>Programación</span>
+                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                                    </button>
+                                                                    <button type="button" class="md-form-dialog__nav-item"
+                                            @click="section = 'reminders'; if (window.matchMedia('(max-width: 767.98px)').matches) navCollapsed = true"
+                                            :aria-current="section === 'reminders' ? 'true' : null">
+                                        <i class="bi bi-bell" aria-hidden="true"></i>
+                                        <span>Recordatorios</span>
+                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                                    </button>
+                                                                    <button type="button" class="md-form-dialog__nav-item"
+                                            @click="section = 'relations'; if (window.matchMedia('(max-width: 767.98px)').matches) navCollapsed = true"
+                                            :aria-current="section === 'relations' ? 'true' : null">
+                                        <i class="bi bi-link-45deg" aria-hidden="true"></i>
+                                        <span>Relacionado</span>
+                                        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                                    </button>
+                                <!--[if ENDBLOCK]><![endif]-->                            </nav>
+                        <!--[if ENDBLOCK]><![endif]-->                        <div class="md-form-dialog__body">
+                            <!--[if BLOCK]><![endif]-->                                <p role="status" x-show="loading" x-cloak>Cargando…</p>
+                                <p role="alert" x-show="loadError" x-text="loadError" x-cloak></p>
+                                <div :inert="loading || !!loadError"><!--[if BLOCK]><![endif]-->             <!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]-->        <p class="md-body-small" wire:dirty wire:target="title,description,category,statusId,priority,size,estimatedTime,startDate,startTime,endDate,endTime,isPrivate,isRecurrent,recurrenceIntervalDays,relations,reminders" role="status">Cambios pendientes de guardar</p>
+    <!--[if ENDBLOCK]><![endif]-->    <div class="task-properties-layout">
+        <aside class="task-properties-panel lt-cm-form" aria-label="Propiedades de la tarea">
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <!--[if BLOCK]><![endif]-->    <div class="md-text-field md-field md-combobox "
+     
+     data-options="[{&quot;value&quot;:&quot;&quot;,&quot;label&quot;:&quot;Sin categor\u00eda&quot;},{&quot;value&quot;:&quot;personal&quot;,&quot;label&quot;:&quot;Personal&quot;},{&quot;value&quot;:&quot;salud&quot;,&quot;label&quot;:&quot;Salud&quot;},{&quot;value&quot;:&quot;finanzas&quot;,&quot;label&quot;:&quot;Finanzas&quot;},{&quot;value&quot;:&quot;educacion&quot;,&quot;label&quot;:&quot;Educaci\u00f3n&quot;},{&quot;value&quot;:&quot;hogar&quot;,&quot;label&quot;:&quot;Hogar&quot;},{&quot;value&quot;:&quot;social&quot;,&quot;label&quot;:&quot;Trabajo&quot;},{&quot;value&quot;:&quot;certmind&quot;,&quot;label&quot;:&quot;Trabajo \/ CertMind&quot;},{&quot;value&quot;:&quot;entreagiles&quot;,&quot;label&quot;:&quot;Trabajo \/ EntreAgiles&quot;},{&quot;value&quot;:&quot;gesthor&quot;,&quot;label&quot;:&quot;Trabajo \/ Gesthor&quot;},{&quot;value&quot;:&quot;jikko&quot;,&quot;label&quot;:&quot;Trabajo \/ Jikko&quot;},{&quot;value&quot;:&quot;siigo&quot;,&quot;label&quot;:&quot;Trabajo \/ Siigo&quot;},{&quot;value&quot;:&quot;unicauca&quot;,&quot;label&quot;:&quot;Trabajo \/ Unicauca&quot;},{&quot;value&quot;:&quot;creatividad&quot;,&quot;label&quot;:&quot;Creatividad&quot;},{&quot;value&quot;:&quot;tecnologia&quot;,&quot;label&quot;:&quot;Tecnolog\u00eda&quot;},{&quot;value&quot;:&quot;compras&quot;,&quot;label&quot;:&quot;Compras&quot;},{&quot;value&quot;:&quot;tramites&quot;,&quot;label&quot;:&quot;Tr\u00e1mites&quot;},{&quot;value&quot;:&quot;otros&quot;,&quot;label&quot;:&quot;Otros&quot;}]"
+     x-data="{
+         value: $wire.entangle('category'),
+         options: [],
+         observer: null,
+         init() {
+             this.options = JSON.parse(this.$el.dataset.options);
+             this.observer = new MutationObserver(() => {
+                 this.options = JSON.parse(this.$el.dataset.options);
+                 this.active = -1;
+                 if (! this.open) this.term = this.labelFor(this.value);
+             });
+             this.observer.observe(this.$el, { attributes: true, attributeFilter: ['data-options'] });
+         },
+         destroy() { this.observer?.disconnect(); },
+         fieldLabel: 'Categoría',
+         term: '',
+         open: false,
+         active: -1,
+         normalize: text => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase(),
+         get filtered() { const term = this.normalize(this.term.trim()); return this.options.filter(option => this.normalize(option.label).includes(term)); },
+         labelFor(value) { return this.options.find(option => option.value === String(value ?? ''))?.label ?? ''; },
+         show() { this.term = ''; this.open = true; this.active = -1; },
+         choose(option) { this.value = option.value; this.close(); this.$refs.input.focus({ preventScroll: true }); },
+         toggle() { this.$refs.input.focus({ preventScroll: true }); if (this.open) this.close(); else this.show(); },
+         close() { this.open = false; this.active = -1; this.term = this.labelFor(this.value); },
+         move(step) { if (! this.open) this.show(); const count = this.filtered.length; if (! count) return; this.active = this.active < 0 ? (step > 0 ? 0 : count - 1) : (this.active + step + count) % count; this.$nextTick(() => this.$refs.list.querySelector('.is-active')?.scrollIntoView({ block: 'nearest' })); },
+     }"
+     x-init="term = labelFor(value); $watch('value', value => { if (! open) term = labelFor(value) })"
+     x-on:pointerdown.window.capture="if (open && ! $el.contains($event.target)) close()"
+     x-on:focusout="$nextTick(() => { if (! $el.contains(document.activeElement)) close() })"
+     x-on:keydown.escape="if (open) { $event.preventDefault(); $event.stopPropagation(); close(); $refs.input.focus({ preventScroll: true }) }">
+    <input type="text" id="task-editor-category" role="combobox" autocomplete="off" placeholder=" "
+           class="md-field__control" aria-autocomplete="list" aria-controls="task-editor-category-list"
+           x-ref="input" x-bind:aria-expanded="open" x-model="term"
+           x-bind:aria-activedescendant="open && active >= 0 ? 'task-editor-category-option-' + active : null"
+           x-on:click="if (! open) show(); else close()" x-on:input="open = true; active = -1"
+           x-on:keydown.arrow-down.prevent="move(1)" x-on:keydown.arrow-up.prevent="move(-1)"
+           x-on:keydown.enter="if (open && filtered[active]) { $event.preventDefault(); choose(filtered[active]) }"
+           x-on:keydown.tab="close()"
+           >
+    <label for="task-editor-category">Categoría</label>
+    <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-icon md-combobox__chevron" x-bind:aria-label="(open ? 'Ocultar opciones de ' : 'Mostrar opciones de ') + fieldLabel" x-bind:aria-expanded="open" aria-controls="task-editor-category-list" x-on:click="toggle()"
+            aria-label="Mostrar opciones de Categoría"
+            title="Mostrar opciones de Categoría"
+                        >
+        <i class="bi bi-chevron-down md-btn__icon" aria-hidden="true"></i>
+        <span class="md-btn__spinner" aria-hidden="true"></span>
+    </button>
+<!--[if ENDBLOCK]><![endif]-->    <ul id="task-editor-category-list" role="listbox" class="md-combobox__list" x-ref="list" x-show="open" x-cloak x-on:mousedown.prevent>
+        <li role="option" x-on:click="choose({ value: '', label: '' })" class="md-combobox__option md-combobox__option--muted" x-show="term === ''" aria-selected="false">Buscar</li>
+        <template x-for="(option, index) in filtered" :key="option.value">
+            <li role="option" class="md-combobox__option" x-text="option.label"
+                x-bind:id="'task-editor-category-option-' + index"
+                x-bind:class="{ 'is-active': index === active, 'is-selected': option.value === String(value ?? '') }"
+                x-bind:aria-selected="option.value === String(value ?? '')"
+                x-on:click="choose(option)"></li>
+        </template>
+        <li class="md-combobox__empty" x-show="filtered.length === 0">Sin resultados</li>
+    </ul>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+<!--[if ENDBLOCK]><![endif]-->            <!--[if BLOCK]><![endif]-->                <div class="md-text-field md-field  " >
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <select id="task-editor-status"
+             name="statusId"             class="md-field__control md-select" wire:model="statusId"
+                                                >
+        <!--[if BLOCK]><![endif]-->            <option value="">Estado inicial (por hacer)</option>
+        <!--[if ENDBLOCK]><![endif]-->        <!--[if BLOCK]><![endif]-->            <!--[if BLOCK]><![endif]-->                <option value="cea980ea-69a1-4fea-8253-372a01ea3cf0" >Borrador</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="9d267a04-3937-457e-89aa-8e1585e9de4a" >Ready</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="01a161ce-2daa-7062-bd8f-1e2e9d4426dd" >AI Agent</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="8f2dd113-92dc-4c94-bb82-657f753a2d18" >WIP</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="657b60cd-6e87-4369-bf49-c14524e2d221" >Done</option>
+            <!--[if ENDBLOCK]><![endif]-->        <!--[if ENDBLOCK]><![endif]-->        
+    </select>
+    <label for="task-editor-status" >Estado<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></label>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+            <!--[if ENDBLOCK]><![endif]-->            <div class="md-text-field md-field  " >
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <select id="task-editor-priority"
+             name="priority"             class="md-field__control md-select" wire:model="priority"
+                                                >
+        <!--[if BLOCK]><![endif]-->            <option value="">Sin prioridad</option>
+        <!--[if ENDBLOCK]><![endif]-->        <!--[if BLOCK]><![endif]-->            <!--[if BLOCK]><![endif]-->                <option value="urgent-important" >🔴 Urgente e Importante</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="not-urgent-important" >🟡 No Urgente pero Importante</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="urgent-not-important" >🟠 Urgente No Importante</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="not-urgent-not-important" >⚪ No Urgente No Importante</option>
+            <!--[if ENDBLOCK]><![endif]-->        <!--[if ENDBLOCK]><![endif]-->        
+    </select>
+    <label for="task-editor-priority" >Prioridad<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></label>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+            <div class="md-text-field md-field  " >
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <select id="task-editor-size"
+             name="size"             class="md-field__control md-select" wire:model="size"
+                                                >
+        <!--[if BLOCK]><![endif]-->            <option value="">Sin tamaño</option>
+        <!--[if ENDBLOCK]><![endif]-->        <!--[if BLOCK]><![endif]-->            <!--[if BLOCK]><![endif]-->                <option value="XS" >XS (&lt; 30 min)</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="S" >S (30 min - 1h)</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="M" >M (1-2h)</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="L" >L (2-4h)</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="XL" >XL (&gt; 4h)</option>
+            <!--[if ENDBLOCK]><![endif]-->        <!--[if ENDBLOCK]><![endif]-->        
+    </select>
+    <label for="task-editor-size" >Tamaño<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></label>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+            <!--[if BLOCK]><![endif]--><div class="md-text-field md-field  " >
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <input type="number"
+           id="task-editor-estimate"
+            name="estimatedTime"            value=""
+           placeholder=" "
+           class="md-field__control" min="0" wire:model="estimatedTime"
+                                            >
+    <label for="task-editor-estimate" >Tiempo estimado (min)<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></label>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+<!--[if ENDBLOCK]><![endif]-->            <!--[if BLOCK]><![endif]-->                <section class="task-focus-block" aria-label="Foco">
+                    <h3 class="md-title-small">Foco</h3>
+                    <!--[if BLOCK]><![endif]-->                        <p class="md-body-small">0 sesiones · 0 min</p>
+                    <!--[if ENDBLOCK]><![endif]-->                    <p class="md-body-small" x-show="!$wire.editingId">Guarda la tarea antes de usar Foco.</p>
+                    <button type="button" class="md-btn-text" x-show="!$wire.editingId" disabled><i class="bi bi-stopwatch" aria-hidden="true"></i> Foco</button>
+                    <div x-show="$wire.editingId" ><div class="md-menu"
+     x-data="{ open: false }"
+     @click.outside="open = false"
+     @keydown.escape.stop="if (open) { open = false; $refs.trigger.focus() }">
+    <button type="button"
+            x-ref="trigger"
+            class="md-btn-icon md-menu__trigger "
+            aria-haspopup="menu"
+            :aria-expanded="open.toString()"
+            aria-label="Opciones de foco"
+            title="Opciones de foco"
+            @click="open = !open">
+        <i class="bi bi-stopwatch" aria-hidden="true"></i>
+    </button>
+    <div class="md-menu__surface" role="menu" x-cloak x-show="open" x-transition.opacity.duration.120ms @click="open = false">
+        <!--[if BLOCK]><![endif]-->    <button type="button" role="menuitem" class="md-menu__item" x-bind:disabled="!$wire.editingId" @click="$dispatch('task-focus-timer', { taskId: $wire.editingId, durationMinutes: focusDuration(), start: false })">
+        <!--[if BLOCK]><![endif]--><i class="bi bi-play-circle" aria-hidden="true"></i><!--[if ENDBLOCK]><![endif]-->        <span>Iniciar temporizador</span>
+    </button>
+<!--[if ENDBLOCK]><![endif]-->                        <!--[if BLOCK]><![endif]-->    <button type="button" role="menuitem" class="md-menu__item" x-bind:disabled="!$wire.editingId" @click="$dispatch('task-focus-manual', { taskId: $wire.editingId, durationMinutes: focusDuration() })">
+        <!--[if BLOCK]><![endif]--><i class="bi bi-clock-history" aria-hidden="true"></i><!--[if ENDBLOCK]><![endif]-->        <span>Registrar tiempo trabajado</span>
+    </button>
+<!--[if ENDBLOCK]><![endif]-->
+    </div>
+</div>
+</div>
+                </section>
+            <!--[if ENDBLOCK]><![endif]-->        </aside>
+        <fieldset class="task-properties-content"  :disabled="!editingContent" >
+            <!--[if BLOCK]><![endif]-->                <section class="md-form-dialog__section" x-show="section === 'reminders'" x-cloak>
+    <header class="md-form-dialog__section-head">
+        <h3>Recordatorios</h3>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </header>
+    <div>
+    <p class="md-body-small">Avisar antes de la fecha del elemento. Sin hora, se toman las 9:00 a. m. de Bogotá.</p>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-text" wire:click="addReminder"
+                        >
+        <!--[if BLOCK]><![endif]--><i class="bi bi-plus md-btn__icon" aria-hidden="true"></i><!--[if ENDBLOCK]><![endif]-->        <span class="md-btn__spinner" aria-hidden="true"></span>
+        <span>Añadir recordatorio</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </button>
+<!--[if ENDBLOCK]><![endif]--></div>
+</section>
+            <!--[if ENDBLOCK]><![endif]-->            <section class="md-form-dialog__section" x-show="section === 'basic'" x-cloak>
+    <header class="md-form-dialog__section-head">
+        <h3>Información básica</h3>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </header>
+    <div class="lt-cm-form">
+                    <!--[if BLOCK]><![endif]-->                        <div class="md-text-field md-field  " >
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <input type="text"
+           id="task-editor-task-title"
+            name="title"            value=""
+           placeholder=" "
+           class="md-field__control" wire:model="title"
+           required                                 >
+    <label for="task-editor-task-title" >Título<!--[if BLOCK]><![endif]--><span aria-hidden="true"> *</span><!--[if ENDBLOCK]><![endif]--></label>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+                    <!--[if ENDBLOCK]><![endif]-->                    <div class="md-markdown-editor"
+     x-data="misoMarkdown('task-editor-description', 'descriptionMode', 'description')"
+     x-on:markdown-editor-mode-changed="modeChanged($event)"
+     x-on:click.capture="editBeforeFormatting($event)">
+    <div data-markdown-editor data-editor-id="task-editor-description" data-initial-mode="edit" class="lm-editor">
+    <div class="lm-editor__toolbar" role="toolbar" aria-label="Formato Markdown">
+        <div class="lm-editor__mode" role="group" aria-label="Modo del editor">
+            <button type="button" class="lm-editor__button" data-markdown-mode="edit">Editar</button>
+            <button type="button" class="lm-editor__button" data-markdown-mode="preview">Vista previa</button>
+        </div>
+        <!--[if BLOCK]><![endif]-->            <button type="button" class="lm-editor__button" data-markdown-snippet="heading">Título</button>
+                    <button type="button" class="lm-editor__button" data-markdown-snippet="bold">Negrita</button>
+                    <button type="button" class="lm-editor__button" data-markdown-snippet="italic">Cursiva</button>
+                    <button type="button" class="lm-editor__button" data-markdown-snippet="link">Enlace</button>
+                    <button type="button" class="lm-editor__button" data-markdown-snippet="list">Lista</button>
+                    <button type="button" class="lm-editor__button" data-markdown-snippet="checklist">Checklist</button>
+                    <button type="button" class="lm-editor__button" data-markdown-snippet="quote">Cita</button>
+                    <button type="button" class="lm-editor__button" data-markdown-snippet="code">Código</button>
+        <!--[if ENDBLOCK]><![endif]-->        <button type="button" class="lm-editor__button lm-editor__copy" data-markdown-copy aria-label="Copiar contenido" title="Copiar contenido">
+            <i class="bi bi-clipboard" data-copy-idle="bi bi-clipboard" data-copy-done="bi bi-clipboard-check" data-copy-fail="bi bi-clipboard-x" aria-hidden="true"></i>
+        </button>
+        <!--[if BLOCK]><![endif]-->            <button type="button" class="lm-editor__button lm-editor__expand" data-markdown-expand hidden aria-label="Ampliar" title="Ampliar" aria-expanded="false">
+                <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path data-markdown-expand-icon d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5" /></svg>
+            </button>
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="lm-editor__body" data-markdown-body tabindex="0" aria-label="Contenido Markdown">
+    <div data-markdown-edit >
+        <textarea data-markdown-source  class="lm-editor__source md-markdown-editor-input" id="task-editor-description" rows="5" placeholder="Detalles de la tarea. Admite Markdown." aria-label="Contenido Markdown" wire:model="description"></textarea>
+    </div>
+    <div data-markdown-preview class="lm-editor__preview" data-empty-text="Sin contenido"  hidden ></div>
+    </div>
+</div>
+</div>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                </div>
+</section>
+            <section class="md-form-dialog__section" x-show="section === 'privacy'" x-cloak>
+    <header class="md-form-dialog__section-head">
+        <h3>Privacidad</h3>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </header>
+    <label class="md-checkbox"><input type="checkbox" wire:model="isPrivate"><i class="bi bi-lock" aria-hidden="true"></i> Tarea privada</label>
+</section>
+            <section class="md-form-dialog__section" x-show="section === 'schedule'" x-cloak>
+    <header class="md-form-dialog__section-head">
+        <h3>Programación</h3>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </header>
+    <div class="lt-cm-form">
+                    <div class="d-flex flex-column gap-2">
+    <div class="row g-3">
+        <div class="col-md-6"><div class="row g-2"><div class="col-7"><div class="md-text-field"><input type="date" wire:model.blur="startDate" placeholder=" " id="task-editor-start"><label for="task-editor-start">Fecha inicio</label></div></div><div class="col-5"><div class="md-text-field"><input type="time" wire:model.blur="startTime" placeholder=" " id="task-editor-start-time"><label for="task-editor-start-time">Hora</label></div></div></div></div>
+        <div class="col-md-6"><div class="row g-2"><div class="col-7"><div class="md-text-field"><input type="date" wire:model.blur="endDate" placeholder=" " id="task-editor-end"><label for="task-editor-end">Fecha fin</label><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div></div><div class="col-5"><div class="md-text-field"><input type="time" wire:model.blur="endTime" placeholder=" " id="task-editor-end-time"><label for="task-editor-end-time">Hora</label></div></div></div></div>
+    </div>
+    <div class="d-flex flex-wrap align-items-center gap-2">
+        <span class="md-body-small" style="color: var(--md-sys-color-on-surface-variant);">Estimar duración</span>
+        <!--[if BLOCK]><![endif]-->            <button type="button" wire:click="applyDuration(15)" class="md-chip md-chip-filter ">15 min</button>
+                    <button type="button" wire:click="applyDuration(30)" class="md-chip md-chip-filter ">30 min</button>
+                    <button type="button" wire:click="applyDuration(60)" class="md-chip md-chip-filter ">1 hora</button>
+                    <button type="button" wire:click="applyDuration(120)" class="md-chip md-chip-filter ">2 horas</button>
+        <!--[if ENDBLOCK]><![endif]-->        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </div>
+</div>
+                    <!--[if BLOCK]><![endif]-->                        <div class="d-flex flex-wrap align-items-center gap-3">
+                            <!--[if BLOCK]><![endif]-->                                <label class="md-checkbox"><input type="checkbox" wire:model="isRecurrent"><i class="bi bi-arrow-repeat"></i> Tarea recurrente</label>
+                                <div x-show="$wire.isRecurrent">
+                                    <span class="d-inline-flex align-items-center gap-1" x-show="$wire.nativeRecurrenceRule">
+                                        <span class="md-chip-tonal" x-text="$wire.nativeRecurrenceRule" title="Regla del calendario; usa Cambiar para reemplazarla"></span>
+                                        <button type="button" class="md-btn-text md-btn--sm" x-on:click="$wire.set('nativeRecurrenceRule', '', false)">Cambiar</button>
+                                    </span>
+                                    <div class="md-text-field lt-cm-field--sm" x-show="!$wire.nativeRecurrenceRule"><input type="number" min="1" wire:model="recurrenceIntervalDays" placeholder=" " id="task-editor-recurrence-days"><label for="task-editor-recurrence-days">Repetir cada (días)</label></div>
+                                </div>
+                            <!--[if ENDBLOCK]><![endif]-->                        </div>
+                    <!--[if ENDBLOCK]><![endif]-->                </div>
+</section>
+            <!--[if BLOCK]><![endif]-->                <section class="md-form-dialog__section" x-show="section === 'relations'" x-cloak>
+    <header class="md-form-dialog__section-head">
+        <h3>Relacionado</h3>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </header>
+    <div class="lt-cm-form">
+                        <!--[if BLOCK]><![endif]-->                            <div class="row g-2 align-items-center" wire:key="task-relation-0">
+                                <div class="col-5">
+                                    <div class="md-text-field md-field  " >
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <select id="task-editor-relation-type-0"
+             name="relations.0.type"             class="md-field__control md-select" wire:model.live="relations.0.type"
+                                                >
+        <!--[if BLOCK]><![endif]-->            <option value="">Elige un módulo</option>
+        <!--[if ENDBLOCK]><![endif]-->        <!--[if BLOCK]><![endif]-->            <!--[if BLOCK]><![endif]-->                <option value="relationship" >Personas</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="goal" >Metas</option>
+            <!--[if ENDBLOCK]><![endif]-->                    <!--[if BLOCK]><![endif]-->                <option value="health-event" >Salud</option>
+            <!--[if ENDBLOCK]><![endif]-->        <!--[if ENDBLOCK]><![endif]-->        
+    </select>
+    <label for="task-editor-relation-type-0" >Módulo<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></label>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+                                </div>
+                                
+                                <div class="col" wire:key="task-relation-0--picker">
+                                    <div class="md-text-field md-field md-combobox "
+     
+     data-options="[]"
+     x-data="{
+         value: $wire.entangle('relations.0.id'),
+         options: [],
+         observer: null,
+         init() {
+             this.options = JSON.parse(this.$el.dataset.options);
+             this.observer = new MutationObserver(() => {
+                 this.options = JSON.parse(this.$el.dataset.options);
+                 this.active = -1;
+                 if (! this.open) this.term = this.labelFor(this.value);
+             });
+             this.observer.observe(this.$el, { attributes: true, attributeFilter: ['data-options'] });
+         },
+         destroy() { this.observer?.disconnect(); },
+         fieldLabel: 'Relación',
+         term: '',
+         open: false,
+         active: -1,
+         normalize: text => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase(),
+         get filtered() { const term = this.normalize(this.term.trim()); return this.options.filter(option => this.normalize(option.label).includes(term)); },
+         labelFor(value) { return this.options.find(option => option.value === String(value ?? ''))?.label ?? ''; },
+         show() { this.term = ''; this.open = true; this.active = -1; },
+         choose(option) { this.value = option.value; this.close(); this.$refs.input.focus({ preventScroll: true }); },
+         toggle() { this.$refs.input.focus({ preventScroll: true }); if (this.open) this.close(); else this.show(); },
+         close() { this.open = false; this.active = -1; this.term = this.labelFor(this.value); },
+         move(step) { if (! this.open) this.show(); const count = this.filtered.length; if (! count) return; this.active = this.active < 0 ? (step > 0 ? 0 : count - 1) : (this.active + step + count) % count; this.$nextTick(() => this.$refs.list.querySelector('.is-active')?.scrollIntoView({ block: 'nearest' })); },
+     }"
+     x-init="term = labelFor(value); $watch('value', value => { if (! open) term = labelFor(value) })"
+     x-on:pointerdown.window.capture="if (open && ! $el.contains($event.target)) close()"
+     x-on:focusout="$nextTick(() => { if (! $el.contains(document.activeElement)) close() })"
+     x-on:keydown.escape="if (open) { $event.preventDefault(); $event.stopPropagation(); close(); $refs.input.focus({ preventScroll: true }) }">
+    <input type="text" id="task-editor-relation-id-0" role="combobox" autocomplete="off" placeholder=" "
+           class="md-field__control" aria-autocomplete="list" aria-controls="task-editor-relation-id-0-list"
+           x-ref="input" x-bind:aria-expanded="open" x-model="term"
+           x-bind:aria-activedescendant="open && active >= 0 ? 'task-editor-relation-id-0-option-' + active : null"
+           x-on:click="if (! open) show(); else close()" x-on:input="open = true; active = -1"
+           x-on:keydown.arrow-down.prevent="move(1)" x-on:keydown.arrow-up.prevent="move(-1)"
+           x-on:keydown.enter="if (open && filtered[active]) { $event.preventDefault(); choose(filtered[active]) }"
+           x-on:keydown.tab="close()"
+           >
+    <label for="task-editor-relation-id-0">Relación</label>
+    <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-icon md-combobox__chevron" x-bind:aria-label="(open ? 'Ocultar opciones de ' : 'Mostrar opciones de ') + fieldLabel" x-bind:aria-expanded="open" aria-controls="task-editor-relation-id-0-list" x-on:click="toggle()"
+            aria-label="Mostrar opciones de Relación"
+            title="Mostrar opciones de Relación"
+                        >
+        <i class="bi bi-chevron-down md-btn__icon" aria-hidden="true"></i>
+        <span class="md-btn__spinner" aria-hidden="true"></span>
+    </button>
+<!--[if ENDBLOCK]><![endif]-->    <ul id="task-editor-relation-id-0-list" role="listbox" class="md-combobox__list" x-ref="list" x-show="open" x-cloak x-on:mousedown.prevent>
+        <li role="option" x-on:click="choose({ value: '', label: '' })" class="md-combobox__option md-combobox__option--muted" x-show="term === ''" aria-selected="false">Sin relación</li>
+        <template x-for="(option, index) in filtered" :key="option.value">
+            <li role="option" class="md-combobox__option" x-text="option.label"
+                x-bind:id="'task-editor-relation-id-0-option-' + index"
+                x-bind:class="{ 'is-active': index === active, 'is-selected': option.value === String(value ?? '') }"
+                x-bind:aria-selected="option.value === String(value ?? '')"
+                x-on:click="choose(option)"></li>
+        </template>
+        <li class="md-combobox__empty" x-show="filtered.length === 0">Elige primero un módulo</li>
+    </ul>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+                                </div>
+                                <div class="col-auto">
+                                    <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-icon" wire:click="removeRelation(0)"
+            aria-label="Quitar relación"
+            title="Quitar relación"
+                        >
+        <i class="bi bi-x-lg md-btn__icon" aria-hidden="true"></i>
+        <span class="md-btn__spinner" aria-hidden="true"></span>
+    </button>
+<!--[if ENDBLOCK]><![endif]-->                                </div>
+                            </div>
+                        <!--[if ENDBLOCK]><![endif]-->                        <div><button type="button" wire:click="addRelation" class="md-btn-text"><i class="bi bi-plus-lg" aria-hidden="true"></i> Añadir relación</button></div>
+                    </div>
+</section>
+            <!--[if ENDBLOCK]><![endif]-->        </fieldset>
+    </div></div>
+                            <!--[if ENDBLOCK]><![endif]-->                        </div>
+                    </div>
+
+                    <footer class="md-form-dialog__actions" role="presentation">
+                        <!--[if BLOCK]><![endif]-->                            <button type="button" x-ref="cancel" class="md-btn-text"  x-on:click="closeEditor()" >Cancelar</button>
+                            <button type="submit" class="md-btn-filled" wire:loading.attr="disabled"  :disabled="loading || !!loadError" >
+                                <i class="bi bi-floppy" aria-hidden="true"></i>
+                                <span>Guardar</span>
+                            </button>
+                        <!--[if ENDBLOCK]><![endif]-->                    </footer>
+                </form>
+            </section>
+        </div>
+    </template>
+<!--[if ENDBLOCK]><![endif]-->    <div x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+        <!--[if BLOCK]><![endif]--><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><template x-if="showRecurringDialog">
+    <div >
+        <div class="md-dialog-scrim" @click="$wire.cancelRecurringCompletion()"></div>
+        <div class="md-dialog"
+                          role="dialog"
+             aria-modal="true"
+             aria-labelledby="dialog-programar-proxima-repeticion"
+                          x-md-surface
+             @md-surface-close="$wire.cancelRecurringCompletion()"
+             @click.stop>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <h2 id="dialog-programar-proxima-repeticion" class="md-dialog-headline md-headline-small">Programar próxima repetición</h2>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <div class="md-dialog-content"><p class="md-body-medium">La tarea actual se marcará como completada y se creará la siguiente ocurrencia.</p>
+                <div class="md-text-field">
+                    <input type="date" wire:model="nextOccurrenceDate" placeholder=" " id="next-occurrence-date">
+                    <label for="next-occurrence-date">Próxima fecha</label>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                </div></div>
+
+            <!--[if BLOCK]><![endif]-->                <div class="md-dialog-actions"><button wire:click="cancelRecurringCompletion" class="md-btn-text">Cancelar</button>
+                <button wire:click="confirmRecurringCompletion" class="md-btn-filled"><i class="bi bi-check-lg"></i> Completar y programar</button></div>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+    </div>
+</template>
+<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+<!--[if ENDBLOCK]><![endif]-->    </div>
+</div>
+    <div wire:key="home-panel-shopping-editor" wire:snapshot="{&quot;data&quot;:{&quot;search&quot;:&quot;&quot;,&quot;placeFilter&quot;:&quot;&quot;,&quot;groupBy&quot;:&quot;category&quot;,&quot;viewMode&quot;:&quot;compact&quot;,&quot;showForm&quot;:false,&quot;itemName&quot;:&quot;&quot;,&quot;itemQuantity&quot;:1,&quot;itemBaseUnit&quot;:&quot;&quot;,&quot;itemCategory&quot;:&quot;&quot;,&quot;itemStoreId&quot;:&quot;&quot;,&quot;itemPrice&quot;:null,&quot;showPurchase&quot;:false,&quot;purchaseItemId&quot;:null,&quot;purchaseVariantId&quot;:&quot;&quot;,&quot;purchaseStoreId&quot;:&quot;&quot;,&quot;purchaseQuantity&quot;:1,&quot;purchaseAmount&quot;:null,&quot;purchaseOperationKey&quot;:&quot;&quot;,&quot;perPage&quot;:25,&quot;paginators&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;a23ijn8qohCm3eRMdzyu&quot;,&quot;name&quot;:&quot;home.panel.shopping-editor&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;f134878e7aef78f8769aff5fc8980e9fb2096bf97ab609cb9a062b514682ee66&quot;}" wire:effects="{&quot;url&quot;:{&quot;search&quot;:{&quot;as&quot;:&quot;q&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:true,&quot;except&quot;:null},&quot;placeFilter&quot;:{&quot;as&quot;:&quot;place&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:true,&quot;except&quot;:null},&quot;groupBy&quot;:{&quot;as&quot;:&quot;group&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:true,&quot;except&quot;:null},&quot;viewMode&quot;:{&quot;as&quot;:&quot;view&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:true,&quot;except&quot;:null},&quot;perPage&quot;:{&quot;as&quot;:&quot;per_page&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:25}},&quot;listeners&quot;:[&quot;panel-shopping&quot;,&quot;purchase-saved&quot;,&quot;ingredients-imported&quot;,&quot;stores-updated&quot;]}" wire:id="a23ijn8qohCm3eRMdzyu" wire:name="home.panel.shopping-editor">
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+    <div wire:key="home-panel-habit-editor" wire:snapshot="{&quot;data&quot;:{&quot;search&quot;:&quot;&quot;,&quot;timeFilter&quot;:&quot;&quot;,&quot;showForm&quot;:false,&quot;editingId&quot;:null,&quot;name&quot;:&quot;&quot;,&quot;icon&quot;:&quot;&quot;,&quot;timeOfDay&quot;:&quot;morning&quot;,&quot;goalDuration&quot;:&quot;&quot;,&quot;baseTime&quot;:&quot;&quot;,&quot;actionKey&quot;:&quot;&quot;,&quot;actionMode&quot;:&quot;auto&quot;,&quot;actionConfig&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;message&quot;:&quot;&quot;,&quot;perPage&quot;:25,&quot;paginators&quot;:[{&quot;page&quot;:1},{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;EvtiJUdbcy0FMicyC6Xb&quot;,&quot;name&quot;:&quot;home.panel.habit-editor&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;343c6715d9350bdb9b367c06f369c945a66d4410a39bfb39797ccb3ffc759ae5&quot;}" wire:effects="{&quot;url&quot;:{&quot;search&quot;:{&quot;as&quot;:&quot;q&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;&quot;},&quot;timeFilter&quot;:{&quot;as&quot;:&quot;time&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;&quot;},&quot;perPage&quot;:{&quot;as&quot;:&quot;per_page&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:25},&quot;paginators.page&quot;:{&quot;as&quot;:&quot;page&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:null}},&quot;listeners&quot;:[&quot;panel-habit&quot;]}" wire:id="EvtiJUdbcy0FMicyC6Xb" wire:name="home.panel.habit-editor">
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+    <div wire:key="home-panel-plan-editor" wire:snapshot="{&quot;data&quot;:{&quot;showPlanForm&quot;:false,&quot;editingPlanId&quot;:null,&quot;planTitle&quot;:&quot;&quot;,&quot;planType&quot;:&quot;restaurant&quot;,&quot;planCategory&quot;:&quot;&quot;,&quot;planCategoryId&quot;:&quot;&quot;,&quot;planCity&quot;:&quot;&quot;,&quot;planAddress&quot;:&quot;&quot;,&quot;planScheduledOn&quot;:null,&quot;planEndsOn&quot;:null,&quot;planNotes&quot;:&quot;&quot;,&quot;planCircles&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;planPeople&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;planTags&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;planLinks&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;planImages&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;showVisitForm&quot;:false,&quot;visitPlanId&quot;:null,&quot;visitDate&quot;:null,&quot;visitPeople&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}],&quot;visitComment&quot;:&quot;&quot;,&quot;reminders&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;nyQ76I6yDpkIg6ulQWXY&quot;,&quot;name&quot;:&quot;home.panel.plan-editor&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;2576bfa811b7035b0a11bf581afeee96e2f097ef3defab8601dd615d5fb793af&quot;}" wire:effects="{&quot;listeners&quot;:[&quot;panel-plan&quot;]}" wire:id="nyQ76I6yDpkIg6ulQWXY" wire:name="home.panel.plan-editor">
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+    <div wire:key="home-panel-quick-editor" wire:snapshot="{&quot;data&quot;:{&quot;kind&quot;:&quot;&quot;,&quot;recordId&quot;:&quot;&quot;,&quot;selectedDate&quot;:&quot;&quot;,&quot;journalVersion&quot;:&quot;&quot;,&quot;text&quot;:&quot;&quot;,&quot;summary&quot;:&quot;&quot;,&quot;drinkId&quot;:&quot;&quot;,&quot;amount&quot;:250,&quot;moodId&quot;:&quot;&quot;,&quot;energy&quot;:null,&quot;scheduledDate&quot;:&quot;&quot;,&quot;scheduledTime&quot;:&quot;&quot;},&quot;memo&quot;:{&quot;id&quot;:&quot;NdDM21pe5mXrgLHdqxaq&quot;,&quot;name&quot;:&quot;home.panel.quick-editor&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;7be44dd9c569f3e08d11b16c1142c3fa31b5750f8164791f31fbfb9c17146ee4&quot;}" wire:effects="{&quot;listeners&quot;:[&quot;panel-quick&quot;]}" wire:id="NdDM21pe5mXrgLHdqxaq" wire:name="home.panel.quick-editor">
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+    <div wire:key="home-panel-focus-timer" wire:snapshot="{&quot;data&quot;:{&quot;taskHost&quot;:false,&quot;manualTaskTitle&quot;:null,&quot;workDuration&quot;:31,&quot;shortBreak&quot;:10,&quot;longBreak&quot;:15,&quot;weekdayGoal&quot;:300,&quot;weekendGoal&quot;:120,&quot;sort&quot;:&quot;recent&quot;,&quot;search&quot;:&quot;&quot;,&quot;originFilter&quot;:&quot;&quot;,&quot;calendarMonth&quot;:&quot;2026-11&quot;,&quot;showForm&quot;:false,&quot;editingId&quot;:null,&quot;editingDate&quot;:&quot;&quot;,&quot;manualStart&quot;:&quot;&quot;,&quot;manualEnd&quot;:&quot;&quot;,&quot;manualDescription&quot;:&quot;&quot;,&quot;manualTaskId&quot;:null,&quot;focusCompanion&quot;:[{&quot;species_id&quot;:280,&quot;name&quot;:&quot;Ralts&quot;,&quot;level&quot;:1,&quot;image&quot;:&quot;https:\/\/raw.githubusercontent.com\/PokeAPI\/sprites\/master\/sprites\/pokemon\/other\/official-artwork\/280.png&quot;,&quot;type_class&quot;:&quot;game-type--psiquico&quot;,&quot;stage&quot;:&quot;mistico&quot;,&quot;team_ability&quot;:&quot;Tecnolog\u00eda&quot;,&quot;cry&quot;:&quot;\u00a1Ral-ral!&quot;},{&quot;s&quot;:&quot;arr&quot;}],&quot;selectedDate&quot;:&quot;2026-11-11&quot;,&quot;dateScope&quot;:&quot;day&quot;,&quot;perPage&quot;:25,&quot;paginators&quot;:[[],{&quot;s&quot;:&quot;arr&quot;}]},&quot;memo&quot;:{&quot;id&quot;:&quot;F77DSt1invh8hBRyYwHe&quot;,&quot;name&quot;:&quot;home.panel.focus-timer&quot;,&quot;path&quot;:&quot;\/&quot;,&quot;method&quot;:&quot;GET&quot;,&quot;release&quot;:&quot;a-a-a&quot;,&quot;children&quot;:[],&quot;scripts&quot;:[],&quot;assets&quot;:[],&quot;errors&quot;:[],&quot;locale&quot;:&quot;es&quot;,&quot;islands&quot;:[]},&quot;checksum&quot;:&quot;cc5c206f6d583ab638b296b974bd34962c33420c5d9b96da61efc38298be8235&quot;}" wire:effects="{&quot;url&quot;:{&quot;sort&quot;:{&quot;as&quot;:&quot;sort&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;recent&quot;},&quot;search&quot;:{&quot;as&quot;:&quot;q&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;&quot;},&quot;originFilter&quot;:{&quot;as&quot;:&quot;origin&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;&quot;},&quot;calendarMonth&quot;:{&quot;as&quot;:&quot;month&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;&quot;},&quot;selectedDate&quot;:{&quot;as&quot;:&quot;date&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:true,&quot;except&quot;:null},&quot;dateScope&quot;:{&quot;as&quot;:&quot;scope&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:&quot;day&quot;},&quot;perPage&quot;:{&quot;as&quot;:&quot;per_page&quot;,&quot;use&quot;:&quot;push&quot;,&quot;alwaysShow&quot;:false,&quot;except&quot;:25}},&quot;listeners&quot;:[&quot;task-focus-manual&quot;,&quot;panel-focus-manual&quot;]}" wire:id="F77DSt1invh8hBRyYwHe" wire:name="home.panel.focus-timer" x-data="{ focusOpen: false }">
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <div x-data="pomodoroTimer({
+        workDuration: 31, shortBreak: 10, longBreak: 15,
+        storageKey: 'life-tracker:pomodoro:1',
+        loadTask: (id) => $wire.focusTask(id),
+        saveSession: (start, end, description, token, taskId) => $wire.saveSession(start, end, description, token, taskId)
+    })"  @panel-focus.window="focusOpen = true; openFocus($event.detail)" >
+        <!--[if BLOCK]><![endif]-->    <template x-teleport="body">
+        
+        <!--[if BLOCK]><![endif]--><template x-if="focusOpen"><!--[if ENDBLOCK]><![endif]-->            <div  class="md-form-dialog-layer" data-module="" x-dialog-viewport
+                 x-data="{ expanded: true, section: null, navCollapsed: window.matchMedia('(max-width: 767.98px)').matches }"
+                 >
+                <div class="md-dialog-scrim" @click="focusOpen = false"></div>
+                <section class="md-form-dialog wall-focus-dialog focus-themed game-stage--mistico game-type--psiquico" :class="{ 'is-expanded': expanded, 'is-nav-collapsed': navCollapsed }"
+                         role="dialog" aria-modal="true" aria-labelledby="dialog-foco-de-hoy"
+                                                  x-md-surface="" @md-surface-close="focusOpen = false">
+                    <div class="md-form-dialog__form">
+                        <header class="md-form-dialog__head" role="presentation">
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                            <!--[if BLOCK]><![endif]--><span class="md-form-dialog__icon"><i class="bi bi-stopwatch" aria-hidden="true"></i></span><!--[if ENDBLOCK]><![endif]-->                            <h2 id="dialog-foco-de-hoy" class="md-form-dialog__title">Foco de hoy</h2>
+                            <button type="button" class="md-btn-icon" @click="expanded = !expanded"
+                                    :aria-pressed="expanded.toString()" :aria-label="expanded ? 'Restaurar' : 'Expandir'">
+                                <i class="bi" :class="expanded ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'" aria-hidden="true"></i>
+                            </button>
+                            <button type="button" class="md-btn-icon" aria-label="Cerrar" @click="focusOpen = false"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+                        </header>
+                        <div class="md-form-dialog__main">
+                            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                            <div class="md-form-dialog__body" ><div class="wall-focus-layout" :class="{ 'has-task': taskId }">
+                <div class="wall-focus">
+                    <strong x-text="displayTime" role="timer" aria-live="off"></strong>
+                    <p>Tiempo de enfoque</p>
+                    <p>31 min de trabajo · 10 min de pausa corta</p>
+                    <!--[if BLOCK]><![endif]-->    <div wire:ignore
+         x-data="focusCompanion({ lines: JSON.parse('{\u0022ready\u0022:[\u0022Cuando quieras, empezamos.\u0022,\u0022Elige una cosa y vamos por ella.\u0022],\u0022start\u0022:[\u0022Arrancamos. Yo vigilo; tú enfócate.\u0022,\u0022Un paso a la vez; aquí estoy.\u0022],\u0022half\u0022:[\u0022Ya vas por la mitad; sigue a tu ritmo.\u0022,\u0022Mitad lograda. Buen foco.\u0022],\u0022final\u0022:[\u0022Último tramo. Cierra con calma.\u0022,\u0022Quedan pocos minutos; tú puedes.\u0022],\u0022paused\u0022:[\u0022Te espero aquí.\u0022,\u0022Pausa tomada; seguimos cuando vuelvas.\u0022],\u0022done\u0022:[\u0022¡Bloque completo! Bien hecho.\u0022,\u0022¡Lo lograste! Tómate un respiro.\u0022],\u0022break\u0022:[\u0022Estira, toma agua y mira lejos.\u0022,\u0022Descansa; el siguiente bloque te espera.\u0022]}'), cry: '¡Ral-ral!', storageKey: 'life-tracker:focus-companion-hidden:1' })"
+         x-effect="sync({ mode, isRunning, isCompleting, pendingCompletion, startedAt, timeLeft, totalTime })"
+         class="focus-companion focus-companion--wall game-stage--mistico"
+         :class="{ 'is-hidden': hidden, 'is-cheer': cheer, 'is-running': isRunning && mode === 'work' }"
+         :data-stage="stage">
+        <span class="focus-companion__art" x-show="!hidden">
+            <!--[if BLOCK]><![endif]-->                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/280.png" width="112" height="112" alt="Ralts">
+            <!--[if ENDBLOCK]><![endif]-->        </span>
+        <div class="focus-companion__talk">
+            <p class="focus-companion__bubble" aria-live="polite" x-show="!hidden"><strong x-text="cry"></strong> <span x-text="line"></span></p>
+            <div class="focus-companion__meta">
+                <span x-show="!hidden">Ralts · Nv 1</span>
+                <button type="button" class="focus-companion__toggle" @click="toggleHidden()"
+                        :aria-label="hidden ? 'Mostrar compañero' : 'Ocultar compañero'" :title="hidden ? 'Mostrar compañero' : 'Ocultar compañero'">
+                    <i class="bi" :class="hidden ? 'bi-eye' : 'bi-eye-slash'" aria-hidden="true"></i>
+                    <span x-show="hidden" x-cloak>Mostrar compañero</span>
+                </button>
+            </div>
+        </div>
+    </div>
+<!--[if ENDBLOCK]><![endif]-->                    <div class="md-chip-rail" role="group" aria-label="Modo del temporizador">
+                        <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-chip md-chip-filter" x-bind:class="{ selected: mode === 'work' }" x-bind:aria-pressed="mode === 'work'" @click="setMode('work')"
+                         aria-pressed="false" >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        Trabajo
+    </button>
+<!--[if ENDBLOCK]><![endif]-->                        <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-chip md-chip-filter" x-bind:class="{ selected: mode === 'shortBreak' }" x-bind:aria-pressed="mode === 'shortBreak'" @click="setMode('shortBreak')"
+                         aria-pressed="false" >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        Pausa corta
+    </button>
+<!--[if ENDBLOCK]><![endif]-->                        <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-chip md-chip-filter" x-bind:class="{ selected: mode === 'longBreak' }" x-bind:aria-pressed="mode === 'longBreak'" @click="setMode('longBreak')"
+                         aria-pressed="false" >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        Pausa larga
+    </button>
+<!--[if ENDBLOCK]><![endif]-->                    </div>
+                    <p x-show="taskId && !startedAt && !validMinutes" role="status">Indica una duración para iniciar.</p>
+                    <p x-show="activeTaskMismatch" role="status">Hay un ciclo activo; se muestra su tarea original.</p>
+                    <label x-show="taskId && !startedAt" class="md-body-small">Duración (minutos) <input type="number" min="1" max="1440" x-model.number="customMinutes" @input="setSuggestedDuration(customMinutes)"></label>
+                    <div class="md-text-field md-field  " >
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <input type="text"
+           id="field-focus-description"
+            name="focus-description"            value=""
+           placeholder=" "
+           class="md-field__control" x-model="description"
+                                            >
+    <label for="field-focus-description" >Descripción del registro de foco<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></label>
+    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+                        <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-filled wall-control" @click="toggle()" x-bind:disabled="isCompleting || (taskId && !startedAt && !validMinutes)"
+                        >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <span class="md-btn__spinner" aria-hidden="true"></span>
+        <span><span x-text="pendingCompletion ? 'Reintentar guardado' : (isRunning ? 'Pausar' : 'Iniciar')"></span></span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </button>
+<!--[if ENDBLOCK]><![endif]-->                        <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-outlined wall-control" @click="finishEarly()" x-bind:disabled="isCompleting || mode !== 'work'"
+                        >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <span class="md-btn__spinner" aria-hidden="true"></span>
+        <span>Finalizar y guardar</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </button>
+<!--[if ENDBLOCK]><![endif]-->                        <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-text wall-control" @click="reset()" x-bind:disabled="isCompleting || pendingCompletion"
+                        >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <span class="md-btn__spinner" aria-hidden="true"></span>
+        <span>Reiniciar</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </button>
+<!--[if ENDBLOCK]><![endif]-->                    </div>
+                    <p x-show="errorMessage" x-text="errorMessage" role="alert"></p>
+                </div>
+            <section class="wall-focus-task" x-show="taskId" aria-label="Tarea en foco" x-cloak>
+                <p x-show="taskLoading" role="status">Cargando tarea…</p>
+                <p x-show="taskError" x-text="taskError" role="alert"></p>
+                <template x-if="taskContext">
+                    <div class="wall-focus-task__content">
+                        <h3 x-text="taskContext.title"></h3>
+                        <div class="wall-focus-task__description" tabindex="0" role="region" aria-label="Descripción de la tarea">
+                            <div class="md-markdown-preview" x-html="taskContext.html" x-show="taskContext.hasDescription"></div>
+                            <p x-show="!taskContext.hasDescription">Esta tarea no tiene descripción</p>
+                        </div>
+                    </div>
+                </template>
+                <p x-show="!taskLoading && !taskError && !taskContext">La tarea ya no está disponible.</p>
+            </section>
+            </div></div>
+                        </div>
+                        <footer class="md-form-dialog__actions" role="presentation">
+                            <!--[if BLOCK]><![endif]--> <!--[if BLOCK]><![endif]-->    <button type="button"
+            class="md-btn-text wall-control" @click="focusOpen = false"
+                        >
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->        <span class="md-btn__spinner" aria-hidden="true"></span>
+        <span>Volver al panel</span>
+        <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    </button>
+<!--[if ENDBLOCK]><![endif]--> <!--[if ENDBLOCK]><![endif]-->                        </footer>
+                    </div>
+                </section>
+            </div>
+        <!--[if BLOCK]><![endif]--></template><!--[if ENDBLOCK]><![endif]-->    </template>
+<!--[if ENDBLOCK]><![endif]-->    </div>
+</div>
+
+    <div
+    x-data="{
+        active: false,
+        detail: null,
+        timeout: null,
+        showFeedback(event) {
+            this.detail = event.detail;
+            this.active = true;
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => this.active = false, this.detail.kind === 'day' ? 3600 : 2800);
+        }
+    }"
+    x-on:habit-feedback.window="showFeedback($event)"
+    class="habit-feedback"
+    :class="{
+        'is-active': active,
+        'is-celebration': detail && detail.kind === 'day',
+        'is-support': detail && detail.tone === 'support',
+        'is-neutral': detail && detail.tone === 'neutral'
+    }"
+    role="status"
+    aria-live="polite"
+    aria-atomic="true"
+>
+    <div class="habit-feedback__confetti" x-show="detail && detail.kind === 'day'" aria-hidden="true">
+        <!--[if BLOCK]><![endif]-->            <i style="--piece: 0"></i>
+                    <i style="--piece: 1"></i>
+                    <i style="--piece: 2"></i>
+                    <i style="--piece: 3"></i>
+                    <i style="--piece: 4"></i>
+                    <i style="--piece: 5"></i>
+                    <i style="--piece: 6"></i>
+                    <i style="--piece: 7"></i>
+                    <i style="--piece: 8"></i>
+                    <i style="--piece: 9"></i>
+                    <i style="--piece: 10"></i>
+                    <i style="--piece: 11"></i>
+                    <i style="--piece: 12"></i>
+                    <i style="--piece: 13"></i>
+                    <i style="--piece: 14"></i>
+                    <i style="--piece: 15"></i>
+                    <i style="--piece: 16"></i>
+                    <i style="--piece: 17"></i>
+                    <i style="--piece: 18"></i>
+                    <i style="--piece: 19"></i>
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="habit-feedback__surface">
+        <div class="habit-feedback__icon" aria-hidden="true"><i class="bi" :class="detail ? detail.icon : 'bi-check2-circle'"></i></div>
+        <div class="habit-feedback__copy">
+            <strong x-text="detail ? detail.title : ''"></strong>
+            <span x-text="detail ? detail.message : ''"></span>
+        </div>
+    </div>
+</div>
+    <div
+    x-data="{
+        active: false,
+        xp: 0,
+        message: '',
+        timeout: null,
+        celebrate(detail) {
+            this.xp = detail.xp;
+            this.message = detail.levelUp
+                ? `¡Nivel ${detail.level}! Sigue así.`
+                : (detail.streakMilestone ? `¡Racha de ${detail.streak} días!` : `+${detail.xp} XP por avanzar.`);
+            this.active = true;
+            clearTimeout(this.timeout);
+            this.timeout = setTimeout(() => this.active = false, 2800);
+        }
+    }"
+    x-on:task-completed.window="celebrate($event.detail)"
+    class="task-celebration"
+    :class="{ 'is-active': active }"
+    aria-live="polite"
+    aria-atomic="true"
+>
+    <div class="task-celebration__confetti" aria-hidden="true">
+        <!--[if BLOCK]><![endif]-->            <i style="--piece: 0"></i>
+                    <i style="--piece: 1"></i>
+                    <i style="--piece: 2"></i>
+                    <i style="--piece: 3"></i>
+                    <i style="--piece: 4"></i>
+                    <i style="--piece: 5"></i>
+                    <i style="--piece: 6"></i>
+                    <i style="--piece: 7"></i>
+                    <i style="--piece: 8"></i>
+                    <i style="--piece: 9"></i>
+                    <i style="--piece: 10"></i>
+                    <i style="--piece: 11"></i>
+                    <i style="--piece: 12"></i>
+                    <i style="--piece: 13"></i>
+                    <i style="--piece: 14"></i>
+                    <i style="--piece: 15"></i>
+                    <i style="--piece: 16"></i>
+                    <i style="--piece: 17"></i>
+        <!--[if ENDBLOCK]><![endif]-->    </div>
+    <div class="task-celebration__content">
+        <i class="bi bi-check2-circle"></i>
+        <div><strong x-text="`+${xp} XP`"></strong><span x-text="message"></span></div>
+    </div>
+</div>
+    <!--[if BLOCK]><![endif]--><!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--><template x-if="showRecurringDialog">
+    <div >
+        <div class="md-dialog-scrim" @click="$wire.cancelRecurringCompletion()"></div>
+        <div class="md-dialog"
+                          role="dialog"
+             aria-modal="true"
+             aria-labelledby="dialog-programar-proxima-repeticion"
+                          x-md-surface
+             @md-surface-close="$wire.cancelRecurringCompletion()"
+             @click.stop>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <h2 id="dialog-programar-proxima-repeticion" class="md-dialog-headline md-headline-small">Programar próxima repetición</h2>
+            <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+            <div class="md-dialog-content"><p class="md-body-medium">La tarea actual se marcará como completada y se creará la siguiente ocurrencia.</p>
+                <div class="md-text-field">
+                    <input type="date" wire:model="nextOccurrenceDate" placeholder=" " id="next-occurrence-date">
+                    <label for="next-occurrence-date">Próxima fecha</label>
+                    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->                </div></div>
+
+            <!--[if BLOCK]><![endif]-->                <div class="md-dialog-actions"><button wire:click="cancelRecurringCompletion" class="md-btn-text">Cancelar</button>
+                <button wire:click="confirmRecurringCompletion" class="md-btn-filled"><i class="bi bi-check-lg"></i> Completar y programar</button></div>
+            <!--[if ENDBLOCK]><![endif]-->        </div>
+    </div>
+</template>
+<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+<!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->    <!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]-->
+<!--[if BLOCK]><![endif]--><!--[if ENDBLOCK]><![endif]--></div>
+</main></body></html>
