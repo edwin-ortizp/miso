@@ -70,6 +70,7 @@ _Última actualización: 2026-11-11_
 | CHG-062 | S | Ficha del guardián en un modal sin salir del módulo | in-progress | En verificación | 3/4 |
 | CHG-063 | M | Guardianes en Objetivos, Ánimo y energía, Hábitos a evitar y Diario | in-progress | En verificación | 3/4 |
 | CHG-064 | M | Guardianes en Comidas, Relaciones, Planes y Vehículos | in-progress | En verificación | 3/4 |
+| CHG-065 | S | Botón de creación rápida en Inicio | in-progress | En desarrollo | 0/2 |
 | CHG-066 | S | Guardianes elegidos del equipo de la semana | done | Cerrado | 4/4 |
 | CHG-067 | S | Medir días activos y canal de entrada | done | Cerrado | 4/4 |
 | CHG-068 | M | Avisos push del guardián | done | Cerrado | 5/5 |

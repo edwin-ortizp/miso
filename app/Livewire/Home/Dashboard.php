@@ -25,6 +25,7 @@ use App\Support\VehicleUsageProjection;
 use App\Support\WaterGoal;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -98,6 +99,16 @@ class Dashboard extends Component
     }
 
     /** One tap through the shared logger, so Inicio matches Ánimo and Diario exactly. */
+    #[On('panel-changed')]
+    #[On('task-calendar-refresh')]
+    public function refreshDashboard(): void {}
+
+    #[On('panel-mood-recorded')]
+    public function moodRecorded(string $id): void
+    {
+        $this->lastMoodEntryId = MoodEntry::findOrFail($id)->id;
+    }
+
     public function saveMood(string $moodStateId): void
     {
         $this->logMood($moodStateId);
