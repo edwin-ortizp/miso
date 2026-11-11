@@ -338,3 +338,9 @@ La experiencia del ejemplar actual aparece en una tarjeta central bajo el Pokém
 - El middleware `TrackActiveDay` escribe una sola vez por día gracias a la caché.
 - `php artisan miso:retention --days=30` muestra D1/D7/D30, canales de entrada y registros por día activo.
 - Con el juego apagado no hay actividades, así que `records_count` queda en 0.
+
+## Volver sin culpa (CHG-071)
+
+- Si el último día activo anterior a hoy (`user_active_days`) fue hace 3 días o más (`config/engagement.php`), Inicio muestra `Home\WelcomeBack` una sola vez por regreso (`welcome_backs`, único usuario + fecha).
+- Ofrece mover lo atrasado a hoy, a otra fecha o dejarlo sin fecha (con Deshacer), un enlace para marcar hábitos de los días ausentes y +1 vaso de agua.
+- Usuarios sin historial nunca la ven; las ausencias anteriores a CHG-066 no se detectan.

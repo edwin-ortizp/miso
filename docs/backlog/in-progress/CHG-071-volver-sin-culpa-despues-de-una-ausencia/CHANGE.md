@@ -1,5 +1,5 @@
 # CHG-071 · Volver sin culpa después de una ausencia
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -81,16 +81,20 @@ Volver tras una ausencia es el momento con más riesgo de abandono: el usuario e
 - Docs a actualizar: `docs/game.md` (sección de recurrencia) o doc de Inicio.
 
 ## 7. Tareas
-- [ ] T1 · Al volver tras 3+ días me recibe el guardián — Resp: developer — Modelo: estandar — Archivos: `ReturnDetector`, `WelcomeBack` — Hecho cuando: aparece solo tras ausencia y una vez por regreso.
-- [ ] T2 · Muevo o archivo lo vencido con un toque — Resp: developer — Modelo: estandar — Archivos: `WelcomeBack`, servicio de tareas — Hecho cuando: las tres acciones funcionan con Deshacer.
-- [ ] T3 · Me sugiere una primera acción pequeña — Resp: developer — Modelo: estandar — Archivos: `WelcomeBack` — Hecho cuando: registrar desde ahí funciona y cuenta en `user_active_days`.
-- [ ] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/WelcomeBackTest.php`, docs — Hecho cuando: pasan los casos de §5.
+- [x] T1 · Al volver tras 3+ días me recibe el guardián — Resp: developer — Modelo: estandar — Archivos: `ReturnDetector`, `WelcomeBack` — Hecho cuando: aparece solo tras ausencia y una vez por regreso.
+- [x] T2 · Muevo o archivo lo vencido con un toque — Resp: developer — Modelo: estandar — Archivos: `WelcomeBack`, servicio de tareas — Hecho cuando: las tres acciones funcionan con Deshacer.
+- [x] T3 · Me sugiere una primera acción pequeña — Resp: developer — Modelo: estandar — Archivos: `WelcomeBack` — Hecho cuando: registrar desde ahí funciona y cuenta en `user_active_days`.
+- [x] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/WelcomeBackTest.php`, docs — Hecho cuando: pasan los casos de §5.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-11 — `ReturnDetector` (último día activo anterior a hoy en `user_active_days`, umbral en `config/engagement.php`), tabla `welcome_backs` (único usuario+fecha de regreso), componente `Home\WelcomeBack` arriba en Inicio con Pasar a hoy / Elegir fecha / Dejar sin fecha (en transacción, con Deshacer), enlace a Hábitos en el primer día ausente y +1 vaso. Pruebas en `tests/Feature/Engagement/WelcomeBackTest.php`. Assets recompilados. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — Decisión (developer): las tareas no tienen estado "archivada"; "Archivar" se implementa como "Dejar sin fecha" (la tarea sigue pendiente pero deja de aparecer como atrasada). Se puede deshacer.
 - Pregunta: ¿3 días de ausencia está bien como umbral? → 2026-11-11 Decisión (usuario): sí, 3 días.
 - Pregunta: ¿los hábitos de los días ausentes se dejan como están (sin registrar) o se ofrece marcar alguno como hecho? → 2026-11-11 Decisión (usuario): se pueden marcar en retroactivo, como ya permite la app, y debe seguir así. La bienvenida ofrece el enlace "¿Hiciste algún hábito estos días? Márcalo" que abre Hábitos en el primer día ausente; no se crea lógica nueva ni restricciones.
 - Depende de: CHG-066.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Implementación terminada → En verificación
