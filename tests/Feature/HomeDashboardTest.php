@@ -184,4 +184,20 @@ class HomeDashboardTest extends TestCase
                     && $yesterday['habits'] === 100;
             });
     }
+
+    public function test_dashboard_shows_quick_create_menu_and_editors(): void
+    {
+        $this->get(route('home'))
+            ->assertOk()
+            ->assertSee('Crear tarea')
+            ->assertSee('Agregar plan')
+            ->assertSee('Agregar compra')
+            ->assertSee('Agregar hábito')
+            ->assertSee('panel-quick-dialog', false);
+    }
+
+    public function test_dashboard_refreshes_when_panel_changes(): void
+    {
+        Livewire::test(Dashboard::class)->dispatch('panel-changed')->assertOk();
+    }
 }
