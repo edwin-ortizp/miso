@@ -51,5 +51,55 @@
             "type": "image/png",
             "purpose": "any maskable"
         }
+    ],
+    "shortcuts": [
+        {
+            "name": "Hábitos de hoy",
+            "short_name": "Hábitos",
+            "url": "/habits?via=shortcut",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-habits.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Registrar agua",
+            "short_name": "Agua",
+            "url": "/water/daily?via=shortcut",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-water.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Cómo me siento",
+            "short_name": "Ánimo",
+            "url": "/mood?via=shortcut",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-mood.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        },
+        {
+            "name": "Escribir mi diario",
+            "short_name": "Diario",
+            "url": "/journal?via=shortcut",
+            "icons": [
+                {
+                    "src": "/icons/shortcut-journal.png",
+                    "sizes": "96x96",
+                    "type": "image/png"
+                }
+            ]
+        }
     ]
 }

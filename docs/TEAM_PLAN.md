@@ -77,7 +77,7 @@ _Última actualización: 2026-11-11_
 | CHG-069 | S | Cierre del día | to-do | Borrador | 0/0 |
 | CHG-070 | M | Resumen del domingo con hallazgos de tus datos | to-do | Borrador | 0/0 |
 | CHG-071 | M | Volver sin culpa después de una ausencia | to-do | Aprobado | 0/4 |
-| CHG-072 | S | Atajos de la app instalada | to-do | Aprobado | 0/3 |
+| CHG-072 | S | Atajos de la app instalada | in-progress | En verificación | 3/3 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

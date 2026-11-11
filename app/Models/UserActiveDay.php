@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
  */
 class UserActiveDay extends Model
 {
-    public const CHANNELS = ['direct', 'push', 'checkin', 'close'];
+    public const CHANNELS = ['direct', 'push', 'checkin', 'close', 'shortcut', 'return'];
 
     protected $fillable = ['user_id', 'date', 'first_channel', 'records_count'];
 

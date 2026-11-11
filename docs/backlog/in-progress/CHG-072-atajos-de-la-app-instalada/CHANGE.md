@@ -1,5 +1,5 @@
 # CHG-072 · Atajos de la app instalada
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -20,7 +20,7 @@ Registrar exige abrir la app y navegar al módulo. Agregamos `shortcuts` al `pub
  ├ Hábitos de hoy        → /habits?via=shortcut
  ├ Registrar agua        → /water/daily?via=shortcut
  ├ Cómo me siento        → /mood?via=shortcut
- └ Escribir en el diario → /journal?via=shortcut
+ └ Escribir mi diario    → /journal?via=shortcut
 ```
 Nombres ≤ 20 caracteres (`short_name` ≤ 12), íconos 96×96 por atajo con el estilo de los íconos actuales.
 
@@ -36,13 +36,16 @@ Nombres ≤ 20 caracteres (`short_name` ≤ 12), íconos 96×96 por atajo con el
 - Manual: Android/Chrome y escritorio Chrome/Edge.
 
 ## 7. Tareas
-- [ ] T1 · Atajos al mantener presionado el ícono — Resp: developer — Modelo: estandar — Archivos: `public/manifest.json`, íconos — Hecho cuando: aparecen los 4 en Android y escritorio.
-- [ ] T2 · Se mide cuántas veces se entra por un atajo — Resp: developer — Modelo: estandar — Archivos: `app/Models/UserActiveDay.php` — Hecho cuando: `?via=shortcut` queda como canal.
-- [ ] T3 · Pruebas — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/PwaShortcutsTest.php` — Hecho cuando: pasan los casos de §5.
+- [x] T1 · Atajos al mantener presionado el ícono — Resp: developer — Modelo: estandar — Archivos: `public/manifest.json`, íconos — Hecho cuando: aparecen los 4 en Android y escritorio.
+- [x] T2 · Se mide cuántas veces se entra por un atajo — Resp: developer — Modelo: estandar — Archivos: `app/Models/UserActiveDay.php` — Hecho cuando: `?via=shortcut` queda como canal.
+- [x] T3 · Pruebas — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Engagement/PwaShortcutsTest.php` — Hecho cuando: pasan los casos de §5.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-11 — `shortcuts` en `public/manifest.json` (4 atajos con `?via=shortcut`), íconos 96×96 `public/icons/shortcut-*.png` en el azul de marca, canal `shortcut` (y `return` para CHG-071) en `UserActiveDay::CHANNELS`, pruebas en `tests/Feature/Engagement/PwaShortcutsTest.php`. "Escribir en el diario" pasó a "Escribir mi diario" para cumplir ≤ 20 caracteres. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - Pregunta: ¿estos cuatro atajos u otros (p. ej. "Tareas de hoy", "Iniciar foco")? Máximo recomendado: 4. → 2026-11-11 Decisión (usuario): los cuatro propuestos para empezar.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Implementación terminada → En verificación

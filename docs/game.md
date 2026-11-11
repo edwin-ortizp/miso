@@ -334,7 +334,7 @@ La experiencia del ejemplar actual aparece en una tarjeta central bajo el Pokém
 
 ## Medición de recurrencia (CHG-066)
 
-- `user_active_days`: una fila por usuario y día con `first_channel` (`direct`, `push`, `checkin`, `close`, leído de `?via=`) y `records_count` (actividades del juego de ese día, incluidas las del MCP).
+- `user_active_days`: una fila por usuario y día con `first_channel` (`direct`, `push`, `checkin`, `close`, `shortcut`, `return`, leído de `?via=`) y `records_count` (actividades del juego de ese día, incluidas las del MCP).
 - El middleware `TrackActiveDay` escribe una sola vez por día gracias a la caché.
 - `php artisan miso:retention --days=30` muestra D1/D7/D30, canales de entrada y registros por día activo.
 - Con el juego apagado no hay actividades, así que `records_count` queda en 0.
