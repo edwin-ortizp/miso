@@ -16,6 +16,11 @@ return [
         'sounds' => true,
         'celebration_set' => ['confetti', 'cats', 'shooting-stars', 'balloons', 'fireworks', 'bubbles', 'balls', 'petals'],
         'seasons_enabled' => true,
+        // Racha (CHG-076): acciones para cumplir el día (1–10) y si se muestra.
+        'streak_threshold' => 3,
+        'streak_visible' => true,
+        // Reto del día (CHG-077).
+        'daily_challenge' => true,
     ],
 
     // Experiencia que suma una especie repetida a su ejemplar.
@@ -36,6 +41,27 @@ return [
     // Constancia (CHG-042): xp mínima para cada integrante del equipo por el primer
     // registro del día de cada fuente. Sin ball, misiones, afinidad ni bono de temporada.
     'consistency_xp' => 1,
+
+    // Balls extra (CHG-076): hitos de racha, reto del día, álbumes y camino. Fuera del límite
+    // diario, con tope semanal común para que no se vuelvan algo para farmear.
+    'bonus_balls_per_week' => 4,
+
+    // Racha de constancia (CHG-076). El día se cumple con el umbral de acciones del juego en al
+    // menos min_areas áreas distintas; gracias automáticas por mes calendario; nunca resta.
+    'streak' => [
+        'min_areas' => 2,
+        'grace_days_per_month' => 2,
+        'milestones' => [3, 7, 14, 30, 60, 100, 180, 365],
+        'history_days' => 400,
+    ],
+
+    // Reto del día (CHG-077): plantillas v1, metas (mín, máx) y lo esperado por día de cada área
+    // para saber cuál va más descuidada en la semana.
+    'daily_challenge' => [
+        'templates' => ['tasks_done', 'category_tasks', 'habit_period', 'water_logs', 'checkin'],
+        'targets' => ['tasks_done' => [2, 3], 'category_tasks' => [2, 2], 'water_logs' => [2, 3]],
+        'weekly_per_day' => ['tasks' => 2, 'water' => 3, 'checkin' => 1],
+    ],
 
     // Compañero del panel (CHG-049): familia de escenario por tipo (slug) y reacciones al avance del día.
     'stage_families' => [
@@ -231,6 +257,23 @@ return [
         'theme_hint_weeks' => 6,
         'propose_window_days' => 7,
         'history_weeks' => 8,
+        // Camino de temporada (CHG-079): objetivo = semanas × points_per_week (mínimo min_target);
+        // 1 punto por actividad hasta daily_cap al día y mission_points por misión cumplida.
+        'path' => [
+            'points_per_week' => 20,
+            'min_target' => 20,
+            'daily_cap' => 5,
+            'mission_points' => 3,
+            'nodes' => [
+                ['percent' => 5, 'reward' => ['type' => 'ball', 'count' => 1]],
+                ['percent' => 15, 'reward' => ['type' => 'xp', 'count' => 10]],
+                ['percent' => 30, 'reward' => ['type' => 'ball', 'count' => 1]],
+                ['percent' => 45, 'reward' => ['type' => 'xp', 'count' => 15]],
+                ['percent' => 60, 'reward' => ['type' => 'xp', 'count' => 20]],
+                ['percent' => 80, 'reward' => ['type' => 'ball', 'count' => 1]],
+                ['percent' => 100, 'reward' => ['type' => 'ball', 'count' => 2]],
+            ],
+        ],
     ],
 
     // Poder (CHG-025): round(total_estadísticas_base × (1 + (nivel − 1) × factor)). Sin estadísticas usa la base.
@@ -262,7 +305,7 @@ return [
     ],
 
     // Rangos permitidos para los ajustes numéricos.
-    'limits' => ['daily_limit' => [0, 50], 'pity_threshold' => [1, 100]],
+    'limits' => ['daily_limit' => [0, 50], 'pity_threshold' => [1, 100], 'streak_threshold' => [1, 10]],
 
     'rarities' => ['common', 'uncommon', 'rare', 'legendary'],
     'rarity_labels' => ['common' => 'Común', 'uncommon' => 'Poco común', 'rare' => 'Rara', 'legendary' => 'Legendaria'],

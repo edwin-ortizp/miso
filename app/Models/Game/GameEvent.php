@@ -21,6 +21,9 @@ class GameEvent extends Model
     public const KIND_XP_GAINED = 'xp_gained';
     public const KIND_MISSION_REWARD = 'mission_reward';
 
+    /** Ball extra común (CHG-076): hitos de racha, reto del día, álbumes y camino de temporada. */
+    public const KIND_BONUS = 'bonus';
+
     protected $fillable = [
         'user_id', 'source_type', 'source_id', 'source_label', 'kind', 'effect',
         'config_snapshot', 'idempotency_key', 'occurred_at',

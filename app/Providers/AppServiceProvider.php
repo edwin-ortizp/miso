@@ -59,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
 
         Task::observe(TaskCalDavObserver::class);
         Task::observe(\App\Observers\GameTaskObserver::class);
+        \App\Models\Game\GameDiscovery::observe(\App\Observers\Game\AlbumObserver::class);
         // Fuentes del juego (CHG-027): observan sin cambiar la lógica de cada módulo.
         \App\Models\PomodoroSession::observe(\App\Observers\Game\FocusSourceObserver::class);
         foreach ([Goal::class, \App\Models\GoalEntry::class, \App\Models\GoalNumericEntry::class] as $goalSource) {

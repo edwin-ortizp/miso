@@ -1,9 +1,9 @@
 # CHG-060 · Música de fondo en el modo rutina de hábitos
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-10 · **Aprobado:** 2026-11-10 · **Cerrado:** —
+**Creado:** 2026-11-10 · **Aprobado:** 2026-11-10 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -54,7 +54,7 @@ Usa `x-ui.icon-action`, igual que el botón ✕, con los iconos `bi-volume-up` y
 - [x] T1 · Conseguir 4 pistas lo-fi/ambient instrumentales libres de derechos y registrar sus licencias — Resp: developer — Modelo: estandar — Archivos: public/audio/routine/*.mp3, public/audio/routine/LICENSES.md — Hecho cuando: las 4 pistas existen, sin voz y de menos de 3 MB cada una, y cada una tiene fuente y licencia anotadas
 - [x] T2 · Reproductor aleatorio continuo con campanita y silencio recordado — Resp: developer — Modelo: estandar — Archivos: resources/js/routine-music.js, resources/js/app.js — Hecho cuando: el store sigue los eventos de §4, nunca repite la pista anterior, baja el volumen y hace sonar la campanita con time-up, y respeta localStorage
 - [x] T3 · Conectar la rutina: botón altavoz y eventos desde el paso — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/habit/partials/routine-overlay.blade.php, tests/Feature/Habit — Hecho cuando: el botón alterna el icono y el aria-label, Pausar/Seguir/Cerrar controlan la música y pasa el test de §5
-- [ ] T4 · Verificar criterios de §0 en el navegador — Resp: qa-tester — Hecho cuando: todos pasan y Alex aprueba las pistas
+- [x] T4 · Verificar criterios de §0 en el navegador — Resp: qa-tester — Hecho cuando: todos pasan y Alex aprueba las pistas (cerrada por el usuario sin verificar)
 
 ## 8. Bitácora de implementación (developer)
 - 2026-11-10 — Inicio (start --force: CHG-017 sigue En desarrollo, sin archivos en común; lo autorizó Alex).
@@ -73,3 +73,4 @@ Usa `x-ui.icon-action`, igual que el botón ✕, con los iconos `bi-volume-up` y
 - 2026-11-10 — Pistas: OpenGameArt CC0 en lugar de Pixabay (403 al descargar). Alex las aprueba en T4.
 - LECCIÓN(developer): en JS, los recursos de public/ se resuelven con asset() pasado desde Blade, nunca con rutas absolutas «/…», porque la app puede vivir en una subruta (APP_URL=…/miso/public) — evidencia: 404 de las pistas en CHG-060 · destino sugerido: docs/ARCHITECTURE.md → docs/ARCHITECTURE.md
 - 2026-11-10 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario sin verificación (pendientes: T4): ya lo probé → done/ (desde el panel)

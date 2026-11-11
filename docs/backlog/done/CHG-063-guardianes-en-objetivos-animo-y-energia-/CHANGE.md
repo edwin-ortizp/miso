@@ -1,9 +1,9 @@
 # CHG-063 · Guardianes en Objetivos, Ánimo y energía, Hábitos a evitar y Diario
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-10 · **Aprobado:** 2026-11-10 · **Cerrado:** —
+**Creado:** 2026-11-10 · **Aprobado:** 2026-11-10 · **Cerrado:** 2026-11-11
 **Relacionado:** CHG-057, CHG-058 (consejos del guardián), CHG-062 (ficha en modal)
 
 ## 0. En palabras simples
@@ -96,7 +96,7 @@ Cuatro proveedores nuevos para `GuardianAdvisor` y un panel lateral nuevo (solo 
 ## 7. Tareas
 - [x] T1 · Guardián con consejos en Objetivos y Ánimo y energía, con su panel derecho — Resp: developer — Archivos: app/Services/Game/Guardian/GoalAdvice.php, app/Services/Game/Guardian/MoodAdvice.php, app/Services/Game/Guardian/GuardianAdvisor.php, config/game.php, config/modules.php, resources/views/livewire/goal/goal-index.blade.php, resources/views/livewire/mood/mood-tracker.blade.php, tests/Feature/Game/GuardianAdviceTest.php, tests/Feature/Game/ModuleGuardianTest.php — Hecho cuando: criterios 1-3, 6 y 7 pasan en esos módulos
 - [x] T2 · Guardián con consejos en Hábitos a evitar y Diario (citas y recaídas con tono de apoyo) — Resp: developer — Archivos: app/Services/Game/Guardian/NegativeHabitAdvice.php, app/Services/Game/Guardian/JournalAdvice.php, app/Services/Game/Guardian/GuardianAdvisor.php, config/game.php, config/modules.php, resources/views/livewire/negative-habit/negative-habit-weekly.blade.php, resources/views/livewire/journal/journal-entries.blade.php, tests/Feature/Game/GuardianAdviceTest.php, tests/Feature/Game/ModuleGuardianTest.php — Hecho cuando: criterios 4-7 pasan y el build compila
-- [ ] T3 · Verificar criterios de aceptación — Resp: qa-tester — Hecho cuando: los 7 criterios pasan
+- [x] T3 · Verificar criterios de aceptación — Resp: qa-tester — Hecho cuando: los 7 criterios pasan (cerrada por el usuario sin verificar)
 - [x] T4 · Actualizar documentación — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
 
 ## 8. Bitácora de implementación (developer)
@@ -114,3 +114,4 @@ Cuatro proveedores nuevos para `GuardianAdvisor` y un panel lateral nuevo (solo 
 - 2026-11-10 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-10 — Movido a in-progress/ (En desarrollo)
 - 2026-11-10 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario sin verificación (pendientes: T3): ya lo probé → done/ (desde el panel)

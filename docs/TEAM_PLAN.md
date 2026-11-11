@@ -65,12 +65,12 @@ _Última actualización: 2026-11-11_
 | CHG-057 | M | Consejos contextuales del guardián | done | Cerrado | 5/5 |
 | CHG-058 | M | Guardián con consejos en Hábitos, Hidratación, Ejercicio y Pomodoro | done | Cerrado | 5/5 |
 | CHG-059 | M | Guardián que acompaña la sesión de foco | done | Cerrado | 4/4 |
-| CHG-060 | S | Música de fondo en el modo rutina de hábitos | in-progress | En verificación | 3/4 |
+| CHG-060 | S | Música de fondo en el modo rutina de hábitos | done | Cerrado | 4/4 |
 | CHG-061 | XS | Ampliar a 12 las pistas de música de la rutina de hábitos | done | Cerrado | 1/1 |
-| CHG-062 | S | Ficha del guardián en un modal sin salir del módulo | in-progress | En verificación | 3/4 |
-| CHG-063 | M | Guardianes en Objetivos, Ánimo y energía, Hábitos a evitar y Diario | in-progress | En verificación | 3/4 |
-| CHG-064 | M | Guardianes en Comidas, Relaciones, Planes y Vehículos | in-progress | En verificación | 3/4 |
-| CHG-065 | S | Botón de creación rápida en Inicio | in-progress | En desarrollo | 0/2 |
+| CHG-062 | S | Ficha del guardián en un modal sin salir del módulo | done | Cerrado | 4/4 |
+| CHG-063 | M | Guardianes en Objetivos, Ánimo y energía, Hábitos a evitar y Diario | done | Cerrado | 4/4 |
+| CHG-064 | M | Guardianes en Comidas, Relaciones, Planes y Vehículos | done | Cerrado | 4/4 |
+| CHG-065 | S | Botón de creación rápida en Inicio | done | Cerrado | 2/2 |
 | CHG-066 | S | Guardianes elegidos del equipo de la semana | done | Cerrado | 4/4 |
 | CHG-067 | S | Medir días activos y canal de entrada | done | Cerrado | 4/4 |
 | CHG-068 | M | Avisos push del guardián | done | Cerrado | 5/5 |
@@ -80,6 +80,11 @@ _Última actualización: 2026-11-11_
 | CHG-072 | M | Volver sin culpa después de una ausencia | done | Cerrado | 4/4 |
 | CHG-073 | S | Atajos de la app instalada | done | Cerrado | 3/3 |
 | CHG-074 | M | Registro por texto libre | to-do | Borrador | 0/0 |
+| CHG-075 | S | Cabecera de Inicio con compañero integrado y check-in | done | Cerrado | 4/4 |
+| CHG-076 | M | Racha de constancia con umbral diario y días de gracia | done | Cerrado | 6/6 |
+| CHG-077 | M | Reto del día | done | Cerrado | 5/5 |
+| CHG-078 | M | Álbumes de la colección por tipo | done | Cerrado | 5/5 |
+| CHG-079 | M | Camino de temporada con hitos y recompensas | done | Cerrado | 5/5 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

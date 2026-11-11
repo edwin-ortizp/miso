@@ -63,6 +63,8 @@ class GameBalls extends Component
 
         return view('livewire.game.game-balls', [
             'pending' => $pending,
+            'streak' => app(\App\Services\Game\Streak::class)->summary((int) auth()->id()),
+            'challenge' => app(\App\Services\Game\DailyChallenge::class)->forToday((int) auth()->id()),
             'revealedSpecies' => $this->revealed ? GameSpecies::find($this->revealed['species_id']) : null,
         ]);
     }

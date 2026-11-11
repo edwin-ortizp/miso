@@ -193,11 +193,37 @@ class HomeDashboardTest extends TestCase
             ->assertSee('Agregar plan')
             ->assertSee('Agregar compra')
             ->assertSee('Agregar hábito')
-            ->assertSee('panel-quick-dialog', false);
+            ->assertSee('Registrar bebida')
+            ->assertSeeLivewire('home.panel.quick-editor');
     }
 
     public function test_dashboard_refreshes_when_panel_changes(): void
     {
         Livewire::test(Dashboard::class)->dispatch('panel-changed')->assertOk();
+    }
+
+    /** CHG-075: bienvenida con la fecha y el check-in como pedido del compañero, sin la fila suelta. */
+    public function test_home_hero_shows_date_and_asks_for_checkin(): void
+    {
+        Livewire::test(Dashboard::class)
+            ->assertSeeHtml('game-buddy-hero')
+            ->assertSee('Lunes 13 de julio')
+            ->assertSee('¿Cómo vas hoy?')
+            ->assertSee('Hacer check-in')
+            ->assertSee('Abre tu primera ball para conocer a tu compañero.')
+            ->assertDontSee('Ya hiciste tu check-in de hoy.');
+    }
+
+    public function test_home_hero_acknowledges_checkin_done_and_reopens_sheet(): void
+    {
+        $state = MoodState::create(['emoji' => '😄', 'text' => 'Feliz', 'value' => 5]);
+
+        Livewire::test(Dashboard::class)
+            ->call('saveMood', $state->id)
+            ->call('saveEnergy', 4)
+            ->assertSee('Ya hiciste tu check-in de hoy.')
+            ->assertDontSee('Hacer check-in')
+            ->set('checkin', true)
+            ->assertSet('checkin', true);
     }
 }

@@ -44,6 +44,12 @@ class GameNotifier extends Component
     #[On('habit-feedback')]
     public function check(GameFeed $feed, GameSettings $settings): void
     {
+        // CHG-079: paradas del camino alcanzadas fuera de la pestaña Temporada (máx. 1 vez por minuto).
+        $userId = (int) auth()->id();
+        if (\Illuminate\Support\Facades\Cache::add("season-path:{$userId}", true, 60)) {
+            app(\App\Services\Game\SeasonPath::class)->awardPending($userId);
+        }
+
         $result = $feed->since((int) auth()->id(), $this->lastSeenEventId);
         $this->lastSeenEventId = $result['last_id'];
         if ($result['toasts'] === []) {

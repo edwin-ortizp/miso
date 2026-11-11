@@ -1,12 +1,10 @@
 <div class="md-card-elevated h-100">
-    <h2 class="md-title-small mb-3" style="color: var(--md-sys-color-on-surface);">
-        <i class="bi bi-lightning-charge" style="color: var(--md-custom-color-warning);"></i> Registro rápido
-    </h2>
+    <x-home.card-head icon="bi-lightning-charge" tone="warning" title="Registro rápido" />
 
     {{-- Hydration --}}
     <div class="mb-3">
         <div class="home-section-label md-label-medium">
-            <i class="bi bi-droplet" style="color: var(--md-sys-color-primary);"></i>
+            <i class="home-tone-text--primary bi bi-droplet"></i>
             <span>Hidratación</span>
             <span class="ms-auto md-label-small">{{ number_format($waterTotal) }} / {{ number_format($waterGoal) }} ml</span>
         </div>
@@ -36,7 +34,7 @@
     {{-- Mood --}}
     <div class="mb-3">
         <div class="home-section-label md-label-medium">
-            <i class="bi bi-emoji-smile" style="color: var(--md-sys-color-tertiary);"></i>
+            <i class="home-tone-text--tertiary bi bi-emoji-smile"></i>
             <span>¿Cómo te sientes?</span>
             @if ($lastMood)
                 <span class="ms-auto md-label-small">{{ $lastMood->emoji }} {{ $lastMood->text }} · {{ $lastMood->time }}</span>
@@ -67,7 +65,7 @@
     {{-- Energy --}}
     <div>
         <div class="home-section-label md-label-medium">
-            <i class="bi bi-battery-charging" style="color: var(--md-custom-color-warning);"></i>
+            <i class="home-tone-text--warning bi bi-battery-charging"></i>
             <span>Energía</span>
             @if ($lastEnergy)
                 <span class="ms-auto md-label-small">{{ $lastEnergy->level }}/5 · {{ $lastEnergy->time }}</span>
@@ -80,7 +78,7 @@
                         wire:click="saveEnergy({{ $level }})"
                         wire:loading.attr="disabled"
                         aria-label="Energía nivel {{ $level }}">
-                    <i class="bi bi-lightning-charge-fill" style="color: var(--md-custom-color-warning);"></i> {{ $level }}
+                    <i class="home-tone-text--warning bi bi-lightning-charge-fill"></i> {{ $level }}
                 </button>
             @endforeach
         </div>

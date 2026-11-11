@@ -34,6 +34,28 @@
             @endforeach
         </section>
 
+        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-streak" id="racha">
+            <h2 class="md-title-medium mb-0" id="game-settings-streak">Racha</h2>
+            <x-ui.switch name="game-streak-visible" label="Mostrar mi racha" wire:model="streakVisible" :checked="$streakVisible"
+                         help="Si la ocultas, tus días siguen guardándose y puedes volver a verla cuando quieras." />
+            <div>
+                <div class="md-text-field">
+                    <input type="number" wire:model="streakThreshold" id="game-streak-threshold" placeholder=" "
+                           min="{{ config('game.limits.streak_threshold')[0] }}" max="{{ config('game.limits.streak_threshold')[1] }}"
+                           aria-describedby="game-streak-threshold-help">
+                    <label for="game-streak-threshold">Acciones para cumplir el día</label>
+                </div>
+                <small id="game-streak-threshold-help" class="md-body-small game-muted">Entre 1 y 10, en al menos dos áreas distintas (tareas, hábitos, salud…).</small>
+                @error('streakThreshold') <small class="game-error d-block">{{ $message }}</small> @enderror
+            </div>
+        </section>
+
+        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-challenge" id="reto">
+            <h2 class="md-title-medium mb-0" id="game-settings-challenge">Reto del día</h2>
+            <x-ui.switch name="game-daily-challenge" label="Reto del día" wire:model="dailyChallenge" :checked="$dailyChallenge"
+                         help="Un reto pequeño cada día, con una ball al cumplirlo." />
+        </section>
+
         <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-director">
             <h2 class="md-title-medium mb-0" id="game-settings-director">Director</h2>
             <x-ui.switch name="game-director" label="Director activo" wire:model="directorEnabled" :checked="$directorEnabled"

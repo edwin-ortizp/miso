@@ -79,7 +79,15 @@ class GameSeasonView extends Component
             }
         }
 
+        // Camino de temporada (CHG-079): entrega paradas pendientes y muestra el de la activa o,
+        // si no hay, el último congelado con lo ganado.
+        $path = app(\App\Services\Game\SeasonPath::class);
+        $path->awardPending($userId);
+        $pathSeason = $active ?? GameSeason::query()->whereIn('id', \App\Models\Game\GameSeasonNode::query()->select('season_id'))
+            ->latest('ends_at')->first();
+
         return view('livewire.game.game-season', [
+            'path' => $pathSeason ? $path->state($userId, $pathSeason) : null,
             'missions' => $missions,
             'companions' => $companions,
             'stages' => $stages,

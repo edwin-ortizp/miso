@@ -158,6 +158,8 @@ class GameCollection extends Component
             'discoveredCount' => $discoveredIds->count(),
             'activeFilters' => collect([$this->state !== 'all', $this->type !== '', $this->rarity !== ''])->filter()->count(),
             'types' => $this->typeOptions(),
+            // Álbumes por tipo (CHG-078): miden el set completo del tipo, sin búsqueda ni rareza.
+            'albums' => app(\App\Services\Game\Albums::class)->overview((int) auth()->id()),
             'rarities' => config('game.rarities'),
             'states' => self::STATES,
             'sheet' => $this->showSheet && $this->selectedId

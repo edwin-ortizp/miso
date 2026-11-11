@@ -38,7 +38,7 @@ class WelcomeBackTest extends TestCase
 
     private function lastActive(string $date): void
     {
-        UserActiveDay::touch($this->user->id, 'direct', $date);
+        UserActiveDay::markActive($this->user->id, 'direct', $date);
     }
 
     private function overdueTask(string $title = 'Pagar factura'): Task

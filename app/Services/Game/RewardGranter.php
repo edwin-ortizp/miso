@@ -166,6 +166,37 @@ class RewardGranter
      */
     public function grantMissionBall(int $userId, string $key, string $label, array $effect = []): ?GameEncounter
     {
+        return $this->rewardBall($userId, GameEvent::KIND_MISSION_REWARD, $key, $label, $effect);
+    }
+
+    /**
+     * Ball extra común (CHG-076): fuera del límite diario, idempotente por clave y con un tope
+     * semanal (`game.bonus_balls_per_week`). Pasado el tope, el logro queda registrado sin ball.
+     * `$effect` lleva `title` y `detail` para el aviso.
+     *
+     * @param  array<string, mixed>  $effect
+     */
+    public function grantBonusBall(int $userId, string $key, string $label, array $effect = []): ?GameEncounter
+    {
+        if (! $this->settings->for($userId)['enabled']) {
+            return null;
+        }
+
+        return $this->safely(fn () => DB::transaction(function () use ($userId, $key, $label, $effect): ?GameEncounter {
+            User::query()->whereKey($userId)->lockForUpdate()->first();
+            $weekStart = now(config('app.timezone'))->startOfWeek();
+            $grantedThisWeek = GameEvent::withoutGlobalScopes()->where('user_id', $userId)
+                ->where('kind', GameEvent::KIND_BONUS)->where('occurred_at', '>=', $weekStart)->get(['effect'])
+                ->filter(fn (GameEvent $event) => (bool) ($event->effect['ball'] ?? false))->count();
+            $capped = $grantedThisWeek >= (int) config('game.bonus_balls_per_week', 4);
+
+            return $this->rewardBall($userId, GameEvent::KIND_BONUS, $key, $label, $effect, $capped);
+        }));
+    }
+
+    /** @param array<string, mixed> $effect */
+    private function rewardBall(int $userId, string $kind, string $key, string $label, array $effect, bool $capped = false): ?GameEncounter
+    {
         if (GameEvent::withoutGlobalScopes()->where('user_id', $userId)->where('idempotency_key', $key)->exists()) {
             return null;
         }
@@ -174,12 +205,15 @@ class RewardGranter
         $event = GameEvent::withoutGlobalScopes()->create([
             'user_id' => $userId,
             'source_label' => mb_substr($label, 0, 255),
-            'kind' => GameEvent::KIND_MISSION_REWARD,
-            'effect' => ['ball' => false] + $effect,
+            'kind' => $kind,
+            'effect' => ['ball' => false] + ($capped ? ['reason' => 'weekly_cap'] : []) + $effect,
             'config_snapshot' => $settings,
             'idempotency_key' => $key,
             'occurred_at' => now(),
         ]);
+        if ($capped) {
+            return null;
+        }
 
         return $this->rollEncounter($userId, $event, $settings, $effect);
     }
@@ -231,7 +265,7 @@ class RewardGranter
     {
         $count = 0;
         $events = GameEvent::withoutGlobalScopes()->where('user_id', $userId)
-            ->whereIn('kind', [GameEvent::KIND_ACTIVITY, GameEvent::KIND_MISSION_REWARD])->orderByDesc('id')->limit(200)->get(['effect']);
+            ->whereIn('kind', [GameEvent::KIND_ACTIVITY, GameEvent::KIND_MISSION_REWARD, GameEvent::KIND_BONUS])->orderByDesc('id')->limit(200)->get(['effect']);
         foreach ($events as $event) {
             if (! ($event->effect['ball'] ?? false)) {
                 continue;

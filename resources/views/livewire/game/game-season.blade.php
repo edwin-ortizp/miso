@@ -73,6 +73,10 @@
             </section>
         @endif
 
+        @if ($path)
+            <x-game.season-path :path="$path" class="game-adventure__journey" />
+        @endif
+
         <section id="season-missions" class="game-adventure__missions" aria-labelledby="season-missions-title">
             <div class="game-adventure__section-heading">
                 <div>

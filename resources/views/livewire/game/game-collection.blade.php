@@ -18,7 +18,7 @@
                 </div>
                 <div class="game-filters mt-2">
                     <x-ui.select name="game-filter-type" label="Tipo" placeholder="Todos los tipos" icon="bi-tag"
-                                 :options="collect($types)->mapWithKeys(fn ($t) => [$t => $t])->all()" :selected="$type" wire:model.live="type" />
+                                 :options="collect($types)->mapWithKeys(fn ($t) => [$t => \App\Services\Game\Albums::label($t)])->all()" :selected="$type" wire:model.live="type" />
                     <x-ui.select name="game-filter-rarity" label="Rareza" placeholder="Todas las rarezas" icon="bi-star"
                                  :options="collect($rarities)->mapWithKeys(fn ($r) => [$r => config('game.rarity_labels.'.$r, $r)])->all()" :selected="$rarity" wire:model.live="rarity" />
                 </div>
@@ -26,7 +26,7 @@
             @php
                 $appliedChips = array_values(array_filter([
                     $state !== 'all' ? ['key' => 'state', 'value' => null, 'label' => $states[$state], 'icon' => 'bi-funnel'] : null,
-                    $type !== '' ? ['key' => 'type', 'value' => null, 'label' => 'Tipo: '.$type, 'icon' => 'bi-tag'] : null,
+                    $type !== '' ? ['key' => 'type', 'value' => null, 'label' => 'Álbum '.\App\Services\Game\Albums::label($type), 'icon' => 'bi-tag'] : null,
                     $rarity !== '' ? ['key' => 'rarity', 'value' => null, 'label' => 'Rareza: '.config("game.rarity_labels.{$rarity}", $rarity), 'icon' => 'bi-star'] : null,
                 ]));
             @endphp
@@ -37,6 +37,36 @@
             @endif
 
             <x-ui.progress :value="$discoveredCount" :max="$total" label="Progreso de la colección" />
+
+            @if ($albums !== [])
+                {{-- CHG-078: un álbum por tipo; tocarlo filtra la cuadrícula por ese tipo (?type=). --}}
+                @php $activeAlbum = collect($albums)->firstWhere('type', $type); @endphp
+                <nav class="game-albums" aria-label="Álbumes">
+                    <h2 class="md-title-small mb-2">Álbumes</h2>
+                    <div class="game-albums__rail" role="group" aria-label="Álbumes por tipo">
+                        <button type="button" class="game-album" aria-pressed="{{ $type === '' ? 'true' : 'false' }}" wire:click="$set('type', '')">
+                            <span class="game-album__name">Todos</span>
+                        </button>
+                        @foreach ($albums as $album)
+                            <button type="button" wire:key="album-{{ $album['type'] }}"
+                                    @class(['game-album', 'game-type--'.$album['type'], 'game-album--complete' => $album['complete']])
+                                    aria-pressed="{{ $type === $album['type'] ? 'true' : 'false' }}"
+                                    aria-label="Álbum {{ $album['label'] }}: {{ $album['found'] }} de {{ $album['total'] }} especies{{ $album['complete'] ? ', completo' : '' }}"
+                                    wire:click="$set('type', '{{ $album['type'] }}')">
+                                <span class="game-album__name">{{ $album['label'] }}</span>
+                                <span class="game-album__count">{{ $album['found'] }} de {{ $album['total'] }}</span>
+                                @if ($album['complete'])
+                                    <span class="game-album__seal"><i class="bi bi-patch-check-fill" aria-hidden="true"></i> Completo</span>
+                                @endif
+                                <x-ui.progress class="game-album__bar" :value="$album['found']" :max="$album['total']" />
+                            </button>
+                        @endforeach
+                    </div>
+                    @if ($activeAlbum)
+                        <p class="md-title-small mt-2 mb-0">Álbum {{ $activeAlbum['label'] }} · {{ $activeAlbum['found'] }} de {{ $activeAlbum['total'] }}</p>
+                    @endif
+                </nav>
+            @endif
 
             @if ($entries->isEmpty())
                 <x-ui.state variant="filtered-empty" title="Ningún resultado con estos filtros" />

@@ -1,9 +1,9 @@
 # CHG-062 · Ficha del guardián en un modal sin salir del módulo
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-10 · **Aprobado:** 2026-11-10 · **Cerrado:** —
+**Creado:** 2026-11-10 · **Aprobado:** 2026-11-10 · **Cerrado:** 2026-11-11
 **Relacionado:** CHG-055, CHG-057, CHG-058 (guardianes de módulo)
 
 ## 0. En palabras simples
@@ -82,7 +82,7 @@ La ficha de especie de la Colección se extrae a un servicio reutilizable y se m
 ## 7. Tareas
 - [x] T1 · La ficha de la Colección se puede reutilizar fuera de ella sin cambiar cómo se ve allí — Resp: developer — Archivos: app/Services/Game/SpeciesSheet.php, app/Livewire/Game/GameCollection.php, resources/views/livewire/game/partials/species-sheet.blade.php — Hecho cuando: los tests de la Colección siguen en verde
 - [x] T2 · Tocar al guardián abre su ficha en un modal con "Ver colección", sin salir del módulo — Resp: developer — Archivos: app/Livewire/Game/GuardianCard.php, resources/views/livewire/game/guardian-card.blade.php, tests/Feature/Game/ModuleGuardianTest.php — Hecho cuando: criterios 1-4 pasan y el build compila
-- [ ] T3 · Verificar criterios de aceptación — Resp: qa-tester — Hecho cuando: los 5 criterios pasan
+- [x] T3 · Verificar criterios de aceptación — Resp: qa-tester — Hecho cuando: los 5 criterios pasan (cerrada por el usuario sin verificar)
 - [x] T4 · Actualizar documentación — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
 
 ## 8. Bitácora de implementación (developer)
@@ -100,3 +100,4 @@ La ficha de especie de la Colección se extrae a un servicio reutilizable y se m
 - 2026-11-10 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-10 — Movido a in-progress/ (En desarrollo)
 - 2026-11-10 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario sin verificación (pendientes: T3): ya lo probé → done/ (desde el panel)

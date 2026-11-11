@@ -26,7 +26,7 @@ class UserActiveDay extends Model
     }
 
     /** Marca el día como activo; el primer canal del día no se sobrescribe. */
-    public static function touch(int $userId, string $channel, ?string $date = null): void
+    public static function markActive(int $userId, string $channel, ?string $date = null): void
     {
         $date ??= now()->toDateString();
         DB::table('user_active_days')->insertOrIgnore([
@@ -39,7 +39,7 @@ class UserActiveDay extends Model
     public static function countRecord(int $userId, ?string $date = null): void
     {
         $date ??= now()->toDateString();
-        self::touch($userId, 'direct', $date);
+        self::markActive($userId, 'direct', $date);
         DB::table('user_active_days')->where('user_id', $userId)->where('date', $date)
             ->update(['records_count' => DB::raw('records_count + 1'), 'updated_at' => now()]);
     }

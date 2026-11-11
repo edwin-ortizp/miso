@@ -51,6 +51,9 @@ class GameNavigationTest extends TestCase
 
     public function test_tabs_and_sidebar_show_counters(): void
     {
+        // Brotelo es la única especie planta: descubrirla completa su álbum (CHG-078). Sin balls
+        // extra, los contadores miden solo las tareas.
+        config(['game.bonus_balls_per_week' => 0]);
         $this->completeTask('A');
         $this->completeTask('B');
         $this->completeTask('C');

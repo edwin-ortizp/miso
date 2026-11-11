@@ -8,15 +8,8 @@
 @endphp
 
 <div class="md-card-elevated h-100">
-    <div class="d-flex align-items-center gap-2 mb-2">
-        <h2 class="md-title-small mb-0" style="color: var(--md-sys-color-on-surface);">
-            <i class="bi bi-list-task" style="color: var(--md-custom-color-info);"></i> Tareas de hoy
-        </h2>
-        <span class="md-chip-tonal" style="background: var(--md-custom-color-info-container); color: var(--md-custom-color-on-info-container);">
-            {{ $pendingTasks }} pendientes
-        </span>
-        <a href="{{ route('tasks.list') }}" class="md-btn-text ms-auto" style="height: 32px; padding: 0 10px;">Ver todas</a>
-    </div>
+    <x-home.card-head icon="bi-list-task" tone="info" title="Tareas de hoy" :count="$pendingTasks.' pendientes'"
+        :href="route('tasks.list')" action="Ver todas" />
 
     @forelse ($todayTasks as $task)
         @php $isOverdue = $task->end_date && $task->end_date->lt(now()->startOfDay()); @endphp
@@ -37,12 +30,12 @@
                     @endif
                     <x-ui.task-code :code="$task->code" /> {{ $task->title }}
                     @if ($task->is_recurrent)
-                        <i class="bi bi-arrow-repeat" style="color: var(--md-sys-color-on-surface-variant);" title="Recurrente"></i>
+                        <i class="home-muted bi bi-arrow-repeat" title="Recurrente"></i>
                     @endif
                 </div>
                 <div class="md-list-item-supporting">
                     @if ($isOverdue)
-                        <span style="color: var(--md-sys-color-error);">Vencida · {{ $task->end_date->translatedFormat('d M') }}</span>
+                        <span class="home-tone-text--error">Vencida · {{ $task->end_date->translatedFormat('d M') }}</span>
                     @elseif ($task->end_date)
                         Vence {{ $task->end_date->translatedFormat('d M') }}
                     @endif
@@ -53,13 +46,13 @@
             </div>
         </div>
     @empty
-        <p class="md-body-small mb-0" style="color: var(--md-sys-color-on-surface-variant);">
+        <p class="home-muted md-body-small mb-0">
             Sin tareas para este día. <a href="{{ route('tasks.planning', ['date' => $selectedDate]) }}">Planificar</a>
         </p>
     @endforelse
 
     @if ($completedTasksToday > 0)
-        <p class="md-label-small mt-2 mb-0" style="color: var(--md-custom-color-success);">
+        <p class="home-tone-text--success md-label-small mt-2 mb-0">
             <i class="bi bi-check2-circle"></i> {{ $completedTasksToday }} completada{{ $completedTasksToday > 1 ? 's' : '' }} este día
         </p>
     @endif

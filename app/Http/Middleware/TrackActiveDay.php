@@ -18,7 +18,7 @@ class TrackActiveDay
             $date = now()->toDateString();
             if (Cache::add("active-day:{$userId}:{$date}", true, now()->endOfDay())) {
                 try {
-                    UserActiveDay::touch($userId, UserActiveDay::channel($request->query('via')), $date);
+                    UserActiveDay::markActive($userId, UserActiveDay::channel($request->query('via')), $date);
                 } catch (\Throwable $e) {
                     Cache::forget("active-day:{$userId}:{$date}");
                     report($e);

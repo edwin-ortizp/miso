@@ -5,6 +5,13 @@
         @endif
     </div>
 
+    @if ($streak)
+        <x-game.streak-card :streak="$streak" class="mb-3" />
+    @endif
+    @if ($challenge)
+        <x-game.daily-challenge :challenge="$challenge" class="md-card-filled mb-3" />
+    @endif
+
     <section aria-label="Tus Poké Balls">
         <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2 mb-3">
             <h2 class="md-title-medium mb-0">{{ $pending->count() }} por abrir</h2>
@@ -23,6 +30,7 @@
                         $event = $ball->event;
                         $kind = match (true) {
                             $event?->kind === \App\Models\Game\GameEvent::KIND_MISSION_REWARD => 'Misión',
+                            $event?->kind === \App\Models\Game\GameEvent::KIND_BONUS => 'Extra',
                             ($event?->effect['source'] ?? null) === 'habits' => 'Hábitos',
                             ($event?->effect['source'] ?? null) === 'focus' => 'Foco',
                             ($event?->effect['source'] ?? null) === 'goals' => 'Meta',

@@ -92,3 +92,26 @@
 .insights-list { list-style: none; margin: 0; padding: 0; display: grid; gap: .75rem; }
 .insights-list__item { display: grid; grid-template-columns: 4rem 1fr; gap: .75rem; align-items: baseline; }
 .insights-list__value { color: var(--md-sys-color-primary); }
+
+/* CHG-075: cabecera única de las tarjetas del Inicio y tonos sin estilos en línea. */
+.home-card-head { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; min-height: 40px; }
+.home-card-head__icon { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--md-sys-shape-corner-medium, 12px); font-size: 1.1rem; }
+.home-card-head__text { min-width: 0; }
+.home-card-head__text h2 { color: var(--md-sys-color-on-surface); }
+.home-card-head__hint { color: var(--md-sys-color-on-surface-variant); }
+.home-card-head__action { margin-inline-start: auto; height: 32px; padding: 0 10px; }
+.home-card-head__count + .home-card-head__action, .home-card-head__text + .home-card-head__action { margin-inline-start: auto; }
+.home-muted { color: var(--md-sys-color-on-surface-variant); }
+
+.home-tone--primary { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
+.home-tone--secondary { background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
+.home-tone--tertiary { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
+.home-tone--success { background: var(--md-custom-color-success-container); color: var(--md-custom-color-on-success-container); }
+.home-tone--info { background: var(--md-custom-color-info-container); color: var(--md-custom-color-on-info-container); }
+.home-tone--warning { background: var(--md-custom-color-warning-container); color: var(--md-custom-color-on-warning-container); }
+
+.home-tone-text--primary { color: var(--md-sys-color-primary); }
+.home-tone-text--tertiary { color: var(--md-sys-color-tertiary); }
+.home-tone-text--success { color: var(--md-custom-color-success); }
+.home-tone-text--warning { color: var(--md-custom-color-warning); }
+.home-tone-text--error { color: var(--md-sys-color-error); }

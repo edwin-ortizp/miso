@@ -1,9 +1,9 @@
 # CHG-065 · Botón de creación rápida en Inicio
-**Estado:** En desarrollo
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -16,8 +16,8 @@ Desde Inicio no se podían crear varias cosas que sí se crean desde el Panel di
 <!-- Qué y por qué, 2-3 líneas. Agrega solo la sección del rol afectado (## 3. UX/UI, ## 4. Diseño técnico o ## 5. Pruebas) si hace falta. Si hay UI, §3 lleva un boceto ASCII de la zona que cambia. -->
 
 ## 7. Tareas
-- [ ] T1 · Botón «+» en Inicio con las mismas acciones del panel — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/home/dashboard.blade.php, app/Livewire/Home/Dashboard.php — Hecho cuando: cada acción abre su diálogo, guarda e Inicio se refresca.
-- [ ] T2 · Prueba de que Inicio muestra el botón y sus editores — Resp: developer — Modelo: estandar — Archivos: tests/Feature — Hecho cuando: la prueba pasa.
+- [x] T1 · Botón «+» en Inicio con las mismas acciones del panel — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/home/dashboard.blade.php, app/Livewire/Home/Dashboard.php — Hecho cuando: cada acción abre su diálogo, guarda e Inicio se refresca.
+- [x] T2 · Prueba de que Inicio muestra el botón y sus editores — Resp: developer — Modelo: estandar — Archivos: tests/Feature — Hecho cuando: la prueba pasa.
 <!-- Primero lo que cambia para el usuario; el detalle técnico después. Formato:
 - [ ] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … -->
 
@@ -27,3 +27,5 @@ Desde Inicio no se podían crear varias cosas que sí se crean desde el Panel di
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/

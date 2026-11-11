@@ -199,6 +199,16 @@ El director IA **no corre dentro de MiSo**: es un schedule de Paseo que usa el c
   - Cada tema trae color e ícono en la pestaña Temporada (`game-season--theme-{clave}`) y una celebración propia: nieve, destellos, calabazas, corazones o velas. Esa celebración entra al sorteo solo mientras dure la temporada y respeta "Mostrar celebraciones" y el movimiento reducido.
   - El contexto incluye `calendar_hints`: los temas vigentes o que empiezan en las próximas 6 semanas, con `starts_on`/`ends_on` (mes-día) y `suggested_types`. Del cumpleaños solo se usa el mes y el día de `users.birth_date` (±7 días); nunca se expone el año ni la edad.
 
+### Camino de temporada (CHG-079)
+
+Le da a la temporada una meta visible: un camino de 7 paradas que avanza con lo que la persona hace mientras dura.
+
+- **Puntos:** 1 por actividad del juego dentro de la temporada, hasta `season.path.daily_cap` (5) por día. Se reutiliza `Streak::dayStats`, así que tampoco cuentan las tareas creadas y cerradas el mismo día. Cada misión semanal cumplida suma 3 puntos (`mission_points`), por fuera del tope. Las recompensas del camino no son `activity`, así que no suman puntos.
+- **Objetivo:** semanas × `points_per_week` (20), con mínimo `min_target` (20). Las paradas están al 5, 15, 30, 45, 60, 80 y 100 %, con ball, +10 xp, ball, +15 xp, +20 xp, ball y 2 balls (`season.path.nodes`).
+- **Entrega:** `SeasonPath::awardPending` corre al abrir Temporada y desde el notificador (como máximo una vez por minuto, `Cache::add`), y solo con temporada activa. Cada parada se guarda en `game_season_nodes` (única por usuario, temporada y parada). Las balls salen por `grantBonusBall` (`season:{id}:node:{n}:{k}`). La xp va al equipo de la semana, con un evento `bonus` sin ball para el aviso. Si se cruzan dos paradas de golpe, se entregan ambas en orden.
+- **Fin o reversión:** el camino se congela («Temporada terminada. Lo ganado queda contigo.») y se sigue mostrando el último con lo ganado. La siguiente temporada empieza en 0. No hay recompensa retroactiva.
+- Hereda el color y el ícono del tema de la temporada. Componente `x-game.season-path`.
+
 ### Idempotencia (schedule que corre dos veces o reintentos)
 
 | Herramienta / proceso | Segunda corrida |
@@ -281,6 +291,54 @@ Los demás campos se ignoran. Para agregar especies, añade filas y vuelve a imp
 
 **Derechos:** quien importa el catálogo y configura las imágenes es responsable de contar con autorización para usar ese contenido.
 
+## Balls extra (CHG-076)
+
+`RewardGranter::grantBonusBall($userId, $key, $label, $effect)` es la única vía para las balls de logros: hitos de racha, reto del día, álbumes y paradas del camino de temporada.
+
+- Crea un evento `kind = bonus`, es idempotente por `idempotency_key` y no cuenta para el máximo diario.
+- **Tope semanal común:** `game.bonus_balls_per_week` (4 por defecto). Pasado el tope, el logro queda registrado con `effect.reason = weekly_cap` y sin ball, así no se repite la semana siguiente.
+- Aviso único `bonus` en `GameFeed`: `effect.title`, `effect.detail` (con ball) o `effect.detail_no_ball` y `effect.icon`.
+- Las balls de misión siguen con `kind = mission_reward`, sin tope semanal; comparten el código interno (`rewardBall`).
+
+## Racha de constancia (CHG-076)
+
+Cuenta los días seguidos en que la persona cuida varias partes de su vida. No resta nada: si se rompe, la mejor racha y lo ganado se conservan.
+
+- **Día cumplido:** al menos `streak_threshold` acciones del juego (eventos `activity`; por defecto 3, ajustable de 1 a 10 en Colección → Ajustes → Racha) en al menos `game.streak.min_areas` áreas distintas (2). El área es `effect.source`; tareas y tareas personales son la misma área.
+- **Antifarmeo:** no cuenta una tarea creada y cerrada el mismo día sin fecha (`start_date`/`end_date`) ni recurrencia. Sí da su recompensa normal.
+- **Día en curso:** nunca rompe la racha; suma cuando se cumple.
+- **Gracias:** `game.streak.grace_days_per_month` (2) por mes calendario. Se derivan al vuelo al recorrer el historial y solo se usan si hay racha que proteger; nada se guarda al leer.
+- **Umbral nuevo:** aplica desde hoy. Cada día cerrado guarda su resultado en `user_active_days.streak_met` y el umbral usado en `streak_threshold`. `records_count` (CHG-067) sirve de prefiltro: si no llega al umbral, el día ni se evalúa.
+- **Hitos:** 3, 7, 14, 30, 60, 100, 180 y 365 días (`game.streak.milestones`). Cada uno paga una ball extra una sola vez en la vida (clave `streak:{n}`). El aviso resume las dos áreas más constantes («5 días con hábitos, 4 con tareas»). Se pagan al abrir el Inicio.
+- **Dónde se ve:** una línea en la cabecera del Inicio (`x-game.streak-line`) y la tarjeta «Tu racha» en Balls (`x-game.streak-card`, con los últimos 7 días). Con el juego apagado o la racha oculta (`streak_visible`) no se muestra ni paga hitos.
+- **Regreso (CHG-072):** el día de la bienvenida no se menciona la racha rota.
+- Zona horaria: la de la app (America/Bogota). Servicio: `App\Services\Game\Streak`.
+
+## Reto del día (CHG-077)
+
+Un reto pequeño al día, pensado para lo que la persona tiene pendiente hoy. Sin IA, sin scheduler y sin culpa: si no se cumple, al día siguiente hay otro y el anterior no resta nada.
+
+- **Plantillas v1** (`game.daily_challenge.templates`):
+  - `tasks_done`: «Cierra {n} tareas» (2–3, si hay al menos n pendientes).
+  - `category_tasks`: «Cierra {n} de {categoría}» (la categoría con más pendientes).
+  - `habit_period`: «Completa los hábitos de {momento}» (un momento que aún no termina y tiene hábitos sin marcar).
+  - `water_logs`: «Registra agua {n} veces» (2–3).
+  - `checkin`: «Haz tu check-in de hoy» (solo si falta ánimo o energía de hoy; en el Inicio «Ir» abre la hoja de check-in).
+- **Elección:** se calcula el avance de la semana de cada área (tareas, hábitos, agua, check-in) frente a lo esperado por día (`weekly_per_day`). Solo compiten las plantillas del área más descuidada, y entre ellas decide una semilla estable `crc32(usuario|fecha)`. El reto se guarda en `game_daily_challenges` (único por usuario y fecha) con sus parámetros congelados.
+- **Avance:** se deriva de los datos del día; no hay eventos nuevos. Funciona igual desde la app que desde MCP. Antifarmeo: no cuentan las tareas creadas hoy sin fecha ni recurrencia.
+- **Premio:** al cumplirlo se fija `completed_at` y se paga una ball extra con `grantBonusBall` (clave `daily-challenge:{fecha}`, sujeta al tope semanal). `rewarded_at` evita un segundo intento.
+- **Dónde se ve:** una línea en la cabecera del Inicio, bajo la racha, y en Balls (`x-game.daily-challenge`). Se apaga en Colección → Ajustes → Reto del día (`daily_challenge`).
+- Servicio: `App\Services\Game\DailyChallenge`.
+
+## Álbumes de la colección (CHG-078)
+
+- **Un álbum por tipo** con al menos una especie activa, en el orden de `game.type_palette`. El nombre visible lleva acentos (`Albums::LABELS`). Cuenta descubiertas / total sobre el set completo del tipo: no cambia con la búsqueda ni con el filtro de rareza. Una especie con dos tipos cuenta en ambos álbumes.
+- **Filtro:** tocar un álbum usa el filtro de tipo que ya tenía la Colección (`?type=`). El encabezado dice «Álbum {Tipo} · N de M», el chip aplicado lo nombra y «Todos» lo quita sin perder búsqueda ni rareza.
+- **Recompensa:** `AlbumObserver` revisa cada `GameDiscovery` nueva, sea por ball o por evolución, después del commit. Al completar un álbum se guarda la fila en `game_album_awards` (única por usuario y tipo) y se paga una ball extra con `grantBonusBall` (clave `album:{tipo}`).
+- **Catálogo que crece:** el álbum vuelve a mostrar pendientes; la fila no se borra y no se paga otra vez.
+- **Sin recompensa retroactiva:** la migración siembra sin ball los álbumes que ya estaban completos.
+- Servicio: `App\Services\Game\Albums`.
+
 ## Configuración
 
 - **Por usuario** (`ModuleSetting` módulo `game`): juego activo, fuentes (tareas, hábitos) y máximo de balls por día de 0 a 50 (Colección → Ajustes); director activo y juego de temporadas (Colección → Temporada).
@@ -298,8 +356,12 @@ Los demás campos se ignoran. Para agregar especies, añade filas y vuelve a imp
 | `game_weeks`, `game_team_members`, `game_missions`, `game_mission_contributions` | Semana, equipo, misiones y aportes únicos a cada misión |
 | `game_seasons` | Temporadas: estado, configuración validada, propuesta original, motivos de rechazo, fechas |
 | `game_quotes` | Frases del integrante del día: semilla (`user_id` null) y del director (`week_start`) |
+| `game_season_nodes` (CHG-079) | Paradas del camino entregadas: temporada, parada, recompensa, `awarded_at` |
+| `game_album_awards` (CHG-078) | Álbum de tipo completado: `album_key`, `species_total` al momento, `awarded_at` |
+| `game_daily_challenges` (CHG-077) | Reto del día por usuario y fecha: plantilla, módulo, parámetros, meta, `completed_at`, `rewarded_at` |
+| `user_active_days` (CHG-067/076) | Día activo, canal, `records_count`; `streak_met` y `streak_threshold` fijan el resultado de la racha de cada día cerrado |
 
-Servicios en `app/Services/Game/`: `RewardGranter`, `EncounterRoller`, `EncounterOpener`, `CompanionProgress`, `WeekPlanner`, `ActivityEffects`, `GameRules`, `SeasonValidator`, `SeasonManager`, `GameSettings`, `SpeciesImageProvider`.
+Servicios en `app/Services/Game/`: `RewardGranter`, `EncounterRoller`, `EncounterOpener`, `CompanionProgress`, `WeekPlanner`, `ActivityEffects`, `GameRules`, `SeasonValidator`, `SeasonManager`, `GameSettings`, `SpeciesImageProvider`, `Streak`, `DailyChallenge`, `Albums`, `SeasonPath`.
 
 Pruebas: `php artisan test tests/Feature/Game tests/Unit/Game`.
 

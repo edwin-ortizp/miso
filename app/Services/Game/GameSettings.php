@@ -34,6 +34,9 @@ class GameSettings
         ));
         $settings['daily_limit'] = $this->clamp('daily_limit', (int) $settings['daily_limit']);
         $settings['pity_threshold'] = $this->clamp('pity_threshold', (int) $settings['pity_threshold']);
+        $settings['streak_threshold'] = $this->clamp('streak_threshold', (int) $settings['streak_threshold']);
+        $settings['streak_visible'] = (bool) $settings['streak_visible'];
+        $settings['daily_challenge'] = (bool) $settings['daily_challenge'];
 
         return $settings;
     }

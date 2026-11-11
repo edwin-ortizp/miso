@@ -75,6 +75,18 @@ class GameFeed
                     $toasts[] = ['type' => 'evolution', 'icon' => 'bi-lightning-charge-fill', 'title' => "¡{$from} evolucionó a {$to}!", 'detail' => null, 'action' => null];
                     break;
 
+                case GameEvent::KIND_BONUS:
+                    // CHG-076: un solo aviso para todas las balls extra; el texto habla de lo hecho.
+                    $ball = (bool) ($effect['ball'] ?? false);
+                    $celebrate = $celebrate || $ball;
+                    $toasts[] = [
+                        'type' => 'bonus', 'icon' => $effect['icon'] ?? 'bi-gift-fill',
+                        'title' => (string) ($effect['title'] ?? $event->source_label),
+                        'detail' => $ball ? ($effect['detail'] ?? null) : ($effect['detail_no_ball'] ?? null),
+                        'action' => $ball ? 'ball' : null,
+                    ];
+                    break;
+
                 case GameEvent::KIND_MISSION_REWARD:
                     $key = ($effect['mission_id'] ?? '').':'.($effect['stage'] ?? '');
                     if (isset($seenMissions[$key])) {

@@ -37,6 +37,14 @@ class GameSettingsPage extends Component
 
     public bool $sounds = true;
 
+    /** Racha (CHG-076). */
+    public bool $streakVisible = true;
+
+    public int $streakThreshold = 3;
+
+    /** Reto del día (CHG-077). */
+    public bool $dailyChallenge = true;
+
     /** @var array<int, string> */
     public array $celebrationSet = [];
 
@@ -59,13 +67,20 @@ class GameSettingsPage extends Component
         $this->seasonsEnabled = $current['seasons_enabled'];
         $this->celebrations = $current['celebrations'];
         $this->sounds = $current['sounds'];
+        $this->streakVisible = $current['streak_visible'];
+        $this->streakThreshold = $current['streak_threshold'];
+        $this->dailyChallenge = $current['daily_challenge'];
         $this->celebrationSet = $current['celebration_set'];
     }
 
     public function save(GameSettings $settings): void
     {
         [$min, $max] = config('game.limits.daily_limit');
-        $this->validate(['dailyLimit' => ['required', 'integer', "between:{$min},{$max}"]]);
+        [$streakMin, $streakMax] = config('game.limits.streak_threshold');
+        $this->validate([
+            'dailyLimit' => ['required', 'integer', "between:{$min},{$max}"],
+            'streakThreshold' => ['required', 'integer', "between:{$streakMin},{$streakMax}"],
+        ], [], ['streakThreshold' => 'acciones para cumplir el día']);
 
         $settings->save((int) auth()->id(), [
             'enabled' => $this->enabled,
@@ -76,6 +91,9 @@ class GameSettingsPage extends Component
             'seasons_enabled' => $this->seasonsEnabled,
             'celebrations' => $this->celebrations,
             'sounds' => $this->sounds,
+            'streak_visible' => $this->streakVisible,
+            'streak_threshold' => $this->streakThreshold,
+            'daily_challenge' => $this->dailyChallenge,
             'celebration_set' => array_values(array_intersect(array_keys(config('game.celebration_catalog')), $this->celebrationSet)),
         ]);
 

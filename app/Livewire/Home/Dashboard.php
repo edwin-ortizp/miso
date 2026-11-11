@@ -160,6 +160,23 @@ class Dashboard extends Component
         }
     }
 
+    /** Racha de constancia (CHG-076): paga hitos pendientes y no habla de racha rota el día del regreso (CHG-072). */
+    private function streak(): ?array
+    {
+        $userId = (int) auth()->id();
+        $streak = app(\App\Services\Game\Streak::class);
+        $summary = $streak->summary($userId);
+        if (! $summary) {
+            return null;
+        }
+        $streak->awardMilestones($userId, $summary);
+        if ($summary['broken'] && app(\App\Services\Engagement\ReturnDetector::class)->detect($userId)) {
+            $summary['broken'] = false;
+        }
+
+        return $summary;
+    }
+
     public function render()
     {
         $date = $this->selectedDate;
@@ -241,6 +258,8 @@ class Dashboard extends Component
             ->values();
 
         return view('livewire.home.dashboard', [
+            'streak' => $this->streak(),
+            'challenge' => app(\App\Services\Game\DailyChallenge::class)->forToday((int) auth()->id()),
             'waterTotal' => $waterTotal,
             'waterGoal' => $waterGoal,
             'drinkTypes' => $drinkTypes,

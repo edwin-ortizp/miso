@@ -41,7 +41,7 @@ class ActiveDayTrackingTest extends TestCase
 
     public function test_unknown_channel_is_direct(): void
     {
-        UserActiveDay::touch($this->user->id, UserActiveDay::channel('spam'));
+        UserActiveDay::markActive($this->user->id, UserActiveDay::channel('spam'));
 
         $this->assertSame('direct', UserActiveDay::first()->first_channel);
     }
@@ -64,8 +64,8 @@ class ActiveDayTrackingTest extends TestCase
 
     public function test_retention_report_counts_returning_days(): void
     {
-        UserActiveDay::touch($this->user->id, 'direct', '2026-11-01');
-        UserActiveDay::touch($this->user->id, 'push', '2026-11-02');
+        UserActiveDay::markActive($this->user->id, 'direct', '2026-11-01');
+        UserActiveDay::markActive($this->user->id, 'push', '2026-11-02');
 
         $this->artisan('miso:retention', ['--days' => 30])
             ->expectsOutputToContain('usuarios activos: 1')

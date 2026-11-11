@@ -1,9 +1,9 @@
 # CHG-064 · Guardianes en Comidas, Relaciones, Planes y Vehículos
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-10 · **Aprobado:** 2026-11-10 · **Cerrado:** —
+**Creado:** 2026-11-10 · **Aprobado:** 2026-11-10 · **Cerrado:** 2026-11-11
 **Relacionado:** CHG-057, CHG-058, CHG-062, CHG-063 (guardianes)
 
 ## 0. En palabras simples
@@ -97,7 +97,7 @@ Vehículos (rail nuevo):
 ## 7. Tareas
 - [x] T1 · Guardián con consejos en Relaciones y Planes, dentro de su panel actual — Resp: developer — Archivos: app/Services/Game/Guardian/RelationshipAdvice.php, app/Services/Game/Guardian/PlanAdvice.php, app/Services/Game/Guardian/GuardianAdvisor.php, config/game.php, resources/views/livewire/relationship/relationship-index.blade.php, resources/views/livewire/plan/plan-index.blade.php, tests/Feature/Game/GuardianAdviceTest.php, tests/Feature/Game/ModuleGuardianTest.php — Hecho cuando: criterios 1, 3, 4 y 7 pasan
 - [x] T2 · Guardián con consejos en Comidas y Vehículos, con panel derecho nuevo — Resp: developer — Archivos: app/Services/Game/Guardian/MealAdvice.php, app/Services/Game/Guardian/VehicleAdvice.php, app/Services/Game/Guardian/GuardianAdvisor.php, config/game.php, config/modules.php, resources/views/livewire/meal/meal-weekly.blade.php, resources/views/livewire/vehicle/vehicle-index.blade.php, tests/Feature/Game/GuardianAdviceTest.php, tests/Feature/Game/ModuleGuardianTest.php — Hecho cuando: criterios 2, 5 y 6 pasan y el build compila
-- [ ] T3 · Verificar criterios de aceptación — Resp: qa-tester — Hecho cuando: los 7 criterios pasan
+- [x] T3 · Verificar criterios de aceptación — Resp: qa-tester — Hecho cuando: los 7 criterios pasan (cerrada por el usuario sin verificar)
 - [x] T4 · Actualizar documentación — Resp: tech-writer — Archivos: docs/game.md — Hecho cuando: docs al día
 
 ## 8. Bitácora de implementación (developer)
@@ -115,3 +115,4 @@ Vehículos (rail nuevo):
 - 2026-11-10 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-10 — Movido a in-progress/ (En desarrollo)
 - 2026-11-10 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario sin verificación (pendientes: T3): ya lo probé → done/ (desde el panel)
