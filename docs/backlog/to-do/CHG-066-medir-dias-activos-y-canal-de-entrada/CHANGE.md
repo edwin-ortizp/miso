@@ -1,9 +1,9 @@
 # CHG-066 · Medir días activos y canal de entrada
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -30,5 +30,6 @@ Estrategia de recurrencia (2026-11-11): MiSo hoy es solo pull — notificaciones
 ## 8. Bitácora de implementación (developer)
 
 ## 9. Preguntas abiertas, decisiones e historial
-- Pregunta: ¿el reporte basta como comando o lo quieres ver en Estadísticas?
+- Pregunta: ¿el reporte basta como comando o lo quieres ver en Estadísticas? → 2026-11-11 Decisión (usuario): basta el comando.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
+- 2026-11-11 — Aprobado por el usuario (Compuerta 2)

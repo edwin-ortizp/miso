@@ -1,9 +1,9 @@
 # CHG-067 · Avisos push del guardián
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -28,48 +28,66 @@ Estrategia de recurrencia (2026-11-11): MiSo hoy es solo pull — notificaciones
 <!-- Sin pantallas: escribe "No aplica — motivo" en cada parte. Con UI, approve exige un boceto ASCII en un bloque de código. Si hay flujo, agrega un diagrama en un bloque mermaid. -->
 ### 3.1 Experiencia (ux-designer)
 - Flujo y cantidad de pasos: Ajustes → "Avisos de tu guardián" → activar (permiso del navegador) → elegir franjas. Aviso → 1 toque → módulo.
-- Qué contiene cada pantalla y qué es lo más importante:
-- Estados (vacío / carga / error / éxito / validaciones):
-- Información necesaria y momento de presentación:
-- Accesibilidad de uso (teclado, foco, errores):
+- Qué contiene cada pantalla y qué es lo más importante: en Ajustes, una tarjeta "Avisos de tu guardián" con interruptor general y tres casillas de franja; lo más importante es el interruptor. El aviso: foto del guardián, nombre y una frase con lo pendiente.
+- Estados: navegador sin soporte → mensaje y casillas deshabilitadas; permiso denegado → cómo reactivarlo en el navegador; iOS sin PWA instalada → "Instala MiSo en tu pantalla de inicio para recibir avisos"; activado → "Listo, tu guardián te escribirá".
+- Información necesaria y momento de presentación: el permiso del navegador se pide solo al activar el interruptor, nunca al cargar la página.
+- Accesibilidad de uso: interruptor y casillas con etiqueta, operables por teclado; los errores se anuncian con aria-live.
 
 ### 3.2 Visual (ui-designer)
 - Distribución:
-- Componentes existentes a reutilizar (ruta):
-- Jerarquía, color, tipografía y espaciado (tokens):
-- Responsive y contraste:
+```
+┌ Avisos de tu guardián ─────────── [● ] ┐
+│ Te escribe solo si hay algo pendiente.  │
+│ [x] Mañana  8–10                        │
+│ [x] Tarde  14–16                        │
+│ [ ] Noche  19–21                        │
+│ Máximo 2 avisos al día.                 │
+└─────────────────────────────────────────┘
+Aviso:  [foto] Chispin · MiSo
+        Llevas 1 de 4 hábitos, quedan 3 h.
+```
+- Componentes existentes a reutilizar (ruta): tarjetas e interruptores de la pantalla actual de Ajustes (`app/Livewire/Settings`), preferencias de `NotificationPreferences`.
+- Jerarquía, color, tipografía y espaciado (tokens): los de Ajustes (M3), sin estilos nuevos.
+- Responsive y contraste: una columna en móvil; contraste AA.
 
 ### 3.3 Escritura (ux-writer)
-- Ubicación y estado:
-- Textos finales (variables y variantes):
-- Reglas de docs/UX-WRITING.md aplicadas:
-- Criterios de aceptación de los textos:
+- Ubicación y estado: Ajustes (tarjeta) y la notificación del sistema.
+- Textos finales (variables y variantes): título "Avisos de tu guardián"; ayuda "Te escribe solo si hay algo pendiente."; "Máximo 2 avisos al día."; aviso: título "{guardián} · MiSo", cuerpo = frase de `GuardianAdvisor` (≤ 60 caracteres).
+- Reglas de docs/UX-WRITING.md aplicadas: tuteo, frases cortas, sin culpa ni urgencia falsa.
+- Criterios de aceptación de los textos: pasan `MissionProposalValidator::penaltyWord` y miden ≤ 60 caracteres.
 
 ## 4. Diseño técnico (software-architect)
 - Archivos a crear / modificar: `resources/js/pwa.js` + service worker (push y notificationclick), tabla `push_subscriptions`, paquete `laravel-notification-channels/webpush` (VAPID en .env), job `SendGuardianNudges` registrado en el scheduler (`routes/console.php`), preferencias en `NotificationPreferences`, reutilizar `app/Services/Notifications/*` como fuente de "qué está pendiente".
 - Enfoque y patrones a seguir: el job elige el módulo con más pendiente del día, pide la frase a `GuardianAdvisor`/`ModuleGuardian::line`, guarda el envío (idempotencia por usuario+franja+día) y respeta zona horaria del usuario.
-- Riesgos y mitigación: iOS solo permite push con la PWA instalada (explicarlo en Ajustes); fatiga de avisos (tope y "no hay pendiente → no aviso"); el servidor necesita cron activo (`schedule:run`).
-- Qué NO tocar:
+- Riesgos y mitigación: hoy no hay cron en producción (T5, requisito de despliegue); iOS solo permite push con la PWA instalada (explicarlo en Ajustes); fatiga de avisos (tope y "no hay pendiente → no aviso"); el servidor necesita cron activo (`schedule:run`).
+- Qué NO tocar: las notificaciones dentro de la app (siguen igual), la lógica del juego y los guardianes.
 
 ## 5. Pruebas (qa-tester)
 | Caso | Tipo | Nivel | Test |
 |---|---|---|---|
-- Comando para verificar:
-- Regresión a vigilar:
+| Franja con pendiente envía 1 aviso | Feature | Alto | `tests/Feature/Notifications/GuardianNudgesTest` |
+| Sin pendiente no envía | Feature | Alto | ídem |
+| Tope diario e idempotencia por franja | Feature | Alto | ídem |
+| Franja desactivada no envía | Feature | Medio | ídem |
+| Textos sin culpa y ≤ 60 caracteres | Unit | Medio | ídem |
+- Comando para verificar: `php artisan test --filter=GuardianNudges`; prueba manual en el celular con la PWA instalada.
+- Regresión a vigilar: notificaciones dentro de la app y la instalación de la PWA.
 
 ## 6. Documentación (tech-writer)
-- Docs a actualizar:
+- Docs a actualizar: `docs/game.md` (sección Guardianes: avisos push) y la documentación de despliegue (cron y VAPID).
 
 ## 7. Tareas
 - [ ] T1 · Puedo activar los avisos y elegir franjas — Resp: developer — Modelo: estandar — Archivos: Ajustes, `pwa.js`, service worker, `push_subscriptions` — Hecho cuando: la suscripción se guarda y se puede desactivar.
 - [ ] T2 · El guardián decide si avisar y qué decir — Resp: developer — Modelo: estandar — Archivos: `app/Jobs/SendGuardianNudges.php`, scheduler — Hecho cuando: respeta franja, pendiente real, tope e idempotencia.
 - [ ] T3 · Tocar el aviso abre el módulo — Resp: developer — Modelo: estandar — Archivos: service worker — Hecho cuando: abre la URL con `?via=push`.
+- [ ] T5 · Dejar documentado el cron del servidor — Resp: developer — Modelo: estandar — Archivos: `docs/ARCHITECTURE.md` o README de despliegue — Hecho cuando: está la línea `* * * * * php artisan schedule:run` y cómo comprobarla (`php artisan schedule:list`); sin cron los avisos no salen.
 - [ ] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Notifications/`, `docs/game.md` — Hecho cuando: hay pruebas de franja, tope, sin pendiente y texto sin culpa.
 
 ## 8. Bitácora de implementación (developer)
 
 ## 9. Preguntas abiertas, decisiones e historial
-- Pregunta: ¿franjas fijas (8–10, 14–16, 19–21) o horas que elige cada usuario?
-- Pregunta: ¿el servidor de producción ya corre `schedule:run` por cron?
+- Pregunta: ¿franjas fijas (8–10, 14–16, 19–21) o horas que elige cada usuario? → 2026-11-11 Decisión: hoy no existen franjas; se crean tres fijas (mañana 8–10, tarde 14–16, noche 19–21) que el usuario activa o desactiva en Ajustes. Horas personalizadas quedan para después.
+- Pregunta: ¿el servidor de producción ya corre `schedule:run` por cron? → 2026-11-11 Decisión (usuario): no hay cron hoy, pero puede configurarse. El CHG documenta cómo y el despliegue requiere activarlo (ver T5).
 - Depende de: CHG-066.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
+- 2026-11-11 — Aprobado por el usuario (Compuerta 2)
