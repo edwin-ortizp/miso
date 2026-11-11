@@ -7,6 +7,8 @@ use App\Livewire\Health\HealthIndex;
 use App\Livewire\Task\TaskList;
 use App\Models\Game\GameCompanion;
 use App\Models\Game\GameSpecies;
+use App\Models\Game\GameTeamMember;
+use App\Services\Game\WeekPlanner;
 use App\Models\HealthEvent;
 use App\Models\User;
 use App\Services\Game\MissionProposalValidator;
@@ -57,6 +59,51 @@ class ModuleGuardianTest extends TestCase
         $this->companion('Chispin', ['Psíquico'], 5);
         $this->companion('Gotin', ['Acero'], 9);
 
+        $this->assertSame('Gotin', $this->service()->pick($this->user->id, 'tasks')['name']);
+    }
+
+    /** CHG-065: deja el equipo de la semana solo con estos ejemplares. */
+    private function teamOf(GameCompanion ...$companions): void
+    {
+        $week = app(WeekPlanner::class)->forWeek($this->user->id, now());
+        GameTeamMember::where('game_week_id', $week->id)->delete();
+        foreach ($companions as $slot => $companion) {
+            GameTeamMember::create(['game_week_id' => $week->id, 'companion_id' => $companion->id,
+                'ability_key' => 'habits', 'ability_label' => 'Hábitos', 'slot' => $slot + 1]);
+        }
+    }
+
+    public function test_team_member_with_affinity_beats_stronger_companion_outside_team(): void
+    {
+        $this->companion('Gotin', ['Acero'], 30);
+        $chispin = $this->companion('Chispin', ['Psíquico'], 3);
+        $rocon = $this->companion('Rocon', ['Roca'], 9);
+        $this->teamOf($chispin, $rocon);
+
+        $guardian = $this->service()->pick($this->user->id, 'tasks');
+        $this->assertSame('Chispin', $guardian['name']);
+        $this->assertSame('Hábitos', $guardian['team_ability']);
+    }
+
+    public function test_without_affinity_in_team_picks_strongest_team_member(): void
+    {
+        $this->companion('Gotin', ['Acero'], 30);
+        $chispin = $this->companion('Chispin', ['Agua'], 3);
+        $rocon = $this->companion('Rocon', ['Roca'], 9);
+        $this->teamOf($chispin, $rocon);
+
+        $this->assertSame('Rocon', $this->service()->pick($this->user->id, 'tasks')['name']);
+    }
+
+    public function test_guardian_follows_the_team_of_each_week(): void
+    {
+        $chispin = $this->companion('Chispin', ['Psíquico'], 3);
+        $gotin = $this->companion('Gotin', ['Acero'], 5);
+        $this->teamOf($chispin);
+        $this->assertSame('Chispin', $this->service()->pick($this->user->id, 'tasks')['name']);
+
+        Carbon::setTestNow(now()->addWeek());
+        $this->teamOf($gotin);
         $this->assertSame('Gotin', $this->service()->pick($this->user->id, 'tasks')['name']);
     }
 

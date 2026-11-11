@@ -14,6 +14,9 @@
             </button>
             <div class="game-guardian__talk">
                 <span class="game-guardian__name">{{ $guardian['name'] }} · Nv {{ $guardian['level'] }}</span>
+                @if (! empty($guardian['team_ability']))
+                    <span class="game-guardian__team md-label-small">Equipo de la semana · {{ $guardian['team_ability'] }}</span>
+                @endif
                 {{-- El consejo ya viene escapado: solo los nombres van envueltos en <strong>. --}}
                 <p class="game-guardian__bubble" aria-live="polite" wire:key="advice-{{ $adviceKey }}-{{ md5($advice) }}">“{!! $advice !!}”</p>
                 <div class="game-guardian__actions">

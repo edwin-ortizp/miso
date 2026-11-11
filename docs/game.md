@@ -124,7 +124,7 @@ Aparece un ejemplar **al azar** del usuario con una frase (`x-game.daily-buddy`)
 Cada módulo tiene un guardián que asoma en la esquina de una tarjeta de su panel lateral, con una frase según el avance del día.
 
 - **Dónde:** Tareas → tarjeta "Hoy"; Salud → tarjeta "Próximo cuidado".
-- **Quién:** el ejemplar de mayor nivel con un tipo afín al módulo (`game.module_guardians`: Tareas = psíquico/acero, Salud = hada/normal); empate → el más antiguo; sin afinidad → el de mayor nivel. Se elige al montar la página y no cambia con los re-renders.
+- **Quién (CHG-065):** se elige entre los integrantes del **equipo de la semana**, así el equipo se ve en toda la app y rota cada lunes; la tarjeta muestra "Equipo de la semana · {habilidad}". Sin equipo se usa toda la colección. Dentro de ese grupo: el ejemplar de mayor nivel con un tipo afín al módulo (`game.module_guardians`: Tareas = psíquico/acero, Salud = hada/normal); empate → el más antiguo; sin afinidad → el de mayor nivel. Se elige al montar la página y no cambia con los re-renders.
 - **Frase:** `ModuleGuardian::line()` usa los umbrales de `DailyBuddy::mood` y los textos de `game.guardian_lines`. Tareas: completadas/planificadas hoy. Salud: si hay un evento en seguimiento (tipo de evolución sin fecha de fin) dice la frase `care`; si no, completados en 7 días / (esos + pendientes de salud).
 - **Oculto** con el juego apagado o sin ejemplares.
 - **Ficha (CHG-062):** tocar al guardián abre su ficha en un modal dentro del módulo, en solo lectura (sin evolucionar ni "Ver más"), con "Ver colección" para ir a la Colección. La ficha la arma `SpeciesSheet::build()`, compartido con la Colección, y solo se calcula al abrir.

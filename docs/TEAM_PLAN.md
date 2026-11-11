@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-10_
+_Última actualización: 2026-11-11_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -70,6 +70,7 @@ _Última actualización: 2026-11-10_
 | CHG-062 | S | Ficha del guardián en un modal sin salir del módulo | in-progress | En verificación | 3/4 |
 | CHG-063 | M | Guardianes en Objetivos, Ánimo y energía, Hábitos a evitar y Diario | in-progress | En verificación | 3/4 |
 | CHG-064 | M | Guardianes en Comidas, Relaciones, Planes y Vehículos | in-progress | En verificación | 3/4 |
+| CHG-065 | S | Guardianes elegidos del equipo de la semana | in-progress | En desarrollo | 0/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

@@ -4,11 +4,9 @@ namespace App\Livewire\Habit;
 
 use App\Livewire\Concerns\HandlesHabitActionPrompt;
 use App\Livewire\Concerns\HasUrlDate;
-use App\Models\Game\GameTeamMember;
 use App\Models\HabitCompletion;
 use App\Models\HabitDefinition;
-use App\Services\Game\SpeciesImageProvider;
-use App\Services\Game\WeekPlanner;
+use App\Services\Game\ModuleGuardian;
 use App\Services\HabitGamificationService;
 use App\Support\HabitProgress;
 use Carbon\Carbon;
@@ -163,21 +161,13 @@ class HabitTracker extends Component
         return $this->routine['queue'][$this->routine['index'] ?? 0] ?? null;
     }
 
-    /** Primer integrante del equipo semanal; la rutina funciona igual sin él. */
+    /** CHG-065: el guardián de Hábitos (del equipo semanal); la rutina funciona igual sin él. */
     private function routineCompanion(): ?array
     {
         try {
-            $week = app(WeekPlanner::class)->forWeek((int) auth()->id(), now());
-            $member = GameTeamMember::with('companion.species')
-                ->where('game_week_id', $week->id)
-                ->orderBy('slot')
-                ->first();
-            $species = $member?->companion?->species;
+            $guardian = app(ModuleGuardian::class)->pick((int) auth()->id(), 'habits');
 
-            return $species ? [
-                'name' => $species->name,
-                'image' => app(SpeciesImageProvider::class)->url($species),
-            ] : null;
+            return $guardian ? ['name' => $guardian['name'], 'image' => $guardian['image']] : null;
         } catch (\Throwable $e) {
             report($e);
 
