@@ -1,9 +1,9 @@
 # CHG-066 · Medir días activos y canal de entrada
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -31,8 +31,10 @@ Estrategia de recurrencia (2026-11-11): MiSo hoy es solo pull — notificaciones
 - 2026-11-11 — Tabla `user_active_days`, modelo `UserActiveDay` (touch/countRecord), middleware `TrackActiveDay` en el grupo web (Cache::add por usuario y día; canal por `?via=`), `GameEvent` de tipo activity suma `records_count` (también desde MCP), comando `miso:retention {--days}`, pruebas en `tests/Feature/Engagement/ActiveDayTrackingTest.php`. Límite: con el juego apagado no se generan GameEvent y `records_count` queda en 0; los días activos sí se registran. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
 - Pregunta: ¿el reporte basta como comando o lo quieres ver en Estadísticas? → 2026-11-11 Decisión (usuario): basta el comando.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
 - 2026-11-11 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/

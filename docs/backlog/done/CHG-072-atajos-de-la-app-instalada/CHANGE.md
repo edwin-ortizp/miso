@@ -1,9 +1,9 @@
 # CHG-072 · Atajos de la app instalada
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -44,8 +44,10 @@ Nombres ≤ 20 caracteres (`short_name` ≤ 12), íconos 96×96 por atajo con el
 - 2026-11-11 — `shortcuts` en `public/manifest.json` (4 atajos con `?via=shortcut`), íconos 96×96 `public/icons/shortcut-*.png` en el azul de marca, canal `shortcut` (y `return` para CHG-071) en `UserActiveDay::CHANNELS`, pruebas en `tests/Feature/Engagement/PwaShortcutsTest.php`. "Escribir en el diario" pasó a "Escribir mi diario" para cumplir ≤ 20 caracteres. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
 - Pregunta: ¿estos cuatro atajos u otros (p. ej. "Tareas de hoy", "Iniciar foco")? Máximo recomendado: 4. → 2026-11-11 Decisión (usuario): los cuatro propuestos para empezar.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
 - 2026-11-11 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/

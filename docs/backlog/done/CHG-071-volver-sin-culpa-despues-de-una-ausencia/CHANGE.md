@@ -1,9 +1,9 @@
 # CHG-071 · Volver sin culpa después de una ausencia
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -90,6 +90,7 @@ Volver tras una ausencia es el momento con más riesgo de abandono: el usuario e
 - 2026-11-11 — `ReturnDetector` (último día activo anterior a hoy en `user_active_days`, umbral en `config/engagement.php`), tabla `welcome_backs` (único usuario+fecha de regreso), componente `Home\WelcomeBack` arriba en Inicio con Pasar a hoy / Elegir fecha / Dejar sin fecha (en transacción, con Deshacer), enlace a Hábitos en el primer día ausente y +1 vaso. Pruebas en `tests/Feature/Engagement/WelcomeBackTest.php`. Assets recompilados. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
 - 2026-11-11 — Decisión (developer): las tareas no tienen estado "archivada"; "Archivar" se implementa como "Dejar sin fecha" (la tarea sigue pendiente pero deja de aparecer como atrasada). Se puede deshacer.
 - Pregunta: ¿3 días de ausencia está bien como umbral? → 2026-11-11 Decisión (usuario): sí, 3 días.
 - Pregunta: ¿los hábitos de los días ausentes se dejan como están (sin registrar) o se ofrece marcar alguno como hecho? → 2026-11-11 Decisión (usuario): se pueden marcar en retroactivo, como ya permite la app, y debe seguir así. La bienvenida ofrece el enlace "¿Hiciste algún hábito estos días? Márcalo" que abre Hábitos en el primer día ausente; no se crea lógica nueva ni restricciones.
@@ -98,3 +99,4 @@ Volver tras una ausencia es el momento con más riesgo de abandono: el usuario e
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
 - 2026-11-11 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/

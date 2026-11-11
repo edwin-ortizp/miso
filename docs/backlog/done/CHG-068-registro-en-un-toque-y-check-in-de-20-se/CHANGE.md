@@ -1,9 +1,9 @@
 # CHG-068 · Registro en un toque y check-in de 20 segundos
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -88,6 +88,7 @@ Aviso: [foto] Gotin · MiSo — Te falta un vaso.
 - 2026-11-11 — `Dashboard::$checkin` (`#[Url]`, siempre registra hoy), hoja `partials/checkin-sheet.blade.php` (persistente, claves `checkin-*` para no chocar con las de Inicio) y botón "Check-in"; `NotificationDispatcher::actions()` agrega botones y URL firmada; `QuickWaterController` en `routes/api.php` (firma 12 h, throttle, `action_done_at` reclamado con UPDATE condicional); `sw.js` v8 maneja `event.action`. Pruebas en `tests/Feature/Engagement/QuickCheckinTest.php`. Assets recompilados. Pruebas no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
 - 2026-11-11 — Decisión (developer): Inicio ya tiene los registros rápidos; el check-in los reutiliza en una hoja en vez de crear un componente paralelo.
 - Depende de: CHG-067.
 - Pregunta: ¿incluir captura por texto libre ("tomé 2 vasos y fui al gym") usando las herramientas MCP, o dejarlo para otro CHG? → 2026-11-11 Decisión (usuario): otro CHG (CHG-073).
@@ -95,3 +96,4 @@ Aviso: [foto] Gotin · MiSo — Te falta un vaso.
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
 - 2026-11-11 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/

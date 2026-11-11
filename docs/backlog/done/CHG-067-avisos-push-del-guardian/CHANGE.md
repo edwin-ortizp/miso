@@ -1,9 +1,9 @@
 # CHG-067 · Avisos push del guardián
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -87,6 +87,7 @@ Aviso:  [foto] Chispin · MiSo
 - 2026-11-11 — Migración (`push_sent_at`, `push_subscriptions`), `GuardianNudgePlanner`, `NotificationDispatcher`, `PushGateway`/`WebPushGateway` (minishlink/web-push ^11, compatible con Guzzle 8), comandos `miso:guardian-nudges`, `notifications:dispatch`, `miso:push-check`, `miso:vapid`, scheduler en `routes/console.php`, `ModuleProgress` extraído de `GuardianCard`, tarjeta en Ajustes → Notificaciones, `pwa.js` (`ltPushToggle`) y `sw.js` v7 (push y notificationclick), `docs/DEPLOY.md`, `docs/notifications.md`. Assets recompilados (incluye el CSS pendiente de CHG-065). Pruebas escritas y no ejecutadas en la nube (PHP 8.3 vs 8.4).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
 - 2026-11-11 — Decisión (usuario): reutilizar el modelo multicanal existente (`notifications` + columna `*_sent_at` por canal) en vez de tablas propias. El aviso del guardián es el tipo `guardian_nudge`; se agrega `push_sent_at` y `push_subscriptions`. Hosting compartido: un solo cron a `schedule:run` (cada 1–15 min), sin colas, lotes con límite de tiempo.
 - 2026-11-11 — Decisión (usuario): todo lo que corra en el servidor queda documentado (cron/script) y es idempotente por ventana; regla agregada en `docs/ARCHITECTURE.md`.
 - Pregunta: ¿franjas fijas (8–10, 14–16, 19–21) o horas que elige cada usuario? → 2026-11-11 Decisión: hoy no existen franjas; se crean tres fijas (mañana 8–10, tarde 14–16, noche 19–21) que el usuario activa o desactiva en Ajustes. Horas personalizadas quedan para después.
@@ -96,3 +97,4 @@ Aviso:  [foto] Chispin · MiSo
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
 - 2026-11-11 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/

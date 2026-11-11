@@ -1,9 +1,9 @@
 # CHG-065 · Guardianes elegidos del equipo de la semana
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -24,7 +24,9 @@ El equipo de la semana solo se veía en la vista del juego y los guardianes sal�
 - 2026-11-11 — `ModuleGuardian::pick()` filtra por integrantes del equipo semanal (fallback a la colección) y expone `team_ability`; etiqueta en la tarjeta; `HabitTracker::routineCompanion()` usa el guardián de Hábitos; 3 pruebas nuevas; docs/game.md actualizado. Fuera de alcance: mostrar en Juego → Semana qué módulos cuida cada integrante (propuesto como seguimiento).
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — LECCIÓN(developer): los assets compilados (`public/css`, `public/js`) viven en el repo; todo cambio de CSS/JS exige `npm run build`. Cerrado sin ejecutar las pruebas en la nube (PHP 8.3 vs 8.4): verificar en local.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
 - 2026-11-11 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/
