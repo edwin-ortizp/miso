@@ -21,5 +21,6 @@ Un ritual nocturno corto que cierra el ciclo diario y donde se cobran las metas 
 ## 8. Bitácora de implementación (developer)
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — Decisión (usuario): queda en Borrador hasta que existan sus metas diarias (en desarrollo por su lado); el cierre se especifica sobre ellas.
 - Depende de: CHG-067 (aviso nocturno) y de las metas diarias en desarrollo; coordinar para no duplicar.
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)

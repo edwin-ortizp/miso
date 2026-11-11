@@ -73,11 +73,12 @@ _Última actualización: 2026-11-11_
 | CHG-065 | S | Guardianes elegidos del equipo de la semana | in-progress | En verificación | 4/4 |
 | CHG-066 | S | Medir días activos y canal de entrada | in-progress | En verificación | 4/4 |
 | CHG-067 | M | Avisos push del guardián | in-progress | En verificación | 5/5 |
-| CHG-068 | M | Registro en un toque y check-in de 20 segundos | to-do | Borrador | 0/0 |
+| CHG-068 | M | Registro en un toque y check-in de 20 segundos | to-do | Aprobado | 0/4 |
 | CHG-069 | S | Cierre del día | to-do | Borrador | 0/0 |
-| CHG-070 | M | Resumen del domingo con hallazgos de tus datos | to-do | Borrador | 0/0 |
+| CHG-070 | M | Resumen del domingo con hallazgos de tus datos | to-do | Aprobado | 0/5 |
 | CHG-071 | M | Volver sin culpa después de una ausencia | in-progress | En verificación | 4/4 |
 | CHG-072 | S | Atajos de la app instalada | in-progress | En verificación | 3/3 |
+| CHG-073 | M | Registro por texto libre | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
