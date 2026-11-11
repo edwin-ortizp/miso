@@ -78,14 +78,15 @@ Aviso:  [foto] Chispin · MiSo
 
 ## 7. Tareas
 - [ ] T1 · Puedo activar los avisos y elegir franjas — Resp: developer — Modelo: estandar — Archivos: Ajustes, `pwa.js`, service worker, `push_subscriptions` — Hecho cuando: la suscripción se guarda y se puede desactivar.
-- [ ] T2 · El guardián decide si avisar y qué decir — Resp: developer — Modelo: estandar — Archivos: `app/Jobs/SendGuardianNudges.php`, scheduler — Hecho cuando: respeta franja, pendiente real, tope e idempotencia.
+- [ ] T2 · El guardián decide si avisar y qué decir — Resp: developer — Modelo: estandar — Archivos: `app/Jobs/SendGuardianNudges.php`, scheduler — Hecho cuando: respeta franja, pendiente real y tope; es idempotente según `docs/ARCHITECTURE.md` § Tareas programadas: tabla `guardian_nudges_sent` con único (user_id, date, slot) escrito antes de enviar, `->withoutOverlapping()->onOneServer()`, y una prueba que corre el job dos veces y verifica un solo aviso.
 - [ ] T3 · Tocar el aviso abre el módulo — Resp: developer — Modelo: estandar — Archivos: service worker — Hecho cuando: abre la URL con `?via=push`.
-- [ ] T5 · Dejar documentado el cron del servidor — Resp: developer — Modelo: estandar — Archivos: `docs/ARCHITECTURE.md` o README de despliegue — Hecho cuando: está la línea `* * * * * php artisan schedule:run` y cómo comprobarla (`php artisan schedule:list`); sin cron los avisos no salen.
+- [ ] T5 · Dejar documentado el cron del servidor — Resp: developer — Modelo: estandar — Archivos: `docs/DEPLOY.md` (nuevo) — Hecho cuando: documenta la línea de crontab (`* * * * * cd /ruta/miso && php artisan schedule:run >> /dev/null 2>&1`), el script bash si se usa, las claves VAPID en `.env`, cómo comprobar (`php artisan schedule:list`) y qué pasa si el cron corre dos veces (nada: idempotente).
 - [ ] T4 · Pruebas y docs — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/Notifications/`, `docs/game.md` — Hecho cuando: hay pruebas de franja, tope, sin pendiente y texto sin culpa.
 
 ## 8. Bitácora de implementación (developer)
 
 ## 9. Preguntas abiertas, decisiones e historial
+- 2026-11-11 — Decisión (usuario): todo lo que corra en el servidor queda documentado (cron/script) y es idempotente por ventana; regla agregada en `docs/ARCHITECTURE.md`.
 - Pregunta: ¿franjas fijas (8–10, 14–16, 19–21) o horas que elige cada usuario? → 2026-11-11 Decisión: hoy no existen franjas; se crean tres fijas (mañana 8–10, tarde 14–16, noche 19–21) que el usuario activa o desactiva en Ajustes. Horas personalizadas quedan para después.
 - Pregunta: ¿el servidor de producción ya corre `schedule:run` por cron? → 2026-11-11 Decisión (usuario): no hay cron hoy, pero puede configurarse. El CHG documenta cómo y el despliegue requiere activarlo (ver T5).
 - Depende de: CHG-066.
