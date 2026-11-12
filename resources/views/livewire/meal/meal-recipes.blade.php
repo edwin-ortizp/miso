@@ -68,7 +68,7 @@
         <div class="md-card-elevated p-4 text-center">
             <i class="bi bi-book" style="font-size: 2rem; color: var(--md-sys-color-outline);"></i>
             <p class="md-body-large mt-2" style="color: var(--md-sys-color-on-surface-variant);">
-                {{ $search || $mealTypeFilter || $difficultyFilter || $favoriteFilter ? 'No se encontraron recetas con esos filtros.' : 'Aún no tienes recetas. ¡Agrega la primera!' }}
+                {{ $search || $mealTypeFilter || $difficultyFilter || $favoriteFilter ? 'No se encontraron recetas con esos filtros.' : 'Todavía no hay recetas. *se pone el delantal* Agrega la primera para tenerla a mano.' }}
             </p>
         </div>
     @else

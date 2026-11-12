@@ -3,7 +3,7 @@
         && \Illuminate\Support\Facades\Route::has('log-viewer.index');
 
     $groups = [
-        null => [['profile', 'Perfil público', 'bi-person'], ['body', 'Datos físicos', 'bi-rulers']],
+        null => [['profile', 'Perfil público', 'bi-person'], ['body', 'Datos físicos', 'bi-rulers'], ['modules', 'Personalizar módulos', 'bi-sliders']],
         'Acceso' => [['security', 'Contraseña y seguridad', 'bi-shield-lock'], ['oauth', 'Aplicaciones OAuth', 'bi-key']],
         'Integraciones' => [['integrations', 'Calendario y notas', 'bi-plug'], ['notifications', 'Notificaciones', 'bi-bell'], ['mcp', 'Servidor MCP', 'bi-robot']],
         'Sistema' => array_values(array_filter([

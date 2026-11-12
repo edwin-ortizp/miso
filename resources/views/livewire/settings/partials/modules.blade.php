@@ -1,0 +1,1 @@
+<livewire:settings.module-preferences />

@@ -1,6 +1,7 @@
 <div class="md-card-elevated h-100">
     <x-home.card-head icon="bi-lightning-charge" tone="warning" title="Registro rápido" />
 
+    @if ($showModule('water'))
     {{-- Hydration --}}
     <div class="mb-3">
         <div class="home-section-label md-label-medium">
@@ -31,6 +32,8 @@
         </div>
     </div>
 
+    @endif
+    @if ($showModule('mood'))
     {{-- Mood --}}
     <div class="mb-3">
         <div class="home-section-label md-label-medium">
@@ -83,4 +86,5 @@
             @endforeach
         </div>
     </div>
+    @endif
 </div>

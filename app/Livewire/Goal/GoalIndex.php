@@ -119,6 +119,8 @@ class GoalIndex extends Component
         $this->saveReminders($goal);
 
         $this->closeForm();
+
+        return (string) $goal->id;
     }
 
     public function updateStatus(string $id, string $status)

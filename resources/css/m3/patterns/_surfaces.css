@@ -215,3 +215,15 @@
   .md-popover__actions > * { min-width: 40%; min-height: 48px; justify-content: center; }
   .md-popover__actions > :only-child { margin-left: auto; }
 }
+
+/* Anchored action popover: keeps its trigger relationship at every viewport.
+   Use for account actions rather than the responsive filter sheet. */
+.md-popover.md-popover--anchored {
+    position: absolute; inset: calc(100% + 8px) 0 auto auto;
+    width: min(20rem, calc(100vw - 2rem)); max-height: calc(100dvh - 100px);
+    display: grid; gap: 14px; padding: 14px 16px 16px;
+    border-radius: var(--md-sys-shape-corner-large); overflow-y: auto;
+}
+.md-popover--anchored .md-popover__head { padding: 0; margin: 0; }
+.md-popover--anchored .md-popover__body { display: grid; gap: 8px; padding: 0; }
+.md-popover--anchored .md-popover__close { display: inline-flex; }

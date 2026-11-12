@@ -9,6 +9,7 @@ use App\Models\HabitDefinition;
 use App\Services\Game\ModuleGuardian;
 use App\Services\HabitGamificationService;
 use App\Support\HabitProgress;
+use App\Support\CompanionVoice;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -66,6 +67,7 @@ class HabitTracker extends Component
             'status' => array_fill_keys(array_map('strval', $queue), 'pending'),
             'companion' => $this->routineCompanion(),
         ];
+        $this->prepareRoutineVoice();
     }
 
     public function routineDone(HabitGamificationService $gamification): void
@@ -86,6 +88,7 @@ class HabitTracker extends Component
 
         $this->routine['status'][(string) $habitId] = 'done';
         $this->routine['index']++;
+        $this->prepareRoutineVoice();
     }
 
     public function routineSkip(): void
@@ -99,12 +102,14 @@ class HabitTracker extends Component
             $this->routine['status'][(string) $habitId] = 'skipped';
         }
         $this->routine['index']++;
+        $this->prepareRoutineVoice();
     }
 
     public function routineGoTo(int $index): void
     {
         if ($this->routine && $index >= 0 && $index < count($this->routine['queue'])) {
             $this->routine['index'] = $index;
+            $this->prepareRoutineVoice();
         }
     }
 
@@ -130,6 +135,26 @@ class HabitTracker extends Component
         if ($skipped !== []) {
             $this->routine['queue'] = $skipped;
             $this->routine['index'] = 0;
+            $this->prepareRoutineVoice();
+        }
+    }
+
+    private function prepareRoutineVoice(): void
+    {
+        $id = $this->currentRoutineHabitId();
+        if (! $id || isset($this->routine['voice'][$id])) {
+            return;
+        }
+        $habit = HabitDefinition::query()->findOrFail($id);
+        $functional = [
+            'start' => "Vamos con {$habit->name}.", 'middle' => 'Ya vas por la mitad.',
+            'final' => 'Últimos segundos. Sigue a tu ritmo.', 'zero' => 'Tiempo terminado. Márcalo cuando termines.',
+            'paused' => 'En pausa. Continúa cuando quieras.', 'done' => 'Hábito completado.',
+        ];
+        foreach ($functional as $stage => $fallback) {
+            $this->routine['voice'][$id][$stage] = $this->routine['companion']
+                ? CompanionVoice::pick((int) auth()->id(), 'routine_'.$stage, ['habit' => $habit->name])['text']
+                : $fallback;
         }
     }
 

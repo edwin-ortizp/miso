@@ -50,7 +50,7 @@
                     <span class="md-list-item-headline">{{ $habit->name }}</span>
                 </button>
             @empty
-                <p class="md-body-small mb-0">Hábitos de hoy completos.</p>
+                <p class="md-body-small mb-0">No hay hábitos pendientes para este momento.</p>
             @endforelse
         </section>
 

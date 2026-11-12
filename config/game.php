@@ -174,7 +174,7 @@ return [
         'goals' => [
             'due' => 'A {goal} le quedan {days} días y vas en {percent} %.',
             'due_plain' => 'A {goal} le quedan {days} días; ¿cuál es el siguiente paso?',
-            'idle' => '{goal} lleva {days} días sin avances; ¿un paso pequeño hoy?',
+            'idle' => 'No hay avances escritos en {goal} desde hace {days} días. ¿Quieres registrar alguno?',
             'milestone' => '¡Hito en {goal}! Eso merece celebrarse.',
         ],
         'mood' => [

@@ -36,6 +36,7 @@
                      cheer: false,
                      timer: null,
                      habit: @js($routineHabit?->name),
+                     voice: @js($routineHabit ? ($routine['voice'][$routineHabit->id] ?? []) : []),
                      init() {
                          this.$nextTick(() => this.$refs.done?.focus());
                          if (this.total) this.timer = setInterval(() => { if (!this.paused && this.left > 0) this.left--; }, 1000);
@@ -50,12 +51,13 @@
                      },
                      get ring() { return this.total ? 565.49 * (1 - this.left / this.total) : 0; },
                      get phrase() {
-                         if (this.cheer) return '¡Bien hecho!';
-                         if (!this.total) return '¡Vamos con ' + this.habit + '!';
-                         if (this.left === 0) return '¡Tiempo! Márcalo cuando termines';
-                         if (this.left <= 15) return '¡Casi!';
-                         if (this.left <= this.total / 2) return '¡Ya vas por la mitad!';
-                         return '¡Vamos con ' + this.habit + '!';
+                         if (this.cheer) return this.voice.done;
+                         if (this.paused) return this.voice.paused;
+                         if (!this.total) return this.voice.start;
+                         if (this.left === 0) return this.voice.zero;
+                         if (this.left <= 15) return this.voice.final;
+                         if (this.left <= this.total / 2) return this.voice.middle;
+                         return this.voice.start;
                      },
                      finish() { this.cheer = true; clearInterval(this.timer); setTimeout(() => $wire.routineDone(), 450); },
                  }"
@@ -83,7 +85,7 @@
                     @if ($routineHabit)
                         <main class="habit-routine__body">
                             @if ($companion)
-                                <p class="habit-routine__bubble md-body-large" aria-live="polite" x-text="phrase">¡Vamos con {{ $routineHabit->name }}!</p>
+                                <p class="habit-routine__bubble md-body-large text-break" aria-live="polite" x-text="phrase">{{ $routine['voice'][$routineHabit->id]['start'] ?? '' }}</p>
                             @endif
 
                             <div class="habit-routine__buddy" :class="{ 'habit-routine__buddy--cheer': cheer }">
@@ -111,7 +113,7 @@
                                 {{ $routineHabit->name }}
                             </h2>
                             @if (! $companion && $seconds)
-                                <p class="habit-routine__over md-body-large" aria-live="polite" x-show="left === 0" x-cloak>¡Tiempo! Márcalo cuando termines</p>
+                                <p class="habit-routine__over md-body-large" aria-live="polite" x-show="left === 0" x-cloak>Tiempo terminado. Márcalo cuando termines.</p>
                             @endif
 
                             <nav class="habit-routine__dots" aria-label="Hábitos de la rutina">

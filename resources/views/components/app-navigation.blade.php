@@ -17,7 +17,7 @@
             <span class="lt-sidebar__name">MiSo</span>
         </div>
         <nav class="lt-sidebar__scroll">
-            @foreach (config('modules.navigation', []) as $section)
+            @foreach (app(\App\Services\Experience\PersonalExperience::class)->navigation() as $section)
                 <div class="lt-nav-group">
                     <span class="lt-nav-group__label">{{ $section['label'] }}</span>
                     @foreach ($section['items'] as $item)
@@ -36,6 +36,7 @@
                     @endforeach
                 </div>
             @endforeach
+            <a href="{{ route('settings.section', 'modules') }}" wire:navigate class="lt-nav-item"><span class="lt-nav-item__icon"><i class="bi bi-sliders" aria-hidden="true"></i></span><span class="lt-nav-item__label">Personalizar módulos</span></a>
         </nav>
     </aside>
 

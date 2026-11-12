@@ -37,6 +37,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        $this->app->scoped(\App\Services\Experience\PersonalExperience::class);
         // CHG-068: canal push; las pruebas lo reemplazan por un doble.
         $this->app->bind(\App\Services\Notifications\Push\PushGateway::class, \App\Services\Notifications\Push\WebPushGateway::class);
         $this->app->singleton(
@@ -50,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Livewire\Livewire::addPersistentMiddleware([\App\Http\Middleware\RequireOnboarding::class]);
         $canManageLogs = static fn (?User $user): bool => $user !== null
             && in_array(strtolower(trim($user->email)), config('log-viewer.allowed_emails', []), true);
 
@@ -57,6 +59,9 @@ class AppServiceProvider extends ServiceProvider
             Gate::define($ability, $canManageLogs);
         }
 
+        foreach ([\App\Models\HabitCompletion::class, Task::class, \App\Models\GoalEntry::class, \App\Models\GoalNumericEntry::class] as $source) {
+            $source::observe(\App\Observers\ExperienceActivityObserver::class);
+        }
         Task::observe(TaskCalDavObserver::class);
         Task::observe(\App\Observers\GameTaskObserver::class);
         \App\Models\Game\GameDiscovery::observe(\App\Observers\Game\AlbumObserver::class);

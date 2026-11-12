@@ -141,15 +141,16 @@ class DailyBuddyTest extends TestCase
         Livewire::test(Dashboard::class)->assertSet('buddy', null)->assertDontSee('Ver ficha de');
     }
 
-    public function test_old_director_quotes_are_not_picked_but_seeds_always_are(): void
+    public function test_new_local_catalog_is_used_without_reseeding_or_mutating_old_quotes(): void
     {
         GameQuote::query()->delete();
         $old = GameQuote::create(['user_id' => $this->user->id, 'text' => 'Vieja', 'source' => GameQuote::SOURCE_DIRECTOR]);
         $old->forceFill(['created_at' => now()->subDays(61)])->save();
-        $this->assertContains(app(DailyBuddy::class)->quote($this->user->id), GameQuote::SEED);
+        $this->assertContains(app(DailyBuddy::class)->quote($this->user->id), config('companion_voice.A'));
 
         GameQuote::create(['user_id' => null, 'text' => 'Semilla', 'source' => GameQuote::SOURCE_SEED]);
-        $this->assertSame('Semilla', app(DailyBuddy::class)->quote($this->user->id));
+        $this->assertContains(app(DailyBuddy::class)->quote($this->user->id), config('companion_voice.A'));
+        $this->assertDatabaseHas('game_quotes', ['text' => 'Semilla']);
     }
 
     public function test_seed_quotes_pass_the_validator(): void

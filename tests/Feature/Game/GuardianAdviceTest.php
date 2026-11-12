@@ -155,7 +155,7 @@ class GuardianAdviceTest extends TestCase
 
         $advice = $this->of(GoalAdvice::class);
         $this->assertSame('A Correr 10K le quedan 12 días; ¿cuál es el siguiente paso?', $advice['due_plain']);
-        $this->assertSame('Leer 12 libros lleva 9 días sin avances; ¿un paso pequeño hoy?', $advice['idle']);
+        $this->assertSame('No hay avances escritos en Leer 12 libros desde hace 9 días. ¿Quieres registrar alguno?', $advice['idle']);
         $this->assertSame('¡Hito en Correr 10K! Eso merece celebrarse.', $advice['milestone']);
     }
 
@@ -375,9 +375,14 @@ class GuardianAdviceTest extends TestCase
         $sample += ['meal' => 'Media mañana', 'person' => 'María Fernanda', 'plan' => 'Museo de Arte Moderno', 'vehicle' => 'Mazda CX-30',
             'task' => 'Cambio de aceite y filtros'];
         foreach (['tasks', 'health', 'water', 'exercise', 'pomodoro', 'habits', 'goals', 'mood', 'negative', 'journal', 'meals', 'relationships', 'plans', 'vehicles'] as $module) {
-            foreach (config("game.guardian_advice.{$module}") as $text) {
+            foreach (config("game.guardian_advice.{$module}") as $key => $text) {
                 $filled = strtr($text, collect($sample)->mapWithKeys(fn ($v, $k) => ['{'.$k.'}' => (string) $v])->all());
-                $this->assertLessThanOrEqual(90, mb_strlen($filled), $filled);
+                if ($module === 'goals' && $key === 'idle') {
+                    // CHG-090: excepción editorial aprobada para distinguir registro de progreso real.
+                    $this->assertSame('No hay avances escritos en Correr una media maratón desde hace 4 días. ¿Quieres registrar alguno?', $filled);
+                } else {
+                    $this->assertLessThanOrEqual(90, mb_strlen($filled), $filled);
+                }
                 $this->assertNull(MissionProposalValidator::penaltyWord($filled), $filled);
             }
         }

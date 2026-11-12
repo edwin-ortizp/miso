@@ -71,7 +71,7 @@
                     <i class="bi bi-arrow-right-circle" aria-hidden="true"></i> Pasar todo a mañana
                 </button>
             @else
-                <p class="day-close__empty md-body-medium home-muted mb-0"><i class="bi bi-check2-all" aria-hidden="true"></i> Nada pendiente para mañana.</p>
+                <p class="day-close__empty md-body-medium home-muted mb-0"><i class="bi bi-check2-all" aria-hidden="true"></i> No quedan tareas pendientes en este cierre.</p>
             @endif
         </section>
     </div>

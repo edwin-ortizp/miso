@@ -9,7 +9,7 @@
         <div class="md-empty-state md-card-outlined">
             <div class="md-empty-state__icon"><i class="bi bi-car-front"></i></div>
             <h2>Tu garaje está vacío</h2>
-            <p>Añade tu automóvil, moto, bicicleta o patineta para programar sus cuidados.</p>
+            <p>*reserva sitio* Añade tu vehículo para programar sus cuidados.</p>
         </div>
     @else
         <div class="vehicle-garage-grid">

@@ -105,7 +105,7 @@ class DayCloseTest extends TestCase
         $component = Livewire::test(DayClose::class)->call('moveAll')
             ->assertSee('Listo, quedaron para mañana.')
             ->assertSee('Deshacer')
-            ->assertSee('Nada pendiente para mañana.');
+            ->assertSee('No quedan tareas pendientes en este cierre.');
 
         $this->assertSame('2026-11-12 14:00:00', $a->fresh()->start_date->toDateTimeString());
         $this->assertSame('2026-11-12 15:00:00', $a->fresh()->end_date->toDateTimeString());
@@ -131,7 +131,7 @@ class DayCloseTest extends TestCase
     {
         $this->mock(\App\Services\Game\Guardian\ModuleProgress::class, fn ($m) => $m->shouldReceive('for')->andReturnUsing(fn (string $module) => ['done' => 2, 'total' => $module === 'tasks' ? 0 : 2, 'care' => false]));
 
-        Livewire::test(DayClose::class)->assertSee('Cumpliste todo lo de hoy. Descansa.')->assertSee('5 de 5 metas');
+        Livewire::test(DayClose::class)->assertSee('Completaste las metas de este resumen. Descansa.')->assertSee('5 de 5 metas');
     }
 
     public function test_finish_closes_day_once_and_shows_closed_state(): void

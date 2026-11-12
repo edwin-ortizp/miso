@@ -52,6 +52,7 @@ class UserActiveDay extends Model
     public static function countRecord(int $userId, ?string $date = null): void
     {
         $date ??= now()->toDateString();
+        app(\App\Services\Experience\PersonalExperience::class)->event($userId, 'first_real_action');
         self::markActive($userId, 'direct', $date);
         DB::table('user_active_days')->where('user_id', $userId)->where('date', $date)
             ->update(['records_count' => DB::raw('records_count + 1'), 'updated_at' => now()]);

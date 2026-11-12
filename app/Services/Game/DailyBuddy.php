@@ -4,7 +4,7 @@ namespace App\Services\Game;
 
 use App\Models\Game\GameCompanion;
 use App\Models\Game\GameQuote;
-use Illuminate\Support\Facades\DB;
+use App\Support\CompanionVoice;
 
 /**
  * Integrante del día (CHG-043): un ejemplar al azar del usuario y una frase
@@ -51,13 +51,17 @@ class DailyBuddy
     {
         $since = now()->subDays((int) config('game.quotes.max_age_days'));
 
-        $text = GameQuote::query()
-            ->where(fn ($q) => $q->whereNull('user_id')
-                ->orWhere(fn ($q) => $q->where('user_id', $userId)->where('created_at', '>=', $since)))
-            ->when($except !== null, fn ($q) => $q->where('text', '!=', $except))
-            ->inRandomOrder()->value('text') ?? $except;
+        $pool = config('companion_voice.A', []);
+        $director = GameQuote::query()->where('user_id', $userId)
+            ->where('source', GameQuote::SOURCE_DIRECTOR)->where('created_at', '>=', $since)->pluck('text');
+        foreach ($director as $text) {
+            if (! in_array($text, $pool, true)) {
+                $pool['director_'.hash('sha256', $text)] = $text;
+            }
+        }
+        $exceptId = $except === null ? false : array_search($except, $pool, true);
 
-        return $text ?? GameQuote::SEED[array_rand(GameQuote::SEED)];
+        return CompanionVoice::fromPool($userId, 'A', $pool, [], $exceptId === false ? null : $exceptId)['text'];
     }
 
     /** Familia de escenario del panel según el tipo principal (CHG-049); sin familia: cielo. */

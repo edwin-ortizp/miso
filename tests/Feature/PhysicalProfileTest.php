@@ -20,7 +20,7 @@ class PhysicalProfileTest extends TestCase
             'email' => 'ana@example.test',
             'password' => 'password',
             'password_confirmation' => 'password',
-        ])->assertRedirect('/');
+        ])->assertRedirect(route('onboarding'));
 
         $user = User::where('email', 'ana@example.test')->firstOrFail();
 

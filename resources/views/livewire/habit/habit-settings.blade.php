@@ -69,7 +69,7 @@
             @empty
                 @if ($totalCount === 0)
                     <x-ui.state variant="empty" icon="bi-check2-square" title="Aún no tienes hábitos"
-                                message="Crea el tuyo o parte de los predeterminados para empezar a registrar tu día.">
+                                message="Crea un hábito o agrega los predeterminados. Yo me encargo de los aplausos.">
                         <x-slot:actions>
                             <x-ui.action variant="filled" icon="bi-arrow-counterclockwise" wire:click="restoreDefaults">Agregar predeterminados</x-ui.action>
                         </x-slot:actions>

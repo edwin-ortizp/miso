@@ -23,9 +23,7 @@ return [
             'Rutina de {period} completada. Tu día ya tiene una buena base.',
         ],
         'day' => [
-            'Cumpliste cada compromiso de hoy. Disfruta este cierre.',
-            'Día completo. La constancia también se construye así.',
-            'Hoy cuidaste todo lo que te propusiste. Bien hecho.',
+            'Completaste todos tus hábitos de hoy.',
         ],
         'streak' => [
             '{streak} días eligiendo {habit}. Tu constancia ya deja huella.',
@@ -52,8 +50,7 @@ return [
             'Comienza pequeño y deja que el ritmo aparezca: {habit}.',
         ],
         'complete' => [
-            'Todo lo de hoy está hecho. Quédate un momento con esa sensación.',
-            'Cerraste el día completo. Mañana será otra oportunidad, no una obligación.',
+            'Completaste todos tus hábitos de hoy. Puedes descansar o elegir qué sigue.',
         ],
     ],
 ];

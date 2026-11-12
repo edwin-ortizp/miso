@@ -56,7 +56,7 @@
         @elseif ($dataState === \App\Support\Ui\DataState::FILTERED_EMPTY)
             <x-ui.state variant="filtered-empty" message="Prueba con otro grupo, otra búsqueda o limpia los filtros." />
         @else
-            <x-ui.state variant="empty" icon="bi-map" title="Todavía no tienes planes" message="Guarda restaurantes, viajes o actividades que quieras hacer con tus personas." />
+            <x-ui.state variant="empty" icon="bi-map" title="Todavía no tienes planes" message="Un café, una caminata, un viaje… Guarda tu primer plan. *ya está buscando qué ponerse*" />
         @endif
     </x-ui.management-card>
 

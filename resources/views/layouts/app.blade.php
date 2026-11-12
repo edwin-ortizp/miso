@@ -43,7 +43,7 @@
     }
     $activeModuleTitle = $activeModuleKey ? (config("modules.{$activeModuleKey}.title") ?? 'MiSo') : 'MiSo';
 
-    $searchIndex = collect(config('modules.navigation', []))
+    $searchIndex = collect(app(\App\Services\Experience\PersonalExperience::class)->navigation())
         ->flatMap(fn ($section) => $section['items'] ?? [])
         ->map(fn ($item) => ['label' => $item['label'], 'icon' => $item['icon'], 'href' => route($item['route'])])
         ->values();
@@ -118,7 +118,7 @@
                     <livewire:notifications.notification-bell />
                 @endauth
                 @auth
-                    <a href="{{ route('settings') }}" wire:navigate class="lt-avatar" aria-label="Abrir menú de perfil" title="Perfil">@if (filled(auth()->user()->avatar_url))<img src="{{ auth()->user()->avatar_url }}" alt="" class="lt-avatar__photo" width="40" height="40">@else{{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}@endif</a>
+                    <x-account-menu />
                 @endauth
             </div>
         </header>
@@ -143,9 +143,11 @@
              declaran en `status` de config/modules.php. --}}
         @auth
             <footer class="lt-status" data-module="{{ $activeModuleKey }}" aria-label="Barra de estado">
-                @persist('status-bar')
-                    <livewire:status-bar.status-bar />
-                @endpersist
+                <div @if ($activeModuleKey === 'home' && ! app(\App\Services\Experience\PersonalExperience::class)->visible('pomodoro')) hidden @endif>
+                    @persist('status-bar')
+                        <livewire:status-bar.status-bar />
+                    @endpersist
+                </div>
                 <div class="lt-status__group lt-status__group--end">
                     @foreach (config("modules.{$activeModuleKey}.status", []) as $statusItem)
                         @php
@@ -173,18 +175,24 @@
                 <span class="lt-bottom__icon"><i class="bi bi-house" aria-hidden="true"></i></span>
                 <span>Inicio</span>
             </a>
+            @if (app(\App\Services\Experience\PersonalExperience::class)->visible('habits'))
             <a href="{{ route('habits') }}" wire:navigate class="lt-bottom__item {{ request()->routeIs('habits*') ? 'is-active' : '' }}" @if(request()->routeIs('habits*')) aria-current="page" @endif>
                 <span class="lt-bottom__icon"><i class="bi bi-check2-square" aria-hidden="true"></i></span>
                 <span>Hábitos</span>
             </a>
+            @endif
+            @if (app(\App\Services\Experience\PersonalExperience::class)->visible('tasks'))
             <a href="{{ route('tasks.list') }}" wire:navigate class="lt-bottom__item {{ request()->routeIs('tasks.*') ? 'is-active' : '' }}" @if(request()->routeIs('tasks.*')) aria-current="page" @endif>
                 <span class="lt-bottom__icon"><i class="bi bi-list-task" aria-hidden="true"></i></span>
                 <span>Tareas</span>
             </a>
+            @endif
+            @if (app(\App\Services\Experience\PersonalExperience::class)->visible('statistics'))
             <a href="{{ route('statistics') }}" wire:navigate class="lt-bottom__item {{ request()->routeIs('statistics*') ? 'is-active' : '' }}" @if(request()->routeIs('statistics*')) aria-current="page" @endif>
                 <span class="lt-bottom__icon"><i class="bi bi-bar-chart" aria-hidden="true"></i></span>
                 <span>Stats</span>
             </a>
+            @endif
             <button type="button" class="lt-bottom__item" @click="sidebarOpen = true">
                 <span class="lt-bottom__icon"><i class="bi bi-grid" aria-hidden="true"></i></span>
                 <span>Módulos</span>

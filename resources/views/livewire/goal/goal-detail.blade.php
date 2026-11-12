@@ -33,6 +33,17 @@
 
         <div class="goal-detail__grid">
             <main class="goal-detail__main">
+                @if ($feedback)
+                    <div class="md-card-outlined goal-section-card text-break" role="status" aria-live="polite" aria-atomic="true" data-testid="goal-feedback">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi {{ config('modules.goals.icon') }}" aria-hidden="true"></i>
+                            <div class="min-w-0">
+                                <strong class="md-title-small d-block">{{ $feedback['title'] }}</strong>
+                                <p class="md-body-medium mb-0">{{ $feedback['message'] }}</p>
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 @if ($kpi && $progress)
                     @php($expectedPercent = $progress['expectedPercent'] ?? 0)
                     <section class="goal-kpi-card md-card-outlined">

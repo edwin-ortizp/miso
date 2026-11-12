@@ -1,7 +1,7 @@
 {{-- Integrante del día (CHG-043): ejemplar al azar con una frase.
      variant="wall": 5.ª columna de Próximos días en el panel; sin estado vacío.
      variant="card": tarjeta del dashboard, con invitación si aún no hay ejemplares. --}}
-@props(['buddy', 'variant' => 'card', 'mood' => null, 'balls' => 0, 'date' => null, 'checkinDone' => false, 'streak' => null, 'challenge' => null, 'night' => false, 'closeHref' => null, 'closing' => null])
+@props(['buddy', 'variant' => 'card', 'mood' => null, 'balls' => 0, 'date' => null, 'checkinDone' => false, 'streak' => null, 'challenge' => null, 'night' => false, 'closeHref' => null, 'closing' => null, 'checkinAvailable' => true])
 
 @if ($variant === 'hero')
     {{-- CHG-075/081: bienvenida del Inicio. Izquierda: el compañero saluda y pide el check-in.
@@ -40,10 +40,12 @@
                         @endunless
                     @elseif ($closeHref)
                         <span>¿Cerramos el día?</span>
-                        @unless ($checkinDone)
+                        @if ($checkinAvailable && ! $checkinDone)
                             <button type="button" class="md-btn-text game-buddy-hero__cta" wire:click="$set('checkin', true)">Check-in</button>
-                        @endunless
+                        @endif
                         <a href="{{ $closeHref }}" wire:navigate class="md-btn-filled game-buddy-hero__cta" data-testid="day-close-entry"><i class="bi bi-moon-stars" aria-hidden="true"></i> Cerrar el día</a>
+                    @elseif (! $checkinAvailable)
+                        <span>Un paso a tu ritmo. Consulta lo que preparaste para hoy.</span>
                     @elseif ($checkinDone)
                         <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Ya hiciste tu check-in de hoy.</span>
                         <button type="button" class="md-btn-text game-buddy-hero__cta" wire:click="$set('checkin', true)">Editar</button>

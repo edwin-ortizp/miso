@@ -8,6 +8,8 @@ use App\Models\GoalNumericEntry;
 use App\Models\Task;
 use App\Models\TaskAssociation;
 use App\Support\GoalProgress;
+use App\Support\CompanionVoice;
+use App\Livewire\Game\GuardianCard;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -19,6 +21,9 @@ class GoalDetail extends Component
 {
     use \App\Livewire\Concerns\HasReminderDraft;
     public string $goalId;
+
+    /** Confirmación del último evento; no se vuelve a seleccionar durante render. */
+    public ?array $feedback = null;
 
     public bool $showGoalForm = false;
     public bool $showEntryForm = false;
@@ -77,6 +82,7 @@ class GoalDetail extends Component
 
     public function openGoalForm(): void
     {
+        $this->feedback = null;
         $goal = $this->goal();
         $this->loadReminders($goal);
         $kpi = GoalProgress::configuration($goal->numeric_goal);
@@ -97,6 +103,7 @@ class GoalDetail extends Component
 
     public function saveGoal(): void
     {
+        $this->feedback = null;
         DB::transaction(fn () => $this->persistGoalWithReminders());
     }
 
@@ -119,12 +126,25 @@ class GoalDetail extends Component
 
     public function updateStatus(string $status): void
     {
+        $this->feedback = null;
         abort_unless(in_array($status, ['active', 'completed', 'abandoned'], true), 422);
-        $this->goal()->update(['status' => $status]);
+        [$goal, $previous] = DB::transaction(function () use ($status): array {
+            $goal = Goal::query()->lockForUpdate()->findOrFail($this->goalId);
+            $previous = $goal->status;
+            $goal->update(['status' => $status]);
+
+            return [$goal, $previous];
+        });
+        if ($previous === 'active' && $status === 'completed') {
+            $this->showFeedback('Objetivo completado', 'Objetivo completado: '.$goal->title.'.', 'F', $goal);
+        } else {
+            $this->showFeedback('Estado actualizado', 'Estado del objetivo actualizado.');
+        }
     }
 
     public function openEntryForm(?string $id = null): void
     {
+        $this->feedback = null;
         $this->resetEntryForm();
 
         if ($id) {
@@ -140,6 +160,7 @@ class GoalDetail extends Component
 
     public function saveEntry(): void
     {
+        $this->feedback = null;
         $validated = $this->validate([
             'entryText' => ['required', 'string', 'max:5000'],
             'entryDate' => ['required', 'date'],
@@ -148,10 +169,19 @@ class GoalDetail extends Component
 
         $data = ['text' => trim($validated['entryText']), 'date' => $validated['entryDate'], 'is_milestone' => $validated['entryIsMilestone']];
 
-        if ($this->editingEntryId) {
+        $editing = $this->editingEntryId !== null;
+        if ($editing) {
             $this->goalEntries()->findOrFail($this->editingEntryId)->update($data);
         } else {
             $this->goalEntries()->create($data);
+        }
+
+        if (! $editing && $data['is_milestone'] && \Carbon\Carbon::parse($data['date'], config('app.timezone'))->isToday()) {
+            $goal = $this->goal();
+            $this->showFeedback('Hito registrado', 'Hito registrado en '.$goal->title.'.', 'E', $goal);
+        } else {
+            $this->showFeedback($editing ? 'Registro actualizado' : ($data['is_milestone'] ? 'Hito registrado' : 'Avance registrado'),
+                $editing ? 'Registro actualizado.' : ($data['is_milestone'] ? 'Hito registrado.' : 'Avance registrado.'));
         }
 
         $this->showEntryForm = false;
@@ -160,11 +190,13 @@ class GoalDetail extends Component
 
     public function deleteEntry(string $id): void
     {
+        $this->feedback = null;
         $this->goalEntries()->findOrFail($id)->delete();
     }
 
     public function openNumericForm(?string $id = null): void
     {
+        $this->feedback = null;
         abort_unless(GoalProgress::configuration($this->goal()->numeric_goal), 422);
         $this->resetNumericForm();
 
@@ -181,6 +213,7 @@ class GoalDetail extends Component
 
     public function saveNumericEntry(): void
     {
+        $this->feedback = null;
         abort_unless(GoalProgress::configuration($this->goal()->numeric_goal), 422);
         $validated = $this->validate([
             'numericValue' => ['required', 'numeric'],
@@ -188,6 +221,7 @@ class GoalDetail extends Component
             'numericNote' => ['nullable', 'string', 'max:5000'],
         ]);
 
+        $editing = $this->editingNumericId !== null;
         DB::transaction(function () use ($validated): void {
             $data = ['value' => $validated['numericValue'], 'date' => $validated['numericDate'], 'note' => trim($validated['numericNote']) ?: null];
 
@@ -202,10 +236,13 @@ class GoalDetail extends Component
 
         $this->showNumericForm = false;
         $this->resetNumericForm();
+        $this->showFeedback($editing ? 'Registro actualizado' : 'Medición registrada',
+            $editing ? 'Registro actualizado.' : 'Medición registrada.');
     }
 
     public function deleteNumericEntry(string $id): void
     {
+        $this->feedback = null;
         DB::transaction(function () use ($id): void {
             $this->numericEntries()->findOrFail($id)->delete();
             $this->syncCurrentValue();
@@ -214,18 +251,21 @@ class GoalDetail extends Component
 
     public function incrementMotivation(string $kind): void
     {
+        $this->feedback = null;
         abort_unless(in_array($kind, ['positive', 'negative'], true), 422);
         $this->goal()->increment($kind.'_count');
     }
 
     public function openTaskForm(): void
     {
+        $this->feedback = null;
         $this->resetTaskForm();
         $this->showTaskForm = true;
     }
 
     public function saveTask(): void
     {
+        $this->feedback = null;
         $validated = $this->validate([
             'taskTitle' => ['required', 'string', 'max:255'],
             'taskDescription' => ['nullable', 'string', 'max:5000'],
@@ -266,6 +306,14 @@ class GoalDetail extends Component
             'kpi' => GoalProgress::configuration($goal->numeric_goal),
             'progress' => GoalProgress::calculate($goal->numeric_goal, $goal->start_date, $goal->due_date),
         ]);
+    }
+
+    private function showFeedback(string $title, string $message, ?string $group = null, ?Goal $goal = null): void
+    {
+        if ($group && GuardianCard::visibleFor((int) auth()->id(), 'goals')) {
+            $message = CompanionVoice::pick((int) auth()->id(), $group, ['goal' => $goal->title])['text'];
+        }
+        $this->feedback = ['title' => $title, 'message' => $message];
     }
 
     private function goal(): Goal

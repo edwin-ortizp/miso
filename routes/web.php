@@ -94,7 +94,8 @@ if (app()->environment(['local', 'testing'])) {
 // que comprobar.
 Route::view('/offline', 'offline')->name('offline');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->group(function () {
+    Route::get('/bienvenida', \App\Livewire\Onboarding\Welcome::class)->name('onboarding');
     Route::get('/', Dashboard::class)->name('home');
     Route::get('/panel', \App\Livewire\Home\WallPanel::class)->name('panel');
     Route::get('/cierre', \App\Livewire\Home\DayClose::class)->name('day.close');
@@ -178,6 +179,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/categories/{domain}', \App\Livewire\Category\CategorySettings::class)->name('categories.settings');
     Route::get('/settings', SettingsPage::class)->name('settings');
     Route::get('/settings/{section}', SettingsPage::class)
-        ->whereIn('section', ['body', 'security', 'oauth', 'integrations', 'notifications', 'mcp', 'logs', 'about'])
+        ->whereIn('section', ['modules', 'body', 'security', 'oauth', 'integrations', 'notifications', 'mcp', 'logs', 'about'])
         ->name('settings.section');
 });

@@ -4,13 +4,14 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Services\Experience\PersonalExperience;
 use App\Support\DefaultExerciseTypes;
-use App\Support\DefaultHabitDefinitions;
 use App\Support\DefaultMoodStates;
 use App\Support\DefaultTaskCategories;
 use App\Support\DefaultVehicleExpenseCategories;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
@@ -28,23 +29,28 @@ class RegisterController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+        $user = DB::transaction(function () use ($validated) {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
 
-        $this->seedDefaultUserData($user);
+            $this->seedDefaultUserData($user);
+            app(PersonalExperience::class)->begin((int) $user->id, true);
+
+            return $user;
+        });
 
         Auth::login($user);
 
-        return redirect()->route('home');
+        $request->session()->regenerate();
+
+        return redirect()->route('onboarding');
     }
 
     private function seedDefaultUserData(User $user): void
     {
-        DefaultHabitDefinitions::createFor($user);
-
         DefaultExerciseTypes::createFor($user);
 
         $drinkTypes = [

@@ -6,6 +6,7 @@ use App\Models\HabitCompletion;
 use App\Models\HabitDefinition;
 use App\Services\Game\RewardGranter;
 use App\Support\HabitProgress;
+use App\Support\CompanionVoice;
 use App\Support\Habits\HabitActionRunner;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -132,7 +133,7 @@ class HabitGamificationService
             return $this->feedback(
                 kind: 'day',
                 tone: 'celebration',
-                title: 'Día completo',
+                title: 'Hábitos de hoy completos',
                 message: $this->message('day', $selected, $habit),
                 icon: 'bi-stars',
                 selected: $selected,
@@ -180,7 +181,7 @@ class HabitGamificationService
         return $this->feedback(
             kind: 'habit',
             tone: 'success',
-            title: 'Buen paso',
+            title: 'Hábito completado',
             message: $this->message('habit', $selected, $habit, $period),
             icon: 'bi-check2-circle',
             selected: $selected,
@@ -221,8 +222,9 @@ class HabitGamificationService
                 'complete',
                 'celebration',
                 'Ritual completo',
-                'Hoy cumpliste contigo',
-                $this->message('complete', $selected),
+                'Hábitos de hoy completos',
+                ($lastFeedback['kind'] ?? null) === 'day' && ($lastFeedback['date'] ?? null) === $selected->toDateString()
+                    ? $lastFeedback['message'] : $this->message('complete', $selected),
                 'bi-stars',
             );
         }
@@ -308,6 +310,14 @@ class HabitGamificationService
         int $streak = 0,
         array $replacements = [],
     ): string {
+        $voiceGroup = ['habit' => 'B', 'period' => 'C', 'day' => 'D'][$group] ?? null;
+        if ($voiceGroup && \App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'habits')) {
+            return CompanionVoice::pick((int) auth()->id(), $voiceGroup, [
+                'habit' => $habit?->name ?? 'tu rutina',
+                'period' => config("habit_gamification.periods.{$period}.label", 'rutina'),
+            ])['text'];
+        }
+
         $messages = config("habit_gamification.messages.{$group}", []);
         if ($messages === []) {
             return 'Tu progreso quedó registrado.';

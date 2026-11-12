@@ -94,6 +94,11 @@ _Última actualización: 2026-11-11_
 | CHG-087 | S | Ajustes legibles y datos físicos agrupados | done | Cerrado | 2/2 |
 | CHG-088 | S | Preferencias de notificaciones claras y franjas visibles | done | Cerrado | 2/2 |
 | CHG-089 | S | Explicar racha y reto del día en Tu día | done | Cerrado | 3/3 |
+| CHG-090 | M | Voz del compañero y celebraciones con humor contextual | done | Cerrado | 7/7 |
+| CHG-091 | S | Acceso y menu de perfil | done | Cerrado | 2/2 |
+| CHG-092 | M | Modulos e Inicio personalizados | done | Cerrado | 2/2 |
+| CHG-093 | M | Primera experiencia guiada | done | Cerrado | 2/2 |
+| CHG-094 | S | Medicion y prueba de primera experiencia | done | Cerrado | 2/2 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

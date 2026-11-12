@@ -134,12 +134,13 @@ class HabitRoutineTest extends TestCase
         $this->seedSpecies();
         $species = GameSpecies::where('name', 'Gotin')->first();
         GameCompanion::create(['line_key' => 'a', 'species_id' => $species->id, 'first_met_at' => now()]);
-        $this->habit('Lavarme los dientes', '20:00', '2 min');
+        $habit = $this->habit('Lavarme los dientes', '20:00', '2 min');
 
         Livewire::test(HabitTracker::class)
             ->call('startRoutine', 'night')
             ->assertSeeHtml('habit-routine__bubble')
-            ->assertSee('¡Vamos con Lavarme los dientes!');
+            ->assertSee('Lavarme los dientes')
+            ->assertSet('routine.voice.'.$habit->id, fn ($voice) => isset($voice['start'], $voice['middle'], $voice['zero']));
     }
 
     public function test_duration_text_is_parsed_to_seconds(): void

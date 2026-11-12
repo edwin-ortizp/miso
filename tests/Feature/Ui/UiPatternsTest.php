@@ -229,4 +229,22 @@ class UiPatternsTest extends TestCase
 
         $this->render('<x-ui.state variant="content" />');
     }
+
+    public function test_anchored_account_popover_keeps_actions_without_filter_sheet_chrome(): void
+    {
+        $html = $this->render('<x-ui.popover state="open" title="Cuenta" variant="anchored"><a href="/settings">Mi perfil</a></x-ui.popover>');
+        $this->assertStringContainsString('md-popover--anchored', $html);
+        $this->assertStringContainsString('role="dialog"', $html);
+        $this->assertStringContainsString('Mi perfil', $html);
+        $this->assertStringNotContainsString('md-popover__scrim', $html);
+        $this->assertStringNotContainsString('md-popover__handle', $html);
+    }
+
+    public function test_default_popover_preserves_the_responsive_filter_sheet(): void
+    {
+        $html = $this->render('<x-ui.popover state="open" title="Filtros">Opciones</x-ui.popover>');
+        $this->assertStringContainsString('md-popover__scrim', $html);
+        $this->assertStringContainsString('md-popover__handle', $html);
+        $this->assertStringNotContainsString('md-popover--anchored', $html);
+    }
 }

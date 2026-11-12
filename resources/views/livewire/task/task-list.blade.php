@@ -132,6 +132,9 @@
             <div class="text-center py-5" style="color: var(--md-sys-color-on-surface-variant);">
                 <i class="bi bi-list-task" style="font-size: 3rem; opacity: 0.4;"></i>
                 <p class="md-body-large mt-3 mb-0">No hay tareas{{ $activeFilterCount || $search !== '' ? ' con los filtros actuales' : '' }}</p>
+                @if (! $activeFilterCount && $search === '')
+                    <p class="md-body-medium mt-2 mb-0">¿Algo dando vueltas por tu cabeza? Crea una tarea y lo ponemos por escrito.</p>
+                @endif
             </div>
         @endforelse
         </div>

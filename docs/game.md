@@ -422,3 +422,25 @@ La experiencia del ejemplar actual aparece en una tarjeta central bajo el Pokém
 - Si el último día activo anterior a hoy (`user_active_days`) fue hace 3 días o más (`config/engagement.php`), Inicio muestra `Home\WelcomeBack` una sola vez por regreso (`welcome_backs`, único usuario + fecha).
 - Ofrece mover lo atrasado a hoy, a otra fecha o dejarlo sin fecha (con Deshacer), un enlace para marcar hábitos de los días ausentes y +1 vaso de agua.
 - Usuarios sin historial nunca la ven; las ausencias anteriores a CHG-067 no se detectan.
+
+
+## Voz del compañero y celebraciones (CHG-090)
+
+La guía editorial es [UX-WRITING.md](UX-WRITING.md). `config/companion_voice.php` contiene 60 frases locales, en seis grupos: compañero, hábito completado, bloque de hábitos, todos los hábitos del día, hito y objetivo completado. También contiene las variantes de las etapas de rutina. Son textos planos; las acotaciones conservan sus asteriscos literales y los nombres del usuario se muestran escapados.
+
+- **Inicio y panel:** usan el catálogo local sin reseed ni nuevas llamadas a IA. Las frases vigentes del director del propio usuario siguen siendo elegibles; las semillas globales antiguas permanecen en la base de datos, pero no se usan para esta selección. El estado del compañero y su frase se conserva durante los refrescos de pantalla.
+- **Variedad:** `App\Support\CompanionVoice` evita las últimas tres plantillas del mismo grupo cuando hay alternativas. El historial se separa por usuario y vive solo en la sesión: no se comparte entre dispositivos ni modifica registros personales. Sin sesión disponible sigue funcionando la selección, sin historial persistente.
+- **Hábitos:** las celebraciones mantienen la prioridad día/bloque/racha/hábito y las recompensas existentes. El resumen de hábitos no afirma que se completaron todas las tareas del día. Las variantes del personaje se usan cuando hay un guardián disponible; sin él se conserva una confirmación funcional.
+- **Rutina:** las frases se fijan por hábito y etapa; no cambian cada segundo ni al pausar y reanudar. Al llegar a cero el usuario sigue teniendo que pulsar Hecho. Saltar un hábito no lo completa.
+- **Objetivos:** desde el detalle, un hito nuevo de hoy y la transición de activo a completado muestran una confirmación persistente debajo del encabezado. Las ediciones, mediciones e históricos tienen confirmaciones funcionales. Guardar una medición que alcanza el indicador no completa automáticamente el objetivo. Sin compañero o con el juego desactivado no aparece humor del personaje.
+
+Para comprobarlo localmente: abrir Mi día o el panel, pedir Otra frase, completar un hábito y una rutina, registrar un hito de hoy y completar un objetivo desde su detalle. Los avisos de recompensas previos al cambio pueden aparecer además de la confirmación; esta permanece después de cerrarlos. Esta entrega no extiende la nueva voz a notificaciones externas ni a todos los canales de edición.
+
+La validación de CHG-090 usa datos ficticios en pruebas y una SQLite exclusiva de navegador. La bitácora del cambio contiene resultados y fallos preexistentes; la implementación local no implica despliegue.
+
+
+### Estados vacíos incluidos en CHG-090
+
+La ampliación aprobada actualiza las ayudas de los estados vacíos en Hábitos/Ajustes, Objetivos, Tareas, Planes, Recetas y Vehículos. Conserva las acciones, los FAB y los formularios existentes; los asteriscos de las acotaciones son texto visible.
+
+Los mensajes de búsqueda o filtros sin resultados mantienen su propósito de recuperación. En Objetivos y Tareas, los filtros iniciales Activos/Pendientes siguen teniendo su mensaje de filtro; para ver el vacío general se elige Todos. Esta entrega no cambia esa clasificación ni las consultas. Ánimo, diario y salud conservan su redacción actual.

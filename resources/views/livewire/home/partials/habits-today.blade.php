@@ -28,7 +28,7 @@
             @if ($totalHabits > 0 && $completedHabits >= $totalHabits)
                 <i class="home-tone-text--success bi bi-stars"></i> ¡Día completo! Todos tus hábitos están hechos.
             @elseif ($totalHabits === 0)
-                Aún no tienes hábitos definidos.
+                Aún no tienes hábitos definidos. Usa el botón + para agregar uno pequeño y propio.
             @else
                 Nada pendiente en este momento del día. 🎉
             @endif

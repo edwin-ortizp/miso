@@ -42,6 +42,13 @@ class DayClose extends Component
     /** El reto «check-in» del hero pide abrir el check-in; ese vive en Inicio. */
     public bool $checkin = false;
 
+    public ?array $buddy = null;
+
+    public function mount(DailyBuddy $buddies): void
+    {
+        $this->buddy = $buddies->pick((int) auth()->id());
+    }
+
     public function updatedCheckin(): void
     {
         $this->redirectRoute('home', navigate: true);
@@ -120,7 +127,7 @@ class DayClose extends Component
         return $goals;
     }
 
-    public function render(ModuleProgress $progress, ModuleGuardian $guardians, DailyChallenge $challenge, Streak $streak, DailyBuddy $buddies)
+    public function render(ModuleProgress $progress, ModuleGuardian $guardians, DailyChallenge $challenge, Streak $streak)
     {
         $userId = (int) auth()->id();
         $goals = $this->goals($progress, $guardians, $userId);
@@ -129,10 +136,9 @@ class DayClose extends Component
 
         return view('livewire.home.day-close', [
             'date' => ucfirst(self::today()->locale('es')->translatedFormat('l j \d\e F')),
-            'buddy' => $buddies->pick($userId),
             'closing' => [
                 'done' => $closed,
-                'quote' => $closed ? '“Zzz… mañana seguimos.”' : ($allMet ? '“Cumpliste todo lo de hoy. Descansa.”' : '“Buen trabajo hoy. Vamos cerrando.”'),
+                'quote' => $closed ? '“Zzz… mañana seguimos.”' : ($allMet ? '“Completaste las metas de este resumen. Descansa.”' : '“Buen trabajo hoy. Vamos cerrando.”'),
                 'bubble' => $closed ? 'Ya cerraste el día. Descansa.' : 'Revisa tu día y deja mañana listo.',
             ],
             'goals' => $goals,
