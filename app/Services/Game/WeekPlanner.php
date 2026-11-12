@@ -40,6 +40,13 @@ class WeekPlanner
     {
         $start = self::weekStart($date)->toDateString();
 
+        // CHG-095: leer no bloquea. Solo se abre la transacción con candado cuando hay
+        // algo que crear (la semana o un hueco del equipo que sí se puede llenar).
+        $existing = GameWeek::withoutGlobalScopes()->where('user_id', $userId)->whereDate('week_start', $start)->first();
+        if ($existing && $this->teamIsSettled($existing)) {
+            return $existing;
+        }
+
         return DB::transaction(function () use ($userId, $start): GameWeek {
             User::query()->whereKey($userId)->lockForUpdate()->first();
 
@@ -62,6 +69,19 @@ class WeekPlanner
 
             return $week;
         });
+    }
+
+    /** Equipo completo o sin ejemplares para completarlo; deja los integrantes cargados en `members`. */
+    private function teamIsSettled(GameWeek $week): bool
+    {
+        $members = GameTeamMember::withoutGlobalScopes()->where('game_week_id', $week->id)->orderBy('slot')->get();
+        $week->setRelation('members', $members);
+        if ($members->count() >= (int) config('game.team_size')) {
+            return true;
+        }
+
+        return ! GameCompanion::withoutGlobalScopes()->where('user_id', $week->user_id)
+            ->whereNotIn('id', $members->pluck('companion_id'))->exists();
     }
 
     private function fillTeam(GameWeek $week): void

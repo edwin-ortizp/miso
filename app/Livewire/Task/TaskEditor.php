@@ -204,7 +204,8 @@ class TaskEditor extends TaskList
     public function render()
     {
         abort_unless(auth()->check(), 403);
-        $focusAvailable = \Illuminate\Support\Facades\Schema::hasColumn('pomodoro_sessions', 'task_id');
+        // La columna existe desde 2026_11_04_000001: no se consulta el esquema en cada render.
+        $focusAvailable = true;
         return view('livewire.task.task-editor', [
             'defaults' => $this->formDefaults(),
             'statusOptions' => \App\Models\TaskStatus::ensureFor(auth()->id())

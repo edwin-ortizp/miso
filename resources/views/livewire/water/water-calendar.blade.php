@@ -1,11 +1,7 @@
 <x-module-shell module="water">
     <x-slot:controls>
-        <div class="md-date-navigator">
-            <button wire:click="previousMonth" class="md-btn-icon" aria-label="Mes anterior"><i class="bi bi-chevron-left"></i></button>
-            <button wire:click="today" class="md-date-navigator__today">Este mes</button>
-            <span class="md-date-navigator__label text-capitalize">{{ $monthData['label'] }}</span>
-            <button wire:click="nextMonth" class="md-btn-icon" aria-label="Mes siguiente"><i class="bi bi-chevron-right"></i></button>
-        </div>
+        <x-date-navigator previous="previousMonth" next="nextMonth" previous-label="Mes anterior" next-label="Mes siguiente" today-label="Este mes"
+                          nav-label="Navegación por mes" :label="$monthData['label']" />
     </x-slot:controls>
     <div class="md-module-workspace">
         <section class="md-module-primary md-card-elevated water-calendar-card">

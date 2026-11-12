@@ -97,7 +97,7 @@ class NegativeHabitWeekly extends Component
             ->get()
             ->groupBy('habit_id');
 
-        $weeklyCount = NegativeHabitLog::whereBetween('timestamp', [$startTimestamp, $endTimestamp])->count();
+        $weeklyCount = $logs->flatten(1)->count();
 
         return view('livewire.negative-habit.negative-habit-weekly', [
             'habits' => $habits,
@@ -106,6 +106,8 @@ class NegativeHabitWeekly extends Component
             'weekStart' => $weekStart,
             'weekEnd' => $weekEnd,
             'weeklyCount' => $weeklyCount,
+            // CHG-095: el catálogo se lee una vez por render, no dos veces por hábito.
+            'categoryOptions' => \App\Support\CategoryCatalog::options('negative-habits'),
         ]);
     }
 }

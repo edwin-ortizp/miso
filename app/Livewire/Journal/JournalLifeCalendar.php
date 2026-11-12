@@ -38,30 +38,50 @@ class JournalLifeCalendar extends Component
         ]);
     }
 
-    /** @return array<int, array{key: string, iso_year: int, start: Carbon, end: Carbon, entries_count: int, is_future: bool, is_current: bool}> */
+    /**
+     * CHG-095: son miles de celdas. La etiqueta, el nivel y el enlace se arman aquí con
+     * fechas nativas, los meses traducidos una sola vez y una plantilla de URL, en vez de
+     * dos `translatedFormat` y un `route()` por celda en la vista.
+     *
+     * @return array<int, array{key: string, iso_year: int, entries_count: int, is_future: bool, is_current: bool, level: int, label: string, href: ?string}>
+     */
     private function buildWeekCells(array $bounds): array
     {
+        $months = [];
+        for ($month = 1; $month <= 12; $month++) {
+            $months[$month] = Carbon::create(2001, $month, 1)->translatedFormat('M');
+        }
+        $hrefTemplate = route('journal.life.week', ['week' => '__WEEK__']);
+        $day = fn (\DateTimeImmutable $date) => $date->format('d').' '.$months[(int) $date->format('n')];
+
         $entriesByWeek = JournalEntry::whereBetween('date', [
             $bounds['start']->toDateString(),
             $bounds['end']->copy()->endOfWeek(Carbon::SUNDAY)->toDateString(),
         ])->get()->countBy(fn (JournalEntry $entry) => sprintf('%d-W%02d', $entry->date->isoWeekYear, $entry->date->isoWeek));
 
-        $currentWeek = now()->startOfWeek(Carbon::MONDAY);
+        $currentWeek = now()->startOfWeek(Carbon::MONDAY)->toDateString();
+        $last = $bounds['end']->toDateString();
         $cells = [];
-        $cursor = $bounds['start']->copy();
+        // `boundsFor` entrega lunes: cada celda va de lunes a domingo.
+        $cursor = new \DateTimeImmutable($bounds['start']->toDateString());
 
-        while ($cursor->lte($bounds['end'])) {
-            $key = sprintf('%d-W%02d', $cursor->isoWeekYear, $cursor->isoWeek);
+        while (($monday = $cursor->format('Y-m-d')) <= $last) {
+            $isoYear = (int) $cursor->format('o');
+            $key = sprintf('%d-W%02d', $isoYear, (int) $cursor->format('W'));
+            $count = $entriesByWeek->get($key, 0);
+            $isFuture = $monday > $currentWeek;
             $cells[] = [
                 'key' => $key,
-                'iso_year' => $cursor->isoWeekYear,
-                'start' => $cursor->copy(),
-                'end' => $cursor->copy()->endOfWeek(Carbon::SUNDAY),
-                'entries_count' => $entriesByWeek->get($key, 0),
-                'is_future' => $cursor->gt($currentWeek),
-                'is_current' => $cursor->equalTo($currentWeek),
+                'iso_year' => $isoYear,
+                'entries_count' => $count,
+                'is_future' => $isFuture,
+                'is_current' => $monday === $currentWeek,
+                'level' => $count === 0 ? 0 : ($count <= 3 ? 1 : ($count <= 6 ? 2 : 3)),
+                'label' => sprintf('Semana %s, del %s al %s, %d día%s con entrada%s', $key, $day($cursor), $day($cursor->modify('+6 days')),
+                    $count, $count === 1 ? '' : 's', $isFuture ? '. Aún no disponible.' : ''),
+                'href' => $isFuture ? null : str_replace('__WEEK__', $key, $hrefTemplate),
             ];
-            $cursor->addWeek();
+            $cursor = $cursor->modify('+7 days');
         }
 
         return $cells;

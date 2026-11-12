@@ -9,8 +9,23 @@ class GameSettings
 {
     public const MODULE = 'game';
 
+    /** @var array<int, array<string, mixed>> Lecturas ya resueltas en esta petición (CHG-095). */
+    private array $resolved = [];
+
+    /** Olvida lo leído; lo llaman `save()` y los eventos de `ModuleSetting`. */
+    public function flush(): void
+    {
+        $this->resolved = [];
+    }
+
     /** @return array{enabled: bool, sources: array<string, bool>, daily_limit: int, pity_threshold: int, rarity_weights: array<string, int>} */
     public function for(int $userId): array
+    {
+        return $this->resolved[$userId] ??= $this->read($userId);
+    }
+
+    /** @return array<string, mixed> */
+    private function read(int $userId): array
     {
         $stored = ModuleSetting::withoutGlobalScopes()
             ->where('user_id', $userId)->where('module', self::MODULE)->first()?->settings;
@@ -48,6 +63,7 @@ class GameSettings
         $setting->user_id = $userId;
         $setting->settings = array_replace($this->for($userId), $settings);
         $setting->save();
+        $this->flush();
     }
 
     private function clamp(string $key, int $value): int

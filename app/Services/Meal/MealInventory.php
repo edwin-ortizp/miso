@@ -215,7 +215,11 @@ class MealInventory
     {
         $factor = $portions / max((float) ($recipe->servings ?: 1), 0.01);
         $rows = [];
-        foreach ($recipe->recipeIngredients()->where('user_id', $userId)->with('shoppingItem')->get() as $ingredient) {
+        // CHG-095: si quien llama ya cargó los ingredientes (listados), no se vuelven a consultar.
+        $ingredients = $recipe->relationLoaded('recipeIngredients')
+            ? $recipe->recipeIngredients->filter(fn ($ingredient) => (int) $ingredient->user_id === $userId)
+            : $recipe->recipeIngredients()->where('user_id', $userId)->with('shoppingItem')->get();
+        foreach ($ingredients as $ingredient) {
             $product = $ingredient->shoppingItem;
             $quantity = $product && (int) $product->user_id === $userId && $product->base_unit && $ingredient->quantity !== null
                 ? UnitConverter::toBase((float) $ingredient->quantity * $factor, $ingredient->unit, $product->base_unit, $product->grams_per_piece) : null;

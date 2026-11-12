@@ -40,6 +40,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(\App\Services\Experience\PersonalExperience::class);
         // CHG-068: canal push; las pruebas lo reemplazan por un doble.
         $this->app->bind(\App\Services\Notifications\Push\PushGateway::class, \App\Services\Notifications\Push\WebPushGateway::class);
+        // CHG-095: una instancia por petición para no repetir la misma lectura en cada componente.
+        $this->app->scoped(\App\Services\Game\GameSettings::class);
+        $this->app->scoped(\App\Services\Game\ModuleGuardian::class);
         $this->app->singleton(
             HabitActionRegistry::class,
             fn (): HabitActionRegistry => new HabitActionRegistry(config('habit_actions.actions', [])),
@@ -62,6 +65,19 @@ class AppServiceProvider extends ServiceProvider
         foreach ([\App\Models\HabitCompletion::class, Task::class, \App\Models\GoalEntry::class, \App\Models\GoalNumericEntry::class] as $source) {
             $source::observe(\App\Observers\ExperienceActivityObserver::class);
         }
+        // CHG-095: lo memorizado en la petición se olvida en cuanto cambia su origen.
+        $forgetGameReads = static function (): void {
+            foreach ([\App\Services\Game\GameSettings::class, \App\Services\Game\ModuleGuardian::class] as $service) {
+                if (app()->resolved($service)) {
+                    app($service)->flush();
+                }
+            }
+        };
+        foreach ([\App\Models\ModuleSetting::class, \App\Models\Game\GameCompanion::class, \App\Models\Game\GameSpecies::class, \App\Models\Game\GameWeek::class, \App\Models\Game\GameTeamMember::class] as $gameSource) {
+            $gameSource::saved($forgetGameReads);
+            $gameSource::deleted($forgetGameReads);
+        }
+
         Task::observe(TaskCalDavObserver::class);
         Task::observe(\App\Observers\GameTaskObserver::class);
         \App\Models\Game\GameDiscovery::observe(\App\Observers\Game\AlbumObserver::class);

@@ -35,7 +35,9 @@ class GenerateNotifications
                     $created++;
                 }
             };
-            if ($preferences['birthdays']) {
+            // CHG-095: antes de las 9:00 `$record` descarta todo; no se recorren las fuentes en vano.
+            $due = ! $available->isFuture();
+            if ($due && $preferences['birthdays']) {
                 Relationship::withoutGlobalScopes()->where('user_id', $user->id)->whereNotNull('birthday_month')->whereNotNull('birthday_day')
                     ->eachById(function ($person) use ($today, $record) {
                         if ($person->birthday()?->isToday($today)) {
@@ -43,11 +45,11 @@ class GenerateNotifications
                         }
                     });
             }
-            if ($preferences['tasks']) {
+            if ($due && $preferences['tasks']) {
                 Task::withoutGlobalScopes()->where('user_id', $user->id)->where('completed', false)->where('is_recurrence_history', false)
                     ->whereDate('end_date', $tomorrow)->eachById(fn ($task) => $record($task, 'task_due', 'Tienes una tarea que vence mañana.'));
             }
-            if ($preferences['plans']) {
+            if ($due && $preferences['plans']) {
                 Plan::withoutGlobalScopes()->where('user_id', $user->id)->where('status', 'scheduled')->whereDate('scheduled_on', $tomorrow)
                     ->eachById(fn ($plan) => $record($plan, 'plan_due', 'Tienes un plan programado para mañana.'));
             }
@@ -55,7 +57,7 @@ class GenerateNotifications
                 ->eachById(function ($reminder) use ($user, $helper, &$created) {
                     $source = $helper->find($user->id, $reminder->source_type, $reminder->source_id);
                     if ($source) {
-                        $notice = app(ManageReminders::class)->materialize($source, $reminder);
+                        $notice = app(ManageReminders::class)->materialize($source, $reminder, $user);
                         if ($notice) {
                             $created++;
                         }

@@ -13,7 +13,6 @@ use App\Models\TaskStatus;
 use App\Services\TaskGamificationService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
@@ -421,13 +420,14 @@ class TaskList extends Component
         $todayStats = $this->categoryStats(today()->startOfDay(), today()->endOfDay());
         $weekStats = $this->categoryStats(now()->startOfWeek(), now()->endOfWeek());
 
-        $statusOptions = TaskStatus::query()->where('user_id', auth()->id())->ordered()->pluck('name', 'id')->all();
+        $statusOptions = $this->taskStatuses()->pluck('name', 'id')->all();
 
         return view('livewire.task.task-list', [
             'tasks' => $tasks,
             'sorts' => self::SORTS,
             'statusOptions' => $statusOptions,
-            'focusAvailable' => Schema::hasColumn('pomodoro_sessions', 'task_id'),
+            // La columna existe desde 2026_11_04_000001: no se consulta el esquema en cada render.
+            'focusAvailable' => true,
             'activeFilters' => $this->taskFilterChips(),
             'pendingCount' => (int) $stats->pending_count,
             'completedCount' => (int) $stats->completed_count,

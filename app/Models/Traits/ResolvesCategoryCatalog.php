@@ -15,7 +15,11 @@ trait ResolvesCategoryCatalog
                 $record->user_id ??= auth()->id();
             }
             // Imports and existing integrations can still supply stable legacy keys.
-            if ($record->user_id && filled($record->category) && Schema::hasTable('user_categories')) {
+            // La comprobación protege a las migraciones antiguas que guardan estos modelos antes
+            // de que exista el catálogo. CHG-095: una vez vista la tabla no se vuelve a preguntar
+            // al esquema en cada guardado (solo se recuerda el «sí», que ya no cambia).
+            static $catalogReady = false;
+            if ($record->user_id && filled($record->category) && ($catalogReady = $catalogReady || Schema::hasTable('user_categories'))) {
                 $domain = $record->categoryDomain();
                 $catalog = UserCategory::withoutGlobalScopes()->where('user_id', $record->user_id)->where('domain', $domain);
                 if (! (clone $catalog)->where('key', $record->category)->exists()) {

@@ -234,8 +234,11 @@ trait FiltersTasks
         }
     }
 
+    /** CHG-095: una lectura por petición del componente (los filtros la piden varias veces). */
+    private $taskStatusCatalog = null;
+
     private function taskStatuses()
     {
-        return TaskStatus::query()->where('user_id', auth()->id())->ordered()->get();
+        return $this->taskStatusCatalog ??= TaskStatus::query()->where('user_id', auth()->id())->ordered()->get();
     }
 }

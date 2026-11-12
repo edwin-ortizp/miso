@@ -20,6 +20,19 @@ class ModuleGuardian
         private readonly WeekPlanner $planner,
     ) {}
 
+    /** @var array<int, \Illuminate\Support\Collection> Ejemplares por usuario, dentro de la petición (CHG-095). */
+    private array $rosters = [];
+
+    /** @var array<int, \Illuminate\Support\Collection> Equipo de la semana por usuario, dentro de la petición. */
+    private array $teams = [];
+
+    /** Olvida lo leído; lo llaman los eventos de ejemplares, especies, semana y equipo. */
+    public function flush(): void
+    {
+        $this->rosters = [];
+        $this->teams = [];
+    }
+
     /** @return array<string, mixed>|null null = juego apagado o sin ejemplares */
     public function pick(int $userId, string $module): ?array
     {
@@ -27,9 +40,8 @@ class ModuleGuardian
             return null;
         }
 
-        $companions = GameCompanion::withoutGlobalScopes()->where('user_id', $userId)
-            ->whereHas('species')->with('species')
-            ->orderByDesc('level')->orderBy('created_at')->orderBy('id')->get();
+        // Una página pide el guardián varias veces (franja, panel, visibilidad): se lee una sola.
+        $companions = $this->rosters[$userId] ??= $this->companions($userId);
         if ($companions->isEmpty()) {
             return null;
         }
@@ -39,7 +51,9 @@ class ModuleGuardian
             ->contains(fn ($type) => in_array(Str::slug((string) $type), $affinity, true));
 
         // CHG-066: el equipo de la semana tiene prioridad; sin equipo, toda la colección.
-        $team = $this->teamMembers($userId);
+        // Se calcula antes de guardarlo: armar la semana por primera vez dispara `flush()`.
+        $team = $this->teams[$userId] ?? $this->teamMembers($userId);
+        $this->teams[$userId] = $team;
         $pool = $team->isNotEmpty()
             ? $companions->filter(fn ($c) => $team->has($c->id))->values()
             : $companions;
@@ -63,6 +77,14 @@ class ModuleGuardian
         ];
     }
 
+    /** @return \Illuminate\Support\Collection<int, GameCompanion> */
+    private function companions(int $userId): \Illuminate\Support\Collection
+    {
+        return GameCompanion::withoutGlobalScopes()->where('user_id', $userId)
+            ->whereHas('species')->with('species')
+            ->orderByDesc('level')->orderBy('created_at')->orderBy('id')->get();
+    }
+
     /** @return \Illuminate\Support\Collection<int, GameTeamMember> integrantes por companion_id */
     private function teamMembers(int $userId): \Illuminate\Support\Collection
     {
@@ -74,8 +96,12 @@ class ModuleGuardian
             return collect();
         }
 
-        return GameTeamMember::withoutGlobalScopes()->where('game_week_id', $week->id)
-            ->get()->keyBy('companion_id');
+        // `forWeek` ya deja los integrantes cargados cuando no tuvo que crear nada.
+        $members = $week->relationLoaded('members')
+            ? $week->members
+            : GameTeamMember::withoutGlobalScopes()->where('game_week_id', $week->id)->get();
+
+        return $members->keyBy('companion_id');
     }
 
     /** Frase según el avance; `$care` (evento de salud en seguimiento) tiene prioridad. */

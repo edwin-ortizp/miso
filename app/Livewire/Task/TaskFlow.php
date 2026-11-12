@@ -160,12 +160,20 @@ class TaskFlow extends Component
 
     public function render()
     {
+        // CHG-095: un solo conteo agrupado decide qué carriles existen; los vacíos no consultan.
+        $totals = [];
+        foreach ($this->applyTaskFilters(Task::query())->toBase()
+            ->selectRaw('category, completed, count(*) as total')->groupBy('category', 'completed')->get() as $row) {
+            // `null` (sin categoría) tiene su propia clave: no se mezcla con una categoría vacía.
+            $totals[$row->category === null ? "\0" : $row->category][(int) (bool) $row->completed] = (int) $row->total;
+        }
+
         $lanes = collect($this->categories)
-            ->map(fn (string $label, string $key) => $this->buildLane($key, $label))
+            ->map(fn (string $label, string $key) => $this->buildLane($key, $label, null, $totals[$key] ?? []))
             ->filter()
             ->values();
 
-        $uncategorized = $this->buildLane(null, 'Sin categoría', 'uncategorized');
+        $uncategorized = $this->buildLane(null, 'Sin categoría', 'uncategorized', $totals["\0"] ?? []);
         if ($uncategorized) {
             $lanes->push($uncategorized);
         }
@@ -173,25 +181,26 @@ class TaskFlow extends Component
         return view('livewire.task.task-flow', ['lanes' => $lanes]);
     }
 
-    private function buildLane(?string $category, string $label, ?string $laneKey = null): ?array
+    /** @param array<int, int> $totals conteo del carril: [0 => pendientes, 1 => completadas] */
+    private function buildLane(?string $category, string $label, ?string $laneKey, array $totals): ?array
     {
         $laneKey ??= $category;
-        $categoryTasks = $this->tasksForCategory($category);
-        $pendingTasks = (clone $categoryTasks)->where('completed', false);
-        $completedTasks = (clone $categoryTasks)->where('completed', true);
-        $pendingTotal = (clone $pendingTasks)->count();
-        $completedTotal = (clone $completedTasks)->count();
+        $pendingTotal = $totals[0] ?? 0;
+        $completedTotal = $totals[1] ?? 0;
 
         if ($pendingTotal === 0 && $completedTotal === 0) {
             return null;
         }
 
-        $tasks = $pendingTasks
+        $categoryTasks = $this->tasksForCategory($category);
+        $tasks = $pendingTotal === 0 ? $categoryTasks->getModel()->newCollection() : (clone $categoryTasks)
+            ->where('completed', false)
             ->orderBy('flow_position')
             ->orderBy('id')
             ->limit($this->laneLimit($laneKey))
             ->get();
-        $completedHistory = $completedTasks
+        $completedHistory = $completedTotal === 0 ? $categoryTasks->getModel()->newCollection() : (clone $categoryTasks)
+            ->where('completed', true)
             ->orderByDesc('completed_at')
             ->orderByDesc('id')
             ->get();

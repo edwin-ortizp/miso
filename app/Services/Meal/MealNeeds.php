@@ -7,13 +7,21 @@ use App\Models\MealPreparation;
 use App\Models\Recipe;
 use App\Models\ShoppingItem;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 class MealNeeds
 {
-    public function aggregate(int $userId, array $ingredients): array
+    /**
+     * CHG-095: los productos se cargan en una sola consulta (con sus ofertas), no uno por
+     * ingrediente. `$products` permite compartir esa carga entre varias llamadas.
+     */
+    public function aggregate(int $userId, array $ingredients, ?Collection $products = null): array
     {
-        return collect($ingredients)->groupBy('shopping_item_id')->map(function ($rows, $id) use ($userId) {
-            $product = ShoppingItem::where('user_id', $userId)->withOffers()->find($id);
+        $groups = collect($ingredients)->groupBy('shopping_item_id');
+        $products ??= $this->products($userId, $groups->keys()->all());
+
+        return $groups->map(function ($rows, $id) use ($products) {
+            $product = $products->get($id);
             $incomplete = ! $product || $rows->contains(fn ($row) => $row['quantity'] === null || $row['unit'] !== $product->base_unit);
             $quantity = $incomplete ? null : round($rows->sum('quantity'), 3);
             $missing = $quantity === null ? null : round(max(0, $quantity - $product->stock), 3);
@@ -26,17 +34,25 @@ class MealNeeds
         })->values()->all();
     }
 
+    /** @return Collection<int|string, ShoppingItem> productos del usuario con ofertas, por id */
+    private function products(int $userId, array $ids): Collection
+    {
+        $ids = array_values(array_unique(array_filter($ids, fn ($id) => $id !== null && $id !== '')));
+
+        return $ids === [] ? collect() : ShoppingItem::where('user_id', $userId)->withOffers()->findMany($ids)->keyBy('id');
+    }
+
     public function preview(int $userId, string $since, string $until): array
     {
         $inventory = app(MealInventory::class);
         $rows = [];
         $warnings = [];
         $entries = MealPlanEntry::where('user_id', $userId)->where('status', 'planned')->whereDate('date', '>=', $since)->whereDate('date', '<=', $until)
-            ->with(['items.recipe', 'items.preparation'])->get();
+            ->with(['items.recipe' => fn ($query) => $query->withCount('recipeIngredients'), 'items.preparation'])->get();
         foreach ($entries as $entry) {
             $rows = array_merge($rows, $inventory->entryIngredients($userId, $entry, false));
             foreach ($entry->items as $item) {
-                if (! $item->preparation_id && (($item->recipe_id && $item->recipe->recipeIngredients()->count() === 0) || (! $item->recipe_id && ! $item->ingredients))) {
+                if (! $item->preparation_id && (($item->recipe_id && (int) $item->recipe->recipe_ingredients_count === 0) || (! $item->recipe_id && ! $item->ingredients))) {
                     $warnings[] = ($item->recipe?->name ?? $item->name).': sin ingredientes enlazados';
                 }
             }
@@ -53,9 +69,14 @@ class MealNeeds
         $preparations = MealPreparation::where('user_id', $userId)->where('cancelled', false)->whereNotNull('consume_by')->whereDate('consume_by', '<=', $limit->toDateString())->orderBy('consume_by')->get()
             ->filter(fn ($p) => $p->remaining() > 0)->map(fn ($p) => $p->summary())->values();
         $inventory = app(MealInventory::class);
-        $recipes = Recipe::where('user_id', $userId)->orderBy('name')->get()->map(function ($recipe) use ($userId, $portions, $products, $inventory) {
-            $rows = $inventory->recipeIngredients($userId, $recipe, $portions, false);
-            $needs = $this->aggregate($userId, $rows);
+        // CHG-095: ingredientes y productos de todas las recetas en consultas por lote.
+        $catalog = Recipe::where('user_id', $userId)->orderBy('name')
+            ->with(['recipeIngredients' => fn ($query) => $query->where('user_id', $userId)->with('shoppingItem')])->get();
+        $rowsByRecipe = $catalog->mapWithKeys(fn ($recipe) => [$recipe->id => $inventory->recipeIngredients($userId, $recipe, $portions, false)]);
+        $offers = $this->products($userId, $rowsByRecipe->flatten(1)->pluck('shopping_item_id')->all());
+        $recipes = $catalog->map(function ($recipe) use ($userId, $portions, $products, $rowsByRecipe, $offers) {
+            $rows = $rowsByRecipe[$recipe->id];
+            $needs = $this->aggregate($userId, $rows, $offers);
             $incomplete = $rows === [] || collect($needs)->contains(fn ($row) => $row['missing'] === null);
 
             return ['id' => $recipe->id, 'name' => $recipe->name, 'prep_time' => $recipe->prep_time, 'portions' => $portions, 'can_cook' => ! $incomplete && collect($needs)->every(fn ($row) => $row['missing'] === 0.0),

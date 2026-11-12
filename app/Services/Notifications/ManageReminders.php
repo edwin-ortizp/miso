@@ -104,7 +104,8 @@ class ManageReminders
         }
     }
 
-    public function materialize(Model $source, Reminder $reminder): ?UserNotification
+    /** `$owner` evita volver a cargar al usuario por cada recordatorio cuando quien llama ya lo tiene. */
+    public function materialize(Model $source, Reminder $reminder, ?User $owner = null): ?UserNotification
     {
         $helper = app(NotificationSource::class);
         $anchor = $helper->anchor($source);
@@ -117,7 +118,7 @@ class ManageReminders
             return null;
         }
 
-        return app(CreateNotification::class)->create(User::findOrFail($source->user_id), $source,
+        return app(CreateNotification::class)->create($owner && (int) $owner->id === (int) $source->user_id ? $owner : User::findOrFail($source->user_id), $source,
             'reminder', $reminder->id.':'.$scheduled->format('Y-m-d H:i:s'),
             'Recordatorio', 'Tienes un recordatorio de '.match ($source::class) {
                 \App\Models\Task::class => 'una tarea.', \App\Models\Plan::class => 'un plan.', default => 'una meta.',

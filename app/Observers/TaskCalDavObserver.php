@@ -12,12 +12,16 @@ class TaskCalDavObserver
         $this->record($task, 'created');
     }
 
-    public function updated(Task $task): void
+    /** CHG-095: la revisión viaja en el mismo UPDATE del guardado (antes era un segundo UPDATE). */
+    public function updating(Task $task): void
     {
         if (! $task->is_recurrence_history) {
-            $task->forceFill(['caldav_revision' => max(1, (int) $task->caldav_revision + 1)])->saveQuietly();
+            $task->forceFill(['caldav_revision' => max(1, (int) $task->caldav_revision + 1)]);
         }
+    }
 
+    public function updated(Task $task): void
+    {
         $this->record($task, 'modified');
     }
 

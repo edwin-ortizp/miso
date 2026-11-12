@@ -1,15 +1,15 @@
 <x-module-shell module="journal" class="life-calendar">
     @if ($isConfigured)
-        <x-slot:controls><a href="#life-year-{{ $currentYear }}" class="md-btn-tonal"><i class="bi bi-crosshair"></i> Ir a hoy</a></x-slot:controls>
+        <x-slot:controls><x-ui.action variant="tonal" icon="bi-crosshair" :href="'#life-year-'.$currentYear">Ir a hoy</x-ui.action></x-slot:controls>
     @endif
 
     @if (! $isConfigured)
-        <section class="md-card-outlined life-calendar-empty text-center">
-            <div class="life-calendar-empty__icon"><i class="bi bi-hourglass-split"></i></div>
-            <h2 class="md-title-large">Tu calendario todavía no tiene límites</h2>
-            <p class="md-body-medium">Agrega tu fecha de nacimiento y una expectativa de vida personal para dibujar las semanas de tu vida.</p>
-            <a href="{{ route('settings') }}" class="md-btn-filled"><i class="bi bi-gear"></i> Configurar perfil</a>
-        </section>
+        <x-ui.state variant="empty" icon="bi-hourglass-split" title="Tu calendario todavía no tiene límites"
+                    message="Agrega tu fecha de nacimiento y una expectativa de vida personal para dibujar las semanas de tu vida.">
+            <x-slot:actions>
+                <x-ui.action variant="filled" icon="bi-gear" :href="route('settings')" wire:navigate>Configurar perfil</x-ui.action>
+            </x-slot:actions>
+        </x-ui.state>
     @else
         <section class="life-calendar-summary mb-3" aria-label="Resumen de semanas">
             <div><span>Por vivir</span><strong>{{ number_format($remainingWeeks) }}</strong><small>semanas</small></div>
@@ -20,7 +20,7 @@
         <section class="md-card-outlined life-calendar-card" aria-label="Calendario completo de vida">
             <div class="life-calendar-card__heading">
                 <div>
-                    <span class="life-calendar-eyebrow"><i class="bi bi-map"></i> MAPA COMPLETO</span>
+                    <span class="life-calendar-eyebrow"><i class="bi bi-map" aria-hidden="true"></i> MAPA COMPLETO</span>
                     <h2 class="md-title-medium mb-0">Tus semanas, de principio a fin</h2>
                 </div>
                 <div class="life-calendar-legend" aria-label="Leyenda">
@@ -39,14 +39,10 @@
                             <span class="life-calendar-year" role="rowheader">{{ $year }}</span>
                             <div class="life-calendar-cells">
                                 @foreach ($weeks as $cell)
-                                    @php
-                                        $level = $cell['entries_count'] === 0 ? 0 : ($cell['entries_count'] <= 3 ? 1 : ($cell['entries_count'] <= 6 ? 2 : 3));
-                                        $label = sprintf('Semana %s, del %s al %s, %d día%s con entrada%s', $cell['key'], $cell['start']->translatedFormat('d M'), $cell['end']->translatedFormat('d M'), $cell['entries_count'], $cell['entries_count'] === 1 ? '' : 's', $cell['is_future'] ? '. Aún no disponible.' : '');
-                                    @endphp
                                     @if ($cell['is_future'])
-                                        <span class="life-calendar-cell level-{{ $level }} is-future" role="gridcell" aria-label="{{ $label }}" title="{{ $label }}"></span>
+                                        <span class="life-calendar-cell level-{{ $cell['level'] }} is-future" role="gridcell" aria-label="{{ $cell['label'] }}" title="{{ $cell['label'] }}"></span>
                                     @else
-                                        <a href="{{ route('journal.life.week', ['week' => $cell['key']]) }}" class="life-calendar-cell level-{{ $level }} {{ $cell['is_current'] ? 'is-current' : '' }}" role="gridcell" aria-label="{{ $label }}" title="{{ $label }}"></a>
+                                        <a href="{{ $cell['href'] }}" class="life-calendar-cell level-{{ $cell['level'] }} {{ $cell['is_current'] ? 'is-current' : '' }}" role="gridcell" aria-label="{{ $cell['label'] }}" title="{{ $cell['label'] }}"></a>
                                     @endif
                                 @endforeach
                             </div>
@@ -55,7 +51,7 @@
                 </div>
             </div>
 
-            <p class="life-calendar-caption mb-0"><i class="bi bi-cursor"></i> Selecciona una semana disponible para abrir su vista detallada.</p>
+            <p class="life-calendar-caption mb-0"><i class="bi bi-cursor" aria-hidden="true"></i> Selecciona una semana disponible para abrir su vista detallada.</p>
         </section>
     @endif
 </x-module-shell>

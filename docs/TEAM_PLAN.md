@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-11_
+_Última actualización: 2026-11-12_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -99,6 +99,7 @@ _Última actualización: 2026-11-11_
 | CHG-092 | M | Modulos e Inicio personalizados | done | Cerrado | 2/2 |
 | CHG-093 | M | Primera experiencia guiada | done | Cerrado | 2/2 |
 | CHG-094 | S | Medicion y prueba de primera experiencia | done | Cerrado | 2/2 |
+| CHG-095 | M | Optimización de backend: consultas repetidas y código sin uso | in-progress | En desarrollo | 0/9 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
