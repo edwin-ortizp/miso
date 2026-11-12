@@ -75,7 +75,7 @@
                             @endforeach
                         </dd></div>
                     @endif
-                    @if ($plan->category)<div><dt>Categoría</dt><dd>{{ $plan->category }}</dd></div>@endif
+                    @if ($plan->category || $plan->planCategory)<div><dt>Categoría</dt><dd><x-ui.catalog-chip tone="accent" :icon="$plan->planCategory?->icon ?: 'bi-tag'">{{ $plan->planCategory?->path_label ?: $plan->category }}</x-ui.catalog-chip></dd></div>@endif
                     @if ($plan->city)<div><dt>Ciudad</dt><dd>{{ $plan->city }}</dd></div>@endif
                     @if ($plan->scheduled_on)<div><dt>Fecha</dt><dd>{{ $plan->scheduled_on->translatedFormat('j M Y') }}@if ($plan->ends_on) – {{ $plan->ends_on->translatedFormat('j M Y') }}@endif</dd></div>@endif
                     @if ($plan->address)<div class="plan-data__full"><dt>Dirección</dt><dd>{{ $plan->address }}</dd></div>@endif

@@ -9,7 +9,8 @@
     {{-- CHG-075: bienvenida con el compañero, la fecha y el check-in de 20 s (CHG-069) como su pedido. --}}
     <x-game.daily-buddy variant="hero" class="mb-3" :buddy="$buddy"
         :date="ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F'))"
-        :checkin-done="$lastMood && $lastEnergy" :streak="$streak" :challenge="$challenge" />
+        :checkin-done="$lastMood && $lastEnergy" :streak="$streak" :challenge="$challenge"
+        :night="$isNight" :close-href="$dayCloseHref" />
     @include('livewire.home.partials.checkin-sheet')
 
     @if ($vehicleAlerts->isNotEmpty())

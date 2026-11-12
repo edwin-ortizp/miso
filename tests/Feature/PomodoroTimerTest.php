@@ -106,7 +106,7 @@ class PomodoroTimerTest extends TestCase
         Livewire::actingAs($user)
             ->test(PomodoroTimer::class)
             ->set('selectedDate', '2026-07-12')
-            ->assertSee('Meta: 120 min')
+            ->assertSee('Meta del 12 de julio')
             ->assertSee('50%');
 
         Livewire::actingAs($user)

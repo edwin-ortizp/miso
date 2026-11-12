@@ -312,7 +312,23 @@ Cuenta los días seguidos en que la persona cuida varias partes de su vida. No r
 - **Hitos:** 3, 7, 14, 30, 60, 100, 180 y 365 días (`game.streak.milestones`). Cada uno paga una ball extra una sola vez en la vida (clave `streak:{n}`). El aviso resume las dos áreas más constantes («5 días con hábitos, 4 con tareas»). Se pagan al abrir el Inicio.
 - **Dónde se ve:** una línea en la cabecera del Inicio (`x-game.streak-line`) y la tarjeta «Tu racha» en Balls (`x-game.streak-card`, con los últimos 7 días). Con el juego apagado o la racha oculta (`streak_visible`) no se muestra ni paga hitos.
 - **Regreso (CHG-072):** el día de la bienvenida no se menciona la racha rota.
+- **Sin racha pero con acciones hoy (CHG-070):** la línea dice «A N acciones de tu racha» y «Llevas X de Y hoy. Aún estás a tiempo.». «Empieza hoy» queda solo para 0 acciones.
 - Zona horaria: la de la app (America/Bogota). Servicio: `App\Services\Game\Streak`.
+
+## Cierre del día (CHG-070)
+
+Ritual nocturno sin recompensa ni culpa: ver cómo fue el día y dejar mañana listo.
+
+- **Pantalla `/cierre`** (`App\Livewire\Home\DayClose`, shell `home`, arquetipo `guided-flow`):
+  - **Hero del compañero en modo noche** (`x-game.daily-buddy` con `night` y `closing`): frase de cierre, «zzz», racha y reto, y el botón «Listo, terminé el día».
+  - **Quedó pendiente:** solo las tareas que vencen hoy, con «Mañana» por tarea, «Pasar todo a mañana» y Deshacer (`App\Actions\Task\ShiftTasksToDate`, compartida con la bienvenida de CHG-072). En escritorio es la columna ancha; sin pendientes, la columna ancha es el resumen.
+  - **Así te fue hoy:** agua, ejercicio, foco, hábitos y tareas según `ModuleProgress`, con el guardián del módulo y su ícono y color (`config/modules.php` + `data-module`). Se omiten las metas en 0.
+- **Cerrar:** «Listo, terminé el día» guarda `user_active_days.closed_at` (`UserActiveDay::closeDay`, idempotente). No toca XP, racha ni reto.
+- **Entradas:**
+  - En Inicio, de 19:00 a 23:59 (Bogotá), el hero pasa a noche y ofrece «Cerrar el día» mientras el día no esté cerrado.
+  - El aviso push de la franja Noche abre `/cierre?via=close`.
+  - No hay ítem de menú: Mi día ya cubre lo del día.
+- **Pruebas:** `php artisan test --filter=DayCloseTest` y `npx playwright test -c tests/Browser/day-close.config.js`.
 
 ## Reto del día (CHG-077)
 

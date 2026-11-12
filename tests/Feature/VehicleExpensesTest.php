@@ -17,6 +17,18 @@ class VehicleExpensesTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_expense_categories_use_the_same_chip_in_table_and_mobile_cards(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $vehicle = $user->vehicles()->create(['name' => 'Auto', 'vehicle_type' => 'automovil', 'power_source' => 'gasolina', 'usage_unit' => 'km']);
+        $category = VehicleExpenseCategory::create(['name' => 'Seguros', 'icon' => 'bi-shield']);
+        $vehicle->expenses()->create(['vehicle_expense_category_id' => $category->id, 'spent_on' => today(), 'amount' => 10000]);
+        $view = Livewire::test(VehicleExpenses::class, ['vehicle' => $vehicle->id])
+            ->assertSeeHtml('md-catalog-chip--accent')->assertSeeHtml('bi-shield');
+        $this->assertSame(2, substr_count($view->html(), 'md-catalog-chip--accent'));
+    }
+
     public function test_registration_seeds_default_categories_and_restoring_is_idempotent(): void
     {
         $this->post(route('register'), [

@@ -6,7 +6,7 @@
             @if ($records->isEmpty())<x-ui.state variant="empty" title="No hay resultados" message="Prueba otra búsqueda o crea un elemento desde el botón flotante." icon="bi-tags" />
             @else
             <table class="md-table md-table--stack" aria-label="Catálogo de planes"><thead><tr><th scope="col">Nombre</th><th scope="col">Planes</th><th scope="col" class="md-table__actions">Acciones</th></tr></thead><tbody>
-            @foreach ($records as $record)<tr wire:key="{{ $section }}-{{ $record->id }}"><td data-label="Nombre" class="md-table__title"><i class="bi {{ $record->icon }}" aria-hidden="true"></i> {{ $section === 'categories' ? $record->path_label : $record->name }}</td><td data-label="Planes">{{ $record->plans_count }}</td><td data-label="Acciones" class="md-table__actions">
+            @foreach ($records as $record)<tr wire:key="{{ $section }}-{{ $record->id }}"><td data-label="Nombre" class="md-table__title">@if ($section === 'categories')<x-ui.catalog-chip tone="accent" :icon="$record->icon ?: 'bi-tag'">{{ $record->path_label }}</x-ui.catalog-chip>@else<i class="bi {{ $record->icon }}" aria-hidden="true"></i> {{ $record->name }}@endif</td><td data-label="Planes">{{ $record->plans_count }}</td><td data-label="Acciones" class="md-table__actions">
                 <x-ui.row-actions :label="'Acciones de '.$record->name"><x-slot:primary wire:click="openForm('{{ $record->id }}')">Editar</x-slot:primary><x-ui.menu-item icon="bi-trash" tone="danger" wire:click="delete('{{ $record->id }}')" wire:confirm="¿Eliminar «{{ $record->name }}»?">Eliminar</x-ui.menu-item></x-ui.row-actions>
             </td></tr>@endforeach
             </tbody></table>

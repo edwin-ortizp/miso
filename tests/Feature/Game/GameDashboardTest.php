@@ -54,7 +54,7 @@ class GameDashboardTest extends TestCase
     {
         $this->act('tasks');
         $this->act('habits');
-        Livewire::test(Dashboard::class)->assertSee('Hoy 2 de 3 acciones · te falta 1.');
+        Livewire::test(Dashboard::class)->assertSee('A 1 acción de tu racha')->assertSee('Llevas 2 de 3 hoy. Aún estás a tiempo.');
 
         $this->act('habits');
         Livewire::test(Dashboard::class)->assertSee('1 día')->assertSee('Hoy ya está: 3 de 3 acciones.');

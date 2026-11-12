@@ -39,7 +39,7 @@ return [
         'title' => 'Mi día',
         'subtitle' => 'Una vista coordinada de lo que importa hoy.',
         'icon' => 'bi-sunrise',
-        'patterns' => ['home', 'panel'],
+        'patterns' => ['home', 'panel', 'day.close'],
         'preserve' => ['date'],
     ],
     'water' => [

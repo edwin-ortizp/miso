@@ -258,6 +258,10 @@ class Dashboard extends Component
             ->values();
 
         return view('livewire.home.dashboard', [
+            // CHG-070: de 19:00 a 23:59 (Bogotá) el hero pasa a noche e invita a cerrar el día, si aún no está cerrado.
+            'isNight' => $isNight = now(\App\Services\Notifications\NotificationSource::TIMEZONE)->hour >= 19,
+            'dayCloseHref' => $isNight && ! \App\Models\UserActiveDay::isClosed((int) auth()->id(), DayClose::today()->toDateString())
+                ? route('day.close', ['via' => 'close']) : null,
             'streak' => $this->streak(),
             'challenge' => app(\App\Services\Game\DailyChallenge::class)->forToday((int) auth()->id()),
             'waterTotal' => $waterTotal,

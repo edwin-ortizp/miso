@@ -65,7 +65,7 @@
                             <span class="md-chip-tonal {{ $priorityChipClass }}">{{ $priorities[$task->priority] ?? $task->priority }}</span>
                         @endif
                         @if ($task->category)
-                            <x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="primary">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>
+                            <x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="accent" :icon="$this->categoryIcon($task->category)">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>
                         @endif
                         @if ($task->size)
                             <span class="md-chip-tonal">{{ $task->size }}</span>
@@ -102,7 +102,7 @@
                 </button>
                 <div class="task-row__status">
                     @if ($task->status)
-                        <x-ui.catalog-chip :color="$task->status->color" :tone="$task->completed ? 'success' : 'neutral'" :icon="$task->status->icon" title="Estado">{{ $task->status->name }}</x-ui.catalog-chip>
+                        <x-ui.catalog-chip :color="$task->status->color" tone="accent" :icon="$task->status->icon" title="Estado">{{ $task->status->name }}</x-ui.catalog-chip>
                     @endif
                 </div>
                 <div class="md-list-item-trailing">

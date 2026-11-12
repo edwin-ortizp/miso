@@ -123,4 +123,17 @@ class NotificationDispatchTest extends TestCase
         $this->assertCount(0, $this->gateway->sent);
         $this->assertNull($notice->fresh()->push_sent_at);
     }
+
+    /** CHG-070: el aviso de la franja Noche abre el cierre del día con su propio canal. */
+    public function test_night_nudge_opens_day_close_without_push_channel(): void
+    {
+        $this->notice(['occurrence_key' => '2026-11-11:night']);
+        $this->notice(['occurrence_key' => '2026-11-11:morning', 'source_id' => GuardianNudgePlanner::sourceId('habits')]);
+
+        $this->artisan('notifications:dispatch')->assertSuccessful();
+
+        $urls = collect($this->gateway->sent)->pluck('payload.url');
+        $this->assertTrue($urls->contains(route('day.close', ['via' => 'close'])));
+        $this->assertTrue($urls->contains(route('habits').'?via=push'));
+    }
 }

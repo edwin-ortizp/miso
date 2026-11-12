@@ -121,6 +121,10 @@ class NotificationDispatcher
     private function withVia(string $url): string
     {
         [$path, $hash] = array_pad(explode('#', $url, 2), 2, null);
+        // CHG-070: si el destino ya trae su canal (p. ej. ?via=close), se respeta.
+        if (preg_match('/[?&]via=/', $path)) {
+            return $url;
+        }
 
         return $path.(str_contains($path, '?') ? '&' : '?').'via=push'.($hash !== null ? '#'.$hash : '');
     }

@@ -1,8 +1,8 @@
 # CHG-082 · Tipografía Nunito en web y mockups
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** Plan aprobado por el usuario en esta conversación.
 
 ## 0. En palabras simples
@@ -32,3 +32,4 @@ Sustituir Instrument Sans por Nunito local en pesos 400, 500, 600 y 700. Mantene
 
 - LECCIÓN: ninguna.
 - 2026-11-11 — Implementación terminada → En verificación
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/ (desde el panel)

@@ -43,6 +43,16 @@ El observer cancela avisos todavía no enviados cuando cambian las fechas o el e
 
 La campana presenta avisos disponibles y no cancelados, filtros, paginación y enlaces al origen. Abrirla no marca leído. Cada escritura de lectura queda limitada al usuario autenticado. Si el origen fue eliminado, el enlace vuelve a su módulo.
 
+### Bandeja compacta (CHG-085)
+
+- Lista ordenada por fecha del aviso descendente, con nombre del elemento, icono por tipo y acciones independientes. Abrir el nombre no marca leído; el botón «Marcar como leída» sí. Las tareas abren su editor mediante `tasks.list?edit=UUID`, aunque los filtros del listado no incluyan esa tarea.
+- `NotificationPresentation` obtiene los orígenes por lotes y siempre por propietario. Mejora también avisos antiguos al renderizar, sin reescribir registros ni alterar generadores, preferencias o canales externos. No hay cambios de esquema ni migraciones.
+- Las fechas se muestran en español y Bogotá, con mes abreviado, año si es distinto del actual y hora solo cuando el origen la tiene. La fecha del evento se distingue de «Aviso:», que corresponde a `scheduled_for`, la disponibilidad programada del aviso, no una confirmación de entrega externa.
+- Para tareas, planes y cumpleaños automáticos se usa la ocurrencia registrada; para recordatorios se indica «Fecha actual» del origen. «Hoy», «mañana» y «ayer» se calculan en cada render. Un origen ausente muestra «Elemento no disponible» sin inventar fechas ni urgencia.
+- El punto y el texto «Sin leer» representan lectura. El tono de error identifica pendientes vencidos; el de advertencia, pendientes de hoy. Completados, cumpleaños, guardián y resumen semanal no se vuelven urgentes por antigüedad. La campana considera todos los avisos sin leer, independientemente de página y filtros.
+- Los filtros separan el borrador de la selección aplicada. «Filtrar» aplica lectura/tipo; «Limpiar» los restablece; los chips permiten quitar cada filtro. Cambiar filtros reinicia la página. «Marcar filtradas leídas» afecta todos los resultados filtrados, incluidas otras páginas; sin filtros se muestra «Marcar todas leídas».
+- Si una página queda sin resultados al marcar la última fila, se vuelve a la última página válida. La bandeja distingue vacío, sin coincidencias, carga y error recuperable con «Reintentar».
+
 `read_at` y `telegram_sent_at` son independientes. El envío Telegram queda pendiente: no hay credenciales, vinculación, endpoints ni controles de envío. `telegram_sent_at` permanece nulo. El historial se conserva; esta versión no incorpora poda.
 
 ## Validación
@@ -71,7 +81,7 @@ La copia recuperable previa está en `storage/framework/testing/notifications-be
 ## Canal push y avisos del guardián (CHG-068)
 
 - **Patrón de canales:** cada canal tiene su columna `*_sent_at` en `notifications` (`telegram_sent_at`, `push_sent_at`) y su tabla de vinculación (`push_subscriptions`). La entrega pasa por `PushGateway` (`WebPushGateway` con VAPID). Para Telegram o WhatsApp: otra implementación del gateway, su columna y su vinculación. Con más de tres canales conviene pasar a una tabla `notification_deliveries`.
-- **Aviso del guardián:** tipo `guardian_nudge`, origen `guardian` con `source_id` = UUID v5 del módulo, ocurrencia `{fecha}:{franja}`. Lo crea `GuardianNudgePlanner` solo si el usuario activó los avisos, tiene un dispositivo vinculado, la franja está activa, no superó el tope diario y queda algo pendiente en hábitos, agua, tareas o ejercicio. Aparece también en la campana y lleva al módulo.
+- **Aviso del guardián:** tipo `guardian_nudge`, origen `guardian` con `source_id` = UUID v5 del módulo, ocurrencia `{fecha}:{franja}`. Lo crea `GuardianNudgePlanner` solo si el usuario activó los avisos, tiene un dispositivo vinculado, la franja está activa, no superó el tope diario y queda algo pendiente en hábitos, agua, tareas o ejercicio. Aparece también en la campana y lleva al módulo; el de la franja Noche (ocurrencia `…:night`) lleva al cierre del día, `/cierre?via=close` (CHG-070). `withVia` no agrega `via=push` a una URL que ya trae su `via`.
 - **Envío:** `NotificationDispatcher` toma lo disponible, no cancelado, no leído, de las últimas 12 h y sin `push_sent_at`; lo reclama con un `UPDATE` condicional y envía a cada dispositivo. Un 404/410 borra la suscripción. Un fallo no se reintenta.
 - **Preferencias** (`module_settings`, módulo `notifications`): `guardian_nudges`, `nudge_morning|afternoon|night` y `push_birthday|task_due|plan_due|reminder` (qué otros tipos van al celular; apagados por defecto).
 - **Pruebas:** `php artisan test --filter='GuardianNudges|NotificationDispatch'`.

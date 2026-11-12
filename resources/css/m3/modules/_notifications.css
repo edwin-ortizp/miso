@@ -1,15 +1,43 @@
-/* The sheet surface needs a darker semantic action color than primary blue. */
-.notification-inbox .md-btn-outlined,
-.notification-inbox .md-btn-text {
-  color: var(--md-sys-color-secondary);
-}
-
-.notification-inbox .md-sheet__body {
+.notification-inbox { --md-sys-color-primary: var(--md-sys-color-secondary); }
+.notification-footer { display: flex; flex-wrap: wrap; width: 100%; justify-content: space-between; gap: var(--md-sys-space-xs); padding-bottom: env(safe-area-inset-bottom); }
+.notification-toolbar {
+  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: var(--md-sys-space-md);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--md-sys-space-sm);
+  padding-bottom: var(--md-sys-space-sm);
 }
+.notification-summary { font-weight: 700; }
+.notification-summary small { font-weight: 400; color: var(--md-sys-color-on-surface-variant); }
+.notification-filters { display: flex; flex-wrap: wrap; gap: var(--md-sys-space-xs); padding-bottom: var(--md-sys-space-xs); }
+.notification-list { list-style: none; margin: 0; padding: 0; }
+.notification-row {
+  --notification-tone: var(--md-sys-color-on-surface-variant);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--md-sys-space-xs);
+  padding: var(--md-sys-space-sm) 0;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+.notification-row--danger { --notification-tone: var(--md-sys-color-error); }
+.notification-row--warning { --notification-tone: var(--md-custom-color-warning); }
+.notification-row__icon { flex: none; font-size: 1.125rem; color: var(--notification-tone); padding-top: var(--md-sys-space-2xs); }
+.notification-row__link { display: grid; flex: 1; min-width: 0; gap: var(--md-sys-space-2xs); min-height: 44px; text-decoration: none; color: var(--md-sys-color-on-surface); overflow-wrap: anywhere; border-radius: var(--md-sys-shape-corner-extra-small); }
+.notification-row__link:hover .notification-row__title { text-decoration: underline; }
+.notification-row__link:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
+.notification-row__title { font-size: var(--md-sys-typescale-body-large-size, 1rem); font-weight: 500; }
+.notification-row--unread .notification-row__title { font-weight: 700; }
+.notification-row--unread .notification-row__title::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: var(--md-sys-space-xs); border-radius: var(--md-sys-shape-corner-full); background: var(--md-sys-color-on-surface); vertical-align: middle; }
+.notification-row__context { color: var(--notification-tone); font-size: .875rem; }
+.notification-row__date { color: var(--md-sys-color-on-surface-variant); font-size: .75rem; }
+.notification-row__body { font-size: .875rem; color: var(--md-sys-color-on-surface-variant); }
+.notification-loading { font-size: .875rem; color: var(--md-sys-color-on-surface-variant); }
 
-.notification-inbox .md-sheet__actions {
-  flex-wrap: wrap;
-}
+.notification-bell-shell { position: relative; --md-module-accent: var(--md-sys-color-error); }
+
+
+
+.notification-bell-badge { pointer-events: none; }
+.notification-filter-chip { min-height: 44px; }
+.notification-pagination { display: flex; justify-content: space-between; align-items: center; gap: var(--md-sys-space-xs); font-size: .875rem; padding-top: var(--md-sys-space-xs); }

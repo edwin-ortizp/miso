@@ -57,7 +57,7 @@ class NotificationSettings extends Component
     {
         return view('livewire.notifications.settings', [
             'vapidKey' => (string) config('webpush.public_key'),
-            'slots' => config('game.nudges.slots'),
+            'nudgeSlots' => config('game.nudges.slots'),
             'devices' => PushSubscription::where('user_id', auth()->id())->count(),
         ]);
     }

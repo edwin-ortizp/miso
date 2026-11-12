@@ -126,4 +126,21 @@ class GuardianNudgesTest extends TestCase
         $this->assertLessThanOrEqual(120, mb_strlen($body));
         $this->assertNull(MissionProposalValidator::penaltyWord($body));
     }
+    public function test_preference_page_keeps_all_time_windows_and_one_save_action(): void
+    {
+        $this->actingAs($this->user);
+        $component = \Livewire\Livewire::test(\App\Livewire\Notifications\NotificationSettings::class)
+            ->assertSee('Mañana 8–10')->assertSee('Tarde 14–16')->assertSee('Noche 19–21')
+            ->assertSee('Este dispositivo')->assertSee('Guardar preferencias');
+        $this->assertSame(1, substr_count($component->html(), 'wire:submit="save"'));
+        $other = User::factory()->create();
+        $before = app(NotificationPreferences::class)->get($other->id);
+        $component->set('preferences.nudge_morning', false)->set('preferences.tasks', true)
+            ->call('save')->assertSee('Preferencias guardadas.');
+        $saved = app(NotificationPreferences::class)->get($this->user->id);
+        $this->assertFalse($saved['nudge_morning']);
+        $this->assertTrue($saved['tasks']);
+        $this->assertSame($before, app(NotificationPreferences::class)->get($other->id));
+    }
+
 }

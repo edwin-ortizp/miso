@@ -28,7 +28,7 @@ test.beforeAll(async () => {
 test.afterAll(() => server?.kill());
 test.use({ baseURL: `http://127.0.0.1:${PORT}` });
 
-for (const width of [390, 768, 1440]) {
+for (const width of [375, 390, 768, 1440]) {
     test(`notification inbox, settings and reminders at ${width}`, async ({ page }) => {
         const errors = [];
         page.on('pageerror', error => errors.push(error.message));
@@ -45,18 +45,66 @@ for (const width of [390, 768, 1440]) {
         await bell.click();
         const inbox = page.getByRole('dialog', { name: 'Notificaciones', exact: true });
         await expect(inbox).toBeVisible();
-        await expect(inbox.getByText('Un recordatorio de prueba.').first()).toBeVisible();
-        const alreadyRead = await inbox.getByText('Leída', { exact: true }).count();
-        await inbox.getByRole('button', { name: 'Marcar leída', exact: true }).first().click();
-        await expect(inbox.getByText('Leída', { exact: true })).toHaveCount(alreadyRead + 1);
+        await expect(inbox.getByText('Tarea de prueba', { exact: true }).first()).toBeVisible();
+        const alreadyRead = await inbox.locator('.notification-row__date').filter({ hasText: 'Leída' }).count();
+        await inbox.getByRole('button', { name: 'Marcar como leída', exact: true }).first().click();
+        await expect(inbox.locator('.notification-row__date').filter({ hasText: 'Leída' })).toHaveCount(alreadyRead + 1);
         await inbox.getByRole('button', { name: 'Filtros', exact: true }).click();
         await inbox.getByLabel('Lectura', { exact: true }).selectOption('read');
         await inbox.getByRole('button', { name: 'Filtrar', exact: true }).click();
-        await expect(inbox.getByText('Un recordatorio de prueba.')).toHaveCount(alreadyRead + 1);
+        await expect(inbox.locator('.notification-row')).toHaveCount(alreadyRead + 1);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
         const a11y = await new AxeBuilder({ page }).include('.md-sheet').analyze();
         expect(a11y.violations.map(v => ({ id: v.id, targets: v.nodes.map(n => ({ target: n.target, summary: n.failureSummary })) }))).toEqual([]);
+        await inbox.getByRole('button', { name: 'Limpiar filtros', exact: true }).click();
+        await expect(inbox.locator('.notification-row')).toHaveCount(15);
+        await inbox.getByRole('button', { name: 'Página siguiente', exact: true }).click();
+        await expect(inbox.locator('.notification-row')).toHaveCount(9);
+        await expect(inbox.getByText('Página 2 de 2', { exact: true })).toBeVisible();
+        await inbox.getByRole('button', { name: 'Página anterior', exact: true }).click();
+        await expect(inbox.locator('.notification-row')).toHaveCount(15);
+        // Every type resolves its own context and destination. Draft selection
+        // must not replace the visible list before Filtrar is pressed.
+        for (const [type, title, target] of [
+            ['task_due', 'Preparar la propuesta comercial', /tasks\/list\?edit=/],
+            ['plan_due', 'Visitar el museo', /plans\//],
+            ['birthday', 'Cumpleaños de Laura', /relationships\//],
+            ['guardian_nudge', 'Tu guardián de tareas', /tasks\/list$/],
+            ['weekly_insights', 'Tu resumen de la semana', /statistics#insights$/],
+        ]) {
+            await inbox.getByRole('button', { name: /^Filtros/ }).click();
+            const filters = inbox.getByRole('dialog', { name: 'Filtros de notificaciones', exact: true });
+            await expect(filters).toBeVisible();
+            const bounds = await filters.boundingBox();
+            expect(bounds.x).toBeGreaterThanOrEqual(0);
+            expect(bounds.x + bounds.width).toBeLessThanOrEqual(width + 1);
+            await filters.getByLabel('Tipo', { exact: true }).selectOption(type);
+            if (type === 'task_due') await expect(inbox.locator('.notification-row')).toHaveCount(15);
+            await filters.getByRole('button', { name: 'Filtrar', exact: true }).click();
+            await expect(filters).toBeHidden();
+            await expect(inbox.locator('.notification-row')).toHaveCount(1);
+            await expect(inbox.getByRole('link', { name: new RegExp(title) })).toHaveAttribute('href', target);
+            await expect(inbox.getByRole('button', { name: /Quitar filtro:/ })).toHaveCount(1);
+            await inbox.getByRole('button', { name: /Quitar filtro:/ }).click();
+            await expect(inbox.locator('.notification-row')).toHaveCount(15);
+        }
+        await expect(inbox.locator('.notification-row--danger')).toHaveCount(1);
+        await expect(bell).toHaveClass(/md-btn--danger/);
+        expect((await inbox.getByRole('button', { name: 'Marcar como leída', exact: true }).first().boundingBox()).height).toBeGreaterThanOrEqual(44);
+        expect((await inbox.getByRole('button', { name: /^Filtros/ }).boundingBox()).height).toBeGreaterThanOrEqual(44);
+        const rowHeight = await inbox.locator('.notification-row').filter({ hasText: 'Preparar la propuesta comercial' }).evaluate(el => el.getBoundingClientRect().height);
+        expect(rowHeight).toBeLessThan(210);
+        const allTypesA11y = await new AxeBuilder({ page }).include('.md-sheet').analyze();
+        expect(allTypesA11y.violations.map(v => ({ id: v.id, targets: v.nodes.map(n => n.target) }))).toEqual([]);
         await page.screenshot({ path: `storage/framework/testing/playwright/notifications-inbox-${width}.png` });
+        await inbox.getByRole('button', { name: /^Filtros/ }).click();
+        await expect(inbox.getByRole('dialog', { name: 'Filtros de notificaciones', exact: true })).toBeVisible();
+        const filtersA11y = await new AxeBuilder({ page }).include('.md-sheet').analyze();
+        expect(filtersA11y.violations.map(v => v.id)).toEqual([]);
+        await page.screenshot({ path: `storage/framework/testing/playwright/notifications-filters-${width}.png` });
+        await page.keyboard.press('Escape');
+        await expect(inbox).toBeVisible();
+        await expect(inbox.getByRole('dialog', { name: 'Filtros de notificaciones', exact: true })).toBeHidden();
         await page.keyboard.press('Escape');
         await expect(inbox).toBeHidden();
         await expect(bell).toBeFocused();
@@ -64,6 +112,18 @@ for (const width of [390, 768, 1440]) {
         await expect(page.getByRole('button', { name: 'Configurar Telegram', exact: true })).toHaveCount(0);
         const settingsA11y = await new AxeBuilder({ page }).include('main').analyze();
         expect(settingsA11y.violations.map(v => v.id)).toEqual([]);
+        // A notification must open the exact task even when the list's search
+        // would hide it. Following it still leaves the notice unread.
+        await page.goto('/tasks/list?q=sin-resultados-de-prueba');
+        await bell.click();
+        const taskLink = inbox.getByRole('link', { name: /Preparar la propuesta comercial/ });
+        await taskLink.click();
+        await page.waitForURL(/tasks\/list\?edit=/);
+        await expect(page.getByRole('dialog', { name: 'Editar tarea', exact: true })).toBeVisible();
+        await page.keyboard.press('Escape');
+        await bell.click();
+        await expect(inbox.locator('.notification-row--unread').filter({ hasText: 'Preparar la propuesta comercial' })).toHaveCount(1);
+        await page.keyboard.press('Escape');
         await page.goto('/tasks/list');
         await page.getByRole('button', { name: /Nueva tarea/, exact: true }).first().click();
         if (width < 768) await page.getByRole('menuitem', { name: 'Nueva tarea', exact: true }).click();

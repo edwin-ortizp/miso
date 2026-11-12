@@ -1678,6 +1678,14 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
 .game-buddy-hero__day { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.75rem; }
 .game-day-tile { display: grid; align-content: start; gap: 0.25rem; min-width: 0; padding: 0.875rem 1rem; border-radius: 12px; background: rgb(0 0 0 / 0.2); color: inherit; }
 .game-day-tile p { margin: 0; }
+/* CHG-089: ayuda ⓘ en la esquina del mosaico. */
+.game-day-tile { position: relative; }
+.game-day-tile__info { position: absolute; top: 0.375rem; right: 0.375rem; z-index: 1; }
+.game-day-tile__info-btn { color: inherit; opacity: 0.8; }
+.game-day-tile { padding-right: 2.5rem; }
+.game-day-tile__anchor { position: fixed; z-index: 1080; width: 0; height: 0; }
+@media (min-width: 768px) { .game-day-tile__popover { top: 0; right: 0; left: auto; width: min(18rem, 80vw); } }
+.game-day-tile__popover { color: var(--md-sys-color-on-surface); }
 .game-day-tile__title { display: inline-flex; align-items: center; gap: 0.375rem; color: inherit; text-decoration: none; opacity: 0.9; }
 .game-day-tile__title:hover { text-decoration: underline; }
 .game-day-tile__title:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; border-radius: 4px; }
@@ -1760,4 +1768,15 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
     .game-adventure-panel .game-streak__week { grid-column: 2; grid-row: 3; justify-self: end; }
     .game-adventure-panel .game-streak__day { min-width: 0; }
     .game-adventure-panel .game-streak__dot { width: 1.875rem; height: 1.875rem; border-radius: 10px; }
+}
+
+/* CHG-070: el compañero se va a dormir. El escenario pasa a noche y aparecen unas "z". */
+.game-buddy-hero.game-buddy-hero--night { --stage-top: #121836; --stage-bottom: #33407a; --stage-particle: rgb(255 244 200 / 0.8); }
+.game-buddy-hero--night .game-buddy-hero__art img { filter: saturate(0.8) brightness(0.92); }
+.game-buddy-hero__zzz { position: absolute; inset-block-start: 4px; inset-inline-end: -6px; font-weight: 800; font-size: 1.1rem; line-height: 1; color: #fff4c8; letter-spacing: 1px; pointer-events: none; }
+.game-buddy-hero__zzz span:nth-child(1) { font-size: 0.85em; vertical-align: 0.4em; }
+.game-buddy-hero__zzz span:nth-child(2) { font-size: 0.7em; vertical-align: 0.9em; }
+@media (prefers-reduced-motion: no-preference) {
+    .game-buddy-hero__zzz { animation: game-zzz 2.4s ease-in-out infinite; }
+    @keyframes game-zzz { 0%, 100% { opacity: 0.55; transform: translateY(2px); } 50% { opacity: 1; transform: translateY(-3px); } }
 }

@@ -30,7 +30,7 @@
                         $total = (int) ($row->total ?? 0);
                     @endphp
                     <tr wire:key="task-category-{{ $category->id }}">
-                        <td data-label="Nombre" class="md-table__title"><x-ui.catalog-chip :color="$category->color" :icon="$category->icon ?: 'bi-tag'">{{ $category->path_label }}</x-ui.catalog-chip></td>
+                        <td data-label="Nombre" class="md-table__title"><x-ui.catalog-chip :color="$category->color" tone="accent" :icon="$category->icon ?: 'bi-tag'">{{ $category->path_label }}</x-ui.catalog-chip></td>
                         <td data-label="Prefijo"><code>{{ $category->code_prefix }}</code></td>
                         <td data-label="Pendientes" class="md-table__nowrap">{{ $pending }}</td>
                         <td data-label="Total" class="md-table__nowrap">{{ $total }}</td>
@@ -70,11 +70,11 @@
     </p>
 @endif
 
-<x-ui.form-dialog :open="$showForm" close="closeForm" submit-action="save" id="task-category-dialog"
+<x-ui.form-dialog module="tasks" :open="$showForm" close="closeForm" submit-action="save" id="task-category-dialog"
                   :title="$editingId ? 'Editar categoría' : 'Nueva categoría'" icon="bi-tags"
                   :submit="$editingId ? 'Actualizar' : 'Crear categoría'">
     <div class="d-flex flex-column gap-3">
-        <x-ui.field name="name" label="Nombre" :required="true" maxlength="60" wire:model="name" />
+        <x-ui.field name="name" label="Nombre" :required="true" maxlength="60" wire:model.live.debounce.300ms="name" />
         <x-ui.field name="codePrefix" label="Prefijo" maxlength="5" help="Deja vacío para sugerirlo a partir del nombre. Los códigos existentes se conservan." wire:model="codePrefix" />
         <x-ui.category-parent model="TaskCategory" :editing-id="$editingId" />
         <x-ui.catalog-color-select name="color" :selected="$color" :preview="$name" :icon="$icon" />
@@ -82,7 +82,7 @@
     </div>
 </x-ui.form-dialog>
 
-<x-ui.form-dialog :open="(bool) $deleting" close="cancelDelete" submit-action="reassignAndDelete" id="task-category-delete-dialog"
+<x-ui.form-dialog module="tasks" :open="(bool) $deleting" close="cancelDelete" submit-action="reassignAndDelete" id="task-category-delete-dialog"
                   :title="$deleting ? 'Eliminar «'.$deleting->name.'»' : 'Eliminar categoría'" icon="bi-exclamation-triangle"
                   submit="Eliminar categoría">
     @if ($deleting)

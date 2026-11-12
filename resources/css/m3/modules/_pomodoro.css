@@ -96,3 +96,49 @@
 /* CHG-059: el compañero de foco se posa sobre el anillo del dial. */
 .pomodoro-guard { position: relative; display: grid; justify-items: center; gap: var(--md-sys-space-sm); width: 100%; }
 .pomodoro-guard .pomodoro-dial { margin-bottom: 0; }
+
+/* CHG-086: temporizador y compañero forman una sola escena, sin métricas duplicadas. */
+.pomodoro-timer-card { container-type: inline-size; }
+.pomodoro-stage { padding: 8px; gap: 14px; }
+.pomodoro-stage .pomodoro-dial { width: 176px; height: 176px; }
+.pomodoro-stage .md-chip-rail { justify-content: center; flex-wrap: wrap; }
+.pomodoro-stage .focus-companion--dial { --size: 96px; max-width: 440px; }
+.pomodoro-stage .focus-companion--dial .focus-companion__bubble { color: var(--md-sys-color-on-surface); }
+.pomodoro-stage .focus-companion--dial .focus-companion__bubble strong { color: var(--md-sys-color-on-surface); filter: none; }
+.pomodoro-stage .focus-companion__toggle { min-width: 44px; min-height: 44px; }
+.pomodoro-stage .pomodoro-description { width: min(100%, 360px); }
+@container (min-width: 480px) {
+    .pomodoro-stage--companion { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 24px; align-items: center; }
+    .pomodoro-stage--companion > .md-chip-rail { grid-column: 1 / -1; grid-row: 1; }
+    .pomodoro-stage--companion .pomodoro-guard { display: contents; }
+    .pomodoro-stage--companion .focus-companion--dial { --size: 144px; grid-column: 1; grid-row: 2 / 6; display: grid; justify-items: center; text-align: center; gap: 12px; align-self: center; }
+    .pomodoro-stage--companion .focus-companion__talk { width: 100%; }
+    .pomodoro-stage--companion .focus-companion__meta { justify-content: center; padding-inline-start: 0; }
+    .pomodoro-stage--companion .focus-companion__bubble::before { left: calc(50% - 6px); top: -6px; }
+    .pomodoro-stage--companion .pomodoro-dial { grid-column: 2; grid-row: 2; }
+    .pomodoro-stage--companion .pomodoro-controls { grid-column: 2; grid-row: 3; }
+    .pomodoro-stage--companion .pomodoro-description { grid-column: 2; grid-row: 4; }
+    .pomodoro-stage--companion .pomodoro-error { grid-column: 2; grid-row: 5; }
+}
+/* Una sola meta: el contexto fluye cerca de la acción en pantallas sin rail lateral. */
+@media (max-width: 1199.98px) {
+    .pomodoro-page .md-module-primary,
+    .pomodoro-page .md-module-workspace--rail > .md-context-rail { display: contents; }
+    .pomodoro-page .md-module-workspace--rail { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .pomodoro-page .md-module-workspace--rail > *,
+    .pomodoro-page .md-module-primary > *,
+    .pomodoro-page .md-context-rail > * { order: 6; min-width: 0; }
+    .pomodoro-page .pomodoro-timer-card { order: 0; }
+    .pomodoro-page .pomodoro-daily-goal { order: 1; }
+    .pomodoro-page #pomodoro-sessions { order: 2; }
+    .pomodoro-page .pomodoro-week-summary { order: 3; }
+    .pomodoro-page .pomodoro-calendar { order: 4; }
+    .pomodoro-page .pomodoro-month-summary { order: 5; }
+}
+
+@media (max-width: 1199.98px) {
+    .pomodoro-page .pomodoro-daily-goal .game-guardian--rail { display: flex; }
+    .pomodoro-daily-goal .game-guardian__art,
+    .pomodoro-daily-goal .game-guardian__art img,
+    .pomodoro-daily-goal .game-guardian__art .game-placeholder { width: 64px; height: 64px; }
+}

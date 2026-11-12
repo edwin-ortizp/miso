@@ -1,4 +1,4 @@
-<x-ui.form-dialog :open="$showCategoryManager" close="closeCategoryManager" submit-action="addCategory" id="vehicle-expense-categories-dialog"
+<x-ui.form-dialog module="vehicles" :open="$showCategoryManager" close="closeCategoryManager" submit-action="addCategory" id="vehicle-expense-categories-dialog"
                   title="Categorías de gastos" icon="bi-tags" submit="Agregar categoría">
     <div class="d-flex flex-column gap-3">
         <p class="md-body-small mb-0">Se comparten entre todos tus vehículos. Para eliminar una categoría con gastos, primero pasa sus gastos a otra.</p>
@@ -26,8 +26,8 @@
             <ul class="vehicle-category-list" aria-label="Tus categorías de gastos">
                 @foreach ($categories as $category)
                     <li class="vehicle-category-row" wire:key="expense-category-{{ $category->id }}">
-                        <span class="vehicle-category-row__icon" aria-hidden="true"><i class="bi {{ $category->icon ?: 'bi-tag' }}"></i></span>
                         @if ($renamingCategoryId === $category->id)
+                            <span class="vehicle-category-row__icon" aria-hidden="true"><i class="bi {{ $category->icon ?: 'bi-tag' }}"></i></span>
                             <div class="vehicle-category-row__body">
                                 <x-ui.field name="renamingCategoryName" label="Nombre de la categoría" maxlength="60" wire:model="renamingCategoryName" wire:keydown.enter.prevent="saveCategoryRename" />
                                 <x-ui.category-parent model="VehicleExpenseCategory" :editing-id="$renamingCategoryId" />
@@ -36,7 +36,7 @@
                             <x-ui.icon-action icon="bi-x-lg" label="Cancelar cambio de nombre" size="sm" wire:click="cancelCategoryRename" />
                         @else
                             <div class="vehicle-category-row__body">
-                                <strong>{{ $category->path_label }}</strong>
+                                <x-ui.catalog-chip tone="accent" :icon="$category->icon ?: 'bi-tag'">{{ $category->path_label }}</x-ui.catalog-chip>
                                 <small>{{ $category->expenses_count ? $category->expenses_count.' '.($category->expenses_count === 1 ? 'gasto' : 'gastos') : 'Sin gastos' }}</small>
                             </div>
                             <x-ui.icon-action icon="bi-pencil" label="Renombrar {{ $category->name }}" size="sm" wire:click="startCategoryRename('{{ $category->id }}')" />

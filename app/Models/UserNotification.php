@@ -33,6 +33,11 @@ class UserNotification extends Model
         }
         // CHG-068: el aviso del guardián lleva al módulo que tiene algo pendiente.
         if ($this->source_type === \App\Services\Notifications\Push\GuardianNudgePlanner::SOURCE) {
+            // CHG-070: el aviso de la franja Noche abre el cierre del día.
+            if (str_ends_with((string) $this->occurrence_key, ':night')) {
+                return route('day.close', ['via' => 'close']);
+            }
+
             return route(match (\App\Services\Notifications\Push\GuardianNudgePlanner::moduleFor((string) $this->source_id)) {
                 'habits' => 'habits', 'water' => 'water.daily', 'tasks' => 'tasks.list', 'exercise' => 'exercise', default => 'home',
             });

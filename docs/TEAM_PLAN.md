@@ -75,20 +75,25 @@ _Última actualización: 2026-11-11_
 | CHG-067 | S | Medir días activos y canal de entrada | done | Cerrado | 4/4 |
 | CHG-068 | M | Avisos push del guardián | done | Cerrado | 5/5 |
 | CHG-069 | M | Registro en un toque y check-in de 20 segundos | done | Cerrado | 4/4 |
-| CHG-070 | S | Cierre del día | to-do | Borrador | 0/0 |
+| CHG-070 | M | Cierre del día | done | Cerrado | 8/8 |
 | CHG-071 | M | Resumen del domingo con hallazgos de tus datos | done | Cerrado | 5/5 |
 | CHG-072 | M | Volver sin culpa después de una ausencia | done | Cerrado | 4/4 |
 | CHG-073 | S | Atajos de la app instalada | done | Cerrado | 3/3 |
-| CHG-074 | M | Registro por texto libre | to-do | Borrador | 0/0 |
 | CHG-075 | S | Cabecera de Inicio con compañero integrado y check-in | done | Cerrado | 4/4 |
 | CHG-076 | M | Racha de constancia con umbral diario y días de gracia | done | Cerrado | 6/6 |
 | CHG-077 | M | Reto del día | done | Cerrado | 5/5 |
 | CHG-078 | M | Álbumes de la colección por tipo | done | Cerrado | 5/5 |
 | CHG-079 | M | Camino de temporada con hitos y recompensas | done | Cerrado | 5/5 |
 | CHG-080 | XS | Pulir cabecera del Inicio: check-in duplicado, contraste y sombra | done | Cerrado | 1/1 |
-| CHG-081 | S | Rediseño de la cabecera del Inicio | in-progress | En desarrollo | 0/4 |
-| CHG-082 | S | Tipografía Nunito en web y mockups | in-progress | En verificación | 2/2 |
-| CHG-083 | M | Pulir álbumes y rediseñar Balls como aventura Pokémon | in-progress | En verificación | 3/3 |
+| CHG-081 | S | Rediseño de la cabecera del Inicio | done | Cerrado | 4/4 |
+| CHG-082 | S | Tipografía Nunito en web y mockups | done | Cerrado | 2/2 |
+| CHG-083 | M | Pulir álbumes y rediseñar Balls como aventura Pokémon | done | Cerrado | 3/3 |
+| CHG-084 | M | Selector visual de color y chips coherentes | done | Cerrado | 4/4 |
+| CHG-085 | M | Bandeja de notificaciones útil y compacta | done | Cerrado | 4/4 |
+| CHG-086 | M | Pomodoro compacto con compañero integrado | done | Cerrado | 2/2 |
+| CHG-087 | S | Ajustes legibles y datos físicos agrupados | done | Cerrado | 2/2 |
+| CHG-088 | S | Preferencias de notificaciones claras y franjas visibles | done | Cerrado | 2/2 |
+| CHG-089 | S | Explicar racha y reto del día en Tu día | done | Cerrado | 3/3 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

@@ -74,7 +74,7 @@ class RelationshipPlans extends Component
             (clone $base)
                 ->when($this->status !== '', fn (Builder $query) => $query->where('status', $this->status))
                 ->withVisitStats($relationship->id)
-                ->with(['circles', 'images'])
+                ->with(['circles', 'images', 'planCategory.parent'])
                 ->get(),
             'recent',
         );

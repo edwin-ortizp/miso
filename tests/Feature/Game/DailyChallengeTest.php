@@ -181,6 +181,21 @@ class DailyChallengeTest extends TestCase
         $this->assertSame('water_logs', $this->today()['key'], 'Un reto cumplido se conserva.');
     }
 
+    /** CHG-089: con las plantillas por defecto nunca sale check-in y el reto varía entre días. */
+    public function test_default_templates_vary_and_never_pick_checkin(): void
+    {
+        config(['game.daily_challenge.templates' => (require config_path('game.php'))['daily_challenge']['templates']]);
+        TaskCategory::create(['key' => 'trabajo', 'name' => 'Trabajo']);
+        $this->oldTasks(4, 'trabajo');
+        $keys = [];
+        foreach (range(0, 29) as $day) {
+            $this->at(Carbon::parse('2026-11-12 10:00:00', 'America/Bogota')->addDays($day)->toDateTimeString());
+            $keys[] = $this->today()['key'];
+        }
+        $this->assertNotContains('checkin', $keys);
+        $this->assertGreaterThan(1, count(array_unique($keys)));
+    }
+
     public function test_next_day_brings_a_new_challenge(): void
     {
         $this->only('water_logs');

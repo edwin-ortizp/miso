@@ -125,7 +125,7 @@ class TaskCatalogColorsTest extends TestCase
         Livewire::test(TaskList::class)->assertDontSeeHtml('md-catalog-chip--pink');
     }
 
-    public function test_uncolored_existing_records_keep_their_fallback_tones(): void
+    public function test_uncolored_catalog_chips_use_module_emphasis(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -133,6 +133,47 @@ class TaskCatalogColorsTest extends TestCase
         $task = Task::create(['title' => 'Sin personalizar', 'category' => $category->key]);
         $this->assertNull($category->color);
         $this->assertNull($task->status->color);
-        Livewire::test(TaskList::class)->assertSeeHtml('md-chip-tonal--primary')->assertDontSeeHtml('md-catalog-chip--blue');
+        Livewire::test(TaskList::class)->assertSeeHtml('md-catalog-chip--accent')->assertDontSeeHtml('md-catalog-chip--blue');
+    }
+
+    public function test_category_icons_refresh_and_follow_the_child_category_across_views(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $parent = app(ManageTaskCategories::class)->create($user, 'Trabajo', 'bi-briefcase', color: 'blue');
+        $child = app(ManageTaskCategories::class)->create($user, 'Proyecto', 'bi-star', $parent->id, color: 'violet');
+        Task::create(['title' => 'Categoría hija', 'category' => $child->key]);
+        foreach ([TaskList::class, TaskPlanning::class, TaskKanban::class] as $view) {
+            $component = Livewire::test($view)->assertSeeHtml('bi-star')->assertSeeHtml('md-catalog-chip--violet')
+                ->assertSee('Trabajo / Proyecto');
+            $child->update(['icon' => 'bi-lightning']);
+            $component->call('$refresh')->assertSeeHtml('bi-lightning');
+            $child->update(['icon' => 'bi-star']);
+        }
+    }
+
+    public function test_historical_categories_do_not_borrow_foreign_appearance(): void
+    {
+        $owner = User::factory()->create();
+        $this->actingAs($owner);
+        $category = app(ManageTaskCategories::class)->create($owner, 'Histórica', 'bi-airplane', color: 'pink');
+        $this->actingAs(User::factory()->create());
+        $task = Task::create(['title' => 'Tarea antigua']);
+        // Simulate a historical key without bypassing ownership checks in current writes.
+        \Illuminate\Support\Facades\DB::table('tasks')->where('id', $task->id)->update(['category' => $category->key]);
+        foreach ([TaskList::class, TaskPlanning::class, TaskKanban::class] as $view) {
+            Livewire::test($view)->assertSee('Historica')->assertSeeHtml('bi-tag')
+                ->assertDontSeeHtml('bi-airplane')->assertDontSeeHtml('md-catalog-chip--pink');
+        }
+    }
+
+    public function test_color_field_offers_one_integrated_preview_and_accessible_options(): void
+    {
+        $this->actingAs(User::factory()->create());
+        Livewire::test(TaskSettings::class)->call('openForm')
+            ->set('name', 'Ejemplo')->set('icon', 'bi-star')
+            ->assertSeeHtml('role="combobox"')->assertSeeHtml('popover="manual"')
+            ->assertSeeHtml('md-catalog-chip--accent')->assertSeeHtml('md-catalog-chip--teal')
+            ->assertSee('Ejemplo')->assertDontSee('Vista previa:');
     }
 }

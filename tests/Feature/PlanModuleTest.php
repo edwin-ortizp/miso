@@ -27,6 +27,19 @@ class PlanModuleTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_category_chips_use_the_saved_icon_and_keep_legacy_labels(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $category = PlanCategory::create(['user_id' => $user->id, 'name' => 'Paseos', 'icon' => 'bi-tree']);
+        $plan = Plan::factory()->for($user)->create(['title' => 'Salida', 'category' => 'Paseos', 'plan_category_id' => $category->id]);
+        foreach ([Livewire::test(PlanIndex::class), Livewire::test(PlanShow::class, ['plan' => $plan->id])] as $view) {
+            $view->assertSeeHtml('md-catalog-chip--accent')->assertSeeHtml('bi-tree')->assertSee('Paseos');
+        }
+        $plan->update(['plan_category_id' => null, 'category' => 'Categoría anterior']);
+        Livewire::test(PlanIndex::class)->assertSee('Categoría anterior')->assertSeeHtml('bi-tag');
+    }
+
     public function test_plan_routes_render_inside_the_shell(): void
     {
         $user = User::factory()->create();

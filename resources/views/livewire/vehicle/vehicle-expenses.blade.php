@@ -56,7 +56,7 @@
                 @foreach ($expenses as $expense)
                     <tr wire:key="expense-row-{{ $expense->id }}">
                         <td>{{ $expense->spent_on->format('d/m/Y') }}</td>
-                        <td><span class="vehicle-expense-category"><i class="bi {{ $expense->category->icon ?: 'bi-tag' }}" aria-hidden="true"></i>{{ $expense->category->name }}</span></td>
+                        <td><x-ui.catalog-chip tone="accent" :icon="$expense->category->icon ?: 'bi-tag'">{{ $expense->category->path_label }}</x-ui.catalog-chip></td>
                         <td>@if ($expense->description)<strong>{{ $expense->description }}</strong>@endif @if ($expense->provider)<br><small>{{ $expense->provider }}</small>@endif @if (! $expense->description && ! $expense->provider)—@endif</td>
                         <td>{{ $expense->usage_reading !== null ? number_format($expense->usage_reading, 0, ',', '.').' '.$vehicle->usage_unit : '—' }}</td>
                         <td><strong>$ {{ number_format($expense->amount, 0, ',', '.') }}</strong></td>
@@ -78,7 +78,7 @@
                                                      action="deleteExpense('{{ $expense->id }}')" title="Eliminar gasto" message="El gasto se elimina del historial de este vehículo." />
                         </div></header>
                         <strong>$ {{ number_format($expense->amount, 0, ',', '.') }}</strong>
-                        <span class="vehicle-expense-category"><i class="bi {{ $expense->category->icon ?: 'bi-tag' }}" aria-hidden="true"></i>{{ $expense->category->name }}{{ $expense->description ? ' · '.$expense->description : '' }}</span>
+                        <div><x-ui.catalog-chip tone="accent" :icon="$expense->category->icon ?: 'bi-tag'">{{ $expense->category->path_label }}</x-ui.catalog-chip>@if ($expense->description) <span>{{ $expense->description }}</span>@endif</div>
                         <dl><div><dt>Proveedor</dt><dd>{{ $expense->provider ?: '—' }}</dd></div><div><dt>Lectura</dt><dd>{{ $expense->usage_reading !== null ? number_format($expense->usage_reading, 0, ',', '.').' '.$vehicle->usage_unit : '—' }}</dd></div></dl>
                     </article>
                 @endforeach

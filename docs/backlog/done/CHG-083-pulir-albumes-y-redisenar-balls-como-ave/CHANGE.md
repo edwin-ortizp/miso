@@ -1,9 +1,9 @@
 # CHG-083 · Pulir álbumes y rediseñar Balls como aventura Pokémon
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -89,3 +89,4 @@ Plan aprobado explícitamente por el usuario el 2026-11-11. Alcance: Balls y scr
 - LECCIÓN(ui-designer): Dimensionar las tarjetas según su contenido: evitar alturas igualadas o acciones empujadas al pie cuando generen vacíos sin función. En escritorio, agrupar datos relacionados en horizontal cuando el ancho permita conservar su legibilidad; adaptar las columnas de las rejillas al ancho disponible y al contenido, en vez de fijar pocas columnas para todos los escritorios. El espacio vacío debe responder a jerarquía, agrupación o interacción. Evidencia: CHG-083 necesitó una segunda revisión para compactar racha/reto y mostrar más Pokébolas por fila; los 240 px y las seis columnas son resultados de ese caso, no límites universales. → docs/UI-DESIGN.md
 - LECCIÓN(ux-designer): En tarjetas de seguimiento, priorizar el estado actual, el progreso y la siguiente acción. Mostrar las explicaciones secundarias mediante ayuda contextual cuando no sean necesarias para actuar; conservar visibles las instrucciones esenciales. El disparador debe tener nombre accesible y la ayuda debe poder abrirse y cerrarse con teclado, restituyendo el foco cuando sea un diálogo. No imponer un acordeón como solución predeterminada. Evidencia: en CHG-083 la explicación de la racha pasó de un acordeón a un botón de ayuda con diálogo canónico. → docs/UX-DESIGN.md
 - LECCIÓN(qa-tester): En cambios de tarjetas y rejillas, revisar móvil y escritorio con pocos y muchos elementos, textos largos y estados pendientes/completados. Comprobar el aprovechamiento del espacio además de desbordamientos: alturas forzadas, grandes vacíos sin función, acciones innecesariamente separadas y columnas que no aprovechan el ancho. Verificar legibilidad y acceso por teclado a la ayuda contextual. Evidencia: CHG-083 pasó las comprobaciones iniciales de responsive y accesibilidad, pero la revisión del usuario detectó espacio vertical desperdiciado; la corrección se comprobó con cinco y seis tarjetas por fila. No extrapolar esas cantidades ni alturas a otras pantallas. → docs/TESTING.md
+- 2026-11-11 — Cerrado por el usuario (Compuerta 3) → done/ (desde el panel)

@@ -76,7 +76,7 @@ class VehicleExpenses extends Component
         $categories = VehicleExpenseCategory::query()->with('parent')->withCount('expenses')->orderBy('sort_order')->orderBy('name')->get()->sortBy(fn ($category) => $categoryOrder[$category->id] ?? PHP_INT_MAX);
         $totalCount = VehicleExpense::query()->where('vehicle_id', $vehicle->id)->count();
         $expenses = $this->filteredExpenses($vehicle->id)
-            ->with('category')
+            ->with('category.parent')
             ->when(in_array($this->expenseSort, ['amount'], true), fn (Builder $query) => $query->orderByDesc($this->expenseSort))
             ->orderBy('spent_on', $this->expenseSort === 'oldest' ? 'asc' : 'desc')->orderBy('created_at', $this->expenseSort === 'oldest' ? 'asc' : 'desc')
             ->paginate($this->perPage());

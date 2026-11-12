@@ -1,5 +1,13 @@
 # UI Design
 
+## Antes de especificar UI
+
+- Antes de escribir §3 de un CHG con UI, abre las vistas vecinas (hero del compañero, `card-head`, tonos) y boceta escritorio y móvil; valida con una captura antes de entregar. En CHG-070 la primera versión fue una columna de 720 px sin íconos ni temática y hubo que rehacerla.
+
+## Identidad de módulos
+
+- Cuando una UI represente un módulo, toma su ícono de `config/modules.php` y su color de `data-module` (`--md-module-accent`); nunca elijas tonos ni íconos a mano. En CHG-070, Foco tenía un ícono distinto al de Pomodoro y los tonos no coincidían con el menú.
+
 ## Responsive del panel lateral
 
 - Antes de decidir dónde vive un elemento del panel lateral, comprueba cómo se reacomoda el panel por debajo de 1200 px: el panel baja debajo de la lista completa, así que lo que quede ahí puede volverse inalcanzable en móvil cuando la lista es larga.

@@ -1,5 +1,5 @@
 # CHG-074 · Registro por texto libre
-**Estado:** Borrador
+**Estado:** Descartado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -66,3 +66,4 @@ Separado de CHG-069 por decisión del usuario. Interpretar texto libre requiere 
 - Pregunta: ¿qué proveedor de IA y qué tope de costo mensual aceptas?
 - Pregunta: ¿solo texto o también voz (dictado del sistema basta en el celular)?
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
+- 2026-11-11 — Descartado: No relevante aún (desde el panel)

@@ -26,7 +26,10 @@
     </article>
 @else
 <article {{ $attributes->class(['game-day-tile' => $inHome, 'game-challenge' => ! $inHome, 'game-day-tile--done' => $challenge['completed']]) }}
-         aria-labelledby="game-day-challenge-{{ $inHome ? 'home' : 'balls' }}" aria-live="polite">
+         aria-labelledby="game-day-challenge-{{ $inHome ? 'home' : 'balls' }}" aria-live="polite" x-data="{ infoOpen: false }">
+    <x-game.day-tile-info id="game-day-challenge-info" title="Cómo funciona el reto del día">
+        Cada día hay un reto distinto según lo que tienes pendiente. Si lo cumples, ganas una ball extra. Es aparte de la racha, aunque lo que hagas también suma a la racha.
+    </x-game.day-tile-info>
     <p class="{{ $inHome ? 'game-day-tile__title' : 'game-challenge__label' }} md-label-large" id="game-day-challenge-{{ $inHome ? 'home' : 'balls' }}">
         <i class="bi bi-bullseye" aria-hidden="true"></i> Reto de hoy
     </p>

@@ -9,7 +9,7 @@
     $timezone = config('app.timezone');
 @endphp
 
-<x-module-shell module="pomodoro" x-data="pomodoroTimer({
+<x-module-shell module="pomodoro" class="pomodoro-page" x-data="pomodoroTimer({
     workDuration: {{ $workDuration }},
     shortBreak: {{ $shortBreak }},
     longBreak: {{ $longBreak }},
@@ -21,13 +21,11 @@
     </x-slot:actions>
 
     <x-slot:controls>
-        <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F \d\e Y')) }}</p>
+        <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->locale('es')->translatedFormat('l d \d\e F \d\e Y')) }}</p>
     </x-slot:controls>
 
-    <livewire:game.guardian-card module="pomodoro" variant="top" />
-
     <x-slot:rail>
-        <x-context-widget :title="$displayDate->isToday() ? 'Meta de hoy' : 'Meta del '.$displayDate->translatedFormat('j \d\e F')" icon="bi-trophy">
+        <x-context-widget class="pomodoro-daily-goal" :title="$displayDate->isToday() ? 'Meta de hoy' : 'Meta del '.$displayDate->translatedFormat('j \d\e F')" icon="bi-trophy">
             <livewire:game.guardian-card module="pomodoro" variant="rail" />
             <p class="goal-today"><strong>{{ $minutesLabel($totalMinutes) }} <span>/ {{ $minutesLabel($dailyGoal) }}</span></strong><b>{{ $progressPercentage }} %</b></p>
             <x-ui.progress :value="min($progressPercentage, 100)" tone="primary" label="Avance de la meta diaria" :valueText="$progressPercentage.'% de la meta'" />
@@ -42,7 +40,7 @@
             </p>
         </x-context-widget>
 
-        <x-context-widget title="Calendario del mes" icon="bi-calendar3">
+        <x-context-widget class="pomodoro-calendar" title="Calendario del mes" icon="bi-calendar3">
             <x-slot:actions>
                 <div class="goal-month-nav">
                     <x-ui.icon-action icon="bi-chevron-left" label="Mes anterior" size="sm" wire:click="previousMonth" />
@@ -61,7 +59,7 @@
             </p>
         </x-context-widget>
 
-        <x-context-widget title="Enfoque del mes" icon="bi-stopwatch" tone="success">
+        <x-context-widget class="pomodoro-month-summary" title="Enfoque del mes" icon="bi-stopwatch" tone="success">
             <dl class="md-context-list">
                 <div><dt>Tiempo registrado</dt><dd>{{ $minutesLabel($monthData['focus_minutes']) }}</dd></div>
                 <div><dt>Metas alcanzadas</dt><dd>{{ $monthData['completed_days'] }} días</dd></div>
@@ -69,17 +67,8 @@
         </x-context-widget>
     </x-slot:rail>
 
-    <x-ui.section title="{{ $displayDate->translatedFormat('l d \d\e F') }}"
-                  description="Meta: {{ $dailyGoal }} min · {{ max($dailyGoal - $totalMinutes, 0) }} min restantes"
-                  :level="2">
-        <x-ui.metric-grid label="Resumen de enfoque">
-            <x-ui.metric label="Sesiones" icon="bi-check2-circle" tone="success" :value="$sessionCount" unit="sesiones" />
-            <x-ui.metric label="Tiempo registrado" icon="bi-stopwatch" tone="info" :value="$hoursMinutes($totalSeconds)" />
-        </x-ui.metric-grid>
-    </x-ui.section>
-
-    <x-ui.card variant="elevated">
-        <div class="pomodoro-stage">
+    <x-ui.card variant="elevated" class="pomodoro-timer-card">
+        <div @class(['pomodoro-stage', 'pomodoro-stage--companion' => $focusCompanion])>
             <div class="md-chip-rail" role="group" aria-label="Modo del temporizador">
                 <button type="button" @click="setMode('work')" class="md-chip md-chip-filter pomodoro-mode--work"
                         :class="mode === 'work' ? 'selected' : ''" :aria-pressed="mode === 'work'">Trabajo</button>
@@ -193,7 +182,7 @@
         @endif
     </x-ui.management-card>
 
-    <x-ui.section title="Esta semana"
+    <x-ui.section class="pomodoro-week-summary" title="Esta semana"
                   description="{{ $weekStart->format('d M') }} – {{ $weekStart->copy()->endOfWeek()->format('d M') }}"
                   :level="3">
         <x-ui.card variant="elevated">

@@ -3,12 +3,12 @@
 namespace App\Livewire\Home;
 
 use App\Actions\LogDrink;
+use App\Actions\Task\ShiftTasksToDate;
 use App\Models\DrinkType;
 use App\Models\Task;
 use App\Services\Engagement\ReturnDetector;
 use App\Services\Game\ModuleGuardian;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 /**
@@ -54,11 +54,7 @@ class WelcomeBack extends Component
 
     public function undoLast(): void
     {
-        DB::transaction(function () {
-            foreach (Task::whereIn('id', array_keys($this->undo))->get() as $task) {
-                $task->fill(['start_date' => $this->undo[$task->id]['start'], 'end_date' => $this->undo[$task->id]['end']])->save();
-            }
-        });
+        ShiftTasksToDate::restore($this->undo);
         $this->undo = [];
         $this->message = 'Deshecho. Las tareas quedaron como estaban.';
     }
@@ -81,33 +77,15 @@ class WelcomeBack extends Component
 
     private function moveTo(string $date, string $outcome): void
     {
-        $target = CarbonImmutable::parse($date)->startOfDay();
-        $this->apply(function (Task $task) use ($target) {
-            // Se corre el bloque entero para que la fecha límite caiga en el día elegido, sin cambiar la hora ni la duración.
-            $deadline = CarbonImmutable::instance($task->end_date ?? $task->start_date);
-            $shift = (int) $deadline->startOfDay()->diffInDays($target, false);
-            $task->fill([
-                'start_date' => $task->start_date?->copy()->addDays($shift),
-                'end_date' => $task->end_date?->copy()->addDays($shift),
-            ]);
-        }, $outcome);
+        $this->undo = ShiftTasksToDate::handle($this->behind()->get(), CarbonImmutable::parse($date));
+        $this->close($outcome);
         $this->message = $date === today()->toDateString() ? 'Listo, empezamos de nuevo.' : 'Listo, quedaron para esa fecha.';
         $this->choosingDate = false;
     }
 
     private function apply(callable $change, string $outcome): void
     {
-        $this->undo = [];
-        DB::transaction(function () use ($change) {
-            foreach ($this->behind()->get() as $task) {
-                $this->undo[$task->id] = [
-                    'start' => $task->start_date?->toDateTimeString(),
-                    'end' => $task->end_date?->toDateTimeString(),
-                ];
-                $change($task);
-                $task->save();
-            }
-        });
+        $this->undo = ShiftTasksToDate::apply($this->behind()->get(), $change);
         $this->close($outcome);
     }
 

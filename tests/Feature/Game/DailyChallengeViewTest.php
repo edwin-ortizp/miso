@@ -42,6 +42,16 @@ class DailyChallengeViewTest extends TestCase
             ->assertSeeHtml('role="progressbar"');
     }
 
+    /** CHG-089: cada mosaico explica su mecánica con un ⓘ y el umbral configurado. */
+    public function test_home_tiles_explain_streak_and_challenge(): void
+    {
+        Livewire::test(Dashboard::class)
+            ->assertSeeHtml('aria-label="Cómo funciona la racha"')
+            ->assertSeeHtml('aria-label="Cómo funciona el reto del día"')
+            ->assertSee('Tu racha sube cuando haces 3 acciones en al menos 2 áreas distintas')
+            ->assertSee('Si lo cumples, ganas una ball extra. Es aparte de la racha');
+    }
+
     public function test_checkin_is_not_a_default_challenge(): void
     {
         $defaults = (require config_path('game.php'))['daily_challenge']['templates'];

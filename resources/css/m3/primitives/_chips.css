@@ -134,6 +134,16 @@
   min-height: 24px;
   overflow-wrap: anywhere;
 }
+.md-catalog-chip--accent {
+  --md-catalog-container: color-mix(in srgb, var(--md-module-accent, var(--md-sys-color-primary)) 12%, var(--md-sys-color-surface-container-lowest));
+  --md-catalog-on-container: color-mix(in srgb, var(--md-module-accent, var(--md-sys-color-primary)) 55%, var(--md-sys-color-on-surface));
+  background: var(--md-catalog-container);
+  color: var(--md-catalog-on-container);
+}
+[data-theme="dark"] .md-catalog-chip--accent {
+  --md-catalog-container: color-mix(in srgb, var(--md-module-accent, var(--md-sys-color-primary)) 40%, #374151);
+  --md-catalog-on-container: #f3f4f6;
+}
 .md-catalog-chip--gray {
   --md-catalog-container: #e5e7eb;
   --md-catalog-on-container: #374151;

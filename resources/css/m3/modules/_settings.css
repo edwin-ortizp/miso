@@ -10,7 +10,7 @@
 .settings-nav__group { display:grid; gap:2px; }
 .settings-nav__group + .settings-nav__group { margin-top:8px; padding-top:12px; border-top:1px solid var(--md-sys-color-outline-variant); }
 .settings-nav__label { padding:0 12px 4px; color:var(--md-sys-color-on-surface-variant); font-size:.75rem; font-weight:700; }
-.settings-nav__link { position:relative; display:flex; align-items:center; gap:10px; min-height:36px; padding:6px 12px; border-radius:8px; color:var(--md-sys-color-on-surface); font-size:.9rem; text-decoration:none; }
+.settings-nav__link { position:relative; display:flex; align-items:center; gap:10px; min-height:44px; padding:8px 12px; border-radius:8px; color:var(--md-sys-color-on-surface); font-size:.9rem; text-decoration:none; }
 .settings-nav__link i { color:var(--md-sys-color-on-surface-variant); }
 .settings-nav__link:hover, .settings-nav__link.is-active { background:var(--md-sys-color-surface-container); }
 .settings-nav__link.is-active { font-weight:700; }
@@ -42,3 +42,41 @@
     .settings-nav__link { flex:none; white-space:nowrap; }
     .settings-nav__link.is-active::before { top:auto; right:8px; bottom:-2px; left:8px; width:auto; height:3px; }
 }
+
+/* CHG-087: formularios de cuenta legibles; las herramientas extensas conservan su ancho. */
+.settings-account-form { width: 100%; max-width: 760px; }
+.settings-account-form .md-card-header { gap: 12px; margin-bottom: 12px; }
+.settings-account-form .md-card-icon { width: 36px; height: 36px; font-size: 1.25rem; border-radius: 12px; }
+.settings-account-form > .md-card-content { display: grid; gap: 20px; }
+.settings-account-form .md-field-pair { gap: 20px; }
+.settings-form-intro { margin: 0; font-size: .875rem; line-height: 1.5; color: var(--md-sys-color-on-surface-variant); }
+.settings-body-reference { display: grid; gap: 12px; border-top: 1px solid var(--md-sys-color-outline-variant); padding-top: 16px; }
+.settings-body-reference__values { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; }
+.settings-body-reference__values > div { display: grid; align-content: start; gap: 4px; min-width: 0; }
+.settings-body-reference__values dt { color: var(--md-sys-color-on-surface-variant); font-size: .8rem; font-weight: 500; }
+.settings-body-reference__values dd { margin: 0; color: var(--md-sys-color-on-surface); font-size: 1rem; font-weight: 600; overflow-wrap: anywhere; }
+@media (max-width: 599.98px) {
+    .settings-body-reference__values { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    .settings-body-reference__values > div { grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); align-items: baseline; }
+    .settings-body-reference__values dd { text-align: end; }
+}
+
+/* CHG-088: preferencias por filas y activación de dispositivo independiente. */
+.settings-notifications { display: grid; gap: 16px; max-width: 760px; }
+.settings-preference-card .md-card-header { gap: 12px; margin-bottom: 12px; }
+.settings-preference-card .md-card-icon { width: 36px; height: 36px; font-size: 1.25rem; border-radius: 12px; }
+.settings-preference-card > .md-card-content { display: grid; gap: 16px; }
+.settings-preference-list { display: grid; gap: 0; }
+.settings-preference-list .md-switch { display: flex; flex-direction: row-reverse; justify-content: space-between; min-height: 48px; gap: 16px; padding-block: 8px; }
+.settings-preference-list .md-switch + .md-switch { border-top: 1px solid var(--md-sys-color-outline-variant); }
+.settings-preference-list .md-switch__text { min-width: 0; flex: 1; }
+.settings-preference-group { min-width: 0; padding: 0; margin: 0; border: 0; }
+.settings-preference-group legend { float: none; width: auto; padding: 0; margin: 0 0 8px; }
+.settings-device { display: grid; gap: 12px; }
+.settings-device p { margin: 0; }
+.settings-preferences-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
+.settings-preferences-actions p { margin: 0; color: var(--md-sys-color-on-surface); }
+
+/* La ayuda explica la restricción: debe poder leerse aunque el correo esté deshabilitado. */
+.settings-account-form .md-text-field:has(> :disabled) { opacity: 1; }
+.settings-account-form .md-text-field > :disabled { color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface-container-low); }

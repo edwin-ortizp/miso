@@ -29,7 +29,7 @@
      @pointerup.window="if (dragStart !== null) { if (dragY > 80) {{ $state }} = false; dragStart = null; dragY = 0 }">
     <span class="md-popover__handle" aria-hidden="true"
           @pointerdown="if (matchMedia('(max-width: 767.98px)').matches) { dragStart = $event.clientY; dragY = 0 }"></span>
-    <header class="md-popover__head" @pointerdown="if (matchMedia('(max-width: 767.98px)').matches && ! $event.target.closest('button')) { dragStart = $event.clientY; dragY = 0 }">
+    <header class="md-popover__head" role="presentation" @pointerdown="if (matchMedia('(max-width: 767.98px)').matches && ! $event.target.closest('button')) { dragStart = $event.clientY; dragY = 0 }">
         <h3 id="{{ $popoverId }}-title" class="md-popover__title">{{ $title }}</h3>
         <button type="button" class="md-btn-icon md-btn--sm md-popover__close" aria-label="Cerrar {{ \Illuminate\Support\Str::lower($title) }}" title="Cerrar" @click="{{ $state }} = false">
             <i class="bi bi-x-lg" aria-hidden="true"></i>

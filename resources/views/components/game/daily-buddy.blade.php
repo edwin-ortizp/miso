@@ -1,7 +1,7 @@
 {{-- Integrante del día (CHG-043): ejemplar al azar con una frase.
      variant="wall": 5.ª columna de Próximos días en el panel; sin estado vacío.
      variant="card": tarjeta del dashboard, con invitación si aún no hay ejemplares. --}}
-@props(['buddy', 'variant' => 'card', 'mood' => null, 'balls' => 0, 'date' => null, 'checkinDone' => false, 'streak' => null, 'challenge' => null])
+@props(['buddy', 'variant' => 'card', 'mood' => null, 'balls' => 0, 'date' => null, 'checkinDone' => false, 'streak' => null, 'challenge' => null, 'night' => false, 'closeHref' => null, 'closing' => null])
 
 @if ($variant === 'hero')
     {{-- CHG-075/081: bienvenida del Inicio. Izquierda: el compañero saluda y pide el check-in.
@@ -10,7 +10,8 @@
         $empty = ! $buddy || $buddy['empty'];
         $hasDay = $streak || $challenge;
     @endphp
-    <section {{ $attributes->class(['game-buddy-hero', 'game-buddy-stage', 'game-buddy-hero--with-day' => $hasDay, 'game-stage--'.($empty ? 'cielo' : ($buddy['stage'] ?? 'cielo')), $empty ? '' : $buddy['type_class']]) }} aria-label="Bienvenida del día">
+    {{-- CHG-070: de noche el escenario se oscurece; `closeHref` invita a cerrar el día desde el Inicio y `closing` es la frase del compañero en la pantalla del cierre. --}}
+    <section {{ $attributes->class(['game-buddy-hero', 'game-buddy-stage', 'game-buddy-hero--night' => $night, 'game-buddy-hero--with-day' => $hasDay, 'game-stage--'.($empty ? 'cielo' : ($buddy['stage'] ?? 'cielo')), $empty ? '' : $buddy['type_class']]) }} aria-label="Bienvenida del día">
         <span class="game-buddy-stage__scene" aria-hidden="true"></span>
         <div class="game-buddy-hero__greeting">
             @if ($empty)
@@ -22,6 +23,7 @@
                     @else
                         <span class="game-placeholder" aria-hidden="true"><i class="bi bi-stars"></i></span>
                     @endif
+                    @if ($night)<span class="game-buddy-hero__zzz" aria-hidden="true">z<span>z</span><span>z</span></span>@endif
                 </a>
             @endif
             <div class="game-buddy-hero__body">
@@ -29,9 +31,20 @@
                     @if ($date)<span>{{ $date }}</span>@endif
                     @unless ($empty)<span>{{ $buddy['name'] }} · Nv {{ $buddy['level'] }}</span>@endunless
                 </p>
-                <p class="game-buddy-hero__quote md-title-large">{{ $empty ? 'Abre tu primera ball para conocer a tu compañero.' : '“'.$buddy['quote'].'”' }}</p>
+                <p class="game-buddy-hero__quote md-title-large">{{ $closing['quote'] ?? ($empty ? 'Abre tu primera ball para conocer a tu compañero.' : '“'.$buddy['quote'].'”') }}</p>
                 <div class="game-buddy-hero__bubble md-body-medium">
-                    @if ($checkinDone)
+                    @if ($closing)
+                        <span><i class="bi {{ $closing['done'] ? 'bi-moon-stars-fill' : 'bi-moon-stars' }}" aria-hidden="true"></i> {{ $closing['bubble'] }}</span>
+                        @unless ($closing['done'])
+                            <button type="button" class="md-btn-filled game-buddy-hero__cta" wire:click="finish" wire:loading.attr="disabled"><i class="bi bi-moon-stars" aria-hidden="true"></i> Listo, terminé el día</button>
+                        @endunless
+                    @elseif ($closeHref)
+                        <span>¿Cerramos el día?</span>
+                        @unless ($checkinDone)
+                            <button type="button" class="md-btn-text game-buddy-hero__cta" wire:click="$set('checkin', true)">Check-in</button>
+                        @endunless
+                        <a href="{{ $closeHref }}" wire:navigate class="md-btn-filled game-buddy-hero__cta" data-testid="day-close-entry"><i class="bi bi-moon-stars" aria-hidden="true"></i> Cerrar el día</a>
+                    @elseif ($checkinDone)
                         <span><i class="bi bi-check-circle-fill" aria-hidden="true"></i> Ya hiciste tu check-in de hoy.</span>
                         <button type="button" class="md-btn-text game-buddy-hero__cta" wire:click="$set('checkin', true)">Editar</button>
                     @else

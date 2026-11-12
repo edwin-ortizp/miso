@@ -1,9 +1,9 @@
 # CHG-081 · Rediseño de la cabecera del Inicio
-**Estado:** En desarrollo
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-11
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -31,12 +31,12 @@ La cabecera de CHG-075 creció con la racha y el reto (CHG-076/077) apilados a l
 - Un solo check-in: el de la burbuja.
 
 ## 7. Tareas
-- [ ] T1 · Toda la app usa la letra del sistema en el juego (tokens tipográficos separados en vez del compuesto inexistente) — Resp: developer — Modelo: estandar — Archivos: resources/css/m3/modules/_game.css — Hecho cuando: no queda ningún `font: var(--md-sys-typescale-*, …)`
-- [ ] T2 · El reto de hoy deja de ser «check-in» si esa plantilla ya no está habilitada y no se ha cumplido — Resp: developer — Modelo: estandar — Archivos: app/Services/Game/DailyChallenge.php, tests/Feature/Game/DailyChallengeTest.php — Hecho cuando: la prueba nueva pasa
-- [ ] T3 · Cabecera en dos columnas (saludo + «Tu día» con mosaicos de racha y reto) en 1440/768/390 px — Resp: developer — Modelo: estandar — Archivos: resources/views/components/game/daily-buddy.blade.php, resources/views/components/game/streak-line.blade.php, resources/views/components/game/daily-challenge.blade.php, resources/css/m3/modules/_game.css, tests/Feature/Game/GameDashboardTest.php — Hecho cuando: capturas en los tres anchos sin espacio perdido ni check-in repetido
-- [ ] T4 · Lecciones de diseño en los lineamientos (tipografía, ancho y un llamado por intención) — Resp: developer — Modelo: estandar — Archivos: docs/UI-DESIGN.md, docs/UX-DESIGN.md — Hecho cuando: las reglas quedan con su evidencia
+- [x] T1 · Toda la app usa la letra del sistema en el juego (tokens tipográficos separados en vez del compuesto inexistente) — Resp: developer — Modelo: estandar — Archivos: resources/css/m3/modules/_game.css — Hecho cuando: no queda ningún `font: var(--md-sys-typescale-*, …)` (cerrada por el usuario sin verificar)
+- [x] T2 · El reto de hoy deja de ser «check-in» si esa plantilla ya no está habilitada y no se ha cumplido — Resp: developer — Modelo: estandar — Archivos: app/Services/Game/DailyChallenge.php, tests/Feature/Game/DailyChallengeTest.php — Hecho cuando: la prueba nueva pasa (cerrada por el usuario sin verificar)
+- [x] T3 · Cabecera en dos columnas (saludo + «Tu día» con mosaicos de racha y reto) en 1440/768/390 px — Resp: developer — Modelo: estandar — Archivos: resources/views/components/game/daily-buddy.blade.php, resources/views/components/game/streak-line.blade.php, resources/views/components/game/daily-challenge.blade.php, resources/css/m3/modules/_game.css, tests/Feature/Game/GameDashboardTest.php — Hecho cuando: capturas en los tres anchos sin espacio perdido ni check-in repetido (cerrada por el usuario sin verificar)
+- [x] T4 · Lecciones de diseño en los lineamientos (tipografía, ancho y un llamado por intención) — Resp: developer — Modelo: estandar — Archivos: docs/UI-DESIGN.md, docs/UX-DESIGN.md — Hecho cuando: las reglas quedan con su evidencia (cerrada por el usuario sin verificar)
 <!-- Primero lo que cambia para el usuario; el detalle técnico después. Formato:
-- [ ] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … -->
+- [x] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … --> (cerrada por el usuario sin verificar)
 
 ## 8. Bitácora de implementación (developer)
 
@@ -46,3 +46,4 @@ La cabecera de CHG-075 creció con la racha y el reto (CHG-076/077) apilados a l
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-11 — Cerrado por el usuario sin verificación (pendientes: T1, T2, T3, T4): ya lo probé → done/ (desde el panel)

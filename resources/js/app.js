@@ -19,6 +19,7 @@ import { registerHealthBodyMap } from './health-body-map';
 import { registerTaskCalendar } from './task-calendar';
 import { registerTaskGantt } from './task-gantt';
 import { registerRoutineMusic } from './routine-music';
+import { registerCatalogColorSelect } from './catalog-color-select';
 
 registerGameReveal(Alpine);
 registerPomodoroTimer(Alpine);
@@ -35,6 +36,7 @@ registerHealthBodyMap(Alpine);
 registerTaskCalendar(Alpine);
 registerTaskGantt(Alpine);
 registerRoutineMusic(Alpine);
+registerCatalogColorSelect(Alpine);
 
 registerInstallPrompt(Alpine);
 registerPushToggle(Alpine);

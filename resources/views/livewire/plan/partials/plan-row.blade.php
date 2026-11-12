@@ -15,7 +15,7 @@
     <div class="plan-row__body">
         <a class="plan-row__title" href="{{ route('plans.show', $plan) }}" wire:navigate>{{ $plan->title }}</a>
         <span class="plan-row__meta">
-            @if ($plan->city)<i class="bi bi-geo-alt" aria-hidden="true"></i> {{ $plan->city }} · @endif{{ $plan->typeLabel() }}@if ($plan->category) · {{ $plan->category }}@endif
+            @if ($plan->city)<i class="bi bi-geo-alt" aria-hidden="true"></i> {{ $plan->city }} · @endif{{ $plan->typeLabel() }}@if ($plan->category || $plan->planCategory) · <x-ui.catalog-chip tone="accent" :icon="$plan->planCategory?->icon ?: 'bi-tag'">{{ $plan->planCategory?->path_label ?: $plan->category }}</x-ui.catalog-chip>@endif
         </span>
         @if ($people->isNotEmpty() || (! $relationship && $plan->circles->isNotEmpty()))
             <span class="plan-row__people">

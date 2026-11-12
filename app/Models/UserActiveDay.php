@@ -13,11 +13,24 @@ class UserActiveDay extends Model
 {
     public const CHANNELS = ['direct', 'push', 'checkin', 'close', 'shortcut', 'return'];
 
-    protected $fillable = ['user_id', 'date', 'first_channel', 'records_count'];
+    protected $fillable = ['user_id', 'date', 'first_channel', 'records_count', 'closed_at'];
 
     protected function casts(): array
     {
-        return ['date' => 'date', 'records_count' => 'integer'];
+        return ['date' => 'date', 'records_count' => 'integer', 'closed_at' => 'datetime'];
+    }
+
+    /** CHG-070: marca el día como cerrado ("Listo, terminé el día"). Idempotente: conserva el primer cierre. */
+    public static function closeDay(int $userId, string $date): void
+    {
+        self::markActive($userId, 'close', $date);
+        DB::table('user_active_days')->where('user_id', $userId)->where('date', $date)->whereNull('closed_at')
+            ->update(['closed_at' => now(), 'updated_at' => now()]);
+    }
+
+    public static function isClosed(int $userId, string $date): bool
+    {
+        return DB::table('user_active_days')->where('user_id', $userId)->where('date', $date)->whereNotNull('closed_at')->exists();
     }
 
     public static function channel(?string $via): string

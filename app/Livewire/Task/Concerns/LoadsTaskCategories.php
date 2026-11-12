@@ -15,11 +15,16 @@ trait LoadsTaskCategories
 {
     public array $categories = [];
 
-    protected array $categoryColors = [];
+    protected array $categoryAppearance = [];
 
     public function categoryColor(?string $key): ?string
     {
-        return $this->categoryColors[$key] ?? null;
+        return $this->categoryAppearance[$key]['color'] ?? null;
+    }
+
+    public function categoryIcon(?string $key): string
+    {
+        return $this->categoryAppearance[$key]['icon'] ?? 'bi-tag';
     }
 
     public function bootLoadsTaskCategories(): void
@@ -34,9 +39,17 @@ trait LoadsTaskCategories
 
     private function taskCategoryOptions(): array
     {
-        $this->categoryColors = auth()->id()
-            ? TaskCategory::where('user_id', auth()->id())->pluck('color', 'key')->all() : [];
+        $this->categoryAppearance = [];
+        if (! auth()->id()) {
+            return [];
+        }
         $options = TaskCategory::options();
+        $this->categoryAppearance = TaskCategory::where('user_id', auth()->id())
+            ->get(['key', 'name', 'color', 'icon'])->mapWithKeys(fn ($category) => [$category->key => [
+                'label' => $options[$category->key] ?? $category->name,
+                'color' => $category->color,
+                'icon' => $category->icon ?: 'bi-tag',
+            ]])->all();
 
         Task::query()->whereNotNull('category')->where('category', '!=', '')
             ->whereNotIn('category', array_keys($options))

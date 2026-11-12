@@ -26,7 +26,7 @@
   .vehicle-garage-grid, .vehicle-catalog-grid, .vehicle-plan-grid, .vehicle-metrics-grid, .vehicle-summary-grid { grid-template-columns: 1fr; }
   .vehicle-identity-card > img, .vehicle-identity-card__placeholder { width: 72px; height: 72px; border-radius: 20px; }.vehicle-identity-card strong { font-size: 1.15rem; }.vehicle-technical-card dl { grid-template-columns: 1fr; }
   .vehicle-care-item { align-items: flex-start; }.vehicle-status-chip { font-size: .62rem !important; }.vehicle-section-heading--action { align-items: stretch; flex-direction: column; }.vehicle-section-heading--action .md-btn-filled { width: 100%; }
-  .vehicle-history-table { display: none; }.vehicle-history-cards { display: grid; gap: 12px; }.vehicle-history-cards article { display: grid; gap: 4px; }.vehicle-history-cards header { align-items: center; }.vehicle-history-cards time, .vehicle-history-cards span { color: var(--md-sys-color-on-surface-variant); font-size: .72rem; }.vehicle-history-cards > article > strong { color: var(--md-sys-color-on-surface); font-size: 1.1rem; }.vehicle-history-cards dl { display: grid; gap: 7px; margin: 10px 0 0; }
+  .vehicle-history-table { display: none; }.vehicle-history-cards { display: grid; gap: 12px; }.vehicle-history-cards article { display: grid; gap: 4px; }.vehicle-history-cards header { align-items: center; }.vehicle-history-cards time, .vehicle-history-cards span:not(.md-catalog-chip) { color: var(--md-sys-color-on-surface-variant); font-size: .72rem; }.vehicle-history-cards > article > strong { color: var(--md-sys-color-on-surface); font-size: 1.1rem; }.vehicle-history-cards dl { display: grid; gap: 7px; margin: 10px 0 0; }
   .vehicle-filter-grid { grid-template-columns: 1fr; }.vehicle-filter-search { grid-column: auto; }
 }
 
