@@ -1,5 +1,8 @@
+{% from '@project/components/life-shell.html.jinja' import dialog %}
+{% from '@project/components/learning-companion.html.jinja' import learning_companion, team_art %}
 {% from '@project/components/life-shell.html.jinja' import shell, tabs as module_tabs, metric, manage_card, row_split, applied_filters, date_filters %}
 {% call shell('pomodoro', 'Pomodoro', 'bi-stopwatch') %}
+{{ learning_companion(true) }}
 {{ module_tabs([('Temporizador','/pomodoro-timer','bi-stopwatch'),('Ajustes','/pomodoro-settings','bi-sliders')], '/pomodoro-timer') }}
 <section class="lt-metrics" aria-label="Resumen de enfoque">{{ metric('Enfoque hoy','1 h 40 min','success') }}{{ metric('Sesiones','4 de 8') }}{{ metric('Racha','6 días','warning') }}</section>
 <section class="lt-grid-main">
@@ -52,4 +55,5 @@
     </div></article>
   </aside>
 </section>
+{% call dialog('guardian-sheet','Abra · Nv 12',close_only=true) %}<div class="lt-learning-sheet">{{ team_art() }}<p>Equipo de la semana · Concentración</p><p>Compañero ficticio para revisar la experiencia.</p></div>{% endcall %}
 {% endcall %}

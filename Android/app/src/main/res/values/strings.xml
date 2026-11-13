@@ -1,3 +1,14 @@
 <resources>
-    <string name="app_name">Life Tracker</string>
+    <string name="app_name">MiSo</string>
+    <string name="loading">Cargando MiSo</string>
+    <string name="load_error">No pudimos abrir MiSo.</string>
+    <string name="load_help">Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="retry">Reintentar</string>
+    <string name="save_file">Guardar archivo</string>
+    <string name="download_failed">No pudimos guardar el archivo.</string>
+    <string name="download_saved">Archivo guardado.</string>
+    <string name="download_busy">Espera a que termine la descarga actual.</string>
+    <string name="link_unavailable">No se puede abrir este enlace.</string>
+    <string name="accept">Aceptar</string>
+    <string name="cancel">Cancelar</string>
 </resources>

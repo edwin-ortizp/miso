@@ -173,6 +173,19 @@ class MoodTracker extends Component
         $this->energyComment = '';
     }
 
+    /** Chat del compañero (CHG-100): energía de un toque, 1 a 5. */
+    public function quickEnergy(int $level): array
+    {
+        if ($level < 1 || $level > 5) {
+            return ['ok' => false, 'message' => 'Elige un nivel del 1 al 5.'];
+        }
+        $this->energyLevel = $level;
+        $this->energyComment = '';
+        $this->saveEnergy();
+
+        return ['ok' => true];
+    }
+
     public function deleteEnergy(string $id)
     {
         EnergyEntry::where('id', $id)->delete();

@@ -153,6 +153,61 @@ class TaskList extends Component
         $this->resetForm();
     }
 
+    /**
+     * Creación rápida desde el chat del compañero (CHG-100): una tarea o varias (una por línea)
+     * con valores por defecto y categoría opcional. Reutiliza el guardado múltiple.
+     *
+     * @return array{ok: bool, count?: int, message?: string}
+     */
+    /** Detalles del chat del compañero (CHG-100): categoría, día y hora de las tareas rápidas. */
+    public string $quickCategory = '';
+
+    public string $quickWhen = '';
+
+    public string $quickTime = '';
+
+    public function quickCreateTasks(string $text, ?string $category = null): array
+    {
+        $category ??= $this->quickCategory;
+        abort_unless(auth()->check(), 403);
+        $count = collect(preg_split('/\R/u', $text) ?: [])->map(fn (string $line) => trim($line))->filter()->count();
+        if ($count === 0) {
+            return ['ok' => false, 'message' => 'Escribe al menos una tarea.'];
+        }
+        if ($count > 50) {
+            return ['ok' => false, 'message' => 'Máximo 50 tareas a la vez.'];
+        }
+
+        $this->resetForm();
+        $this->resetErrorBag();
+        $this->bulkTitles = $text;
+        $this->category = array_key_exists($category, $this->categories) ? $category : '';
+        $day = match ($this->quickWhen) {
+            'today' => now(),
+            'tomorrow' => now()->addDay(),
+            default => null,
+        };
+        $time = preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $this->quickTime) ? $this->quickTime : null;
+        if ($day) {
+            $this->startDate = $day->toDateString();
+            $this->startTime = $time;
+        }
+        $this->saveBulk();
+
+        if ($this->getErrorBag()->isNotEmpty()) {
+            $message = $this->getErrorBag()->first();
+            $this->resetErrorBag();
+            $this->showForm = false;
+
+            return ['ok' => false, 'message' => $message ?: 'No se pudo crear. Inténtalo de nuevo.'];
+        }
+        $this->showForm = false;
+        $this->quickTime = '';
+        $this->dispatch('task-editor-saved');
+
+        return ['ok' => true, 'count' => $count];
+    }
+
     public function saveBulk(): void
     {
         $lines = collect(preg_split('/\R/u', $this->bulkTitles) ?: [])

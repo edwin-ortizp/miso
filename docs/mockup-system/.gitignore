@@ -1,3 +1,12 @@
 __pycache__/
 *.py[cod]
 .migration-backup/
+
+# Capturas e informes locales del recorrido CHG-096
+dist/learning-review/
+
+# Capturas e informes locales del compañero CHG-097
+dist/favorite-review/
+
+# Creación rápida CHG-099
+dist/task-creation-review/

@@ -60,6 +60,7 @@
 @import './m3/patterns/_states.css';
 @import './m3/patterns/_markdown.css';
 @import './m3/patterns/_auth.css';
+@import './m3/patterns/_companion-chat.css';
 
 /* 4. Archetypes */
 @import './m3/archetypes/_layout.css';

@@ -9,7 +9,14 @@
 
 <x-module-shell module="water">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
+            :greeting="config('companion_chat.water.greeting')"
+            :quick="$drinkTypes->take(4)->map(fn ($type) => [
+                'type' => 'tap', 'id' => 'drink-'.$type->id, 'emoji' => $type->icon ?? '💧', 'label' => $type->name.' · 250 ml',
+                'aria' => 'Registrar 250 ml de '.$type->name, 'echo' => '250 ml de '.$type->name,
+                'call' => 'quickAdd', 'args' => [(string) $type->id, 250],
+                'reply' => str_replace('{name}', $type->name, config('companion_chat.water.reply')),
+            ])->values()->all()" />
     </x-slot:actions>
 
     <x-slot:controls>

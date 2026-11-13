@@ -43,20 +43,25 @@ trait LoadsTaskCategories
         if (! auth()->id()) {
             return [];
         }
-        $options = TaskCategory::options();
-        $this->categoryAppearance = TaskCategory::where('user_id', auth()->id())
-            ->get(['key', 'name', 'color', 'icon'])->mapWithKeys(fn ($category) => [$category->key => [
-                'label' => $options[$category->key] ?? $category->name,
-                'color' => $category->color,
-                'icon' => $category->icon ?: 'bi-tag',
-            ]])->all();
+        // CHG-095: una página monta varios componentes con este trait; el catálogo se arma una vez.
+        [$options, $this->categoryAppearance] = app(\App\Support\RequestMemo::class)->remember('task-categories:components:'.auth()->id(), function () {
+            $options = TaskCategory::options();
+            $appearance = TaskCategory::where('user_id', auth()->id())
+                ->get(['key', 'name', 'color', 'icon'])->mapWithKeys(fn ($category) => [$category->key => [
+                    'label' => $options[$category->key] ?? $category->name,
+                    'color' => $category->color,
+                    'icon' => $category->icon ?: 'bi-tag',
+                ]])->all();
 
-        Task::query()->whereNotNull('category')->where('category', '!=', '')
-            ->whereNotIn('category', array_keys($options))
-            ->distinct()->orderBy('category')->pluck('category')
-            ->each(function (string $key) use (&$options) {
-                $options[$key] = DefaultTaskCategories::labelFor($key);
-            });
+            Task::query()->whereNotNull('category')->where('category', '!=', '')
+                ->whereNotIn('category', array_keys($options))
+                ->distinct()->orderBy('category')->pluck('category')
+                ->each(function (string $key) use (&$options) {
+                    $options[$key] = DefaultTaskCategories::labelFor($key);
+                });
+
+            return [$options, $appearance];
+        });
 
         return $options;
     }

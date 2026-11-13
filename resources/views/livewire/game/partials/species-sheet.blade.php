@@ -133,6 +133,13 @@
                 <div class="game-sheet__headline">
                     @if ($companion && $sheet['isCurrent'])
                         <span class="game-power md-title-large"><i class="bi bi-lightning-charge-fill" aria-hidden="true"></i>Poder {{ $sheet['power'] }}</span>
+                        @unless ($readonly ?? false)
+                            @if (($favoriteCompanionId ?? null) === $companion->id)
+                                <span class="md-label-large game-muted"><i class="bi bi-heart-fill" aria-hidden="true"></i> Tu favorito</span>
+                            @else
+                                <button type="button" class="md-btn-tonal" wire:click="makeFavorite({{ $companion->id }})"><i class="bi bi-heart" aria-hidden="true"></i> Hacer favorito</button>
+                            @endif
+                        @endunless
                     @endif
                 </div>
 

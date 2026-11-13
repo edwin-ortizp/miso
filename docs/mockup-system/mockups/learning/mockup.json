@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "learning",
+  "version": "1.0.0",
+  "title": "Formación",
+  "pages": [
+    {
+      "id": "main",
+      "template": "pages/main.html.jinja",
+      "screens": [
+        "learning-list",
+        "learning-detail",
+        "learning-calendar",
+        "learning-tasks",
+        "learning-goals",
+        "learning-habits",
+        "learning-focus"
+      ],
+      "output": "learning.html"
+    }
+  ],
+  "screens": {
+    "learning-list": {
+      "template": "screens/learning-list.html.jinja",
+      "title": "Formaciones"
+    },
+    "learning-detail": {
+      "template": "screens/learning-detail.html.jinja",
+      "title": "Contenido"
+    },
+    "learning-calendar": {
+      "template": "screens/learning-calendar.html.jinja",
+      "title": "Calendario"
+    },
+    "learning-tasks": {
+      "template": "screens/learning-tasks.html.jinja",
+      "title": "Tareas"
+    },
+    "learning-goals": {
+      "template": "screens/learning-goals.html.jinja",
+      "title": "Objetivos"
+    },
+    "learning-habits": {
+      "template": "screens/learning-habits.html.jinja",
+      "title": "HÃ¡bitos"
+    },
+    "learning-focus": {
+      "template": "screens/learning-focus.html.jinja",
+      "title": "Pomodoro"
+    }
+  },
+  "routes": [
+    {
+      "path": "/learning-list",
+      "screen": "learning-list"
+    },
+    {
+      "path": "/learning-detail",
+      "screen": "learning-detail"
+    },
+    {
+      "path": "/learning-calendar",
+      "screen": "learning-calendar"
+    },
+    {
+      "path": "/learning-tasks",
+      "screen": "learning-tasks"
+    },
+    {
+      "path": "/learning-goals",
+      "screen": "learning-goals"
+    },
+    {
+      "path": "/learning-habits",
+      "screen": "learning-habits"
+    },
+    {
+      "path": "/learning-focus",
+      "screen": "learning-focus"
+    }
+  ],
+  "datasets": {
+    "include": [
+      "learning-demo",
+      "learning-no-team",
+      "learning-empty",
+      "learning-no-favorite",
+      "learning-no-collection"
+    ],
+    "default": "learning-demo",
+    "switcher": true,
+    "changePolicy": "reset"
+  },
+  "roles": [
+    "reviewer"
+  ],
+  "defaultRole": "reviewer",
+  "entryRoute": "/learning-list",
+  "entryScript": "scripts/entry.js",
+  "styles": [
+    "@project/project-assets/mockups.css"
+  ],
+  "runtime": {
+    "persistence": "none",
+    "resetEnabled": true
+  },
+  "build": {
+    "selfContained": true,
+    "offline": true,
+    "externalResources": "forbid",
+    "externalNavigation": "forbid",
+    "maxOutputBytes": 10000000
+  }
+}

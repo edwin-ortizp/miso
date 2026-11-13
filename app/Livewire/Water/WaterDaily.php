@@ -264,9 +264,12 @@ class WaterDaily extends Component
     public function quickAdd(string $drinkTypeId, int $amount)
     {
         $drinkType = DrinkType::find($drinkTypeId);
-        if (!$drinkType) return;
+        if (!$drinkType) return ['ok' => false, 'message' => 'No encontré esa bebida.'];
 
         LogDrink::handle($drinkType, $this->selectedDate, $amount);
+
+        // Chat del compañero (CHG-100): total del día para la respuesta.
+        return ['ok' => true, 'total' => (int) DrinkLog::whereDate('date', $this->selectedDate)->sum('amount')];
     }
 
     public function save()

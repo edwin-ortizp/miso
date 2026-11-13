@@ -1,5 +1,8 @@
+{% from '@project/components/life-shell.html.jinja' import dialog %}
+{% from '@project/components/learning-companion.html.jinja' import learning_companion, team_art %}
 {% from '@project/components/life-shell.html.jinja' import shell, tabs as module_tabs, header, metric, manage_card, fab %}
 {% call shell('tasks', 'Lista de tareas', 'bi-list-task') %}
+{{ learning_companion(false) }}
 {{ header('Lista de tareas', 'Decide y prioriza el trabajo del día.', 'bi-list-task') }}
 {{ module_tabs([('Lista','/tasks-list','bi-list-task'),('Gantt','/tasks-gantt','bi-bar-chart-steps',True),('Calendario','/tasks-calendar','bi-calendar3'),('Flujo','/tasks-flow','bi-signpost-split',True),('Kanban','/tasks-kanban','bi-kanban'),('Planificación','/tasks-planning','bi-calendar-week'),('Progreso','/tasks-progress','bi-trophy',True),('Ajustes','/tasks-settings','bi-sliders',True)], '/tasks-list') }}
 <p><a class="lt-link" href="#/tasks-categories">Categorías de Tareas</a></p>
@@ -22,4 +25,5 @@
     {% else %}
 <div class="lt-list">{% for task, meta, done in [('Preparar propuesta','Alta prioridad · 10:00',false),('Revisar presupuesto','Finanzas · 14:00',false),('Planificar semana','Personal · 18:00',false),('Enviar seguimiento','Completada',true)] %}<div class="lt-list-item" data-task-category="{{ ['projects','finance','personal','__none__'][loop.index0] }}"><span class="lt-check{% if done %} is-done{% endif %}">{% if done %}✓{% endif %}</span><div class="lt-list-item__body"><strong>{{ task }}</strong><span>{{ meta }}</span></div>{% if not done %}<span class="lt-chip">Pendiente</span>{% endif %}</div>{% endfor %}</div>{% endif %}{% endcall %}
 {{ fab('Agregar tarea', 'bi-plus-lg') }}
+{% call dialog('guardian-sheet','Abra · Nv 12',close_only=true) %}<div class="lt-learning-sheet">{{ team_art() }}<p>Equipo de la semana · Concentración</p><p>Compañero ficticio para revisar la experiencia.</p></div>{% endcall %}
 {% endcall %}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "learning-no-team",
+  "label": "Sin equipo Pokémon",
+  "settings": {
+    "team": false,
+    "empty": false
+  },
+  "entities": {}
+}

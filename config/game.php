@@ -21,6 +21,9 @@ return [
         'streak_visible' => true,
         // Reto del día (CHG-077).
         'daily_challenge' => true,
+        // Chat del compañero (CHG-100): favorito y presentación del botón de crear.
+        'favorite_companion_id' => null,
+        'creation_style' => 'pokemon',
     ],
 
     // Experiencia que suma una especie repetida a su ejemplar.

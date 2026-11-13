@@ -37,7 +37,18 @@ class TaskCategory extends Model
     /** Catálogo del usuario autenticado como key => nombre, en su orden. */
     public static function options(): array
     {
-        return auth()->id() ? static::hierarchyOptions(auth()->id(), 'key') : [];
+        $userId = auth()->id();
+
+        // CHG-095: una lectura por petición; lista, editor y guardián piden lo mismo.
+        return $userId ? app(\App\Support\RequestMemo::class)->remember("task-categories:options:{$userId}",
+            fn () => static::hierarchyOptions($userId, 'key')) : [];
+    }
+
+    /** Claves de `$keys` más las de sus subcategorías; una lectura por petición. */
+    public static function expandKeys(array $keys, int $userId): array
+    {
+        return app(\App\Support\RequestMemo::class)->remember("task-categories:expand:{$userId}:".implode('|', $keys),
+            fn () => static::expandSelection($keys, $userId, 'key'));
     }
 
     /** Genera un key único para el usuario a partir del nombre. */

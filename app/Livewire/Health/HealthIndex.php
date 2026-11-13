@@ -478,7 +478,7 @@ class HealthIndex extends Component
             'commonIllnesses' => HealthEvent::COMMON_ILLNESSES,
             'nextEvent' => $nextEvent,
             'upcomingCount' => HealthEvent::query()->whereDate('event_date', '>', today())->count(),
-            'pendingHealthTasks' => Task::query()->whereIn('category', \App\Models\TaskCategory::expandSelection(['salud'], auth()->id(), 'key'))->where('completed', false)->count(),
+            'pendingHealthTasks' => Task::query()->whereIn('category', \App\Models\TaskCategory::expandKeys(['salud'], (int) auth()->id()))->where('completed', false)->count(),
             'healthTasks' => $this->healthTasks(),
             'moments' => $this->illnessMoments(),
         ]);
@@ -595,7 +595,7 @@ class HealthIndex extends Component
     private function healthTasks(): Collection
     {
         $pending = Task::query()
-            ->whereIn('category', \App\Models\TaskCategory::expandSelection(['salud'], auth()->id(), 'key'))
+            ->whereIn('category', \App\Models\TaskCategory::expandKeys(['salud'], (int) auth()->id()))
             ->where('completed', false)
             ->orderByRaw('CASE WHEN start_date IS NULL THEN 1 ELSE 0 END')
             ->orderBy('start_date')
@@ -604,7 +604,7 @@ class HealthIndex extends Component
             ->get();
 
         $recentlyCompleted = Task::query()
-            ->whereIn('category', \App\Models\TaskCategory::expandSelection(['salud'], auth()->id(), 'key'))
+            ->whereIn('category', \App\Models\TaskCategory::expandKeys(['salud'], (int) auth()->id()))
             ->where('completed', true)
             ->where('completed_at', '>=', now()->subDays(7))
             ->orderByDesc('completed_at')
@@ -616,7 +616,7 @@ class HealthIndex extends Component
 
     private function healthTask(string $id): Task
     {
-        return Task::query()->whereIn('category', \App\Models\TaskCategory::expandSelection(['salud'], auth()->id(), 'key'))->findOrFail($id);
+        return Task::query()->whereIn('category', \App\Models\TaskCategory::expandKeys(['salud'], (int) auth()->id()))->findOrFail($id);
     }
 
     private function eventRules(): array

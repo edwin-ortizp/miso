@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "learning-no-collection",
+  "label": "Colección vacía",
+  "settings": {
+    "collectionEmpty": true,
+    "team": false
+  },
+  "entities": {}
+}

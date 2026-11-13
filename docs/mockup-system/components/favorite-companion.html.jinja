@@ -1,0 +1,24 @@
+{% from '@project/components/life-shell.html.jinja' import dialog %}
+{% macro favorite_companion() %}
+<div class="lt-favorite-dock" data-favorite-dock>
+<div class="lt-favorite-bubble" id="favorite-bubble" data-favorite-bubble role="dialog" aria-labelledby="favorite-greeting" hidden>
+<button class="lt-icon-button lt-favorite-bubble__close" type="button" data-favorite-action="quiet" aria-label="Cerrar mensaje"><i class="bi bi-x-lg" aria-hidden="true"></i></button>
+<strong id="favorite-greeting" data-favorite-cry></strong><p data-favorite-line></p>
+<div class="lt-favorite-bubble__actions"><button class="lt-button lt-button--text" type="button" data-favorite-action="profile" data-favorite-details>Ver compañero</button><button class="lt-button lt-button--text" type="button" data-favorite-action="hide">Ocultar</button></div>
+</div>
+<button type="button" class="lt-favorite-presence" data-favorite-action="open" aria-haspopup="dialog" aria-controls="favorite-bubble" aria-expanded="false"><span data-favorite-image></span></button>
+</div>
+{% call dialog('favorite-profile','Tu compañero',icon='bi-heart',close_only=true) %}
+<div class="lt-favorite-profile" data-favorite-profile></div>
+<p>Tu favorito te acompaña aunque cambie el equipo de la semana. Tú decides cuándo elegir otro.</p>
+<div class="lt-favorite-actions"><button type="button" class="lt-button" data-favorite-action="choose">Cambiar compañero</button><button type="button" class="lt-button lt-button--text" data-favorite-action="hide">Ocultar compañero</button></div>
+{% endcall %}
+{% call dialog('favorite-chooser','Elegir compañero',icon='bi-heart',close_only=true) %}
+<p>Elige entre tus Pokémon. Tu equipo semanal y sus guardianes siguen su propio camino.</p>
+<div class="lt-favorite-choices" data-favorite-choices></div>
+<p data-favorite-empty hidden>Tu colección está vacía. Cuando descubras tu primer Pokémon podrás elegir quién te acompaña. Por ahora, sigue a tu ritmo.</p>
+{% endcall %}
+{% call dialog('favorite-account','Tu perfil',icon='bi-person',close_only=true) %}
+<p>Tu espacio, tu compañía.</p><div data-task-creation-settings hidden><label class="lt-field"><span>Presentación de creación</span><select data-task-creation-mode><option value="traditional">Tradicional</option><option value="pokemon">Con mi Pokémon</option></select></label><p data-task-creation-hint></p></div><button type="button" class="lt-button" data-favorite-action="restore" data-favorite-restore>Mostrar compañero</button>
+{% endcall %}
+{% endmacro %}

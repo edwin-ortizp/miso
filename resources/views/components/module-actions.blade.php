@@ -6,6 +6,9 @@
     'fabAlways' => true,
     // FAB dividido cuando hay varias acciones de creación.
     'split' => false,
+    // Chat del compañero (CHG-100): acciones rápidas (compose / tap).
+    'quick' => [],
+    'greeting' => null,
 ])
 
 @php
@@ -62,4 +65,4 @@
 <x-ui.fab :label="$primary['label']" :icon="$primary['icon'] ?? 'bi-plus-lg'"
           :action="$primary['action'] ?? null" :href="$primary['href'] ?? null"
           :event="$primary['event'] ?? null" :detail="$primary['detail'] ?? null"
-          :actions="$createActions" :split="$split" />
+          :actions="$createActions" :split="$split" :quick="$quick" :greeting="$greeting" />

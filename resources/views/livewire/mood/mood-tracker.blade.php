@@ -12,7 +12,22 @@
             :secondary="[
                 ['label' => 'Registrar energía', 'icon' => 'bi-lightning-charge', 'action' => 'openEnergyForm', 'create' => true],
                 ['label' => 'Escribir en el diario', 'icon' => 'bi-journal-text', 'href' => route('journal', ['date' => $selectedDate])],
-            ]" />
+            ]"
+            :greeting="config('companion_chat.mood.greeting')"
+            :quick="$prioritizedStates->take(5)->map(fn ($state) => [
+                'type' => 'tap', 'id' => 'mood-'.$state->id, 'emoji' => $state->emoji, 'label' => $state->text,
+                'aria' => 'Registrar '.$state->text, 'echo' => $state->emoji.' '.$state->text,
+                'call' => 'saveMood', 'args' => [(string) $state->id], 'reply' => config('companion_chat.mood.reply'),
+                'then' => 'energy', 'thenSay' => config('companion_chat.mood.energy_question'),
+            ])->values()
+            ->merge(collect(config('companion_chat.mood.energy_levels'))->map(fn ($level, $value) => [
+                'type' => 'tap', 'id' => 'energy-'.$value, 'group' => 'energy', 'emoji' => $level['emoji'], 'label' => $value.' · '.$level['label'],
+                'aria' => 'Energía '.$value.' de 5, '.$level['label'], 'echo' => $level['emoji'].' Energía '.$value.' · '.$level['label'],
+                'call' => 'quickEnergy', 'args' => [(int) $value], 'reply' => config('companion_chat.mood.energy_reply'), 'then' => 'done',
+            ])->values())
+            ->push(['type' => 'step', 'id' => 'mood-again', 'group' => 'done', 'icon' => 'bi-emoji-smile', 'label' => 'Registrar otra emoción',
+                    'then' => 'start', 'say' => config('companion_chat.mood.greeting')])
+            ->all()" />
     </x-slot:actions>
 
     <x-slot:controls>

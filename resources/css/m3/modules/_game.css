@@ -5,6 +5,7 @@
  */
 
 [data-module="game"],
+.lt-chat,
 .game-notifier,
 .game-celebration {
     /* Paleta por tipo: fondo sólido y texto con contraste AA. */

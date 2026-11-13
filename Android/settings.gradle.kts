@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "LifeTracker"
+rootProject.name = "MiSo"
 include(":app")

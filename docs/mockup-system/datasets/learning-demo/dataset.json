@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "learning-demo",
+  "label": "Universidad e inglés",
+  "settings": {
+    "team": true,
+    "empty": false
+  },
+  "entities": {}
+}

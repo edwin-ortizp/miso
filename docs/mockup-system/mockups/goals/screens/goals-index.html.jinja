@@ -1,5 +1,8 @@
+{% from '@project/components/life-shell.html.jinja' import dialog %}
+{% from '@project/components/learning-companion.html.jinja' import learning_companion, team_art %}
 {% from '@project/components/life-shell.html.jinja' import shell, tabs as module_tabs, header, metric, dialog, fab, manage_card, row_split %}
 {% call shell('goals', 'Objetivos', 'bi-flag') %}
+{{ learning_companion(false) }}
 {{ header('Objetivos', 'Resultados activos y próximos pasos.', 'bi-flag') }}
 {{ module_tabs([('Objetivos','/goals-index','bi-flag'),('Detalle','/goals-detail','bi-bullseye')], '/goals-index') }}
 <section class="lt-metrics">{{ metric('Objetivos activos','5') }}{{ metric('Hitos este mes','9','success') }}{{ metric('Avance promedio','64 %') }}</section>
@@ -23,4 +26,5 @@
   <div class="lt-form"><label class="lt-field "><span>Nombre del KPI</span><input type="text" placeholder="Kilómetros"></label><label class="lt-field "><span>Unidad</span><input type="text" placeholder="km"></label><label class="lt-field "><span>Valor inicial</span><input type="number" value="0"></label><label class="lt-field "><span>Valor objetivo</span><input type="number" value="10"></label></div>
 </section>
 {% endcall %}
+{% call dialog('guardian-sheet','Abra · Nv 12',close_only=true) %}<div class="lt-learning-sheet">{{ team_art() }}<p>Equipo de la semana · Concentración</p><p>Compañero ficticio para revisar la experiencia.</p></div>{% endcall %}
 {% endcall %}

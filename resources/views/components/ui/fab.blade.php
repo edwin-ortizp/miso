@@ -9,6 +9,9 @@
     'module' => null,
     'split' => false,
     'compact' => false,
+    // Chat del compañero (CHG-100): acciones rápidas del módulo.
+    'quick' => [],
+    'greeting' => null,
 ])
 
 @php
@@ -38,7 +41,20 @@
     };
     $menuId = 'fab-menu-'.\Illuminate\Support\Str::random(6);
     $tag = static fn (array $item): string => empty($item['href']) ? 'button' : 'a';
+    // CHG-100: con favorito y presentación «Con mi Pokémon», el chat ocupa el lugar del FAB.
+    $companion = app(\App\Services\Game\FavoriteCompanion::class)->forChat(auth()->id());
 @endphp
+
+@if ($companion)
+    {{-- El chat se mueve una sola vez a <body> desde JS (companion-chat.js) y queda fuera de los renders
+         de Livewire: así la conversación no se reinicia al crear. wire:ignore evita que Livewire lo vuelva a pintar. --}}
+    <div wire:ignore wire:key="companion-chat-host-{{ $moduleKey }}">
+        <div class="md-fab-layer md-fab-host lt-chat-host" data-module="{{ $moduleKey }}" data-chat-host="{{ $moduleKey ?: 'app' }}">
+            <x-ui.companion-chat :companion="$companion" :label="$label" :module-key="$moduleKey"
+                                 :items="$actions->prepend($primary)->all()" :quick="$quick" :greeting="$greeting" :binding="$binding" :tag="$tag" />
+        </div>
+    </div>
+@else
 
 @teleport('body')
     <div class="md-fab-layer md-fab-host" data-module="{{ $moduleKey }}"
@@ -92,3 +108,4 @@
         @endif
     </div>
 @endteleport
+@endif

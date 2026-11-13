@@ -1,5 +1,5 @@
 # CHG-095 · Optimización de backend: consultas repetidas y código sin uso
-**Estado:** En desarrollo
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -78,21 +78,32 @@ Hábitos a evitar                      ┌ Registrar incidencia ─────�
 
 ## 7. Tareas
 <!-- Primero lo que cambia para el usuario; el detalle técnico después. Formato:
-- [ ] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … -->
-- [ ] T1 · Las páginas dejan de repetir el bloque del juego y de bloquear al leer — Resp: developer — Modelo: estandar — Archivos: app/Services/Game/WeekPlanner.php, ModuleGuardian.php, GameSettings.php, app/Providers/AppServiceProvider.php — Hecho cuando: una página con guardián no emite `for update` y las pruebas de Game pasan.
-- [ ] T2 · «Qué cocinar» y la previsualización de compras cargan por lotes — Resp: developer — Modelo: estandar — Archivos: app/Services/Meal/MealNeeds.php, MealInventory.php — Hecho cuando: el presupuesto de consultas no crece con las recetas y las pruebas de comidas pasan.
-- [ ] T3 · Tareas: Flujo con un conteo agrupado, estados sin repetir, sin introspección de esquema y un solo UPDATE por guardado — Resp: developer — Modelo: estandar — Archivos: app/Livewire/Task/, app/Observers/TaskCalDavObserver.php — Hecho cuando: pasan las pruebas de tareas y CalDAV y los presupuestos nuevos.
-- [ ] T4 · Catálogos de categorías sin consultas por fila — Resp: developer — Modelo: estandar — Archivos: app/Livewire/NegativeHabit/NegativeHabitWeekly.php y su vista, app/Models/Traits/ResolvesCategoryCatalog.php — Hecho cuando: Hábitos a evitar consulta el catálogo una vez y las pruebas de catálogos y migraciones pasan.
-- [ ] T5 · Diario › Vida se arma sin formatear miles de fechas — Resp: developer — Modelo: estandar — Archivos: app/Livewire/Journal/JournalLifeCalendar.php y su vista — Hecho cuando: las celdas conservan enlaces, clases y etiquetas y el tiempo baja de forma medible.
-- [ ] T6 · El cron de notificaciones no recorre lo que no puede crear — Resp: developer — Modelo: estandar — Archivos: app/Services/Notifications/GenerateNotifications.php, ManageReminders.php — Hecho cuando: las pruebas de notificaciones pasan.
-- [ ] T7 · Arreglos de UI en las vistas tocadas — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/negative-habit/negative-habit-weekly.blade.php, journal-life-calendar.blade.php, components/date-navigator.blade.php y las 4 vistas que lo adoptan — Hecho cuando: `ui:conformance` no sube respecto a 235 y las vistas funcionan a 390 y 1440 px.
-- [ ] T8 · Se retira código y carpetas sin uso — Resp: developer — Modelo: estandar — Archivos: app/Models/JournalWeeklySummary.php, app/Models/Game/GameAlbumAward.php, resources/views/components/page-header.blade.php, archive/, dist/ — Hecho cuando: no quedan referencias y la suite pasa.
-- [ ] T9 · Hallazgos y mediciones documentados — Resp: developer — Modelo: estandar — Archivos: docs/performance.md, docs/backlog/UX-DESIGN.md — Hecho cuando: están la tabla antes/después y la auditoría de UX.
+- [x] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … -->
+- [x] T1 · Las páginas dejan de repetir el bloque del juego y de bloquear al leer — Resp: developer — Modelo: estandar — Archivos: app/Services/Game/WeekPlanner.php, ModuleGuardian.php, GameSettings.php, app/Providers/AppServiceProvider.php — Hecho cuando: una página con guardián no emite `for update` y las pruebas de Game pasan.
+- [x] T2 · «Qué cocinar» y la previsualización de compras cargan por lotes — Resp: developer — Modelo: estandar — Archivos: app/Services/Meal/MealNeeds.php, MealInventory.php — Hecho cuando: el presupuesto de consultas no crece con las recetas y las pruebas de comidas pasan.
+- [x] T3 · Tareas: Flujo con un conteo agrupado, estados sin repetir, sin introspección de esquema y un solo UPDATE por guardado — Resp: developer — Modelo: estandar — Archivos: app/Livewire/Task/, app/Observers/TaskCalDavObserver.php — Hecho cuando: pasan las pruebas de tareas y CalDAV y los presupuestos nuevos.
+- [x] T4 · Catálogos de categorías sin consultas por fila — Resp: developer — Modelo: estandar — Archivos: app/Livewire/NegativeHabit/NegativeHabitWeekly.php y su vista, app/Models/Traits/ResolvesCategoryCatalog.php — Hecho cuando: Hábitos a evitar consulta el catálogo una vez y las pruebas de catálogos y migraciones pasan.
+- [x] T5 · Diario › Vida se arma sin formatear miles de fechas — Resp: developer — Modelo: estandar — Archivos: app/Livewire/Journal/JournalLifeCalendar.php y su vista — Hecho cuando: las celdas conservan enlaces, clases y etiquetas y el tiempo baja de forma medible.
+- [x] T6 · El cron de notificaciones no recorre lo que no puede crear — Resp: developer — Modelo: estandar — Archivos: app/Services/Notifications/GenerateNotifications.php, ManageReminders.php — Hecho cuando: las pruebas de notificaciones pasan.
+- [x] T7 · Arreglos de UI en las vistas tocadas — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/negative-habit/negative-habit-weekly.blade.php, journal-life-calendar.blade.php, components/date-navigator.blade.php y las 4 vistas que lo adoptan — Hecho cuando: `ui:conformance` no sube respecto a 235 y las vistas funcionan a 390 y 1440 px.
+- [x] T8 · Se retira código y carpetas sin uso — Resp: developer — Modelo: estandar — Archivos: app/Models/JournalWeeklySummary.php, app/Models/Game/GameAlbumAward.php, resources/views/components/page-header.blade.php, archive/, dist/ — Hecho cuando: no quedan referencias y la suite pasa.
+- [x] T9 · Hallazgos y mediciones documentados — Resp: developer — Modelo: estandar — Archivos: docs/performance.md, docs/backlog/UX-DESIGN.md — Hecho cuando: están la tabla antes/después y la auditoría de UX.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-11 — T1: `forWeek` lee sin candado ni transacción cuando no hay nada que crear; `GameSettings` y `ModuleGuardian` pasan a `scoped` con memoria de petición que `AppServiceProvider` vacía al guardar o borrar ajustes, ejemplares, especies, semana o equipo.
+- 2026-11-11 — T2: `MealNeeds::aggregate` carga los productos por lote; `suggestions` precarga ingredientes y productos de todas las recetas; `preview` usa `withCount`.
+- 2026-11-11/12 — T3: Flujo carga el tablero en dos lecturas; estados memorizados por componente; sin `Schema::hasColumn`; revisión CalDAV en `updating`. Catálogo de categorías de tareas compartido por petición (`App\Support\RequestMemo`, `TaskCategory::expandKeys`).
+- 2026-11-12 — T4: Hábitos a evitar lee el catálogo una vez. `ResolvesCategoryCatalog` conserva `Schema::hasTable` porque la migración `2026_08_04_000010` guarda `MoodState` antes de existir `user_categories`; solo deja de repetirlo por guardado.
+- 2026-11-12 — T5: celdas de Diario › Vida armadas en PHP (etiqueta, nivel y enlace).
+- 2026-11-12 — T6: el cron salta los recorridos automáticos antes de las 9:00 y no recarga al usuario por recordatorio.
+- 2026-11-12 — T7: `x-date-navigator` con props de etiquetas, adoptado en Hábitos (semanal), Hábitos a evitar, Hidratación semanal y calendario; diálogo de incidencia con `x-ui.form-dialog`; estado vacío y acciones de Diario › Vida con `x-ui.state` / `x-ui.action`. `ui:conformance`: 235 → 228.
+- 2026-11-12 — T8: borrados `archive/`, `dist/`, `JournalWeeklySummary`, `GameAlbumAward` y `x-page-header` (sin referencias). Se conserva el CSS `lt-page-head` porque lo usan los mockups.
+- 2026-11-12 — T9: `docs/performance.md` (tabla antes/después) y `docs/backlog/UX-DESIGN.md` (auditoría de UX móvil, 7 hallazgos).
+- Validación: `BackendQueryBudgetTest` 7/7; suite completa 1.466/1.515 sin fallos nuevos respecto a la línea base limpia (38 fallos y 10 errores ya existentes: contratos de UI, aislamiento en pruebas Livewire, `UrlStateTest`, `ModuleGuardianTest` ×3). La suite completa corrió antes de la segunda tanda de T3 (catálogo compartido y Flujo en dos lecturas); esa tanda se validó con 134 pruebas filtradas. No se hizo comprobación en navegador de las vistas tocadas ni la comparación byte a byte del HTML de Diario › Vida (la base local estuvo caída durante parte de la sesión); queda para la verificación del usuario.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-11 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-11 — Decisión del usuario: borrar `archive/` y `dist/`; de UX solo auditoría (sin rediseños); dirección elegida para Hidratación: «vasos como protagonista» (queda en el backlog).
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
+- 2026-11-12 — Implementación terminada → En verificación

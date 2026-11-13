@@ -1,0 +1,31 @@
+{% from '@project/components/life-shell.html.jinja' import dialog %}
+{% macro task_creation() %}
+{% call(zone) dialog('quick-task-panel','Tu compañero',icon='bi-chat-heart',custom_footer=true) %}
+{% if zone == 'body' %}
+<div class="lt-quick-intro lt-quick-message"><span data-quick-art></span><p data-quick-greeting>¿Qué quieres sacar de tu cabeza?</p></div>
+<div class="lt-quick-tabs" role="group" aria-label="Tipo de creación"><button type="button" class="lt-button lt-button--text" data-quick-action="single" aria-pressed="true">Una tarea</button><button type="button" class="lt-button lt-button--text" data-quick-action="bulk" aria-pressed="false">Varias tareas</button></div>
+<form class="lt-form" data-quick-form novalidate>
+<label class="lt-field lt-form--full" data-quick-single><span>Título *</span><input name="title" autocomplete="off" aria-describedby="quick-task-error"></label>
+<label class="lt-field lt-form--full" data-quick-bulk hidden><span>Una tarea por línea *</span><textarea name="titles" rows="5" aria-describedby="quick-task-error"></textarea></label>
+<label class="lt-field lt-form--full"><span>Categoría (opcional)</span><select name="category"><option value="">Sin categoría elegida</option><option>Personal</option><option>Profesional</option></select></label>
+<p class="lt-quick-error lt-form--full" id="quick-task-error" role="alert" data-quick-error></p>
+</form><p class="lt-quick-result lt-quick-message lt-quick-message--reply" role="status" data-quick-result></p>
+{% else %}<button class="lt-button lt-button--text" type="button" data-quick-action="advanced">Más opciones</button><button class="lt-button" type="button" data-quick-action="create">Crear tarea</button>{% endif %}
+{% endcall %}
+{% call(zone) dialog('bulk-task-editor','Crear múltiples tareas',icon='bi-list-task',sections=[('basic','Información básica','bi-file-earmark-text'),('privacy','Privacidad','bi-lock'),('schedule','Programación','bi-calendar3')],custom_footer=true) %}
+{% if zone == 'body' %}
+<form class="lt-form" data-bulk-task-form novalidate>
+<section class="lt-dialog__section lt-form--full" data-section="basic"><div class="lt-form">
+<label class="lt-field lt-form--full"><span>Una tarea por línea *</span><textarea name="titles" rows="7" aria-describedby="bulk-task-error"></textarea></label>
+<label class="lt-field lt-form--full"><span>Descripción común</span><textarea name="description" rows="3"></textarea></label>
+<label class="lt-field"><span>Categoría</span><select name="category"><option value="">Sin categoría elegida</option><option>Personal</option><option>Profesional</option></select></label>
+<label class="lt-field"><span>Prioridad</span><select name="priority"><option value="">Sin prioridad</option><option value="urgent-important">Urgente e importante</option><option value="not-urgent-important">Importante</option><option value="urgent-not-important">Urgente</option><option value="not-urgent-not-important">Sin urgencia</option></select></label>
+<label class="lt-field"><span>Tamaño</span><select name="size"><option value="">Sin tamaño</option><option>S</option><option>M</option><option>L</option></select></label>
+</div></section>
+<section class="lt-dialog__section lt-form--full" data-section="privacy" hidden><label class="lt-list-item"><input name="private" type="checkbox">Tareas privadas</label></section>
+<section class="lt-dialog__section lt-form--full" data-section="schedule" hidden><div class="lt-form">{% for name,label,type in [('date','Fecha inicio','date'),('time','Hora inicio','time'),('endDate','Fecha fin','date'),('endTime','Hora fin','time')] %}<label class="lt-field"><span>{{ label }}</span><input name="{{ name }}" type="{{ type }}"></label>{% endfor %}</div></section>
+<p class="lt-quick-error lt-form--full" id="bulk-task-error" role="alert" data-bulk-task-error></p>
+</form>
+{% else %}<button class="lt-button lt-button--text" type="button" data-lt-toggle="bulk-task-editor">Cancelar</button><button class="lt-button" type="button" data-quick-action="bulk-create">Crear tareas</button>{% endif %}
+{% endcall %}
+{% endmacro %}

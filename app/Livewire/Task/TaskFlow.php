@@ -160,20 +160,22 @@ class TaskFlow extends Component
 
     public function render()
     {
-        // CHG-095: un solo conteo agrupado decide qué carriles existen; los vacíos no consultan.
-        $totals = [];
-        foreach ($this->applyTaskFilters(Task::query())->toBase()
-            ->selectRaw('category, completed, count(*) as total')->groupBy('category', 'completed')->get() as $row) {
-            // `null` (sin categoría) tiene su propia clave: no se mezcla con una categoría vacía.
-            $totals[$row->category === null ? "\0" : $row->category][(int) (bool) $row->completed] = (int) $row->total;
-        }
+        // CHG-095: dos lecturas para todo el tablero (pendientes y completadas), repartidas
+        // por carril en memoria; antes eran cuatro consultas por categoría.
+        // `null` (sin categoría) usa su propia clave: no se mezcla con una categoría vacía.
+        $byLane = fn ($tasks) => $tasks->groupBy(fn (Task $task) => $task->category ?? "\0");
+        $pending = $byLane($this->applyTaskFilters(Task::query())->where('completed', false)
+            ->orderBy('flow_position')->orderBy('id')->get());
+        $completed = $byLane($this->applyTaskFilters(Task::query())->where('completed', true)
+            ->orderByDesc('completed_at')->orderByDesc('id')->get());
+        $empty = (new Task)->newCollection();
 
         $lanes = collect($this->categories)
-            ->map(fn (string $label, string $key) => $this->buildLane($key, $label, null, $totals[$key] ?? []))
+            ->map(fn (string $label, string $key) => $this->buildLane($key, $label, null, $pending->get($key, $empty), $completed->get($key, $empty)))
             ->filter()
             ->values();
 
-        $uncategorized = $this->buildLane(null, 'Sin categoría', 'uncategorized', $totals["\0"] ?? []);
+        $uncategorized = $this->buildLane(null, 'Sin categoría', 'uncategorized', $pending->get("\0", $empty), $completed->get("\0", $empty));
         if ($uncategorized) {
             $lanes->push($uncategorized);
         }
@@ -181,29 +183,19 @@ class TaskFlow extends Component
         return view('livewire.task.task-flow', ['lanes' => $lanes]);
     }
 
-    /** @param array<int, int> $totals conteo del carril: [0 => pendientes, 1 => completadas] */
-    private function buildLane(?string $category, string $label, ?string $laneKey, array $totals): ?array
+    /** `$pending` y `$completedHistory` ya vienen filtrados y ordenados para este carril. */
+    private function buildLane(?string $category, string $label, ?string $laneKey, $pending, $completedHistory): ?array
     {
         $laneKey ??= $category;
-        $pendingTotal = $totals[0] ?? 0;
-        $completedTotal = $totals[1] ?? 0;
+        $pendingTotal = $pending->count();
+        $completedTotal = $completedHistory->count();
 
         if ($pendingTotal === 0 && $completedTotal === 0) {
             return null;
         }
 
-        $categoryTasks = $this->tasksForCategory($category);
-        $tasks = $pendingTotal === 0 ? $categoryTasks->getModel()->newCollection() : (clone $categoryTasks)
-            ->where('completed', false)
-            ->orderBy('flow_position')
-            ->orderBy('id')
-            ->limit($this->laneLimit($laneKey))
-            ->get();
-        $completedHistory = $completedTotal === 0 ? $categoryTasks->getModel()->newCollection() : (clone $categoryTasks)
-            ->where('completed', true)
-            ->orderByDesc('completed_at')
-            ->orderByDesc('id')
-            ->get();
+        $tasks = $pending->take($this->laneLimit($laneKey))->values();
+        $completedHistory = $completedHistory->values();
 
         return compact('category', 'label', 'laneKey', 'tasks', 'pendingTotal', 'completedTotal', 'completedHistory');
     }

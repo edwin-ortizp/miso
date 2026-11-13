@@ -105,3 +105,38 @@ Los scripts de medición aceptan `PERF_URL` exclusivamente localhost/127.0.0.1 y
 - Verificador de formularios: guardar, editar, alta tras edición, error de validación, borrador limpio, Escape, foco y cierre a 390/768/1440 px; enlace `?edit=` de Tareas y retirada del parámetro sin petición; atrás/adelante en filtros y recurrencia local; sin solicitudes al escribir borradores. Comprobación axe de etiquetas/ARIA/identificadores sobre el formulario de Salud: pasa.
 - Suite general: ocho pruebas de interacción y seis de accesibilidad de arquetipos pasan. **24 pruebas de accesibilidad del catálogo fallan por contraste preexistente**: principalmente `<code>` rosa sobre el fondo del catálogo (4,26:1) y Cancelar del diálogo (4,43:1). No se cambió la paleta para ocultar estos fallos ni se afirma que toda la suite sea verde.
 - Producción: los hashes públicos de JS/CSS consultados eran distintos de los locales. No se verificó el código PHP desplegado ni se instrumentó producción. Los tiempos iniciales de 1–2 s observados con la herramienta son aproximaciones; no se usan como antes/después del hosting. La aplicación publicada no se considera validada por estas mediciones locales.
+
+## Consultas por petición (CHG-095, 11–12 de noviembre de 2026)
+
+Medición local con datos reales del usuario (MySQL), cada ruta GET dentro de una transacción revertida (`storage/framework/testing/measure-routes.php`, no versionado). Con tablas de cientos de filas el SQL total por página es menor de 100 ms: **el costo estaba en el número de consultas y en trabajo repetido en PHP, no en índices**.
+
+| Ruta | Antes | Después | Causa corregida |
+|---|---:|---:|---|
+| `/meals/suggestions` | 976 | 26 | N+1: un `find` con ofertas por ingrediente y por receta → carga por lotes en `MealNeeds` |
+| `/negative-habits` | 105 | 24 | la vista leía el catálogo de categorías dos veces por hábito |
+| `/tasks/flow` | 93 | 27 | cuatro consultas por categoría → dos lecturas para todo el tablero |
+| `/` | 84 | 66 | bloque del juego y ajustes repetidos |
+| `/tasks/list` | 73 | 42 | estados y catálogo de categorías repetidos por cada componente de la página |
+| `/cierre` | 69 | 32 | guardián pedido cinco veces |
+| `/health` | 66 | 41 | expansión de la categoría «salud» repetida |
+| `/habits` | 57 | 32 | guardián pedido cuatro veces |
+| `/settings` (solo shell) | 20 | 16 | lectura de la semana del juego |
+| `/journal/life` | 18 (≈1,75 s de PHP) | 17 | ~4.700 celdas con dos `translatedFormat` y un `route()` cada una → se arman en PHP con fechas nativas |
+
+Causas de fondo y cómo quedaron:
+
+1. **Leer la semana del juego bloqueaba y escribía.** `WeekPlanner::forWeek` abría una transacción con `SELECT users … FOR UPDATE` en cada render (de 1 a 5 veces por página). Ahora lee sin candado y solo entra a la transacción cuando hay que crear la semana o llenar un hueco del equipo.
+2. **Lecturas idénticas repetidas dentro de una petición.** `GameSettings`, `ModuleGuardian` y `RequestMemo` (catálogo de categorías de tareas) son `scoped` y recuerdan lo leído **solo durante la petición**; `AppServiceProvider` los vacía en cuanto se guarda o borra cualquiera de sus orígenes. No es caché persistente ni hay TTL.
+3. **Introspección de esquema en rutas calientes.** Se retiró `Schema::hasColumn` de la lista y el editor de tareas; `ResolvesCategoryCatalog` conserva `Schema::hasTable` (lo necesitan migraciones antiguas) pero deja de preguntarlo en cada guardado.
+4. **Doble `UPDATE` por tarea.** La revisión CalDAV se suma en `updating`, dentro del mismo `UPDATE`.
+5. **Cron de notificaciones.** Antes de las 9:00 (Bogotá) ya no recorre cumpleaños, tareas y planes que igual descartaba; no recarga al usuario por cada recordatorio.
+
+Presupuestos fijados en `tests/Feature/BackendQueryBudgetTest.php`. Suite completa: 1.466 de 1.515 pasan; los 48 fallos son los mismos de la línea base sin estos cambios (ninguno nuevo).
+
+Analizado y no cambiado a propósito:
+
+- **188 `whereDate()` sobre columnas `DATE`.** Impiden usar índice, pero en SQLite (pruebas) las fechas se guardan con hora y quitarlos cambia resultados; con este volumen no compensa.
+- **Índices nuevos.** Sin evidencia de consultas lentas.
+- **`CACHE_STORE=database` y `SESSION_DRIVER=database`.** Suman 3–4 consultas a cada petición (sesión leída dos veces y escrita, y el `Cache::add` de `TrackActiveDay`). Es configuración de entorno: en producción conviene `CACHE_STORE=file` y, si el hosting lo permite, `SESSION_DRIVER=file`.
+- **Escrituras del juego en GET** (hitos de racha, reto diario): idempotentes y por diseño.
+- **Shell (16 consultas fijas).** Quedan como siguientes candidatos los ajustes de Pomodoro leídos dos veces (barra de estado y guardián) y los contadores del menú.

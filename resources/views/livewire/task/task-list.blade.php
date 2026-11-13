@@ -244,7 +244,20 @@
     <div class="lt-fab-zone">
         <x-module-actions fab-always :split="true"
             :primary="['label' => 'Nueva tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']]"
-            :secondary="[['label' => 'Crear múltiples tareas', 'icon' => 'bi-list-task', 'event' => 'task-bulk-editor', 'detail' => ['action' => 'openForm'], 'create' => true]]" />
+            :secondary="[['label' => 'Crear múltiples tareas', 'icon' => 'bi-list-task', 'event' => 'task-bulk-editor', 'detail' => ['action' => 'openForm'], 'create' => true]]"
+            :greeting="config('companion_chat.tasks.greeting')"
+            :quick="[
+                ['type' => 'compose', 'id' => 'task-single', 'label' => 'Una tarea', 'icon' => 'bi-check2-square', 'mode' => 'single',
+                 'call' => 'quickCreateTasks', 'placeholder' => config('companion_chat.tasks.single_placeholder'), 'prompt' => config('companion_chat.tasks.single_prompt'),
+                 'submit' => 'Crear tarea', 'reply' => config('companion_chat.tasks.reply'),
+                 'fields' => ['category', 'when'], 'options' => $categories ?: null, 'whenLabels' => config('companion_chat.tasks.when'),
+                 'more' => ['event' => 'task-editor', 'detail' => ['action' => 'openForm'], 'field' => 'title']],
+                ['type' => 'compose', 'id' => 'task-bulk', 'label' => 'Varias tareas', 'icon' => 'bi-list-task', 'mode' => 'bulk',
+                 'call' => 'quickCreateTasks', 'placeholder' => config('companion_chat.tasks.bulk_placeholder'), 'prompt' => config('companion_chat.tasks.bulk_prompt'),
+                 'submit' => 'Crear tarea', 'submitMany' => 'Crear {n} tareas', 'reply' => config('companion_chat.tasks.reply'), 'replyMany' => config('companion_chat.tasks.reply_many'),
+                 'fields' => ['category', 'when'], 'options' => $categories ?: null, 'whenLabels' => config('companion_chat.tasks.when'),
+                 'more' => ['event' => 'task-bulk-editor', 'detail' => ['action' => 'openForm'], 'field' => 'bulkTitles']],
+            ]" />
     </div>
 
     <livewire:task.task-editor :edit-task="$editTask" />

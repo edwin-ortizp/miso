@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Game;
 
+use App\Models\Game\GameCompanion;
 use App\Services\Game\GameSettings;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -50,6 +51,11 @@ class GameSettingsPage extends Component
 
     public string $message = '';
 
+    /** Chat del compañero (CHG-100). */
+    public string $creationStyle = 'pokemon';
+
+    public ?int $favoriteCompanionId = null;
+
     public function mount(GameSettings $settings): void
     {
         $current = $settings->for((int) auth()->id());
@@ -71,6 +77,8 @@ class GameSettingsPage extends Component
         $this->streakThreshold = $current['streak_threshold'];
         $this->dailyChallenge = $current['daily_challenge'];
         $this->celebrationSet = $current['celebration_set'];
+        $this->creationStyle = $current['creation_style'];
+        $this->favoriteCompanionId = $current['favorite_companion_id'];
     }
 
     public function save(GameSettings $settings): void
@@ -80,7 +88,11 @@ class GameSettingsPage extends Component
         $this->validate([
             'dailyLimit' => ['required', 'integer', "between:{$min},{$max}"],
             'streakThreshold' => ['required', 'integer', "between:{$streakMin},{$streakMax}"],
+            'creationStyle' => ['required', 'in:pokemon,traditional'],
+            'favoriteCompanionId' => ['nullable', 'integer'],
         ], [], ['streakThreshold' => 'acciones para cumplir el día']);
+        $favoriteId = $this->favoriteCompanionId && GameCompanion::query()->whereKey($this->favoriteCompanionId)->exists()
+            ? $this->favoriteCompanionId : null;
 
         $settings->save((int) auth()->id(), [
             'enabled' => $this->enabled,
@@ -94,6 +106,8 @@ class GameSettingsPage extends Component
             'streak_visible' => $this->streakVisible,
             'streak_threshold' => $this->streakThreshold,
             'daily_challenge' => $this->dailyChallenge,
+            'creation_style' => $this->creationStyle,
+            'favorite_companion_id' => $favoriteId,
             'celebration_set' => array_values(array_intersect(array_keys(config('game.celebration_catalog')), $this->celebrationSet)),
         ]);
 
@@ -103,6 +117,9 @@ class GameSettingsPage extends Component
 
     public function render()
     {
-        return view('livewire.game.game-settings');
+        return view('livewire.game.game-settings', [
+            'companions' => GameCompanion::query()->with('species')->orderByDesc('level')->get()
+                ->filter(fn (GameCompanion $companion) => $companion->species)->values(),
+        ]);
     }
 }

@@ -52,6 +52,8 @@ class GameSettings
         $settings['streak_threshold'] = $this->clamp('streak_threshold', (int) $settings['streak_threshold']);
         $settings['streak_visible'] = (bool) $settings['streak_visible'];
         $settings['daily_challenge'] = (bool) $settings['daily_challenge'];
+        $settings['favorite_companion_id'] = is_numeric($settings['favorite_companion_id']) ? (int) $settings['favorite_companion_id'] : null;
+        $settings['creation_style'] = in_array($settings['creation_style'], ['pokemon', 'traditional'], true) ? $settings['creation_style'] : 'pokemon';
 
         return $settings;
     }

@@ -16,7 +16,7 @@ class ModuleProgress
     public function for(string $module): array
     {
         if ($module === 'health') {
-            $tasks = Task::query()->whereIn('category', TaskCategory::expandSelection(['salud'], auth()->id(), 'key'));
+            $tasks = Task::query()->whereIn('category', TaskCategory::expandKeys(['salud'], (int) auth()->id()));
             $done = (clone $tasks)->where('completed', true)->where('completed_at', '>=', now()->subDays(7))->count();
 
             return [

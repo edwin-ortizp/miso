@@ -22,6 +22,7 @@ export function mountLifeShell({root, scope, toast}) {
     syncFilterCount();
   }
   scope.on(root, 'click', event => {
+    if (!root.querySelector('[data-learning-view]') && event.target.closest('[data-learning-action="advice"]')) { const line = root.querySelector('[data-advice]'); if (line) line.textContent = line.textContent.includes('paso pequeño') ? 'Una tarea a la vez. Tu agenda no necesita hacer malabares.' : 'Un paso pequeño también abre camino. ¿Por cuál empezamos?'; return; }
     if (event.target.closest('.lt-multiselect__panel') && !event.target.closest('.lt-multiselect__option')) return;
     const dlg = event.target.closest('.lt-dialog');
     const sidebar = event.target.closest('[data-lt-dialog-sidebar]');

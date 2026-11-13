@@ -1,0 +1,5 @@
+{% extends '@mockup-system/shared/layouts/document.html.jinja' %}
+{% block screens %}
+{% for template in templates %}<template id="{{ template.id }}" data-screen="{{ template.screen }}" data-body-class="{{ template.bodyClass }}">{{ template.html }}</template>
+{% endfor %}
+{% endblock %}

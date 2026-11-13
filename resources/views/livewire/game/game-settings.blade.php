@@ -50,6 +50,29 @@
             </div>
         </section>
 
+        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-companion-chat" id="companero">
+            <h2 class="md-title-medium mb-0" id="game-settings-companion-chat">Tu compañero al crear</h2>
+            <fieldset class="d-grid gap-2">
+                <legend class="md-label-large">Presentación de creación</legend>
+                <label class="d-flex align-items-center gap-2"><input type="radio" name="creation-style" value="pokemon" wire:model.live="creationStyle"> Con mi Pokémon</label>
+                <label class="d-flex align-items-center gap-2"><input type="radio" name="creation-style" value="traditional" wire:model.live="creationStyle"> Tradicional</label>
+            </fieldset>
+            @if ($companions->isEmpty())
+                <p class="md-body-medium text-muted mb-0">Aún no tienes compañeros: verás el botón tradicional hasta que conozcas al primero.</p>
+            @else
+                <div class="d-grid gap-1">
+                    <label class="md-label-large" for="game-favorite-companion">Pokémon favorito</label>
+                    <select id="game-favorite-companion" class="form-select" wire:model="favoriteCompanionId">
+                        <option value="">El compañero del día</option>
+                        @foreach ($companions as $companion)
+                            <option value="{{ $companion->id }}">{{ $companion->species->name }} · Nv. {{ $companion->level }}</option>
+                        @endforeach
+                    </select>
+                    <p class="md-body-small text-muted mb-0">Aparece en lugar del botón de crear y te ayuda a registrar rápido.</p>
+                </div>
+            @endif
+        </section>
+
         <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-challenge" id="reto">
             <h2 class="md-title-medium mb-0" id="game-settings-challenge">Reto del día</h2>
             <x-ui.switch name="game-daily-challenge" label="Reto del día" wire:model="dailyChallenge" :checked="$dailyChallenge"

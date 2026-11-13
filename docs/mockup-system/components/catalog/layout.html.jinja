@@ -1,2 +1,6 @@
 {% macro panel() -%}<section class="lt-panel lt-panel--accent" data-ui-component="life-tracker/layout/panel" data-ui-variant="accent"><header class="lt-panel__head"><h3>Resumen</h3></header><div class="lt-panel__body">Contenido agrupado en una superficie compartida.</div></section>{%- endmacro %}
+{% from '@project/components/learning-companion.html.jinja' import learning_companion, team_art %}
+{% from '@project/components/life-shell.html.jinja' import dialog %}
+{% macro guardian_showcase() %}<section data-ui-component="life-tracker/layout/guardian" data-ui-variant="weekly">{{ learning_companion() }}{% call dialog('guardian-sheet','Abra · Nv 12',close_only=true) %}<div class="lt-learning-sheet">{{ team_art() }}<p>Equipo de la semana · Concentración</p></div>{% endcall %}</section>{% endmacro %}
+{% macro reservation_showcase() %}<div class="lt-learning-result" data-ui-component="life-tracker/layout/reservation" data-ui-variant="recurring"><span class="lt-chip"><i class="bi bi-calendar3" aria-hidden="true"></i> Inglés · lunes y miércoles · 16:00–18:00</span><p>2 tareas vinculadas · reserva independiente</p></div>{% endmacro %}
 {% macro showcase() -%}{{ panel() }}{%- endmacro %}

@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "learning-empty",
+  "label": "Sin formaciones",
+  "settings": {
+    "team": true,
+    "empty": true
+  },
+  "entities": {}
+}

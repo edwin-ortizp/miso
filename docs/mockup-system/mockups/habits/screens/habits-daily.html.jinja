@@ -1,7 +1,11 @@
+{% from '@project/components/life-shell.html.jinja' import dialog %}
+{% from '@project/components/learning-companion.html.jinja' import learning_companion, team_art %}
 {% from '@project/components/life-shell.html.jinja' import shell, tabs as module_tabs, header, metric %}
 {% call shell('habits', 'Registro diario', 'bi-check2-square') %}
+{{ learning_companion(false) }}
 {{ header('Registro diario', 'Constancia y registro de hábitos del día.', 'bi-check2-square') }}
 {{ module_tabs([('Registro diario','/habits-daily','bi-check2-square'),('Resumen semanal','/habits-weekly','bi-bar-chart-line')], '/habits-daily') }}
 <section class="lt-metrics">{{ metric('Completados hoy','4 de 6','success') }}{{ metric('Mejor racha','12 días') }}{{ metric('Semana actual','78 %') }}</section>
 <section class="lt-panel lt-panel--accent"><div class="lt-panel__head"><i class="bi bi-check2-square"></i><h3>Hábitos de hoy</h3><small>Martes</small></div><div class="lt-panel__body"><div class="lt-progress"><span style="width:67%"></span></div><div class="lt-list"><div class="lt-list-item"><span class="lt-check is-done">✓</span><div class="lt-list-item__body"><strong>Meditar</strong><span>10 min · mañana</span></div><span class="lt-chip lt-chip--success">Hecho</span></div><div class="lt-list-item"><span class="lt-check is-done">✓</span><div class="lt-list-item__body"><strong>Leer</strong><span>20 min · noche</span></div><span class="lt-chip lt-chip--success">Hecho</span></div><div class="lt-list-item"><span class="lt-check"></span><div class="lt-list-item__body"><strong>Ejercicio</strong><span>30 min · tarde</span></div></div><div class="lt-list-item"><span class="lt-check"></span><div class="lt-list-item__body"><strong>Dormir a tiempo</strong><span>Antes de las 23:00</span></div></div></div></div></section>
+{% call dialog('guardian-sheet','Abra · Nv 12',close_only=true) %}<div class="lt-learning-sheet">{{ team_art() }}<p>Equipo de la semana · Concentración</p><p>Compañero ficticio para revisar la experiencia.</p></div>{% endcall %}
 {% endcall %}

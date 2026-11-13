@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "id": "learning-no-favorite",
+  "label": "Sin favorito",
+  "settings": {
+    "noFavorite": true
+  },
+  "entities": {}
+}

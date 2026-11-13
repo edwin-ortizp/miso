@@ -43,6 +43,8 @@ class AppServiceProvider extends ServiceProvider
         // CHG-095: una instancia por petición para no repetir la misma lectura en cada componente.
         $this->app->scoped(\App\Services\Game\GameSettings::class);
         $this->app->scoped(\App\Services\Game\ModuleGuardian::class);
+        $this->app->scoped(\App\Services\Game\FavoriteCompanion::class);
+        $this->app->scoped(\App\Support\RequestMemo::class);
         $this->app->singleton(
             HabitActionRegistry::class,
             fn (): HabitActionRegistry => new HabitActionRegistry(config('habit_actions.actions', [])),
@@ -67,7 +69,7 @@ class AppServiceProvider extends ServiceProvider
         }
         // CHG-095: lo memorizado en la petición se olvida en cuanto cambia su origen.
         $forgetGameReads = static function (): void {
-            foreach ([\App\Services\Game\GameSettings::class, \App\Services\Game\ModuleGuardian::class] as $service) {
+            foreach ([\App\Services\Game\GameSettings::class, \App\Services\Game\ModuleGuardian::class, \App\Services\Game\FavoriteCompanion::class] as $service) {
                 if (app()->resolved($service)) {
                     app($service)->flush();
                 }
@@ -76,6 +78,17 @@ class AppServiceProvider extends ServiceProvider
         foreach ([\App\Models\ModuleSetting::class, \App\Models\Game\GameCompanion::class, \App\Models\Game\GameSpecies::class, \App\Models\Game\GameWeek::class, \App\Models\Game\GameTeamMember::class] as $gameSource) {
             $gameSource::saved($forgetGameReads);
             $gameSource::deleted($forgetGameReads);
+        }
+
+        // Catálogo de categorías de tareas compartido por los componentes de una misma página.
+        $forgetTaskCatalog = static function (): void {
+            if (app()->resolved(\App\Support\RequestMemo::class)) {
+                app(\App\Support\RequestMemo::class)->flush();
+            }
+        };
+        foreach ([Task::class, \App\Models\TaskCategory::class] as $catalogSource) {
+            $catalogSource::saved($forgetTaskCatalog);
+            $catalogSource::deleted($forgetTaskCatalog);
         }
 
         Task::observe(TaskCalDavObserver::class);

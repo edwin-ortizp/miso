@@ -100,6 +100,17 @@ class GameCollection extends Component
         $this->historyLimit += 20;
     }
 
+    /** Chat del compañero (CHG-100): este ejemplar aparece en lugar del botón de crear. */
+    public function makeFavorite(int $companionId, \App\Services\Game\GameSettings $settings): void
+    {
+        $companion = \App\Models\Game\GameCompanion::query()->with('species')->find($companionId);
+        if (! $companion) {
+            return;
+        }
+        $settings->save((int) auth()->id(), ['favorite_companion_id' => $companion->id, 'creation_style' => 'pokemon']);
+        $this->sheetMessage = "{$companion->species?->name} es tu favorito. Te acompañará al crear.";
+    }
+
     public function evolve(int $companionId, int $speciesId, CompanionProgress $progress): void
     {
         try {
@@ -162,6 +173,7 @@ class GameCollection extends Component
             'albums' => app(\App\Services\Game\Albums::class)->overview((int) auth()->id()),
             'rarities' => config('game.rarities'),
             'states' => self::STATES,
+            'favoriteCompanionId' => app(\App\Services\Game\GameSettings::class)->for((int) auth()->id())['favorite_companion_id'],
             'sheet' => $this->showSheet && $this->selectedId
                 ? $this->sheet($this->selectedId, $found, $teamLookup)
                 : null,
