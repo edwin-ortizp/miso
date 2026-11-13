@@ -21,7 +21,11 @@ import { registerTaskCalendar } from './task-calendar';
 import { registerTaskGantt } from './task-gantt';
 import { registerRoutineMusic } from './routine-music';
 import { registerCatalogColorSelect } from './catalog-color-select';
+import { registerNavigationGuard } from './navigation-guard';
+import { registerAndroid } from './android';
 
+registerNavigationGuard(Alpine);
+registerAndroid();
 registerGameReveal(Alpine);
 registerPomodoroTimer(Alpine);
 registerFocusCompanion(Alpine);

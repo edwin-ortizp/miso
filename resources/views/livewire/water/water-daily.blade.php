@@ -167,7 +167,7 @@
                 });
             }
         }">
-            <x-ui.form-dialog :open="$showForm" close="closeForm" close-expression="requestClose()"
+            <x-ui.form-dialog :open="$showForm" close="closeForm" close-expression="requestClose()" handles-discard
                               title="{{ $editingId ? 'Editar bebida' : 'Nueva bebida' }}"
                               submit-action="save" id="water-log-form"
                               x-on:submit.capture="if (confirming) { $event.preventDefault(); $event.stopImmediatePropagation(); }">

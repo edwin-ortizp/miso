@@ -53,11 +53,29 @@ El tipo de una formación con contenido queda bloqueado durante la edición para
 - Los errores abren la sección que necesita corrección. Cancelar, Escape y cerrar descartan el borrador. Cabecera y footer se conservan accesibles; el editor de tareas sigue siendo el compartido.
 - En el estado vacío, el guardián ofrece orientación. Con registros, la ayuda de contexto se consulta desde el icono discreto junto al título. Se conserva la integración de compañero favorito desarrollada por CHG-097, que es independiente del equipo semanal.
 
+## Accesos directos y guardián del módulo
+
+El índice y los detalles de Formación tienen un panel contextual con **Accesos directos** y **Guardián de Formación**. La ayuda aislada del encabezado se sustituye por ese guardián; el compañero favorito conserva su comportamiento independiente.
+
+- Desde el menú de una formación o de cualquier periodo, materia, módulo, etapa, curso interno o tema, elegir **Fijar en accesos directos**. El detalle también ofrece un botón de chincheta con estado accesible.
+- Cada acceso abre directamente el elemento, conserva la ubicación jerárquica y muestra las acciones propias de ese nivel. No es necesario entrar primero a la carrera y luego al semestre.
+- El nombre y el tipo se muestran junto a su origen. Por ejemplo, dos accesos «Semestre 1» se distinguen por «Ingeniería de Sistemas» y «Maestría en gestión de proyectos».
+- La chincheta del acceso permite quitarlo; no elimina ni modifica el registro. Fijar nuevamente lo añade al final, sin duplicados.
+- Los accesos son manuales: crear una formación, marcarla En curso o completarla no fija ni retira nada. Renombrar un elemento actualiza su etiqueta sin cambiar el destino.
+- El escenario de demostración incluye tres elecciones ficticias: el semestre de Ingeniería, Inglés B1 y Clases de guitarra. No se generan a partir del estado académico.
+- En escritorio, los dos widgets viven en el lateral. Por debajo de 1200 px los accesos aparecen antes de la tabla y el guardián después del contenido principal, con una sola composición gobernada por CSS.
+- Sin equipo semanal se conserva el panel y sus accesos, con orientación textual en lugar de un guardián inventado. El estado sin formaciones mantiene su guía inicial.
+- Navegar entre módulos conserva los accesos durante el escenario. Reiniciar, cambiar de escenario o recargar restablece los datos de demostración.
+
+Todo se implementa en las fuentes del mockup. No se cambia `config/modules.php` ni hay persistencia en el backend.
+
 ## Validación
 
 ```powershell
+node docs/mockup-system/mockups/learning/tests/shortcuts.mjs
 node docs/mockup-system/mockups/learning/tests/acceptance.mjs
 node docs/mockup-system/mockups/learning/tests/favorite.mjs
+node docs/mockup-system/mockups/learning/tests/task-creation.mjs
 ```
 
 La aceptación levanta un servidor temporal y prueba la creación desde cero de carrera, maestría, Scrum e inglés, sus jerarquías, formularios, materiales, evaluaciones y conexiones. Capturas e informes quedan en `dist/learning-review/` (ignorados por Git). Incluye 14 vistas responsive, menú de fila y formulario en escritorio/móvil, teclado y auditoría Axe de cuatro vistas y un formulario.
@@ -76,3 +94,14 @@ Los assets de la aplicación no cambian: el prototipo usa su propio compilador. 
 - Sin errores de JavaScript ni solicitudes externas en la aceptación. Sintaxis JS y `git diff --check` aprobados.
 - `php artisan ui:conformance`: mismas 228 desviaciones inventariadas de producción, salida 1. Este cambio no modifica las vistas Blade señaladas y no corrige esa deuda ajena al prototipo.
 - Pendiente revisión del usuario de la experiencia corregida. No se implementó el backend ni se certificó equivalencia píxel a píxel con una sesión autenticada de producción.
+
+## Evidencia de accesos directos · 2026-11-13
+
+- Compilación del módulo con el motor: cuatro comprobaciones aisladas aprobadas. Los cambios de CSS están limitados a Formación; no se recompiló la aplicación Laravel.
+- `shortcuts.mjs`: aprobado. Navegación directa al semestre, inglés y guitarra; tipos de unidad; fijar/quitar/reinsertar; nombres repetidos con origen; renombrado; independencia de estados; escenarios/reinicio; teclado; escritorio/tablet/móvil y Axe sin violaciones.
+- `acceptance.mjs`: aprobado con la expectativa del nuevo panel. Conserva los recorridos de jerarquía e integración, 14 vistas y cinco verificaciones Axe.
+- `task-creation.mjs`: aprobado; creación individual/múltiple, borradores, validación, protección de duplicados, foco, accesibilidad y responsive conservados.
+- `favorite.mjs`: sus recorridos de escritorio alcanzan la auditoría final, que detecta contraste 4,39:1 del texto activo «Objetivos» frente al mínimo 4,5:1. Se reprodujo el mismo defecto con el HTML de HEAD anterior a los accesos (selector `button[data-learning-nav="goals"] > .lt-nav-item__label`). No es una regresión de este cambio. Una ejecución diagnóstica de los perfiles tablet y móvil del mismo runner, sin modificar el archivo, pasó completa.
+- `ui:conformance`: 232 desviaciones actuales en vistas de producción, ajenas a los archivos modificados por este cambio. No se declara conformidad global de la aplicación.
+- Capturas revisadas: índice y semestre en 1440 × 1000, 1199 × 900 y 375 × 812. Accesos antes de la tabla bajo 1200 px y guardián después; no hay desbordamiento del viewport. Artefactos en `dist/learning-review/shortcuts/`.
+- Sintaxis JavaScript y `git diff --check` aprobados. Pendiente revisión visual del usuario; el cambio sigue limitado a prototipos y documentación.

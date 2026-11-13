@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Services\Notifications\Android\AndroidDispatcher;
 use App\Services\Notifications\Push\NotificationDispatcher;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
@@ -13,9 +14,12 @@ class DispatchNotifications extends Command
 
     protected $description = 'Envía por push las notificaciones disponibles que aún no se han entregado';
 
-    public function handle(NotificationDispatcher $dispatcher): int
+    public function handle(NotificationDispatcher $dispatcher, AndroidDispatcher $android): int
     {
+        $started = microtime(true);
         $r = $dispatcher->run((bool) $this->option('dry-run'));
+        $a = $android->run((bool) $this->option('dry-run'), max(0, (float) config('game.nudges.max_seconds', 40) - (microtime(true) - $started)), max(0, (int) config('game.nudges.max_sends', 200) - $r['sent'] - $r['failed']));
+        $this->info('Android · aceptadas por FCM: '.$a['sent'].' · fallidas: '.$a['failed'].($a['problem'] ? ' · '.$a['problem'] : ''));
         if ($r['problem']) {
             $this->warn('Push sin configurar: '.$r['problem']);
 

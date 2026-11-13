@@ -6,11 +6,15 @@ use App\Models\UserNotification;
 use App\Services\Notifications\NotificationPresentation;
 use Illuminate\Database\QueryException;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 class NotificationBell extends Component
 {
+    #[On('android-notification-received')]
+    public function refreshAndroidNotice(): void {}
+
     use WithPagination;
 
     public bool $open = false;

@@ -31,6 +31,7 @@
     <x-app-navigation side="right" toggle />
     <div class="lt-offline" x-data="ltConnection()" :class="{ 'is-visible': offline }" role="status" aria-live="polite">Sin conexión — se muestran los datos guardados</div>
     {{ $slot }}
+    @include('partials.discard-guard')
     @livewireScriptConfig
 </body>
 </html>

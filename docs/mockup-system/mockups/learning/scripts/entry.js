@@ -4,7 +4,7 @@ import {mountFavorite} from './favorite.js';
 import {startMockup} from '@mockup-system/runtime/bootstrap.js';
 import {mountLifeShell} from '@project/project-assets/life-shell.js';
 import {Calendar, dayGridPlugin, esLocale, interactionPlugin, listPlugin, timeGridPlugin} from '@project/project-assets/vendor/fullcalendar.js';
-import {seed,iso,dateAt,offset,occurrences,gradeResult,learningTaskIds,focusMinutes,saveSlot,cancelSlot,FORMATION_TYPES,NODE_LABELS,formationKind,childKinds,resourceKinds,ownerIds,validNodeContext} from './domain.js';
+import {seed,iso,dateAt,offset,occurrences,gradeResult,learningTaskIds,focusMinutes,saveSlot,cancelSlot,FORMATION_TYPES,NODE_LABELS,formationKind,childKinds,resourceKinds,ownerIds,validNodeContext,pinTarget,pinnedTargets,togglePin} from './domain.js';
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const statuses={todo:'Borrador',ready:'Ready',wip:'WIP',done:'Done'};
 const button=(action,label,id='',icon='')=>`<button type="button" class="lt-button lt-button--text" data-learning-action="${action}" data-id="${esc(id)}">${icon?`<i class="bi ${icon}" aria-hidden="true"></i>`:''}${esc(label)}</button>`;
@@ -48,7 +48,23 @@ function mount(ctx){
  if(kind==='material'){setForm(kind,{node:owner(),...data});$('[data-material-location]').textContent='Material de: '+contextPath();$('#material-editor-title').textContent=data.id?'Editar material':'Agregar material';}
  }
  function syncAssociations(f){const links=state.links.filter(l=>l.node===f.elements.node.value);f.querySelectorAll('[name="tasks"]').forEach(i=>i.checked=links.some(l=>l.kind==='task'&&l.target===i.value));f.querySelectorAll('[name="habits"]').forEach(i=>i.checked=links.some(l=>l.kind==='habit'&&l.target===i.value));}
- function rowActions(kind,id,title){const template=$(`[data-row-actions="${kind}"]`);return `<div data-row-id="${esc(id)}">${template.innerHTML.replaceAll('__ROW__',esc(id.replaceAll('|','-'))).replaceAll('__TITLE__',esc(title))}</div>`;}
+ function rowActions(kind,id,title){const template=$(`[data-row-actions="${kind}"]`),key=(kind==='learning'?'formation:':'node:')+id,pinned=(state.pins||[]).includes(key);return `<div data-row-id="${esc(id)}">${template.innerHTML.replaceAll('__ROW__',esc(id.replaceAll('|','-'))).replaceAll('__TITLE__',esc(title)).replaceAll('__PIN_LABEL__',pinned?'Quitar de accesos directos':'Fijar en accesos directos').replaceAll('__PIN_ICON__',pinned?'bi-pin-angle-fill':'bi-pin-angle')}</div>`;}
+ function renderContextPanel(show){
+ const targets=pinnedTargets(state),key=unit()?'node:'+unit().id:'formation:'+selected()?.id;
+ $('[data-formation-workspace]').classList.toggle('lt-learning-workspace--single',!show);
+ $('[data-shortcuts-panel]').hidden=!show;$('[data-formation-guardian]').hidden=!show;
+ $('[data-rail-guardian]').hidden=!state.team;$('[data-rail-no-team]').hidden=state.team;
+ $('[data-shortcuts-count]').textContent=targets.length;$('[data-shortcuts-count]').setAttribute('aria-label',targets.length+' accesos directos');
+ $('[data-shortcuts-list]').innerHTML=targets.length?`<ul class="lt-learning-shortcut-list">${targets.map(item=>`<li><a class="lt-learning-shortcut-link" href="#${esc(item.href)}" data-shortcut-key="${esc(item.key)}"><strong>${esc(item.title)}</strong><small>${esc(item.type)} · ${esc(item.origin)}</small></a><button class="lt-icon-button" type="button" data-learning-action="unpin" data-id="${esc(item.key)}" aria-label="Quitar de accesos directos: ${esc(item.title)} · ${esc(item.origin)}"><i class="bi bi-pin-angle-fill" aria-hidden="true"></i></button></li>`).join('')}</ul>`:'<p class="lt-learning-shortcut-empty">Todavía no tienes accesos. En las acciones de una formación o de su contenido, elige «Fijar en accesos directos».</p>';
+ const control=$('[data-pin-current]'),pinned=(state.pins||[]).includes(key),label=pinned?'Quitar de accesos directos':'Fijar en accesos directos';
+ control.hidden=view!=='detail'||!selected();control.setAttribute('aria-pressed',String(pinned));control.setAttribute('aria-label',label);control.title=label;control.querySelector('i').className='bi '+(pinned?'bi-pin-angle-fill':'bi-pin-angle');
+ $('[data-formation-guardian] [data-advice]').textContent=targets.length?'Tus accesos te llevan directo al periodo o curso que elijas. La ruta completa sigue disponible cuando la necesites.':'Abre lo que estás estudiando y fíjalo para volver con un clic. Puedes combinar universidad, idiomas y otras clases.';
+ }
+ function changePin(key,source){
+ const target=pinTarget(state,key);if(!target)return;
+ let pinned;update(s=>{pinned=togglePin(s,key);});feedback((pinned?'Acceso fijado: ':'Acceso retirado: ')+target.title+'.');
+ queueMicrotask(()=>{let control;if(source==='context')control=$('[data-pin-current]');else if(source==='row'){const row=$(`[data-row-id="${CSS.escape(target.node||target.formation)}"]`);control=[...(row?.querySelectorAll('.lt-split__toggle,.lt-row-more')||[])].find(b=>b.getClientRects().length);}else control=$('[data-shortcuts-list] a');const fallback=$('#learning-management-title');fallback.setAttribute('tabindex','-1');(control||fallback).focus();});
+ }
  function goContext(formation,node=''){update(s=>{s.selected=formation;s.selectedNode=node;s.tab='content';},false);navigate('/learning-detail?formation='+encodeURIComponent(formation)+'&unit='+encodeURIComponent(node));}
  function renderFab(){const kind=view==='list'?'list':view==='detail'&&selected()?currentKind():view;const template=$(`[data-fab="${kind}"]`);$('[data-learning-fab]').innerHTML=template?.innerHTML||'';const seen=new Set();$('[data-learning-fab]').querySelectorAll('.lt-fab-dial__menu button').forEach(b=>{const label=b.textContent.trim();if(seen.has(label))b.remove();else seen.add(label);});}
  function taskRows(tasks){return tasks.map(t=>`<tr><td><strong>${esc(t.title)}</strong><small>${t.recurrent?'Recurrente · ocurrencia actual':'Tarea existente'}</small></td><td>${esc(t.date||'Sin fecha')}${t.time?' · '+esc(t.time):''}</td><td>${chip(statuses[t.status])}</td><td>${rowActions('task',t.id,t.title)}</td></tr>`);}
@@ -57,7 +73,8 @@ function mount(ctx){
  function render(){
  favorite.render();
  const learning=selected(),node=unit(),kind=currentKind(),canResources=resourceKinds.has(kind);
- const blank=view==='list'&&!state.learnings.length;$('.lt-mcard').hidden=blank;$('[data-empty-guide]').hidden=!blank;$('[data-empty-companion]').hidden=!state.team;$('[data-companion-help]').hidden=blank||!['list','detail'].includes(view);$('[data-sheet-art]').hidden=!state.team;
+ const blank=view==='list'&&!state.learnings.length;$('.lt-mcard').hidden=blank;$('[data-empty-guide]').hidden=!blank;$('[data-empty-companion]').hidden=!state.team;$('[data-companion-help]').hidden=true;$('[data-sheet-art]').hidden=!state.team;
+ renderContextPanel(['list','detail'].includes(view)&&state.learnings.length>0);
  all('[data-detail-back]').forEach(b=>b.hidden=view!=='detail'||!learning);
  $('[data-page-title]').textContent=view==='detail'?contextTitle():({list:'Formación',calendar:'Calendario',tasks:'Tareas',goals:'Objetivos',habits:'Hábitos',focus:'Hora de concentrarte'}[view]);
  $('[data-page-description]').textContent=view==='detail'?[node?NODE_LABELS[kind]:learning?.type,learning?.category,node?.description||learning?.description].filter(Boolean).join(' · '):({list:'Tu carrera, un posgrado, un curso o una ruta por tu cuenta.',calendar:'Tus compromisos y el tiempo que reservas para estudiar.',tasks:'Acciones que puedes consultar y trabajar en foco.',goals:'El propósito al que contribuyen tus formaciones.',habits:'La constancia se confirma a tu ritmo.',focus:'Elige una tarea y dedica este momento a avanzar.'}[view]);
@@ -196,6 +213,10 @@ function mount(ctx){
  const values={title,description:$('[data-cal-f-description]').value,date:$('[data-cal-f-date]').value,endDate:$('[data-cal-f-end-date]').value,time:$('[data-cal-f-time]').value,endTime:$('[data-cal-f-end-time]').value,status:$('[data-cal-f-status]').value,estimate:Number($('[data-cal-f-estimate]').value)||25,category:$('[data-cal-q-category]').value,priority:$('[data-cal-f-priority]').value,size:$('[data-cal-f-size]').value,private:$('[data-cal-f-private]').checked,recurrent:$('[data-cal-f-recurrent]').checked,recurDays:Math.max(1,Number($('[data-cal-f-recur-days]').value)||7),reminders:all('[data-task-reminder-row]').map(r=>({amount:r.querySelector('[data-task-reminder-amount]').value,unit:r.querySelector('[data-task-reminder-unit]').value})),relations:all('[data-task-relation-row]').map(r=>({type:r.querySelector('[data-task-relation-type]').value,target:r.querySelector('[data-task-relation-target]').value}))};
  if(values.date&&values.endDate&&values.endDate<values.date){$('[data-cal-task-error]').textContent='La fecha final no puede ser anterior al inicio.';return;}
  update(s=>{if(activeTask)Object.assign(s.tasks.find(t=>t.id===activeTask),values);else appendTasks(s,[title],values,taskOwner);});close('task-dialog');taskCreation.singleSaved();feedback('Tarea guardada.');return;}
+ if(a==='pin-formation')changePin('formation:'+id,'row');
+ if(a==='pin-node')changePin('node:'+id,'row');
+ if(a==='pin-context')changePin(unit()?'node:'+unit().id:'formation:'+selected().id,'context');
+ if(a==='unpin')changePin(id,'panel');
  if(a==='learning-open')goContext(id);
  if(a==='context-root')goContext(selected().id);
  if(a==='node-open')goContext(selected().id,id);
@@ -215,7 +236,8 @@ function mount(ctx){
  if(a==='habit-toggle')update(s=>{const h=s.habits.find(h=>h.id===id);h.done=!h.done;});
  if(a==='focus-start')update(s=>{if(s.focus.startedAt){s.focus.elapsed+=(Date.now()-s.focus.startedAt)/1000;s.focus.startedAt=null;}else s.focus.startedAt=Date.now();});
  if(a==='focus-save'||a==='focus-simulate'){const elapsed=state.focus.elapsed+(state.focus.startedAt?(Date.now()-state.focus.startedAt)/1000:0);const minutes=a==='focus-simulate'?25:Math.round(elapsed/60*100)/100;if(minutes<=0){feedback('Inicia una sesión antes de registrar tiempo.');return;}update(s=>{s.sessions.push({id:'f'+s.next++,task:s.focus.task,minutes,date:iso(new Date())});s.focus.elapsed=0;s.focus.startedAt=null;});feedback(`${minutes} min registrados. Tareas y hábitos conservan su estado.`);}
- if(a==='sheet')open('guardian-sheet');if(a==='advice'){(view==='focus'?$('[data-learning-content] [data-advice]'):$('[data-empty-guide] [data-advice]')).textContent=['Una tarea a la vez. Tu agenda no necesita hacer malabares.','El tiempo reservado es una invitación: tú eliges por dónde avanzar.','Un paso pequeño también abre camino. ¿Por cuál empezamos?'][Math.floor(Math.random()*3)];}
+ if(a==='sheet')open('guardian-sheet');if(a==='advice'){const line=target.closest('[data-guardian]')?.querySelector('[data-advice]');if(line)line.textContent=line.textContent.includes('un paso')?'Tus accesos no cambian tus tareas ni tu agenda. Solo te acercan a lo que quieres consultar.':'Puedes fijar un semestre, inglés o guitarra: un paso menos para seguir con lo tuyo.';}
+
  if(a==='clear-filters'){all('[data-filter-type],[data-filter-category],[data-filter-status]').forEach(x=>x.value='');query='';$('.lt-mcard__search input').value='';render();}
  });
  scope.on(root,'keydown',e=>{const layer=all('.lt-dialog-layer').find(d=>!d.hidden);if(!layer||layer.id==='quick-task-panel')return;if(e.key==='Escape'){e.preventDefault();close(layer.id);}if(e.key==='Tab'){const items=[...layer.querySelectorAll('button,input,select,textarea,a[href]')].filter(x=>!x.disabled&&x.tabIndex>=0&&x.type!=='hidden'&&x.getClientRects().length);const first=items[0],last=items.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});

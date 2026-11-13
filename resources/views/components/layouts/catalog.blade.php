@@ -37,5 +37,6 @@
             {{ $slot }}
         </main>
     </div>
+    @include('partials.discard-guard')
 </body>
 </html>

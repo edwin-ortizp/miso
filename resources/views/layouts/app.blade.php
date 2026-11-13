@@ -227,6 +227,7 @@
         </x-ui.sheet>
     </div>
 
+    @include('partials.discard-guard')
     @livewireScriptConfig
 </body>
 </html>

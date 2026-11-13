@@ -47,6 +47,7 @@
          close() { this.open = false; this.active = -1; this.term = this.labelFor(this.value); },
          move(step) { if (! this.open) this.show(); const count = this.filtered.length; if (! count) return; this.active = this.active < 0 ? (step > 0 ? 0 : count - 1) : (this.active + step + count) % count; this.$nextTick(() => this.$refs.list.querySelector('.is-active')?.scrollIntoView({ block: 'nearest' })); },
      }"
+     x-md-surface.nonmodal="open" @md-surface-close.stop="close(); $refs.input.focus({ preventScroll: true })"
      x-init="term = labelFor(value); $watch('value', value => { if (! open) term = labelFor(value) })"
      x-on:pointerdown.window.capture="if (open && ! $el.contains($event.target)) close()"
      x-on:focusout="$nextTick(() => { if (! $el.contains(document.activeElement)) close() })"

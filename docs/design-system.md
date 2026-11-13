@@ -124,8 +124,9 @@ Las pantallas no llevan banner (`md-module-header`). La identidad vive en la bar
 
 ## Acciones de creación
 
-Regla transversal y obligatoria para producción y mockups: **toda acción cuyo fin principal sea crear, registrar o agregar un elemento es un FAB, y el FAB abre el modal de formulario estándar sobre la pantalla actual.**
+Regla transversal y obligatoria para producción y mockups: **toda acción cuyo fin principal sea crear, registrar o agregar un elemento parte del FAB canónico. Por defecto, abre el modal de formulario estándar sobre la pantalla actual.** La variante del compañero aprobada en CHG-100 se describe a continuación.
 
+- **Variante del compañero (CHG-100)**: el mismo `x-ui.fab` puede presentar `x-ui.companion-chat` según el ajuste personal; sin colección o en modo tradicional conserva el FAB habitual. El chat permite los registros rápidos aprobados de Tareas, Agua y Ánimo; «Más opciones» y las acciones complejas abren los formularios canónicos. En Tareas también permite consultar/ordenar la lista y actuar sobre una propuesta validada por el servidor. No añade otro punto flotante ni habilita formularios inline arbitrarios en otros módulos.
 - **Componente único**: `x-ui.fab` (o `x-module-actions`, que lo renderiza como acción `primary`). En mockups, la macro `fab()` de `life-shell.html.jinja`. Posición, espaciado, tamaño, estados y responsive viven solo ahí; ningún módulo los redefine.
 - **Escritorio**: FAB extendido, rectángulo redondeado con ícono y texto de la acción en infinitivo + objeto: «Registrar evento», «Agregar objetivo», «Crear receta».
 - **Móvil (< 768 px)**: solo ícono, con `aria-label` igual al texto; se sitúa por encima de la barra inferior.
@@ -289,3 +290,12 @@ Las tarjetas del panel usan `--md-sys-shape-corner-medium` (12 px); los objetivo
 
 ### Acciones en tarjetas del calendario de tareas
 Las cuatro vistas de FullCalendar ofrecen un disparador ⋮ por tarea: aparece con hover/foco y permanece visible en dispositivos táctiles o mientras su menú está abierto. Un único menú fuera de la rejilla evita recortes. Incluye el avance de estado y las acciones de la lista, con las mismas condiciones y confirmación de eliminación. Escape/exterior/cambio de vista cierran; teclado permite recorrer opciones. Las acciones conservan vista, fecha y filtros; errores permiten reintentar. Las otras capas mantienen su navegación.
+
+
+### Navegación Android y protección de edición (CHG-101)
+
+`x-md-surface` registra la superficie activa en una pila compartida. Android solicita cerrar solo la superior; Escape y el foco pertenecen a esa superficie. Los menús y selectores comparten el contrato. `.nonmodal` registra un desplegable sin apropiarse del foco del campo. Los cierres reutilizan `md-surface-close`.
+
+`x-ui.form-dialog` protege por defecto los formularios con `submit-action` o `submit-expression`, comparando campos en memoria. Cancelar, X, scrim, Atrás y navegación piden «Tienes cambios sin guardar» antes de descartar. Validaciones fallidas conservan la referencia anterior; guardar correctamente reinicia la referencia. Para autoguardado usar `:protect-changes="false"`. Para un cierre que ya tiene confirmación propia usar `handles-discard`: se mantiene su flujo de cierre y la protección general de navegación (Agua es el caso existente). Si un guardado exitoso ocurre fuera del submit Livewire, emitir `miso-form-saved` en el formulario.
+
+No se guardan borradores persistentes ni se envían valores del formulario al puente Android. Los navegadores sin puente conservan el flujo web; una recarga completa puede utilizar el aviso estándar del navegador. Al cambiar de editor, `ltFormEditor` consulta el mismo protector antes de reemplazar datos.

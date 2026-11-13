@@ -14,5 +14,6 @@
     <main class="md-main-content md-main-content--catalog">
         {{ $slot }}
     </main>
+    @include('partials.discard-guard')
 </body>
 </html>

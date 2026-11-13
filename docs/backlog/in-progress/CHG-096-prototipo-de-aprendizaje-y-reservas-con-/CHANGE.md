@@ -36,6 +36,9 @@ flowchart LR
   Tema --> Tarea
   Tarea --> Pomodoro
 ```
+- Ampliación aprobada: accesos manuales a cualquier nivel desde menú y detalle. El índice y los detalles ofrecen el panel contextual; no se derivan accesos del estado En curso.
+- Escritorio: accesos y guardián en lateral. Tablet/móvil: accesos antes de la tabla, guardián secundario después. Origen visible para distinguir nombres repetidos.
+
 ### 3.2 Visual (ui-designer)
 - Tablas y `row_split` canónicos; FAB dividido con tipos concretos en la raíz y acciones válidas dentro del detalle.
 - Formularios `dialog` con secciones laterales, desplegables para tipo/categoría y editor compartido de tarea.
@@ -78,6 +81,10 @@ Vacío: [compañero + guía para comenzar] [FAB con tipos de formación]
 - [x] T2 · Construir recorrido Aprendizaje y reservas — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system — Hecho cuando: escenarios y conexiones interactivos.
 - [x] T3 · Verificar y documentar — Resp: developer — Modelo: estandar — Archivos: docs — Hecho cuando: compilación y aceptación pasan.
 
+- [x] T4 · Fijar accesos manuales y abrir cualquier nivel directamente — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system — Hecho cuando: no hay duplicados y quitar un acceso conserva el registro.
+- [x] T5 · Incorporar panel contextual con guardián — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system — Hecho cuando: accesos visibles antes de la tabla bajo 1200 px, guardián secundario y favorito independiente.
+- [x] T6 · Verificar navegación, accesibilidad y regresiones — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system — Hecho cuando: pruebas de accesos y recorridos existentes pasan, capturas revisadas y documentación actualizada.
+
 ## 8. Bitácora de implementación (developer)
 - 2026-11-12: plan aprobado explícitamente por el usuario; implementación limitada a docs.
 
@@ -93,6 +100,15 @@ Vacío: [compañero + guía para comenzar] [FAB con tipos de formación]
 - Capturas revisadas: vacío, detalle, menú por fila y formulario con secciones en escritorio y móvil. Se retiró la tabla vacía duplicada del estado inicial.
 - ui:conformance mantiene 228 desviaciones ajenas de producción; sintaxis JS y diff --check aprobados. Guía actualizada con recorridos y límites.
 
+- 2026-11-13: ampliación aprobada e implementada en el prototipo: preferencias de accesos directos, panel contextual del guardián y datos ficticios de universidad, inglés y guitarra. No se modificó backend ni config/modules.php.
+- Prueba específica de accesos aprobada: navegación directa, todos los tipos de unidad, duplicados, renombrado, independencia del estado, quitar/reinsertar, escenarios/reinicio, teclado, tres tamaños y Axe. Capturas revisadas en dist/learning-review/shortcuts/.
+
+- 2026-11-13: cierre de verificación local de accesos: compilación del módulo (4 comprobaciones), shortcuts.mjs, acceptance.mjs y task-creation.mjs aprobados. Tres tamaños de accesos sin problemas de Axe; aceptación general conserva 14 vistas y cinco auditorías.
+- Favorito: contraste preexistente del menú Objetivos en escritorio (4,39:1), reproducido contra HEAD anterior a estos cambios. Sus perfiles tablet y móvil pasaron completos en ejecución diagnóstica sin editar la suite. No se amplió el alcance para cambiar colores de otros módulos.
+- ui:conformance informa 232 desviaciones actuales ajenas a los archivos de este cambio. No hay declaraciones de conformidad global. Documentación y diff --check revisados.
+
+- 2026-11-13: retirado el encabezado redundante «Formación / Tu carrera, un posgrado…» solo del índice. Se conservan ubicación y controles del detalle; el foco vuelve a la cabecera de la tabla si se retira el último acceso. Compilación aislada (4 comprobaciones), shortcuts.mjs y diff --check aprobados.
+
 ## 9. Preguntas abiertas, decisiones e historial
 - Sin preguntas bloqueantes. Reservas con superposición permitida, hábitos manuales y notas opcionales.
 - 2026-11-12 — Aprobado por el usuario (Compuerta 2)
@@ -102,3 +118,7 @@ Vacío: [compañero + guía para comenzar] [FAB con tipos de formación]
 
 - Corrección aprobada: retirar pestañas globales, usar tipos concretos en el FAB, desplegables, secciones laterales y split por fila; orientar el vacío con el compañero.
 - 2026-11-12 — Implementación terminada → En verificación
+- 2026-11-13 — Reabierto: Accesos directos y panel contextual aprobados por el usuario
+- 2026-11-13 — Implementación terminada → En verificación
+- 2026-11-13 — Reabierto: Retirar encabezado redundante del índice de Formación
+- 2026-11-13 — Implementación terminada → En verificación

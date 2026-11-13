@@ -4,7 +4,7 @@ export const dateAt = s => new Date(s+'T12:00:00');
 export function offset(day, n) { const d=dateAt(day); d.setDate(d.getDate()+n); return iso(d); }
 export function seed(settings={}) {
  const today=iso(new Date()); const monday=offset(today,-((dateAt(today).getDay()+6)%7));
- const state={id:'learning-state',taskCreation:creationDefaults(),collection:settings.collectionEmpty?[]:[25,133,63],favorite:settings.collectionEmpty||settings.noFavorite?null:25,companionHidden:false,selected:'english',selectedNode:'',team:settings.team!==false,tab:'route',layers:{tasks:true,slots:true,plans:true,birthdays:true,meals:true},calendarDate:today,
+ const state={id:'learning-state',taskCreation:creationDefaults(),collection:settings.collectionEmpty?[]:[25,133,63],favorite:settings.collectionEmpty||settings.noFavorite?null:25,companionHidden:false,selected:'english',selectedNode:'',pins:[],team:settings.team!==false,tab:'route',layers:{tasks:true,slots:true,plans:true,birthdays:true,meals:true},calendarDate:today,
  learnings:settings.empty?[]:[{id:'master',title:'Maestría en gestión de proyectos',type:'Formación universitaria',category:'Profesional',status:'En curso',description:'Organizar el semestre y avanzar con las entregas.',goal:'career'},{id:'english',title:'Ruta de inglés B1',type:'Idioma',category:'Personal',status:'En curso',description:'Aprender paso a paso, con práctica y tiempo reservado.',goal:'english-goal'}],
  nodes:settings.empty?[]:[{id:'semester',learning:'master',parent:'',title:'Semestre 1',status:'En curso',materials:''},{id:'research',learning:'master',parent:'semester',title:'Metodología de investigación',status:'En curso',materials:'Guía de investigación · capítulos 1 y 2'},{id:'finance',learning:'master',parent:'semester',title:'Finanzas de proyectos',status:'Pendiente',materials:''},{id:'foundation',learning:'english',parent:'',title:'Etapa 1 · Bases para conversar',status:'En curso',materials:'Cuaderno de vocabulario personal'},{id:'conversation',learning:'english',parent:'foundation',title:'Presentarme y hablar de mi semana',status:'En curso',materials:'Practicar una presentación de dos minutos'}],
  goals:[{id:'english-goal',title:'Aprender inglés',description:'Mantener una conversación cotidiana en inglés.',progress:35},{id:'career',title:'Fortalecer mi perfil profesional',description:'Aplicar lo aprendido en proyectos reales.',progress:20}],
@@ -20,6 +20,11 @@ export function seed(settings={}) {
   const kinds={semester:'period',research:'subject',finance:'subject',foundation:'stage',conversation:'topic'};
   state.nodes.forEach(n=>n.kind=kinds[n.id]);
   state.nodes.push({id:'scrum-events',learning:'scrum',parent:'',kind:'module',title:'Eventos de Scrum',status:'En curso',description:'Propósito y práctica de cada evento.'},{id:'degree-period',learning:'degree',parent:'',kind:'period',title:'Semestre 1',status:'En curso'},{id:'degree-math',learning:'degree',parent:'degree-period',kind:'subject',title:'Cálculo diferencial',status:'En curso'});
+ }
+ // Fictional examples chosen manually; creation and status changes never pin anything.
+ if(!settings.empty){
+  state.learnings.push({id:'guitar',title:'Clases de guitarra',type:'Curso',category:'Personal',status:'En curso',description:'Aprender acordes y practicar canciones.',goal:''});
+  state.pins=['node:degree-period','formation:english','formation:guitar'];
  }
  state.materials=state.nodes.filter(n=>n.materials).map((n,i)=>({id:'m'+i,node:n.id,title:n.materials,type:'Apunte',content:n.materials}));
  return state;
@@ -63,3 +68,25 @@ export function validNodeContext(state,value){
 export function saveSlot(state,value){const index=state.slots.findIndex(s=>s.id===value.id);if(index<0){state.slots.push({...value,id:'s'+state.next++,exceptions:{}});return;}
  const original=state.slots[index];if(value.scope==='one'){original.exceptions[value.occurrence] = {...value};}else{state.slots[index]={...value,exceptions:{}};}}
 export function cancelSlot(state,id,day,scope){const slot=state.slots.find(s=>s.id===id);if(scope==='series')state.slots=state.slots.filter(s=>s.id!==id);else slot.exceptions[day]={cancelled:true};}
+
+// Resolve current labels at render time so renaming a formation updates its shortcuts.
+export function pinTarget(state,key){
+ const split=key.indexOf(':');const type=key.slice(0,split),id=key.slice(split+1);
+ if(type==='formation'){
+  const formation=state.learnings.find(l=>l.id===id);
+  return formation?{key,formation:formation.id,node:'',title:formation.title,type:formation.type,origin:'Formación',href:'/learning-detail?formation='+encodeURIComponent(id)+'&unit='}:null;
+ }
+ if(type!=='node')return null;
+ const node=state.nodes.find(n=>n.id===id),formation=node&&state.learnings.find(l=>l.id===node.learning);
+ if(!node||!formation)return null;
+ const parents=[],seen=new Set([id]);let parent=node.parent;
+ while(parent){if(seen.has(parent))break;seen.add(parent);const item=state.nodes.find(n=>n.id===parent&&n.learning===formation.id);if(!item)break;parents.unshift(item.title);parent=item.parent;}
+ return {key,formation:formation.id,node:id,title:node.title,type:NODE_LABELS[node.kind],origin:[formation.title,...parents].join(' / '),href:'/learning-detail?formation='+encodeURIComponent(formation.id)+'&unit='+encodeURIComponent(id)};
+}
+export function pinnedTargets(state){return [...new Set(state.pins||[])].map(key=>pinTarget(state,key)).filter(Boolean);}
+export function togglePin(state,key){
+ if(!pinTarget(state,key))return false;
+ state.pins ||= [];
+ if(state.pins.includes(key)){state.pins=state.pins.filter(item=>item!==key);return false;}
+ state.pins.push(key);return true;
+}

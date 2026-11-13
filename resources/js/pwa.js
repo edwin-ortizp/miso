@@ -1,3 +1,5 @@
+import { isAndroid, androidPush, nativeRequest } from './android.js';
+
 /**
  * Instalacion y funcionamiento sin conexion.
  *
@@ -30,7 +32,7 @@ export function registerServiceWorker() {
 }
 
 function isStandalone() {
-    return window.matchMedia('(display-mode: standalone)').matches
+    return isAndroid() || window.matchMedia('(display-mode: standalone)').matches
         || window.navigator.standalone === true;
 }
 
@@ -144,6 +146,10 @@ export function registerPushToggle(Alpine) {
         busy: false,
 
         async init() {
+            if (isAndroid()) {
+                try { this.state = await androidPush('status'); } catch { this.state = 'error'; }
+                return;
+            }
             if (!('serviceWorker' in navigator) || !('PushManager' in window) || !('Notification' in window)) {
                 this.state = 'unsupported';
 
@@ -167,6 +173,7 @@ export function registerPushToggle(Alpine) {
         async enable() {
             this.busy = true;
             try {
+                if (isAndroid()) { this.state = await androidPush('enable'); return; }
                 const permission = await Notification.requestPermission();
                 if (permission !== 'granted') {
                     this.state = permission === 'denied' ? 'denied' : 'off';
@@ -182,7 +189,7 @@ export function registerPushToggle(Alpine) {
                 await this.$wire.saveSubscription(subscription.toJSON());
                 this.state = 'on';
             } catch {
-                this.state = 'off';
+                this.state = isAndroid() ? 'error' : 'off';
             } finally {
                 this.busy = false;
             }
@@ -191,6 +198,7 @@ export function registerPushToggle(Alpine) {
         async disable() {
             this.busy = true;
             try {
+                if (isAndroid()) { this.state = await androidPush('disable'); return; }
                 const registration = await navigator.serviceWorker.ready;
                 const subscription = await registration.pushManager.getSubscription();
                 if (subscription) {
@@ -198,9 +206,11 @@ export function registerPushToggle(Alpine) {
                     await subscription.unsubscribe();
                 }
                 this.state = 'off';
-            } finally {
+            } catch { this.state = 'error'; } finally {
                 this.busy = false;
             }
         },
+        android: isAndroid(),
+        async openSettings() { if (isAndroid()) await nativeRequest('pushSettings'); },
     }));
 }

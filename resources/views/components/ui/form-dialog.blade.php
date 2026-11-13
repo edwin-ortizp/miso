@@ -17,6 +17,8 @@
     'headerActions' => null,
     'focusErrors' => false,
     'sectionEvent' => false,
+    'protectChanges' => true,
+    'handlesDiscard' => false,
 ])
 
 @php
@@ -44,7 +46,7 @@
              @if($state) x-show="{{ $state }}" x-cloak :class="{'lt-editor-pristine': !submitted}" @endif
              @if($sectionEvent) @task-editor-section.window="section = $event.detail.section" @endif
              x-data="{ section: @js($firstSection), navCollapsed: window.matchMedia('(max-width: 767.98px)').matches, expanded: @js((bool) $expanded) }" @if($state) x-effect="if ({{ $state }}) { section = @js($firstSection); expanded = @js((bool) $expanded); navCollapsed = window.matchMedia('(max-width: 767.98px)').matches }" @endif>
-            <div class="md-dialog-scrim" @if($clientClose) x-on:click="{{ $clientClose }}" @else wire:click="{{ $close }}" @endif></div>
+            <div class="md-dialog-scrim" x-on:click="$el.parentElement.querySelector('[role=dialog]').dispatchEvent(new CustomEvent('md-surface-close', { bubbles: true }))"></div>
             <section {{ $attributes->class(['md-form-dialog', 'md-form-dialog--sections' => $sections !== []]) }}
                      id="{{ $dialogId }}"
                      :class="{ 'is-expanded': expanded, 'is-nav-collapsed': navCollapsed }"
@@ -52,8 +54,8 @@
                      aria-modal="true"
                      aria-labelledby="{{ $dialogId }}-title"
                      x-md-surface="{{ $state ?? '' }}"
-                     @md-surface-close="{{ $clientClose ?? '$refs.cancel.click()' }}">
-                <form class="md-form-dialog__form" novalidate @if($state) @submit="submitted = true" @endif @if ($submitExpression) @submit.prevent="{{ $submitExpression }}" @elseif ($submitAction) wire:submit="{{ $submitAction }}" @else @submit.prevent @endif>
+                     @md-surface-close="{{ $clientClose ?? ('$wire.'.$close.'()') }}">
+                <form class="md-form-dialog__form" novalidate @if($protectChanges && ($submitAction || $submitExpression)) x-dirty-guard{{ $handlesDiscard ? '.external-close' : '' }}="{{ $state ? 'loading' : 'false' }}" @endif @if($state) @submit="submitted = true" @endif @if ($submitExpression) @submit.prevent="{{ $submitExpression }}" @elseif ($submitAction) wire:submit="{{ $submitAction }}" @else @submit.prevent @endif>
                     <header class="md-form-dialog__head" role="presentation">
                         @if ($sections !== [])
                             <button type="button" class="md-btn-icon" @click="navCollapsed = !navCollapsed"
@@ -71,7 +73,7 @@
                                 :aria-pressed="expanded.toString()" :aria-label="expanded ? 'Restaurar' : 'Expandir'" :title="expanded ? 'Restaurar' : 'Expandir'">
                             <i class="bi" :class="expanded ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'" aria-hidden="true"></i>
                         </button>
-                        <button type="button" class="md-btn-icon" @if($clientClose) x-on:click="{{ $clientClose }}" @else wire:click="{{ $close }}" @endif aria-label="Cerrar" title="Cerrar">
+                        <button type="button" class="md-btn-icon" x-on:click="$dispatch('md-surface-close')" aria-label="Cerrar" title="Cerrar">
                             <i class="bi bi-x-lg" aria-hidden="true"></i>
                         </button>
                     </header>
@@ -108,7 +110,7 @@
                         @isset($actions)
                             {{ $actions }}
                         @else
-                            <button type="button" x-ref="cancel" class="md-btn-text" @if($clientClose) x-on:click="{{ $clientClose }}" @else wire:click="{{ $close }}" @endif>Cancelar</button>
+                            <button type="button" x-ref="cancel" class="md-btn-text" x-on:click="$dispatch('md-surface-close')">Cancelar</button>
                             <button type="submit" class="md-btn-filled" wire:loading.attr="disabled" @if($state) :disabled="loading || !!loadError" @endif>
                                 <i class="bi bi-floppy" aria-hidden="true"></i>
                                 <span>{{ $submit }}</span>

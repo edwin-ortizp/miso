@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { codePoints, createCompanionChat, fillTemplate, shouldHint, singleLine, splitLines, validateDraft, whenDate } from '../../resources/js/companion-chat.js';
+import { actionSuggestions, resolveArguments, codePoints, createCompanionChat, fillTemplate, shouldHint, singleLine, splitLines, validateDraft, whenDate } from '../../resources/js/companion-chat.js';
 
 const memoryStore = () => {
     const data = new Map();
@@ -103,4 +103,54 @@ test('calcula hoy y mañana en fecha local', () => {
     assert.equal(whenDate('today', now), '2026-11-30');
     assert.equal(whenDate('tomorrow', now), '2026-12-01');
     assert.equal(whenDate('', now), null);
+});
+
+
+test('resuelve identidades dinámicas y rechaza argumentos sin resultado', () => {
+    assert.deepEqual(resolveArguments(['{id}', 1], {id:'task-uuid'}), ['task-uuid', 1]);
+    assert.deepEqual(resolveArguments({action:'openForm',id:'{id}'}, {id:'task-uuid'}), {action:'openForm',id:'task-uuid'});
+    assert.throws(()=>resolveArguments(['{id}'], null));
+    assert.throws(()=>resolveArguments(['{id}'], {id:''}));
+});
+
+test('sugiere hasta tres acciones por palabras clave normalizadas y del grupo actual', () => {
+    const actions=[{label:'Siguiente',keywords:['qué sigue']},{label:'Ordenar',keywords:['ordenar']},{label:'Otra',keywords:['ordenar']},{label:'Tercera',keywords:['ordenar']},{label:'Cuarta',keywords:['ordenar']},{label:'Hoy',group:'view',keywords:['hoy']}];
+    assert.deepEqual(actionSuggestions('¿QUE SIGUE?',actions),[{index:0,label:'Siguiente'}]);
+    assert.equal(actionSuggestions('orden',actions).length,3);
+    assert.deepEqual(actionSuggestions('hoy',actions),[]);
+    assert.deepEqual(actionSuggestions('hoy',actions,'view'),[{index:5,label:'Hoy'}]);
+});
+
+test('Enter sin selección crea el título aunque coincida con una acción', async () => {
+    const calls=[];
+    const chat=createCompanionChat({quick:[{type:'compose',id:'one',call:'create',mode:'single',keywords:['ordenar'],label:'Crear'}]}, {storage:memoryStore()});
+    chat.wire={call:async(...args)=>{calls.push(args);return {ok:true};}};
+    chat.startCompose(0);chat.draft='Ordenar mi escritorio';
+    await chat.send();assert.deepEqual(calls,[['create','Ordenar mi escritorio']]);
+});
+
+test('flechas y Enter ejecutan solo una sugerencia seleccionada y conservan el borrador', async () => {
+    const storage=memoryStore(),chat=createCompanionChat({quick:[{type:'compose',id:'one',call:'create',mode:'single'}, {type:'step',label:'Ver tareas',keywords:['ver tareas'],then:'view'}]}, {storage});
+    chat.startCompose(0);chat.draft='ver tareas';chat.onKeydown({key:'ArrowDown',preventDefault(){}});
+    assert.equal(chat.suggestionIndex,0);chat.onKeydown({key:'Enter',preventDefault(){}});
+    assert.equal(chat.step,'view');assert.equal(chat.lastResult,null);assert.equal(storage.getItem('miso:companion-chat:app:one'),'ver tareas');
+});
+
+test('la propuesta usa el resultado anterior y lo limpia al cambiar de contexto', async () => {
+    const calls=[],chat=createCompanionChat({quick:[{type:'tap',call:'next',reply:'Tu siguiente: {title}',then:'next'}, {type:'tap',call:'complete',args:['{id}'],reply:'ok',then:'start'}, {type:'step',then:'start'}]}, {storage:memoryStore()});
+    chat.wire={call:async(...args)=>{calls.push(args);return args[0]==='next'?{ok:true,id:'one',title:'Una'}:{ok:true};}};
+    await chat.tap(0);assert.equal(chat.lastResult.id,'one');await chat.tap(1);assert.deepEqual(calls[1],['complete','one']);assert.equal(chat.lastResult,null);
+    await chat.tap(0);await chat.goTo(2);assert.equal(chat.lastResult,null);await chat.tap(1);assert.equal(calls.length,3);
+});
+
+test('una recurrencia pendiente no anuncia éxito y deja paso al formulario', async () => {
+    const chat=createCompanionChat({quick:[{type:'tap',call:'complete',reply:'¡Completada!'}]}, {storage:memoryStore()});
+    chat.open=true;chat.wire={call:async()=>({ok:true,pending:true,message:'Confirma la próxima fecha.'})};
+    await chat.tap(0);assert.equal(chat.open,false);assert.equal(chat.messages.at(-1).text,'Confirma la próxima fecha.');assert.notEqual(chat.messages.at(-1).tone,'success');assert.equal(chat.lastResult,null);
+});
+
+test('una propuesta vacía no deja identificadores ni textos sin resolver', async () => {
+    const chat=createCompanionChat({quick:[{type:'tap',call:'next',reply:'Siguiente: {title}',then:'next',emptyThen:'start'}]}, {storage:memoryStore()});
+    chat.lastResult={id:'old'};chat.wire={call:async()=>({ok:true,empty:true,message:'No hay pendientes.'})};
+    await chat.tap(0);assert.equal(chat.step,'start');assert.equal(chat.lastResult,null);assert.equal(chat.messages.at(-1).text,'No hay pendientes.');
 });

@@ -142,3 +142,82 @@ it('el chat no se reemplaza en cada render', function () {
         ->assertSee('wire:ignore wire:key="companion-chat-tasks"', false)
         ->assertSee('Tócame para anotar algo', false);
 });
+
+
+it('filtra desde el chat sin quitar búsqueda ni categoría y cuenta la lista actual', function () {
+    \App\Models\TaskCategory::create(['name' => 'Trabajo', 'key' => 'trabajo']);
+    Task::create(['title' => 'Preparar hoy', 'category' => 'trabajo', 'start_date' => today()]);
+    Task::create(['title' => 'Preparar mañana', 'category' => 'trabajo', 'start_date' => today()->addDay()]);
+    Task::create(['title' => 'Otra hoy', 'start_date' => today()]);
+    $component = Livewire::test(TaskList::class)->set('categoryFilter', ['trabajo'])->set('search', 'Preparar');
+    $result = $component->call('chatFilter', 'hoy')->effects['returns'][0];
+    expect($result)->toMatchArray(['ok' => true, 'total' => 1]);
+    $component->assertSet('dateFilter', ['hoy'])->assertSet('categoryFilter', ['trabajo'])->assertSet('search', 'Preparar');
+    expect($component->call('chatFilter', '')->effects['returns'][0])->toMatchArray(['ok' => true, 'total' => 2]);
+    $component->assertSet('dateFilter', []);
+    expect($component->call('chatFilter', 'invalido')->effects['returns'][0]['ok'])->toBeFalse();
+});
+
+it('solo acepta órdenes existentes y conserva los filtros del chat', function () {
+    Task::create(['title' => 'Hoy', 'start_date' => today()]);
+    $component = Livewire::test(TaskList::class)->set('dateFilter', ['hoy']);
+    foreach (array_keys(TaskList::SORTS) as $sort) {
+        expect($component->call('chatSort', $sort)->effects['returns'][0])->toMatchArray(['ok' => true, 'total' => 1]);
+        $component->assertSet('sort', $sort)->assertSet('dateFilter', ['hoy']);
+    }
+    expect($component->call('chatSort', 'drop table tasks')->effects['returns'][0]['ok'])->toBeFalse();
+    $component->assertSet('sort', 'title');
+});
+
+it('propone una pendiente de la lista actual por vencimiento y luego prioridad', function () {
+    $this->travelTo(today()->setTime(12, 0));
+    $old = Task::create(['title' => 'Pendiente antigua', 'start_date' => today()->subDays(2), 'priority' => 'not-urgent-not-important']);
+    $urgent = Task::create(['title' => 'Urgente vencida', 'end_date' => today()->subDay(), 'priority' => 'urgent-important']);
+    $today = Task::create(['title' => 'Pendiente hoy', 'start_date' => today(), 'priority' => 'urgent-important']);
+    $future = Task::create(['title' => 'Pendiente futura', 'start_date' => today()->addDay(), 'priority' => 'urgent-important']);
+    $component = Livewire::test(TaskList::class);
+    expect($component->call('chatNext')->effects['returns'][0]['id'])->toBe($urgent->id);
+    $component->set('dateFilter', ['hoy']);
+    expect($component->call('chatNext')->effects['returns'][0]['id'])->toBe($today->id);
+    $component->set('dateFilter', [])->set('search', 'futura');
+    expect($component->call('chatNext')->effects['returns'][0]['id'])->toBe($future->id);
+    $component->set('search', 'no existe');
+    expect($component->call('chatNext')->effects['returns'][0])->toMatchArray(['ok' => true, 'empty' => true]);
+});
+
+it('no propone ni abre ni completa tareas ajenas o que dejaron de estar en la lista', function () {
+    $other = User::factory()->create();
+    $this->actingAs($other);
+    $foreign = Task::create(['title' => 'Ajena']);
+    $this->actingAs($this->user);
+    $mine = Task::create(['title' => 'Mía', 'start_date' => today()]);
+    $component = Livewire::test(TaskList::class);
+    expect($component->call('chatNext')->effects['returns'][0]['id'])->toBe($mine->id);
+    foreach (['chatOpen', 'chatComplete'] as $method) {
+        expect($component->call($method, $foreign->id)->effects['returns'][0]['ok'])->toBeFalse();
+    }
+    expect($foreign->fresh()->completed)->toBeFalse();
+    $component->set('dateFilter', ['sin-fecha']);
+    foreach (['chatOpen', 'chatComplete'] as $method) {
+        expect($component->call($method, $mine->id)->effects['returns'][0]['ok'])->toBeFalse();
+    }
+    expect($mine->fresh()->completed)->toBeFalse();
+});
+
+it('completa la propuesta solo una vez y rechaza una tarea ya completada', function () {
+    $task = Task::create(['title' => 'Completar']);
+    $component = Livewire::test(TaskList::class);
+    expect($component->call('chatOpen', $task->id)->effects['returns'][0])->toMatchArray(['ok' => true, 'id' => $task->id]);
+    expect($component->call('chatComplete', $task->id)->effects['returns'][0]['ok'])->toBeTrue();
+    expect($task->fresh()->completed)->toBeTrue();
+    expect($component->call('chatComplete', $task->id)->effects['returns'][0]['ok'])->toBeFalse();
+    expect($component->call('chatNext')->effects['returns'][0])->toMatchArray(['ok' => true, 'empty' => true]);
+});
+
+it('pide confirmar la recurrencia sin anunciar una tarea completada', function () {
+    $task = Task::create(['title' => 'Rutina', 'is_recurrent' => true, 'start_date' => today(), 'recurrence' => ['customDays' => 7]]);
+    $component = Livewire::test(TaskList::class);
+    expect($component->call('chatComplete', $task->id)->effects['returns'][0])->toMatchArray(['ok' => true, 'pending' => true]);
+    $component->assertSet('showRecurringCompletion', true)->assertSet('recurringTaskId', $task->id);
+    expect($task->fresh()->completed)->toBeFalse();
+});

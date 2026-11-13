@@ -29,6 +29,7 @@
         'greeting' => $greeting ? ($companion['salute'] ?? '').' '.$greeting : $companion['greeting'],
         'followUp' => $voice['follow_up'],
         'error' => $voice['error'],
+        'missingResult' => $voice['tasks']['missing_result'],
         'quick' => $quick,
     ];
     $panelId = 'companion-chat-'.($moduleKey ?: 'app');
@@ -67,7 +68,7 @@
 
         <div class="lt-chat__thread" x-ref="thread" role="log" aria-live="polite" aria-label="Mensajes de {{ $name }}">
             <template x-for="message in messages" :key="message.id">
-                <div class="lt-chat__row" :class="'lt-chat__row--' + message.from"><p class="lt-chat__bubble" :class="message.tone ? 'lt-chat__bubble--' + message.tone : ''"><span class="lt-chat__typing" x-show="message.typing" aria-label="{{ $name }} está escribiendo"><i></i><i></i><i></i></span><span class="lt-chat__text" x-show="!message.typing" x-text="message.text"></span></p></div>
+                <div class="lt-chat__row" :class="'lt-chat__row--' + message.from"><p class="lt-chat__bubble" :class="message.tone ? 'lt-chat__bubble--' + message.tone : ''"><span class="lt-chat__typing" x-show="message.typing" role="img" aria-label="{{ $name }} está escribiendo"><i></i><i></i><i></i></span><span class="lt-chat__text" x-show="!message.typing" x-text="message.text"></span></p></div>
             </template>
         </div>
 
@@ -75,13 +76,14 @@
             @foreach ($quick as $index => $item)
                 @php $type = $item['type'] ?? 'compose'; @endphp
                 <button type="button" class="lt-chat__chip" data-chat-chip style="--i: {{ $loop->index }}"
+                        :disabled="busy"
                         x-show="step === @js($item['group'])"
                         @if ($type === 'compose')
                             :class="{ 'is-active': composer === {{ $index }} }" :aria-pressed="(composer === {{ $index }}).toString()" @click="startCompose({{ $index }})"
                         @elseif ($type === 'step')
                             @click="goTo({{ $index }})"
                         @else
-                            :disabled="busy" @click="tap({{ $index }})" aria-label="{{ $item['aria'] ?? $item['label'] }}"
+                            @click="tap({{ $index }})" aria-label="{{ $item['aria'] ?? $item['label'] }}"
                         @endif>
                     @isset($item['emoji'])<span aria-hidden="true">{{ $item['emoji'] }}</span>@else<i class="bi {{ $item['icon'] ?? 'bi-lightning-charge' }}" aria-hidden="true"></i>@endisset
                     <span>{{ $item['label'] }}</span>
@@ -129,10 +131,17 @@
                     </div>
                 </div>
             @endif
+            <div class="lt-chat__suggestions" id="{{ $panelId }}-suggestions" role="listbox" aria-label="{{ $voice['tasks']['suggestions_label'] }}" x-show="suggestions.length" x-cloak>
+                <template x-for="(suggestion, position) in suggestions" :key="suggestion.index">
+                    <button type="button" role="option" :id="'{{ $panelId }}-suggestion-' + position" :aria-selected="(suggestionIndex === position).toString()"
+                            :class="{ 'is-selected': suggestionIndex === position }" @mousedown.prevent @click="chooseSuggestion(suggestion.index)" x-text="suggestion.label"></button>
+                </template>
+            </div>
             <div class="lt-chat__entry" :class="{ 'has-error': error }">
                 <textarea x-ref="entry" x-model="draft" @keydown="onKeydown($event)" :rows="activeComposer?.mode === 'bulk' ? 3 : 1"
                           :placeholder="activeComposer?.placeholder ?? 'Escribe aquí…'" :aria-label="activeComposer?.placeholder ?? 'Escribe aquí'"
                           :aria-invalid="error ? 'true' : 'false'" aria-describedby="{{ $panelId }}-error"
+                          aria-autocomplete="list" aria-controls="{{ $panelId }}-suggestions" :aria-activedescendant="suggestionIndex >= 0 ? '{{ $panelId }}-suggestion-' + suggestionIndex : null"
                           autocomplete="off" enterkeyhint="send"></textarea>
                 <button type="submit" class="lt-chat__send" :disabled="busy" :aria-label="submitLabel()" :title="submitLabel()">
                     <i class="bi" :class="busy ? 'bi-three-dots' : 'bi-send-fill'" aria-hidden="true"></i>
@@ -141,7 +150,7 @@
             <p class="lt-chat__error" id="{{ $panelId }}-error" role="alert" x-show="error" x-text="error"></p>
             <div class="lt-chat__foot">
                 <span class="lt-chat__hint" x-text="activeComposer?.mode === 'bulk' ? 'Una por línea · Ctrl+Enter crea' : 'Enter crea'"></span>
-                <button type="button" class="lt-chat__more" x-show="activeComposer?.more" @click="moreOptions()">Más opciones <i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
+                <button type="button" class="lt-chat__more" :disabled="busy" x-show="activeComposer?.more" @click="moreOptions()">Más opciones <i class="bi bi-arrow-up-right" aria-hidden="true"></i></button>
             </div>
         </form>
     </section>

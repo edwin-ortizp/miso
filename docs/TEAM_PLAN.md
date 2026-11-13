@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-12_
+_Última actualización: 2026-11-13_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -100,10 +100,13 @@ _Última actualización: 2026-11-12_
 | CHG-093 | M | Primera experiencia guiada | done | Cerrado | 2/2 |
 | CHG-094 | S | Medicion y prueba de primera experiencia | done | Cerrado | 2/2 |
 | CHG-095 | M | Optimización de backend: consultas repetidas y código sin uso | in-progress | En verificación | 9/9 |
-| CHG-096 | M | Prototipo de Aprendizaje y reservas con compañeros | in-progress | En verificación | 3/3 |
+| CHG-096 | M | Prototipo de Aprendizaje y reservas con compañeros | in-progress | En verificación | 6/6 |
 | CHG-097 | S | Compañero favorito persistente en el prototipo de Aprendizaje | in-progress | En verificación | 2/2 |
 | CHG-098 | M | Contenedor Android híbrido de MiSo con WebView | in-progress | En verificación | 3/3 |
-| CHG-100 | M | Chat del compañero Pokémon reemplaza el FAB | in-progress | En desarrollo | 0/4 |
+| CHG-100 | M | Chat del compañero Pokémon reemplaza el FAB | in-progress | En verificación | 4/4 |
+| CHG-101 | M | Navegación Android y protección de formularios | in-progress | En verificación | 2/2 |
+| CHG-102 | M | Canal Android FCM en Laravel | in-progress | En verificación | 2/2 |
+| CHG-103 | M | Recepción FCM y apertura segura en Android | in-progress | En verificación | 2/2 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

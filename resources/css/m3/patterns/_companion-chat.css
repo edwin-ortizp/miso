@@ -445,3 +445,9 @@
 
 /* Solo el chat llevado a <body> se muestra; copias que Livewire vuelva a pintar dentro del módulo quedan ocultas. */
 .lt-chat-host:not(body > .lt-chat-host) { display: none !important; }
+
+/* CHG-100: explicit, keyboard-selectable action suggestions. */
+.lt-chat__suggestions { display: grid; gap: 4px; margin-bottom: 8px; }
+.lt-chat__suggestions button { padding: 8px 12px; min-height: 40px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 12px; text-align: left; font: inherit; background: var(--chat-surface); color: var(--md-sys-color-on-surface); cursor: pointer; }
+.lt-chat__suggestions button:hover, .lt-chat__suggestions button.is-selected { outline: 2px solid var(--chat-accent); outline-offset: -2px; }
+.lt-chat__suggestions button:focus-visible { outline: 2px solid var(--chat-accent); outline-offset: 2px; }

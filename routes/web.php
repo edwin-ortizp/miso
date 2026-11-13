@@ -81,6 +81,13 @@ Route::middleware('guest')->group(function () {
 
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
+Route::middleware(['auth', 'throttle:30,1'])->prefix('android')->name('android.')->group(function () {
+    Route::post('/installations/status', [\App\Http\Controllers\Android\InstallationController::class, 'status'])->name('status');
+    Route::post('/installations', [\App\Http\Controllers\Android\InstallationController::class, 'store'])->name('register');
+    Route::delete('/installations', [\App\Http\Controllers\Android\InstallationController::class, 'destroy'])->name('revoke');
+    Route::get('/notifications/{notification}', \App\Http\Controllers\Android\NotificationController::class)->whereUuid('notification')->name('notice');
+});
+
 // Catálogo del sistema de diseño: solo existe en desarrollo y pruebas.
 if (app()->environment(['local', 'testing'])) {
     Route::get('/ui-catalog', [CatalogController::class, 'index'])->name('ui.catalog');

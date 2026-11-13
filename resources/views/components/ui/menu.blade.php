@@ -26,7 +26,7 @@
             @click="open = !open">
         <i class="bi {{ $icon }}" aria-hidden="true"></i>
     </button>
-    <div class="md-menu__surface" role="menu" x-cloak x-show="open" x-transition.opacity.duration.120ms @click="open = false">
+    <div class="md-menu__surface" role="menu" x-cloak x-show="open" x-md-surface.no-scroll-lock="open" @md-surface-close.stop="open = false; $refs.trigger.focus()" x-transition.opacity.duration.120ms @click="open = false">
         {{ $slot }}
     </div>
 </div>

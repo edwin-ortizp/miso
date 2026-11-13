@@ -1,3 +1,5 @@
+import { addSurface, isTopSurface } from './navigation-guard';
+
 const FOCUSABLE = [
     'a[href]',
     'button:not([disabled])',
@@ -21,14 +23,18 @@ function focusable(surface) {
  * para que el estado lo maneje quien la declara.
  */
 export function registerUiSurfaces(Alpine) {
+    let scrollLocks = 0;
     Alpine.directive('md-surface', (el, { modifiers, expression }, { cleanup, effect, evaluateLater }) => {
         let deactivate = () => {};
         let active = false;
         const activate = () => {
         const invoker = document.activeElement;
+        const removeSurface = addSurface(el, () => el.dispatchEvent(new CustomEvent('md-surface-close', {bubbles:true})));
+        if (modifiers.includes('nonmodal')) return removeSurface;
         const locksScroll = !modifiers.includes('no-scroll-lock');
 
         if (locksScroll) {
+            scrollLocks++;
             document.body.classList.add('md-scroll-locked');
         }
 
@@ -39,6 +45,7 @@ export function registerUiSurfaces(Alpine) {
         // Alpine puede inicializar la directiva antes de insertar la superficie
         // en el documento; se reintenta hasta que el foco entra de verdad.
         const focusInto = (attempt = 0) => {
+            if (!isTopSurface(el)) return;
             if (el.contains(document.activeElement) && document.activeElement !== document.body) {
                 return;
             }
@@ -56,6 +63,7 @@ export function registerUiSurfaces(Alpine) {
         const timers = [setTimeout(() => focusInto(), 0)];
 
         const onKeydown = (event) => {
+            if (!isTopSurface(el)) return;
             if (event.key === 'Escape') {
                 event.stopPropagation();
                 el.dispatchEvent(new CustomEvent('md-surface-close', { bubbles: true }));
@@ -87,6 +95,7 @@ export function registerUiSurfaces(Alpine) {
         };
 
         const onFocusIn = (event) => {
+            if (!isTopSurface(el)) return;
             if (!el.contains(event.target)) {
                 (focusable(el)[0] ?? el).focus({ preventScroll: true });
             }
@@ -98,12 +107,13 @@ export function registerUiSurfaces(Alpine) {
         document.addEventListener('focusin', onFocusIn);
 
         return () => {
+            removeSurface();
             timers.forEach(clearTimeout);
             document.removeEventListener('keydown', onKeydown);
             document.removeEventListener('focusin', onFocusIn);
 
             if (locksScroll) {
-                document.body.classList.remove('md-scroll-locked');
+                if (--scrollLocks === 0) document.body.classList.remove('md-scroll-locked');
             }
 
             if (invoker instanceof HTMLElement && document.body.contains(invoker)) {

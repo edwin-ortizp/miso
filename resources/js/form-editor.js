@@ -1,3 +1,5 @@
+import { allowLeave } from './navigation-guard';
+
 // Draft visibility is client state. Only loading an existing record and saving
 // use Livewire; their requests belong to the editor, never the surrounding list.
 export function registerFormEditor(Alpine) {
@@ -22,6 +24,7 @@ export function registerFormEditor(Alpine) {
             if (this.loading) return;
             const state = actions[detail.action];
             if (!state) return;
+            if (!await allowLeave()) return;
             this.closeEditor();
             const generation = ++this.generation;
             Object.entries(defaults).forEach(([key, value]) => wire.$set(key, structuredClone(value), false));

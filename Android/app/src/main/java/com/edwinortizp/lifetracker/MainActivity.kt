@@ -8,6 +8,13 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.net.http.SslError
 import android.os.Bundle
+import android.os.Build
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import android.webkit.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -39,6 +46,11 @@ class MainActivity : ComponentActivity() {
     private var pendingDownload: String? = null
     private val downloads: DownloadViewModel by viewModels()
     private lateinit var back: OnBackPressedCallback
+    private lateinit var bridge: NativeBridge
+    private var permissionCallback: ((Boolean) -> Unit)? = null
+    private val notificationPermission = registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        permissionCallback?.invoke(granted); permissionCallback = null
+    }
 
     private val chooseFiles = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val values = WebChromeClient.FileChooserParams.parseResult(result.resultCode, result.data)
@@ -75,8 +87,22 @@ class MainActivity : ComponentActivity() {
             setDownloadListener { url, _, disposition, mime, _ -> requestDownload(url, disposition, mime) }
         }
         WebView.setWebContentsDebuggingEnabled(BuildConfig.DEBUG)
+        bridge = NativeBridge(this, web) { callback ->
+            if (Build.VERSION.SDK_INT < 33 || ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED) callback(true)
+            else if (permissionCallback == null) { permissionCallback = callback; notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS) }
+            else callback(false)
+        }
+        bridge.install()
         back = object : OnBackPressedCallback(false) {
-            override fun handleOnBackPressed() { failed = false; web.goBack() }
+            override fun handleOnBackPressed() {
+                if (ViewCompat.getRootWindowInsets(web)?.isVisible(WindowInsetsCompat.Type.ime()) == true) {
+                    WindowInsetsControllerCompat(window,web).hide(WindowInsetsCompat.Type.ime()); return
+                }
+                if (bridge.ready) bridge.back() else web.evaluateJavascript("window.MisoNavigation?.guarded() === true") { guarded ->
+                    if (guarded == "true") Toast.makeText(this@MainActivity,"Usa los controles de MiSo para cerrar el formulario.",Toast.LENGTH_LONG).show()
+                    else performWebBack()
+                }
+            }
         }
         onBackPressedDispatcher.addCallback(this, back)
         setContent {
@@ -104,8 +130,9 @@ class MainActivity : ComponentActivity() {
             }
         }
         val restored = savedInstanceState?.getBundle("web")?.let { web.restoreState(it) }
-        if (restored == null) web.loadUrl(lastUrl)
-        back.isEnabled = web.canGoBack()
+        if (restored == null) web.loadUrl(bridge.initialNoticeUrl(intent) ?: lastUrl)
+        else bridge.notice(intent)
+        updateBack()
     }
 
     private fun client() = object : WebViewClient() {
@@ -116,6 +143,7 @@ class MainActivity : ComponentActivity() {
             return true
         }
         override fun onPageStarted(view: WebView, url: String, favicon: Bitmap?) {
+            bridge.pageStarted()
             if (policy.destination(url) != UrlPolicy.Destination.INTERNAL) {
                 view.stopLoading()
                 failed = true
@@ -128,10 +156,10 @@ class MainActivity : ComponentActivity() {
         override fun onPageFinished(view: WebView, url: String) {
             loadProgress = 100
             CookieManager.getInstance().flush()
-            back.isEnabled = view.canGoBack()
+            updateBack()
         }
         override fun doUpdateVisitedHistory(view: WebView, url: String, isReload: Boolean) {
-            back.isEnabled = view.canGoBack()
+            updateBack()
         }
         override fun onReceivedError(view: WebView, request: WebResourceRequest, error: WebResourceError) {
             if (request.isForMainFrame) { failed = true; loadProgress = 100 }
@@ -234,8 +262,15 @@ class MainActivity : ComponentActivity() {
         super.onSaveInstanceState(outState)
     }
     override fun onPause() { CookieManager.getInstance().flush(); web.onPause(); super.onPause() }
-    override fun onResume() { super.onResume(); if (::web.isInitialized) web.onResume() }
+    override fun onResume() { super.onResume(); if (::web.isInitialized) web.onResume(); if (::bridge.isInitialized) bridge.resume() }
+    fun updateBack() { if (::back.isInitialized) back.isEnabled = true }
+    fun performWebBack() {
+        failed = false
+        if (web.canGoBack()) web.goBack() else { back.isEnabled = false; onBackPressedDispatcher.onBackPressed() }
+    }
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); bridge.notice(intent) }
     override fun onDestroy() {
+        if (::bridge.isInitialized) bridge.destroy()
         fileCallback?.onReceiveValue(null)
         fileCallback = null
         (web.parent as? android.view.ViewGroup)?.removeView(web)

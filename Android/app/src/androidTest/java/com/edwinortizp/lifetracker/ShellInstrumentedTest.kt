@@ -43,6 +43,29 @@ class ShellInstrumentedTest {
         evaluate(scenario, "location.origin === 'https://miso.novapixel.org' && document.readyState === 'complete' && !!document.querySelector('input[type=password]')") == "true"
     }
 
+    @Test fun bridgeIsVersionedMainFrameOnlyAndOptionalWithoutFirebase() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                requireNotNull(web(activity.window.decorView)).loadDataWithBaseURL(BuildConfig.MISO_BASE_URL,
+                    "<html><body>Bridge fixture</body></html>","text/html","UTF-8",BuildConfig.MISO_BASE_URL)
+            }
+            awaitCondition { evaluate(scenario,"document.body?.textContent === 'Bridge fixture' && typeof MisoNative !== 'undefined'") == "true" }
+            evaluate(scenario,"""
+                window.replyCount = 0;
+                MisoNative.onmessage = e => { window.replyCount++; window.replyState = JSON.parse(e.data).state; };
+                MisoNative.postMessage(JSON.stringify({v:2,type:'pushStatus',id:'bad-version'}));
+                var frame = document.createElement('iframe');
+                frame.srcdoc = "<script>MisoNative.onmessage=()=>parent.replyCount++; MisoNative.postMessage(JSON.stringify({v:1,type:'pushStatus',id:'frame'}));</script>";
+                document.body.appendChild(frame);
+            """.trimIndent())
+            Thread.sleep(300)
+            assertEquals("0",evaluate(scenario,"replyCount"))
+            evaluate(scenario,"MisoNative.postMessage(JSON.stringify({v:1,type:'pushStatus',id:'main'}))")
+            awaitCondition { evaluate(scenario,"replyCount") == "1" }
+            if (!BuildConfig.FIREBASE_CONFIGURED) assertEquals("\"unconfigured\"",evaluate(scenario,"replyState"))
+        }
+    }
+
     @Test fun publicLoginLoadsOverHttps() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario -> awaitLogin(scenario) }
     }

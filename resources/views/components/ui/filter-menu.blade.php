@@ -25,7 +25,7 @@
         <i class="bi bi-chevron-down md-chip-menu__arrow" aria-hidden="true"></i>
     </button>
 
-    <div x-show="openMenu === '{{ $name }}'" x-transition x-cloak class="md-chip-menu__dropdown" role="listbox" aria-label="{{ $label }}">
+    <div x-show="openMenu === '{{ $name }}'" x-md-surface.no-scroll-lock="openMenu === '{{ $name }}'" @md-surface-close.stop="openMenu = null" x-transition x-cloak class="md-chip-menu__dropdown" role="listbox" aria-label="{{ $label }}">
         <button type="button"
                 class="md-chip-menu__item @if (blank($selected)) active @endif"
                 role="option"

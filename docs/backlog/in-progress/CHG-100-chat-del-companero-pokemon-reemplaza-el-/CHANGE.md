@@ -1,5 +1,5 @@
 # CHG-100 · Chat del compañero Pokémon reemplaza el FAB
-**Estado:** En desarrollo
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -59,7 +59,7 @@ Escritorio                               Móvil (hoja inferior)
 - Criterios: ningún texto supera dos líneas en móvil.
 
 ## 4. Diseño técnico (software-architect)
-- Archivos a crear: migración `users.favorite_companion_id` (FK nullable a `game_companions`, nullOnDelete) y `users.creation_style` (default `pokemon`); `app/Services/Game/FavoriteCompanion.php` (favorito → DailyBuddy → null); `resources/views/components/ui/companion-chat.blade.php`; `resources/js/companion-chat.js`; `resources/css/m3/patterns/_companion-chat.css`.
+- Persistencia final (decisión registrada en §8): `favorite_companion_id` y `creation_style` en `GameSettings`, sin columnas nuevas ni migración. Piezas creadas: `app/Services/Game/FavoriteCompanion.php` (favorito → DailyBuddy → null); `resources/views/components/ui/companion-chat.blade.php`; `resources/js/companion-chat.js`; `resources/css/m3/patterns/_companion-chat.css`.
 - Modificar: `components/ui/fab.blade.php` (elige chat o FAB), `module-actions.blade.php` (prop `quick`), `livewire/task/task-list.blade.php` + `app/Livewire/Task/TaskEditor.php` (creación rápida), `water-daily.blade.php` (`quickAdd`), vista de ánimo, perfil, ficha/colección de compañeros.
 - Enfoque: Alpine + Livewire; panel teleport a body; animaciones CSS/FLIP sin bloquear el foco; la decisión chat/FAB vive en el componente para que todos los módulos lo hereden.
 - Riesgos: rendimiento en móvil (solo transform/opacity), conflicto con modales existentes (z-index, foco), imágenes nulas (fallback a FAB).
@@ -84,7 +84,7 @@ Escritorio                               Móvil (hoja inferior)
 - [x] T1 · Guardar el Pokémon favorito y elegir la presentación en el perfil — Resp: developer — Modelo: estandar — Archivos: migración, FavoriteCompanion, perfil, colección — Hecho cuando: el favorito persiste y el ajuste funciona con fallback.
 - [x] T2 · Ver el chat con el tema del Pokémon en lugar del FAB — Resp: developer — Modelo: estandar — Archivos: companion-chat (blade/js/css), fab, module-actions — Hecho cuando: todos los módulos con FAB muestran el chat con animaciones y abren sus modales.
 - [x] T3 · Registrar rápido en Tareas, Agua y Ánimo — Resp: developer — Modelo: estandar — Archivos: task-list, TaskEditor, water-daily, ánimo — Hecho cuando: los registros rápidos y "Más opciones" con borrador funcionan.
-- [ ] T4 · Verificar accesibilidad, rendimiento y documentar — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pruebas de la sección 5 pasan y capturas revisadas.
+- [x] T4 · Verificar accesibilidad, rendimiento y documentar — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pruebas de la sección 5 pasan y capturas revisadas.
 
 ## 8. Bitácora de implementación (developer)
 - 2026-11-12 — Favorito y presentación guardados en los ajustes del juego (`GameSettings`: `favorite_companion_id`, `creation_style`) en lugar de columnas nuevas en `users`: no hace falta migración y sigue el patrón de ajustes existente. El selector está en Ajustes de la colección y «Hacer favorito» en la ficha del compañero.
@@ -100,3 +100,46 @@ Escritorio                               Móvil (hoja inferior)
 - 2026-11-12 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-12 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-12 — Movido a in-progress/ (En desarrollo)
+
+## 10. Handoff original · flujos guiados en Tareas (aprobado 2026-11-12, implementado 2026-11-13)
+
+**Estado al entregar:** T1–T3 hechas; chat abierto entre envíos verificado (Pest `tests/Feature/CompanionChatTest.php` 13 ✔, `node --test tests/JavaScript/companion-chat.test.js` 10 ✔, Playwright `npx playwright test -c tests/Browser/companion-chat.config.js` ✔). Sin commit. Algunos archivos del chat cambiaron en disco después de la última sesión: **léelos antes de editar**.
+
+**Piezas existentes (no rehacer):**
+- `resources/views/components/ui/fab.blade.php` → con compañero renderiza `x-ui.companion-chat` dentro de `wire:ignore`; `companion-chat.js` (`adoptHost`) lo mueve una vez a `<body>` con registro único `'page'` y guarda `this.wire` (no usar `$wire` dentro del chat: tras moverlo no resuelve el componente).
+- Acciones `quick` por módulo: `compose` (texto → método Livewire que devuelve `{ok, count|message}`), `tap` (`call`, `args`, `reply` con `{total}` etc., `group`, `then`, `thenSay`), `step` (`then`, `say`). Los chips se filtran por `step === group` (default `start`).
+- Textos en `config/companion_chat.php`; voz en `docs/UX-WRITING.md`.
+
+**Qué construir (Tareas):**
+1. Saludo con chips: `Crear tarea` · `Varias` · `Ver tareas` · `Ordenar` · `¿Qué sigue?` (los dos primeros ya existen como compose).
+2. `Ver tareas` (step → grupo `view`, "¿Cuáles quieres ver?"): taps `Hoy`, `Vencidas`, `Próximas`, `Sin fecha`, `Todas` → nuevo `TaskList::chatFilter(string $date)` que fija `dateFilter` con las claves de `FiltersTasks::FILTER_DATES` (`hoy`, `vencidas`, `proximas`, `sin-fecha`; vacío = todas), resetea paginación y devuelve `{ok, total}`; reply "Te muestro las de hoy: tienes {total}." → grupo `after-view` con `Ordenar`, `Quitar filtro`, `Crear otra`, `↩ Inicio`. Los chips de filtros aplicados de la lista deben reflejarlo (son el mismo estado).
+3. `Ordenar` (grupo `sort`): taps sobre `TaskList::$sort` (revisar valores válidos en TaskList/`render`) → `chatSort(string $sort)` con lista blanca.
+4. `¿Qué sigue?`: `chatNext()` devuelve la tarea pendiente más urgente (vencida/hoy, luego prioridad) `{ok, title, id}`; reply "Tu siguiente: {title}." + chips `✓ Completar` (reutilizar el método de completar de `HandlesTaskRowActions`) y `Abrir` (evento `task-editor` con `{action:'openForm', id}`). Requiere que `tap` acepte args dinámicos del resultado previo: guardar `lastResult` en el chat y permitir `args: ['{id}']`.
+5. Autocompletado sin IA: al escribir en el composer mostrar hasta 3 sugerencias por coincidencia de palabras clave (definir `keywords` por ítem en config, normalizar tildes/mayúsculas); Enter sobre sugerencia la ejecuta; sin coincidencia sigue creando la tarea.
+6. Chip `↩ Inicio` (step `then: 'start'`) en todos los grupos no iniciales; Escape cierra.
+7. Fuera de alcance inicial: "Mover vencidas a hoy" (acción masiva, necesita confirmación) → dejar para después.
+
+**Textos** (añadir a `config/companion_chat.php` → `tasks`): `view_question` "¿Cuáles quieres ver?", `view_reply` "Te muestro {label}: tienes {total}.", `view_empty` "No hay tareas aquí. ¿Creamos una?", `sort_question` "¿Cómo las ordeno?", `sort_reply` "Listo, ordenadas por {label}.", `next_reply` "Tu siguiente: {title}.", `next_empty` "¡Nada pendiente! Disfruta 🎉".
+
+**Pruebas a agregar:** Pest (`chatFilter`/`chatSort` lista blanca y totales, `chatNext` orden y vacío, usuario ajeno); node (args dinámicos, sugerencias por palabras clave); Playwright en `companion-chat.interaction.spec.js` ("Ver tareas → Hoy" filtra la lista y el chat sigue abierto).
+
+**Cierre:** marcar T4 (accesibilidad axe y capturas 375/768/1280 del spec) y luego `node .claude/team.mjs verify CHG-100`. Tests previos que ya fallaban y no son de este cambio: 2 en `tests/Feature/ModuleExperienceTest.php`.
+
+
+## 11. Continuación y validación · 2026-11-13
+
+- El usuario confirmó continuar en la app real (CHG-100), sin retomar CHG-099. Para «¿Qué sigue?» eligió la lista actual, respetando búsqueda y filtros.
+- Implementados `chatFilter`, `chatSort`, `chatNext`, `chatOpen` y `chatComplete` en `InteractsWithTaskChat`. Lista blanca de claves existentes, totales y paginación del mismo estado del listado. Propuesta: vencidas → hoy → resto; prioridad, cronológico e ID como desempate.
+- Abrir/completar vuelven a comprobar usuario, filtros y estado pendiente. Completar reutiliza la acción existente y su transacción; las recurrencias abren su confirmación y no reciben un mensaje de éxito anticipado.
+- Acciones por grupos con regreso a Inicio. `lastResult` resuelve identidades dinámicas, se limpia al cambiar de contexto y rechaza marcadores sin valor antes de llamar al servidor. Sugerencias por palabras clave en config: hasta tres, normalizadas; Enter solo ejecuta una sugerencia seleccionada. Sin selección conserva creación literal.
+- Se mantiene el montaje único en body y la conexión Livewire. Corregida semántica ARIA del indicador de escritura (`role=img`) detectada por Axe. Catálogo y contrato de diseño documentan la variante canónica del FAB y sus registros rápidos aprobados.
+- PHP: CompanionChatTest 19 pruebas y 113 assertions aprobadas, incluyendo aislamiento entre usuarios, filtros, órdenes válidos, propuesta vacía/priorizada, cambios posteriores y recurrencia.
+- JavaScript: companion-chat.test.js 17 pruebas aprobadas (identidades, contexto, sugerencias/teclado, borradores y ausencia de éxito prematuro).
+- Build Vite aprobado. Una nueva compilación integró las fuentes compartidas de otra sesión (navigation-guard) que habían cambiado mientras se validaba; no se editaron esos archivos ni Android.
+- Playwright: 7/7 aprobadas en una ejecución completa; comprobación responsive ampliada después y aprobada de nuevo. Filtrar/ordenar con chat abierto, abrir/completar, recurrencia/cancelación, sugerencias, transferencia al modal, registros de Agua/Ánimo y FAB sin colección.
+- Axe WCAG A/AA y 2.1 AA: sin violaciones en el chat y sus sugerencias a 375/768/1280. Escritura durante saludo comprobada con movimiento normal; movimiento reducido y Escape/foco comprobados. En viewport 375×500 se escribió y envió una tarea manteniendo el control de envío visible. No equivale a teclado nativo en dispositivo físico.
+- Capturas inspeccionadas de Tareas en móvil/escritorio, viewport reducido y Agua. Imágenes externas desactivadas en la fixture: se certifican composición, tema e interacción con placeholder, no el proveedor de arte.
+- ui:conformance sigue fallando con 232 desviaciones de la aplicación; no se amplió el alcance para corregir deuda visual ajena. TaskList conserva sus 17 estilos inline anteriores. git diff --check aprobado en todos los archivos de este trabajo.
+- Guía final: docs/companion-chat.md. Evidencia local: storage/framework/testing/playwright/companion-chat y companion-chat-keyboard. No se hizo commit, despliegue ni migración de datos reales.
+- LECCIÓN: ninguna adicional a los contratos ya documentados.
+- 2026-11-13 — Implementación terminada → En verificación

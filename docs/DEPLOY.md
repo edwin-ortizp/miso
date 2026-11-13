@@ -69,3 +69,33 @@ No pasa nada. Si se duplica la línea, se ejecuta a mano o se cruzan dos corrida
 - Errores y avisos: `storage/logs/laravel.log` (o el visor `/log-viewer`).
 - Apagar solo los avisos del guardián: `GUARDIAN_NUDGES_ENABLED=false` y `config:clear`.
 - Apagar todo lo programado: comenta la línea de cron.
+
+
+## Canal Android nativo · CHG-102/103
+
+Este canal es independiente de Web Push/VAPID. Laravel sigue generando los mismos avisos y aplicando las preferencias existentes. `notifications:dispatch` ejecuta ambos transportes dentro del presupuesto compartido de tiempo/envíos; no se agrega otro cron ni se necesitan workers. Sin configuración Android, Web Push continúa funcionando.
+
+Variables nuevas:
+
+```dotenv
+ANDROID_PUSH_ENABLED=false
+FIREBASE_PROJECT_ID=proyecto-firebase
+FIREBASE_CREDENTIALS=/ruta/privada/firebase-service-account.json
+```
+
+El JSON debe ser una cuenta de servicio autorizada a enviar por FCM HTTP v1 al proyecto (permiso `cloudmessaging.messages.create`). Guardarlo fuera de `public/`, con lectura limitada al usuario PHP, y nunca en Git ni en el APK. Mantener salida HTTPS a `oauth2.googleapis.com` y `fcm.googleapis.com` y reloj del servidor correcto. El archivo Android `google-services.json` pertenece al cliente y se configura aparte, según `Android/README.md`.
+
+Procedimiento de activación, pendiente de autorización para producción:
+
+1. Respaldar según el proceso habitual y desplegar la migración `2026_11_13_000001_create_android_push_tables.php`. Crea instalaciones y entregas Android sin modificar registros de notificaciones existentes. Fue verificada con MySQL 8.4 desechable.
+2. Configurar proyecto/credenciales fuera del directorio público y activar `ANDROID_PUSH_ENABLED=true`; regenerar la caché de configuración si corresponde.
+3. Ejecutar `php artisan miso:android-push-check` y `php artisan miso:android-push-check --dry-run`. No imprimen tokens ni claves y no envían. La comprobación de configuración no certifica permiso IAM ni recepción en el teléfono.
+4. Mantener el cron existente `php artisan schedule:run`. Con una cuenta de prueba, activar en el APK y confirmar un envío de Laravel y su apertura en primer plano, segundo plano y proceso terminado. Un aviso de prueba debe crearse después de activar el dispositivo; no se reenvían avisos anteriores.
+
+`android_installations` vincula usuario, token cifrado, secreto hasheado y versión de vínculo. `android_deliveries` registra una entrega única por aviso/instalación/vínculo. Las horas se almacenan en UTC. `accepted_at` significa que FCM aceptó el mensaje, no lectura ni recepción confirmada. Un fallo transitorio se reintenta al minuto y después a los cinco minutos; el tercer fallo termina el intento. Token `UNREGISTERED` desactiva la instalación. Una reclamación que quede en `sending` más de cinco minutos se termina como fallida, sin reenviarla: tras un crash no se puede saber si el proveedor la aceptó y se evita duplicarla.
+
+El comando muestra conteos de aceptadas y fallidas por Android; `miso:last-run:dispatch` conserva el registro del transporte web existente. Para inspección detallada utilizar las entregas Android, sin exponer tokens en vistas o logs. El presupuesto es por corrida, no una promesa de entrega inmediata.
+
+Rollback: desactivar `ANDROID_PUSH_ENABLED` y regenerar configuración detiene solo los envíos nativos. Mantener tablas para conservar vínculos/historial y no ejecutar `migrate:rollback` sobre datos reales como apagado. Web Push y la aplicación Laravel continúan. Para que el dispositivo deje de mostrar mensajes ya aceptados por FCM, usar Desactivar en este dispositivo; el interruptor del servidor no puede retirar mensajes ya en tránsito.
+
+No se desplegó ni migró producción en esta implementación. La comprobación real queda pendiente de Firebase, cuenta de prueba y dispositivo físico.

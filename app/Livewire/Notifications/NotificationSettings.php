@@ -2,13 +2,21 @@
 
 namespace App\Livewire\Notifications;
 
+use App\Models\AndroidInstallation;
 use App\Models\PushSubscription;
 use App\Services\Notifications\NotificationPreferences;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class NotificationSettings extends Component
 {
+    #[On('android-device-updated')]
+    public function refreshAndroidDevice(NotificationPreferences $settings): void
+    {
+        $this->preferences = $settings->get(auth()->id());
+    }
+
     public array $preferences = [];
 
     public string $message = '';
@@ -46,7 +54,7 @@ class NotificationSettings extends Component
     public function removeSubscription(string $endpoint): void
     {
         PushSubscription::where('user_id', auth()->id())->where('endpoint', $endpoint)->delete();
-        if (! PushSubscription::where('user_id', auth()->id())->exists()) {
+        if (! PushSubscription::where('user_id', auth()->id())->exists() && ! AndroidInstallation::where('user_id', auth()->id())->where('active', true)->exists()) {
             $this->preferences['guardian_nudges'] = false;
             app(NotificationPreferences::class)->save(auth()->id(), $this->preferences);
         }
@@ -58,7 +66,7 @@ class NotificationSettings extends Component
         return view('livewire.notifications.settings', [
             'vapidKey' => (string) config('webpush.public_key'),
             'nudgeSlots' => config('game.nudges.slots'),
-            'devices' => PushSubscription::where('user_id', auth()->id())->count(),
+            'devices' => PushSubscription::where('user_id', auth()->id())->count() + AndroidInstallation::where('user_id', auth()->id())->where('active', true)->count(),
         ]);
     }
 }

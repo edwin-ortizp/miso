@@ -41,7 +41,7 @@
               x-text="selected.length ? selected.slice(0, 2).map((value) => labels[value] ?? value).join(', ') + (selected.length > 2 ? ' +' + (selected.length - 2) : '') : @js($allLabel)">{{ $allLabel }}</span>
     </button>
     <label for="{{ $fieldId }}" @if($labelExpression) x-text="{{ $labelExpression }}" @endif>{{ $label }}</label>
-    <div class="md-multi-select__panel" :class="{ 'md-multi-select__panel--above': above }" role="dialog" aria-label="{{ $label }}" x-cloak x-show="open">
+    <div class="md-multi-select__panel" :class="{ 'md-multi-select__panel--above': above }" role="dialog" aria-label="{{ $label }}" x-cloak x-show="open" x-md-surface.no-scroll-lock="open" @md-surface-close.stop="open = false; $refs.trigger.focus()">
         @if ($searchable)
             <div class="md-multi-select__search" role="presentation"><label class="visually-hidden" for="{{ $fieldId }}-search">Buscar opciones</label><input id="{{ $fieldId }}-search" type="search" x-model="search" placeholder="Buscar opciones" autocomplete="off"></div>
         @endif

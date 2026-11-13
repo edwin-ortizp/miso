@@ -21,6 +21,7 @@
         <x-account-menu />
     </header>
     <main class="experience-main">{{ $slot }}</main>
+    @include('partials.discard-guard')
     @livewireScriptConfig
 </body>
 </html>

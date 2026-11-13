@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Iniciar Sesión - MiSo</title>
     @include('partials.app-styles')
+    <script>window.MisoNative?.postMessage(JSON.stringify({v:1,type:'session',account:null}));</script>
 </head>
 <body style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--md-sys-color-surface);">
     <div style="max-width: 420px; width: 100%; padding: 0 16px;">

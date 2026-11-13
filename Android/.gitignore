@@ -19,3 +19,4 @@
 *.apk
 *.aab
 *.log
+/app/google-services.json

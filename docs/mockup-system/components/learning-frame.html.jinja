@@ -14,13 +14,26 @@
 <div class="lt-learning" data-learning-view="{{ view }}">
 {{ favorite_companion() }}
 {% if view in ['calendar','tasks'] %}{{ tabs([('Lista','/learning-tasks','bi-list-task'),('Calendario','/learning-calendar','bi-calendar3')],'/learning-' ~ view) }}{% endif %}
-<div class="lt-learning-heading"><div><nav class="lt-learning-breadcrumbs" data-breadcrumbs aria-label="Ubicación" hidden></nav><h2 data-page-title>{{ title }}</h2><p data-page-description></p></div><div class="lt-learning-heading-actions"><button class="lt-icon-button" type="button" data-learning-action="edit-learning" data-detail-back hidden aria-label="Editar formación"><i class="bi bi-pencil" aria-hidden="true"></i></button><button class="lt-icon-button" type="button" data-learning-action="sheet" data-companion-help aria-label="Ayuda de tu compañero"><i class="bi bi-stars" aria-hidden="true"></i></button></div></div>
+<div class="lt-learning-heading"{% if view == 'list' %} hidden{% endif %}><div><nav class="lt-learning-breadcrumbs" data-breadcrumbs aria-label="Ubicación" hidden></nav><h2 data-page-title tabindex="-1">{{ title }}</h2><p data-page-description></p></div><div class="lt-learning-heading-actions"><button class="lt-icon-button" type="button" data-learning-action="edit-learning" data-detail-back hidden aria-label="Editar formación"><i class="bi bi-pencil" aria-hidden="true"></i></button><button class="lt-icon-button" type="button" data-learning-action="pin-context" data-pin-current hidden aria-pressed="false" aria-label="Fijar en accesos directos"><i class="bi bi-pin-angle" aria-hidden="true"></i></button><button class="lt-icon-button" type="button" data-learning-action="sheet" data-companion-help aria-label="Ayuda de tu compañero"><i class="bi bi-stars" aria-hidden="true"></i></button></div></div>
+<div class="lt-learning-workspace lt-grid-main" data-formation-workspace>
+<aside class="lt-panel lt-learning-shortcuts" data-shortcuts-panel aria-labelledby="formation-shortcuts-title" hidden>
+<header class="lt-panel__head"><i class="bi bi-pin-angle" aria-hidden="true"></i><h3 id="formation-shortcuts-title">Accesos directos</h3><span class="lt-count" data-shortcuts-count></span></header>
+<div class="lt-panel__body"><p class="lt-learning-shortcut-help">Elige lo que quieres tener a mano, esté o no en curso.</p><div data-shortcuts-list></div></div>
+</aside>
+<div class="lt-learning-main">
 <div data-empty-guide hidden><div data-empty-companion>{{ learning_companion(shared_art=true) }}</div><div class="lt-learning-empty-guide"><h3>¿Qué quieres estudiar?</h3><p>Organiza tu carrera universitaria, un posgrado, un curso o una ruta por tu cuenta. Empieza con una formación; sus periodos y contenidos se agregan después.</p><p>Usa <strong>Agregar formación</strong> o abre su flecha para elegir qué vas a crear.</p></div></div>
 <div class="lt-learning-detail-tabs lt-tabs" data-detail-tabs hidden role="group" aria-label="Secciones del contenido"></div>
 {% call(zone) manage_card('learning-management',title,icon,search='Buscar en esta vista') %}
 {% if zone == 'filters' %}<div class="lt-popover" id="learning-management-filters" role="dialog" aria-labelledby="learning-filter-title" hidden><h4 id="learning-filter-title">Filtros</h4><div class="lt-form"><label class="lt-field"><span>Tipo</span><select data-filter-type><option value="">Todos</option>{% for t in formation_types %}<option>{{ t }}</option>{% endfor %}</select></label><label class="lt-field"><span>Categoría</span><select data-filter-category><option value="">Todas</option>{% for c in categories %}<option>{{ c }}</option>{% endfor %}</select></label><label class="lt-field"><span>Estado</span><select data-filter-status><option value="">Todos</option><option>En curso</option><option>Pendiente</option><option>Completado</option></select></label></div><div class="lt-popover__actions"><button class="lt-button lt-button--text" type="button" data-learning-action="clear-filters">Limpiar</button><button class="lt-button" type="button" data-lt-toggle="learning-management-filters">Aplicar</button></div></div>
 {% else %}<div data-learning-content></div>{% endif %}
 {% endcall %}
+</div>
+<aside class="lt-panel lt-learning-guardian-widget" data-formation-guardian aria-labelledby="formation-guardian-title" hidden>
+<header class="lt-panel__head"><i class="bi bi-stars" aria-hidden="true"></i><h3 id="formation-guardian-title">Guardián de Formación</h3></header>
+<div data-rail-guardian>{{ learning_companion(shared_art=true) }}</div>
+<p class="lt-learning-no-guardian" data-rail-no-team hidden>Cuando tengas un equipo semanal, su guardián te acompañará aquí. Mientras tanto, puedes organizar tus accesos directos.</p>
+</aside>
+</div>
 <p class="lt-learning-feedback" role="status" data-learning-feedback></p>
 <div data-learning-fab></div>
 <template data-fab="list">{{ fab('Agregar formación','bi-plus-lg','learning-editor',actions=[('Carrera universitaria','bi-mortarboard','learning-editor'),('Especialización','bi-mortarboard','learning-editor'),('Maestría','bi-mortarboard','learning-editor'),('Doctorado','bi-mortarboard','learning-editor'),('Curso','bi-journal-bookmark','learning-editor'),('Ruta personal','bi-signpost-split','learning-editor')],split=true,id='lt-fab-list') }}</template>
@@ -40,8 +53,8 @@
 {% endfor %}
 <template data-fab="calendar">{{ fab('Reservar tiempo','bi-calendar-plus','slot-editor') }}</template>
 <template data-fab="tasks">{{ fab('Crear tarea','bi-plus-lg','task-dialog',actions=[('Crear varias','bi-list-task','bulk-task-editor')],split=true,id='lt-task-create-menu') }}</template>
-<template data-row-actions="learning">{{ row_split('formation-__ROW__','Consultar',[('Editar','bi-pencil',false,'learning-edit')],'__TITLE__',action='learning-open') }}</template>
-<template data-row-actions="node">{{ row_split('unit-__ROW__','Consultar',[('Editar','bi-pencil',false,'node-edit'),('Subir','bi-arrow-up',false,'node-up'),('Bajar','bi-arrow-down',false,'node-down')],'__TITLE__',action='node-open') }}</template>
+<template data-row-actions="learning">{{ row_split('formation-__ROW__','Consultar',[('Editar','bi-pencil',false,'learning-edit'),('__PIN_LABEL__','__PIN_ICON__',false,'pin-formation')],'__TITLE__',action='learning-open') }}</template>
+<template data-row-actions="node">{{ row_split('unit-__ROW__','Consultar',[('Editar','bi-pencil',false,'node-edit'),('Subir','bi-arrow-up',false,'node-up'),('Bajar','bi-arrow-down',false,'node-down'),('__PIN_LABEL__','__PIN_ICON__',false,'pin-node')],'__TITLE__',action='node-open') }}</template>
 <template data-row-actions="task">{{ row_split('task-__ROW__','Consultar',[('Iniciar foco','bi-stopwatch',false,'focus-task')],'__TITLE__',action='task-open') }}</template>
 <template data-row-actions="grade">{{ row_split('grade-__ROW__','Consultar',[('Editar','bi-pencil',false,'grade-edit')],'__TITLE__',action='grade-view') }}</template>
 <template data-row-actions="slot">{{ row_split('slot-__ROW__','Consultar',[('Editar o cancelar','bi-pencil',false,'slot-open')],'__TITLE__',action='slot-open') }}</template>

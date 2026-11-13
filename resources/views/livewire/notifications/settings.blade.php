@@ -11,11 +11,15 @@
 
     <x-ui.card class="settings-preference-card" icon="bi-phone-vibrate">
         <x-slot:header><h2 class="md-title-medium mb-0">Este dispositivo</h2></x-slot:header>
-        <div class="settings-device" x-data="ltPushToggle(@js($vapidKey))">
+        <div class="settings-device" x-data="ltPushToggle(@js($vapidKey))" @android-push-state.window="if (android) state = $event.detail.state">
             <p class="settings-form-intro">Tu guardián te escribe si hay algo pendiente. Máximo {{ config('game.nudges.daily_cap') }} avisos al día.</p>
-            <p x-show="state === 'unsupported'" x-cloak role="status">Este navegador no recibe avisos. En iPhone, instala MiSo en tu pantalla de inicio y ábrela desde ahí.</p>
-            <p x-show="state === 'denied'" x-cloak role="status">Bloqueaste los avisos para MiSo. Actívalos en los permisos del navegador y vuelve aquí.</p>
-            <p x-show="state === 'unconfigured'" x-cloak role="status">Los avisos aún no están configurados en el servidor.</p>
+            <p x-show="state === 'unsupported'" x-cloak role="status" x-text="android ? 'El servicio de avisos Android no está disponible. Revisa Google Play Services e inténtalo de nuevo.' : 'Este navegador no recibe avisos. En iPhone, instala MiSo en tu pantalla de inicio y ábrela desde ahí.'"></p>
+            <p x-show="state === 'denied'" x-cloak role="status" x-text="android ? 'Los avisos no tienen permiso. Puedes activarlos en los ajustes de Android.' : 'Bloqueaste los avisos para MiSo. Actívalos en los permisos del navegador y vuelve aquí.'"></p>
+            <p x-show="state === 'blocked'" x-cloak role="status">El canal de avisos está bloqueado en los ajustes de Android.</p>
+            <p x-show="state === 'error'" x-cloak role="status">No pudimos conectar los avisos con tu cuenta. Vuelve a intentarlo.</p>
+            <x-ui.action type="button" variant="text" x-show="android && (state === 'denied' || state === 'blocked')" x-cloak x-on:click="openSettings()">Abrir ajustes de Android</x-ui.action>
+            <x-ui.action type="button" variant="text" x-show="state === 'error'" x-cloak x-on:click="init()">Reintentar</x-ui.action>
+            <p x-show="state === 'unconfigured'" x-cloak role="status" x-text="android ? 'Los avisos Android aún no están configurados.' : 'Los avisos aún no están configurados en el servidor.'"></p>
             <p x-show="state === 'off'" x-cloak role="status">Los avisos están desactivados en este dispositivo.</p>
             <p x-show="state === 'on'" x-cloak role="status">Los avisos están activados en este dispositivo.</p>
             <div x-show="state === 'off' || state === 'on'" x-cloak>

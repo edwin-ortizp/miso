@@ -37,6 +37,29 @@ export function fillTemplate(template, values = {}) {
     return String(template ?? '').replace(/\{(\w+)\}/g, (match, key) => (key in values && values[key] !== undefined ? String(values[key]) : match));
 }
 
+/** Dynamic arguments keep their original type; unresolved identities never reach Livewire. */
+export function resolveArguments(value, result = {}) {
+    if (Array.isArray(value)) return value.map((item) => resolveArguments(item, result));
+    if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, resolveArguments(item, result)]));
+    if (typeof value !== 'string') return value;
+    const match = value.match(/^\{(\w+)\}$/);
+    if (!match) return value;
+    if (!Object.hasOwn(result ?? {}, match[1]) || result[match[1]] === null || result[match[1]] === '') throw new Error('Missing action result');
+    return result[match[1]];
+}
+
+export function actionSuggestions(text, actions, group = 'start') {
+    const normalize = (value) => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+    const query = normalize(text);
+    if (query.length < 3) return [];
+    return actions.map((item, index) => ({ ...item, index }))
+        .filter((item) => (item.group ?? 'start') === group && (item.keywords ?? []).some((word) => {
+            const keyword = normalize(word);
+            return keyword && (keyword.startsWith(query) || (' ' + query + ' ').includes(' ' + keyword + ' '));
+        }))
+        .slice(0, 3).map(({ index, label }) => ({ index, label }));
+}
+
 /** Texto final del modo sencillo: una sola línea. */
 export function singleLine(text) {
     return splitLines(text).join(' ');
@@ -86,11 +109,13 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
         hint: false,
         lastSavedAt: 0,
         wire: null,
+        lastResult: null,
+        suggestionIndex: -1,
 
         init() {
             this.wire = this.$wire;
             this.adoptHost();
-            this.$watch?.('draft', (value) => this.persistDraft(value));
+            this.$watch?.('draft', (value) => { this.persistDraft(value); this.suggestionIndex = -1; });
             if (typeof window === 'undefined') return;
             if (window.visualViewport) {
                 const sync = () => {
@@ -225,6 +250,10 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
         },
 
         startCompose(index, { announce = true } = {}) {
+            if (this.busy) return;
+            this.persistDraft(this.draft);
+            this.lastResult = null;
+            this.suggestionIndex = -1;
             const item = quick[index];
             if (!item) return;
             this.composer = index;
@@ -236,11 +265,20 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
 
         /** Cambia de paso de la conversación (chips del grupo `then`). */
         async goTo(index) {
+            if (this.busy) return;
+            this.persistDraft(this.draft);
+            this.lastResult = null;
+            this.suggestionIndex = -1;
             const item = quick[index];
             if (!item) return;
             this.composer = null;
             this.step = item.then ?? 'start';
+            if (this.step === 'start') {
+                const auto = quick.findIndex((action) => action.type === 'compose' && (action.group ?? 'start') === 'start');
+                if (auto >= 0) this.startCompose(auto, { announce: false });
+            }
             if (item.say) await this.say(item.say);
+            this.$nextTick?.(() => this.focusEntry());
         },
 
         persistDraft(value) {
@@ -264,7 +302,32 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
             return item.mode === 'bulk' && this.draftCount > 1 ? fillTemplate(item.submitMany ?? 'Crear {n}', { n: this.draftCount }) : (item.submit ?? 'Crear');
         },
 
+        get suggestions() {
+            return this.activeComposer && !this.busy ? actionSuggestions(this.draft, quick, this.step) : [];
+        },
+
+        async chooseSuggestion(index) {
+            const item = quick[index];
+            if (!item || this.busy) return;
+            this.suggestionIndex = -1;
+            if (item.type === 'step') await this.goTo(index);
+            else if (item.type === 'tap') await this.tap(index);
+            else this.startCompose(index);
+        },
+
         onKeydown(event) {
+            const suggestions = this.suggestions;
+            if ((event.key === 'ArrowDown' || event.key === 'ArrowUp') && suggestions.length) {
+                event.preventDefault();
+                this.suggestionIndex = (this.suggestionIndex + (event.key === 'ArrowDown' ? 1 : -1) + suggestions.length) % suggestions.length;
+                return;
+            }
+            if (event.key === 'Escape' && this.suggestionIndex >= 0) {
+                event.preventDefault(); event.stopPropagation(); this.suggestionIndex = -1; return;
+            }
+            if (event.key === 'Enter' && this.suggestionIndex >= 0 && suggestions[this.suggestionIndex]) {
+                event.preventDefault(); this.chooseSuggestion(suggestions[this.suggestionIndex].index); return;
+            }
             const item = this.activeComposer;
             if (event.key === 'Enter' && (item?.mode !== 'bulk' || event.ctrlKey || event.metaKey) && !event.shiftKey) {
                 event.preventDefault();
@@ -281,6 +344,7 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
                 this.$refs?.entry?.focus();
                 return;
             }
+            this.lastResult = null;
             const lines = splitLines(this.draft);
             const text = item.mode === 'single' ? singleLine(this.draft) : lines.join('\n');
             this.busy = true;
@@ -314,25 +378,50 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
         async tap(index) {
             const item = quick[index];
             if (!item || this.busy) return;
+            let args;
+            try { args = resolveArguments(item.args ?? [], this.lastResult); }
+            catch {
+                this.lastResult = null;
+                await this.say(config.missingResult ?? 'Primero elige una tarea.', { tone: 'error' });
+                return;
+            }
+            this.persistDraft(this.draft);
             this.busy = true;
             this.echo(item.echo ?? item.label);
             try {
                 const [result] = await Promise.all([
-                    this.wire.call(item.call, ...(item.args ?? [])),
+                    this.wire.call(item.call, ...args),
                     reducedMotion() ? null : wait(REPLY_TYPING_MS),
                 ]);
-                if (result && result.ok === false) {
+                this.lastResult = result?.ok !== false && !result?.pending && result?.id ? result : null;
+                if (result?.ok === false) {
+                    if ((item.args ?? []).some((arg) => typeof arg === 'string' && arg.startsWith('{'))) {
+                        this.step = 'start'; this.composer = null;
+                    }
                     await this.say(result.message ?? config.error, { tone: 'error' });
                     return;
                 }
-                await this.say(fillTemplate(item.reply ?? '¡Listo!', result ?? {}), { tone: 'success' });
+                if (result?.pending) {
+                    await this.say(result.message, { typing: 0 });
+                    this.step = 'start'; this.composer = null;
+                    this.close({ restoreFocus: false });
+                    return;
+                }
+                const reply = result?.message ?? (result?.total === 0 && item.emptyReply ? item.emptyReply : fillTemplate(item.reply ?? '¡Listo!', result ?? {}));
+                await this.say(reply, { tone: result?.empty ? '' : 'success' });
                 if (item.then) {
-                    this.step = item.then;
+                    this.step = result?.empty ? (item.emptyThen ?? 'start') : item.then;
                     this.composer = null;
+                }
+                if (item.event) {
+                    const detail = resolveArguments(item.detail ?? {}, result);
+                    this.close({ restoreFocus: false });
+                    window.dispatchEvent(new CustomEvent(item.event, { detail }));
                 }
                 await this.say(item.thenSay ?? '');
             } catch {
-                await this.say('Algo falló al registrar. Inténtalo de nuevo.', { tone: 'error' });
+                this.lastResult = null;
+                await this.say(config.actionError ?? 'Algo falló al realizar la acción. Inténtalo de nuevo.', { tone: 'error' });
             } finally {
                 this.busy = false;
             }

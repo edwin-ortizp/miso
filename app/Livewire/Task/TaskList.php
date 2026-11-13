@@ -37,6 +37,7 @@ class TaskList extends Component
     }
 
     use \App\Livewire\Task\Concerns\HandlesTaskRowActions;
+    use \App\Livewire\Task\Concerns\InteractsWithTaskChat;
 
     public const SORTS = [
         'updated' => 'Última actualización',
@@ -480,6 +481,7 @@ class TaskList extends Component
         return view('livewire.task.task-list', [
             'tasks' => $tasks,
             'sorts' => self::SORTS,
+            'chatActions' => $this->taskChatActions(),
             'statusOptions' => $statusOptions,
             // La columna existe desde 2026_11_04_000001: no se consulta el esquema en cada render.
             'focusAvailable' => true,
