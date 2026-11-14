@@ -1,4 +1,4 @@
-import { allowLeave } from './navigation-guard';
+import { allowLeave } from './navigation-guard.js';
 
 // Draft visibility is client state. Only loading an existing record and saving
 // use Livewire; their requests belong to the editor, never the surrounding list.
@@ -9,6 +9,10 @@ export function registerFormEditor(Alpine) {
         submitted: false,
         editingContent: true,
         generation: 0,
+        beginContentEdit() {
+            this.editingContent = true;
+            if (Object.hasOwn(defaults, 'descriptionMode')) wire.$set('descriptionMode', 'write', false);
+        },
         get showDialog() { return wire.showForm; },
         set showDialog(value) { wire.$set('showForm', value, false); },
         focusDuration() {
@@ -37,8 +41,9 @@ export function registerFormEditor(Alpine) {
                 this.loading = true;
                 try {
                     await wire.$call(detail.action, detail.id);
-                    if (generation === this.generation && detail.section) {
-                        window.dispatchEvent(new CustomEvent('task-editor-section', { detail: { section: detail.section } }));
+                    if (generation === this.generation) {
+                        if (this.editingContent) this.beginContentEdit();
+                        if (detail.section) window.dispatchEvent(new CustomEvent('task-editor-section', { detail: { section: detail.section } }));
                     }
                 } catch {
                     this.loadError = 'No se pudo cargar el registro. Cierra el formulario e inténtalo de nuevo.';

@@ -2,13 +2,11 @@
 
 namespace App\Support\Game;
 
-use App\Models\Game\GameCompanion;
-use App\Models\Game\GameDiscovery;
 use App\Models\Game\GameEncounter;
 use App\Models\Game\GameMission;
-use App\Models\Game\GameSpecies;
 use App\Models\Game\GameWeek;
 use App\Services\Game\GameRules;
+use App\Services\Game\SpeciesCatalog;
 use App\Services\Game\WeekPlanner;
 
 /**
@@ -33,12 +31,12 @@ class TabCounters
     public function collection(): ?array
     {
         return $this->remember('collection', function () {
-            $total = GameSpecies::query()->where('active', true)->count();
+            $catalog = app(SpeciesCatalog::class);
+            $total = $catalog->available((int) auth()->id())->count();
             if ($total === 0) {
                 return null;
             }
-            $found = GameDiscovery::query()->pluck('species_id')
-                ->merge(GameCompanion::query()->pluck('species_id'))->unique()->count();
+            $found = $catalog->available((int) auth()->id())->whereIn('id', $catalog->discoveredIds((int) auth()->id()))->count();
 
             return ['text' => "{$found}/{$total}", 'label' => "{$found} de {$total} descubiertas"];
         });

@@ -1,9 +1,9 @@
 # CHG-097 · Compañero favorito persistente en el prototipo de Aprendizaje
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-12 · **Aprobado:** 2026-11-12 · **Cerrado:** —
+**Creado:** 2026-11-12 · **Aprobado:** 2026-11-12 · **Cerrado:** 2026-11-14
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -69,3 +69,4 @@ Foco:              [temporizador + favorito] (sin franja duplicada)
 - Revisión flotante implementada: se retiraron la franja y el rótulo permanente; icono opuesto al FAB, burbuja contextual con onomatopeya al tocar, cierre por Escape/botón/fuera y acceso a compañero/ocultación. Una sola presencia también en foco; se esconde con modales o menú FAB abierto.
 - Validación de la revisión: build normal aprobado (4 comprobaciones, HTML 4.38 MB); favorite.mjs aprobado en escritorio 1440, tablet 834 y móvil 390, incluyendo límites de burbuja, separación del FAB/navegación, teclado, axe, selección/perfil y funcionamiento offline. acceptance.mjs aprobado (14 vistas responsive y 5 checks Axe). Capturas de burbuja en los tres tamaños inspeccionadas; git diff --check aprobado.
 - 2026-11-12 — Implementación terminada → En verificación
+- 2026-11-14 — Cerrado por el usuario (Compuerta 3) → done/ (desde el panel)

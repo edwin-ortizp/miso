@@ -52,6 +52,6 @@
 
     <x-ui.dialog standard state="streakHelp" title="Cómo funciona la racha" icon="bi-fire">
         <p class="mb-1 mt-2">Cada día necesitas {{ $streak['goal'] }} acciones en al menos {{ $streak['min_areas'] }} áreas distintas. Si un día no llegas, se usa una gracia ({{ $streak['grace_total'] }} por mes).</p>
-        <a href="{{ route('game.settings') }}#racha" wire:navigate>Cambiar el número de acciones</a>
+        <a href="{{ route('game.settings.rewards') }}#racha" wire:navigate>Cambiar el número de acciones</a>
     </x-ui.dialog>
 </section>

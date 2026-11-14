@@ -12,7 +12,6 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-
 /** CHG-077 · T3: el reto en el hero del Inicio, en Balls y su interruptor. */
 class DailyChallengeViewTest extends TestCase
 {
@@ -67,7 +66,7 @@ class DailyChallengeViewTest extends TestCase
 
     public function test_switch_hides_it(): void
     {
-        Livewire::test(GameSettingsPage::class)->set('dailyChallenge', false)->call('save');
+        Livewire::test(GameSettingsPage::class, ['section' => 'rewards'])->set('dailyChallenge', false)->call('save');
 
         $this->assertFalse(app(GameSettings::class)->for(auth()->id())['daily_challenge']);
         Livewire::test(Dashboard::class)->assertDontSee('Reto de hoy');

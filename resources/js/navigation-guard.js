@@ -26,6 +26,15 @@ export async function allowLeave(root = document) {
     const dirty = [...forms].filter(([el,f]) => (root === document || root.contains(el)) && visible(el) && f.dirty());
     if (!dirty.length) return true;
     if (!await confirmDiscard()) return false;
+    return restoreDiscardedForms(dirty);
+}
+// Forms can restore saved server state before Livewire captures its history cache.
+export async function restoreDiscardedForms(dirty) {
+    const pending = [];
+    dirty.forEach(([el]) => el.dispatchEvent(new CustomEvent('miso-form-discard', {
+        detail: { waitUntil: promise => pending.push(promise) },
+    })));
+    try { await Promise.all(pending); } catch { return false; }
     dirty.forEach(([,f]) => f.reset());
     return true;
 }
@@ -41,11 +50,11 @@ export function registerNavigationGuard(Alpine) {
         finish(discard) { this.open = false; const done = this.resolve; this.resolve = null; done?.(discard); },
         destroy() { this.finish(false); }
     }));
-    Alpine.directive('dirty-guard', (el, {expression, modifiers}, {evaluateLater, cleanup, effect}) => {
+    Alpine.directive('dirty-guard', Alpine.skipDuringClone((el, {expression, modifiers}, {evaluateLater, cleanup, effect}) => {
         let baseline = null;
         let loading = false;
         const snapshot = () => formSnapshot(el.querySelectorAll('input,select,textarea'));
-        const state = {owner: null, submitting:false, dirty:() => baseline !== null && !loading && snapshot() !== baseline, reset:() => {baseline = snapshot(); publishNavigation();}};
+        const state = {owner: null, submitting:false, dirty:() => baseline !== null && !loading && snapshot() !== baseline, reset:() => {baseline = snapshot(); el.dispatchEvent(new CustomEvent('miso-form-state', {detail:{dirty:false}})); publishNavigation();}};
         let node = el;
         while (node) {
             if (node.hasAttribute?.('wire:id')) { state.owner = node.getAttribute('wire:id'); break; }
@@ -58,7 +67,7 @@ export function registerNavigationGuard(Alpine) {
         }
         const observer = new MutationObserver(() => { setup(); if (!visible(el)) baseline = null; });
         observer.observe(el.closest('.md-form-dialog-layer') ?? el, {attributes:true, childList:true, subtree:true});
-        const changed = () => { setup(); publishNavigation(); };
+        const changed = () => { setup(); el.dispatchEvent(new CustomEvent('miso-form-state', {detail:{dirty:state.dirty()}})); publishNavigation(); };
         const submitted = () => { state.submitting = true; };
         const closing = async event => {
             event.stopImmediatePropagation();
@@ -75,7 +84,7 @@ export function registerNavigationGuard(Alpine) {
         el.addEventListener('miso-form-saved', state.reset);
         forms.set(el,state); setTimeout(setup,0);
         cleanup(() => { observer.disconnect(); forms.delete(el); surface?.removeEventListener('md-surface-close',intercept,true); el.removeEventListener('input',changed); el.removeEventListener('change',changed); el.removeEventListener('submit',submitted); el.removeEventListener('miso-form-saved',state.reset); publishNavigation(); });
-    });
+    }));
     document.addEventListener('livewire:init', () => {
         window.Livewire.hook('commit', ({component, succeed, fail}) => {
             const related = [...forms.values()].filter(f => f.submitting && f.owner === component.id);

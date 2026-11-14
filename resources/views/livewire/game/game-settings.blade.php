@@ -1,114 +1,27 @@
 <x-module-shell module="game" archetype="settings">
     @if ($message)
-        <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message }}</div>
+        <x-ui.snackbar>{{ $message }}</x-ui.snackbar>
     @endif
-
-    <form wire:submit="save" class="d-grid gap-3">
-        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-play">
-            <h2 class="md-title-medium mb-0" id="game-settings-play">Juego</h2>
-            <x-ui.switch name="game-enabled" label="Juego activo" wire:model="enabled" :checked="$enabled"
-                         help="Si lo apagas, conservas tus balls, tu colección y tu experiencia." />
-            <x-ui.switch name="game-tasks" label="Dar balls por tareas completadas" wire:model="tasks" :checked="$tasks" />
-            <x-ui.switch name="game-habits" label="Dar balls por hábitos" wire:model="habits" :checked="$habits" />
-            <x-ui.switch name="game-focus" label="Dar balls por foco" wire:model="focus" :checked="$focus"
-                         help="Una ball al cumplir tu meta diaria de minutos, no por cada pomodoro." />
-            <x-ui.switch name="game-goals" label="Dar balls por metas" wire:model="goals" :checked="$goals" />
-            <x-ui.switch name="game-health" label="Dar balls por salud" wire:model="health" :checked="$health"
-                         help="Al cumplir tu meta diaria de agua o de ejercicio." />
-            <div>
-                <div class="md-text-field">
-                    <input type="number" wire:model="dailyLimit" id="game-daily-limit" placeholder=" "
-                           min="{{ config('game.limits.daily_limit')[0] }}" max="{{ config('game.limits.daily_limit')[1] }}">
-                    <label for="game-daily-limit">Máximo de balls por día</label>
-                </div>
-                @error('dailyLimit') <small class="game-error">{{ $message }}</small> @enderror
+    <div class="settings-layout">
+        <form wire:submit="save" x-dirty-guard x-data="{ changed: false }" @miso-form-state="changed = $event.detail.dirty"
+              @miso-form-discard="$event.detail.waitUntil($wire.restoreSavedSettings().then(() => $nextTick()))" class="settings-content" wire:key="game-settings-{{ $section }}">
+            @include('livewire.game.partials.settings.'.$section)
+            <div class="game-settings-save">
+                <x-ui.action type="submit" variant="filled" icon="bi-check-lg" wire:loading.attr="disabled" wire:target="save">Guardar cambios</x-ui.action>
+                <span x-show="changed" x-cloak class="md-body-small" role="status">Cambios pendientes</span>
+                <span wire:loading wire:target="save" role="status">Guardando…</span>
             </div>
-        </section>
-
-        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-consistency">
-            <h2 class="md-title-medium mb-0" id="game-settings-consistency">Constancia</h2>
-            <p class="md-body-small game-muted mb-0">Tu equipo gana +1 xp la primera vez que registras algo de cada tipo en el día.</p>
-            @php($consistencyLabels = ['vehicle' => 'Vehículo (gasolina, gastos, mantenimiento)', 'wellbeing' => 'Bienestar (diario, ánimo, energía)', 'people' => 'Personas (relaciones, visitas a planes)', 'home' => 'Hogar (comidas y compras)', 'personal_tasks' => 'Tareas personales (categoría Personal)'])
-            @foreach ($consistencyLabels as $key => $label)
-                <x-ui.switch name="game-consistency-{{ $key }}" :label="$label" wire:model="consistency.{{ $key }}" :checked="$consistency[$key] ?? true" />
-            @endforeach
-        </section>
-
-        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-streak" id="racha">
-            <h2 class="md-title-medium mb-0" id="game-settings-streak">Racha</h2>
-            <x-ui.switch name="game-streak-visible" label="Mostrar mi racha" wire:model="streakVisible" :checked="$streakVisible"
-                         help="Si la ocultas, tus días siguen guardándose y puedes volver a verla cuando quieras." />
-            <div>
-                <div class="md-text-field">
-                    <input type="number" wire:model="streakThreshold" id="game-streak-threshold" placeholder=" "
-                           min="{{ config('game.limits.streak_threshold')[0] }}" max="{{ config('game.limits.streak_threshold')[1] }}"
-                           aria-describedby="game-streak-threshold-help">
-                    <label for="game-streak-threshold">Acciones para cumplir el día</label>
-                </div>
-                <small id="game-streak-threshold-help" class="md-body-small game-muted">Entre 1 y 10, en al menos dos áreas distintas (tareas, hábitos, salud…).</small>
-                @error('streakThreshold') <small class="game-error d-block">{{ $message }}</small> @enderror
-            </div>
-        </section>
-
-        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-companion-chat" id="companero">
-            <h2 class="md-title-medium mb-0" id="game-settings-companion-chat">Tu compañero al crear</h2>
-            <fieldset class="d-grid gap-2">
-                <legend class="md-label-large">Presentación de creación</legend>
-                <label class="d-flex align-items-center gap-2"><input type="radio" name="creation-style" value="pokemon" wire:model.live="creationStyle"> Con mi Pokémon</label>
-                <label class="d-flex align-items-center gap-2"><input type="radio" name="creation-style" value="traditional" wire:model.live="creationStyle"> Tradicional</label>
-            </fieldset>
-            @if ($companions->isEmpty())
-                <p class="md-body-medium text-muted mb-0">Aún no tienes compañeros: verás el botón tradicional hasta que conozcas al primero.</p>
-            @else
-                <div class="d-grid gap-1">
-                    <label class="md-label-large" for="game-favorite-companion">Pokémon favorito</label>
-                    <select id="game-favorite-companion" class="form-select" wire:model="favoriteCompanionId">
-                        <option value="">El compañero del día</option>
-                        @foreach ($companions as $companion)
-                            <option value="{{ $companion->id }}">{{ $companion->species->name }} · Nv. {{ $companion->level }}</option>
-                        @endforeach
-                    </select>
-                    <p class="md-body-small text-muted mb-0">Aparece en lugar del botón de crear y te ayuda a registrar rápido.</p>
-                </div>
-            @endif
-        </section>
-
-        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-challenge" id="reto">
-            <h2 class="md-title-medium mb-0" id="game-settings-challenge">Reto del día</h2>
-            <x-ui.switch name="game-daily-challenge" label="Reto del día" wire:model="dailyChallenge" :checked="$dailyChallenge"
-                         help="Un reto pequeño cada día, con una ball al cumplirlo." />
-        </section>
-
-        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-director">
-            <h2 class="md-title-medium mb-0" id="game-settings-director">Director</h2>
-            <x-ui.switch name="game-director" label="Director activo" wire:model="directorEnabled" :checked="$directorEnabled"
-                         help="Propone temporadas desde tu schedule de Paseo." />
-        </section>
-
-        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-seasons">
-            <h2 class="md-title-medium mb-0" id="game-settings-seasons">Temporadas</h2>
-            <x-ui.switch name="game-seasons" label="Juego de temporadas" wire:model="seasonsEnabled" :checked="$seasonsEnabled"
-                         help="Si lo apagas, el juego usa sus reglas base. No pierdes nada." />
-        </section>
-
-        <section class="md-card-elevated d-grid gap-3" aria-labelledby="game-settings-celebrations">
-            <h2 class="md-title-medium mb-0" id="game-settings-celebrations">Celebraciones</h2>
-            <x-ui.switch name="game-celebrations" label="Mostrar celebraciones" wire:model="celebrations" :checked="$celebrations"
-                         help="Una animación al azar cuando ganas una ball, subes de nivel, evolucionas o cumples una misión o meta." />
-            <div class="game-sound-setting">
-                <x-ui.switch name="game-sounds" label="Sonidos" wire:model="sounds" :checked="$sounds"
-                             help="Suaves y cortos, al ganar o abrir balls." />
-                <x-ui.action variant="text" icon="bi-volume-up" @click="window.playGameSound?.('ball', { force: true })">Probar sonido</x-ui.action>
-            </div>
-            <fieldset class="game-celebration-options">
-                <legend class="md-label-large">Cuáles pueden salir</legend>
-                @foreach (config('game.celebration_catalog') as $key => $label)
-                    <x-ui.switch name="game-celebration-{{ $key }}" :label="$label" wire:model="celebrationSet" value="{{ $key }}"
-                                 :checked="in_array($key, $celebrationSet, true)" />
+        </form>
+        <aside class="settings-aside">
+            <nav class="settings-nav" aria-label="Secciones de ajustes de Colección">
+                @foreach ($sections as $key => [$label, $icon])
+                    <a href="{{ route($key === 'general' ? 'game.settings' : 'game.settings.'.$key) }}" wire:navigate
+                       @class(['settings-nav__link', 'is-active' => $section === $key])
+                       @if ($section === $key) aria-current="page" @endif>
+                        <i class="bi {{ $icon }}" aria-hidden="true"></i><span>{{ $label }}</span>
+                    </a>
                 @endforeach
-            </fieldset>
-        </section>
-
-        <div><button type="submit" class="md-btn-filled"><i class="bi bi-save"></i> Guardar ajustes</button></div>
-    </form>
+            </nav>
+        </aside>
+    </div>
 </x-module-shell>

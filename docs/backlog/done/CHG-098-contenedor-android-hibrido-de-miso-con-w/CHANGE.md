@@ -1,8 +1,8 @@
 # CHG-098 · Contenedor Android híbrido de MiSo con WebView
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
-**Creado:** 2026-11-12 · **Aprobado:** 2026-11-12 · **Cerrado:** —
+**Creado:** 2026-11-12 · **Aprobado:** 2026-11-12 · **Cerrado:** 2026-11-14
 
 ## 0. En palabras simples
 MiSo se instala como APK y abre la aplicación existente sin barra del navegador. Comprobar abriendo el APK, entrando a la cuenta y navegando.
@@ -65,3 +65,4 @@ Actualizar Android/README.md con compilación, instalación, límites y matriz d
 - 2026-11-12 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-12 — Movido a in-progress/ (En desarrollo)
 - 2026-11-12 — Implementación terminada → En verificación
+- 2026-11-14 — Cerrado por el usuario (Compuerta 3) → done/ (desde el panel)

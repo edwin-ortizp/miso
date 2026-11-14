@@ -4,7 +4,10 @@ namespace App\Livewire\Game;
 
 use App\Models\Game\GameCompanion;
 use App\Services\Game\GameSettings;
+use App\Services\Game\SpeciesCatalog;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -13,6 +16,14 @@ use Livewire\Component;
 #[Title('Ajustes de la colección')]
 class GameSettingsPage extends Component
 {
+    public const SECTIONS = ['general' => ['General', 'bi-sliders'], 'generations' => ['Generaciones', 'bi-grid-3x3-gap'],
+        'rewards' => ['Recompensas', 'bi-gift'], 'companion' => ['Compañero', 'bi-heart'], 'celebrations' => ['Celebraciones', 'bi-stars']];
+
+    #[Locked]
+    public string $section = 'general';
+
+    public array $enabledGenerations = [1];
+
     public bool $enabled = true;
 
     public bool $tasks = true;
@@ -56,9 +67,12 @@ class GameSettingsPage extends Component
 
     public ?int $favoriteCompanionId = null;
 
-    public function mount(GameSettings $settings): void
+    public function mount(GameSettings $settings, string $section = 'general'): void
     {
+        abort_unless(array_key_exists($section, self::SECTIONS), 404);
+        $this->section = $section;
         $current = $settings->for((int) auth()->id());
+        $this->enabledGenerations = $current['enabled_generations'];
         $this->enabled = $current['enabled'];
         $this->tasks = (bool) $current['sources']['tasks'];
         $this->habits = (bool) $current['sources']['habits'];
@@ -81,35 +95,45 @@ class GameSettingsPage extends Component
         $this->favoriteCompanionId = $current['favorite_companion_id'];
     }
 
+    public function restoreSavedSettings(GameSettings $settings): void
+    {
+        $this->mount($settings, $this->section);
+        $this->resetValidation();
+        $this->message = '';
+        $this->dispatch('game-settings-restored');
+    }
+
     public function save(GameSettings $settings): void
     {
-        [$min, $max] = config('game.limits.daily_limit');
-        [$streakMin, $streakMax] = config('game.limits.streak_threshold');
-        $this->validate([
-            'dailyLimit' => ['required', 'integer', "between:{$min},{$max}"],
-            'streakThreshold' => ['required', 'integer', "between:{$streakMin},{$streakMax}"],
-            'creationStyle' => ['required', 'in:pokemon,traditional'],
-            'favoriteCompanionId' => ['nullable', 'integer'],
-        ], [], ['streakThreshold' => 'acciones para cumplir el día']);
-        $favoriteId = $this->favoriteCompanionId && GameCompanion::query()->whereKey($this->favoriteCompanionId)->exists()
-            ? $this->favoriteCompanionId : null;
-
-        $settings->save((int) auth()->id(), [
-            'enabled' => $this->enabled,
-            'sources' => ['tasks' => $this->tasks, 'habits' => $this->habits, 'focus' => $this->focus, 'goals' => $this->goals, 'health' => $this->health]
-                + array_map('boolval', array_intersect_key($this->consistency, config('game.consistency_sources'))),
-            'daily_limit' => $this->dailyLimit,
-            'director_enabled' => $this->directorEnabled,
-            'seasons_enabled' => $this->seasonsEnabled,
-            'celebrations' => $this->celebrations,
-            'sounds' => $this->sounds,
-            'streak_visible' => $this->streakVisible,
-            'streak_threshold' => $this->streakThreshold,
-            'daily_challenge' => $this->dailyChallenge,
-            'creation_style' => $this->creationStyle,
-            'favorite_companion_id' => $favoriteId,
-            'celebration_set' => array_values(array_intersect(array_keys(config('game.celebration_catalog')), $this->celebrationSet)),
-        ]);
+        $current = $settings->for((int) auth()->id());
+        $changes = [];
+        if ($this->section === 'general') {
+            $changes = ['enabled' => $this->enabled, 'director_enabled' => $this->directorEnabled, 'seasons_enabled' => $this->seasonsEnabled];
+        } elseif ($this->section === 'generations') {
+            $this->validate([
+                'enabledGenerations' => ['required', 'array', 'min:1'],
+                'enabledGenerations.*' => ['required', 'integer', 'distinct', Rule::in(array_keys(SpeciesCatalog::NAMES))],
+            ], ['enabledGenerations.required' => 'Mantén al menos una generación activa.', 'enabledGenerations.min' => 'Mantén al menos una generación activa.']);
+            $changes = ['enabled_generations' => array_values(array_map('intval', $this->enabledGenerations))];
+        } elseif ($this->section === 'rewards') {
+            [$min, $max] = config('game.limits.daily_limit');
+            [$streakMin, $streakMax] = config('game.limits.streak_threshold');
+            $this->validate(['dailyLimit' => ['required', 'integer', "between:{$min},{$max}"],
+                'streakThreshold' => ['required', 'integer', "between:{$streakMin},{$streakMax}"]]);
+            $changes = ['sources' => array_replace($current['sources'],
+                ['tasks' => $this->tasks, 'habits' => $this->habits, 'focus' => $this->focus, 'goals' => $this->goals, 'health' => $this->health],
+                array_map('boolval', array_intersect_key($this->consistency, config('game.consistency_sources')))),
+                'daily_limit' => $this->dailyLimit, 'streak_visible' => $this->streakVisible,
+                'streak_threshold' => $this->streakThreshold, 'daily_challenge' => $this->dailyChallenge];
+        } elseif ($this->section === 'companion') {
+            $this->validate(['creationStyle' => ['required', 'in:pokemon,traditional'],
+                'favoriteCompanionId' => ['nullable', 'integer', Rule::exists('game_companions', 'id')->where('user_id', auth()->id())]]);
+            $changes = ['creation_style' => $this->creationStyle, 'favorite_companion_id' => $this->favoriteCompanionId];
+        } elseif ($this->section === 'celebrations') {
+            $changes = ['celebrations' => $this->celebrations, 'sounds' => $this->sounds,
+                'celebration_set' => array_values(array_intersect(array_keys(config('game.celebration_catalog')), $this->celebrationSet))];
+        }
+        $settings->save((int) auth()->id(), $changes);
 
         $this->dispatch('game-settings-saved');
         $this->message = 'Ajustes guardados.';
@@ -118,6 +142,8 @@ class GameSettingsPage extends Component
     public function render()
     {
         return view('livewire.game.game-settings', [
+            'sections' => self::SECTIONS,
+            'generations' => $this->section === 'generations' ? app(SpeciesCatalog::class)->generations((int) auth()->id()) : [],
             'companions' => GameCompanion::query()->with('species')->orderByDesc('level')->get()
                 ->filter(fn (GameCompanion $companion) => $companion->species)->values(),
         ]);

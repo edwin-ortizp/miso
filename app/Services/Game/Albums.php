@@ -40,7 +40,7 @@ class Albums
         $found = array_flip($this->discoveredIds($userId));
         $totals = [];
         $hits = [];
-        foreach ($this->catalog() as $id => $types) {
+        foreach ($this->catalog($userId) as $id => $types) {
             foreach ($types as $type) {
                 $totals[$type] = ($totals[$type] ?? 0) + 1;
                 $hits[$type] = ($hits[$type] ?? 0) + (isset($found[$id]) ? 1 : 0);
@@ -99,9 +99,9 @@ class Albums
     }
 
     /** @return array<int, array<int, string>> species_id => tipos, del catálogo activo */
-    private function catalog(): array
+    private function catalog(int $userId): array
     {
-        return GameSpecies::query()->where('active', true)->whereNotNull('types')->get(['id', 'types'])
+        return app(SpeciesCatalog::class)->available($userId)->whereNotNull('types')->get(['id', 'types'])
             ->mapWithKeys(fn (GameSpecies $species) => [(int) $species->id => array_values(array_unique(array_filter((array) $species->types, 'is_string')))])
             ->all();
     }

@@ -5,6 +5,8 @@ return [
     // Valores por defecto; cada usuario los ajusta en Colección → Ajustes (ModuleSetting módulo "game").
     'defaults' => [
         'enabled' => true,
+        'enabled_generations' => [1],
+        'dismissed_generations' => [],
         'sources' => ['tasks' => true, 'habits' => true, 'focus' => true, 'goals' => true, 'health' => true, 'vehicle' => true, 'wellbeing' => true, 'people' => true, 'home' => true, 'personal_tasks' => true],
         'daily_limit' => 5,
         'pity_threshold' => 10,

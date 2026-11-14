@@ -12,4 +12,9 @@ if (! app()->environment('testing') || config('database.default') !== 'sqlite'
     throw new RuntimeException('Dedicated personal-experience testing database required.');
 }
 Artisan::call('migrate:fresh', ['--force' => true]);
+
+\App\Models\User::factory()->create([
+    'email' => 'focus-dashboard@example.test',
+    'password' => 'browser-test-password',
+]);
 echo json_encode(['ready' => true], JSON_THROW_ON_ERROR);

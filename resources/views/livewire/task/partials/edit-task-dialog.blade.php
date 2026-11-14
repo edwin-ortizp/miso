@@ -16,7 +16,7 @@
     ]">
     @if ($localEditor && ! $bulkEditor)
         <x-slot:headerActions>
-            <button type="button" class="md-btn-icon" x-show="$wire.editingId && !editingContent" @click="editingContent = true" aria-label="Editar contenido" title="Editar contenido"><i class="bi bi-pencil" aria-hidden="true"></i></button>
+            <button type="button" class="md-btn-text" x-show="$wire.editingId && !editingContent" @click="beginContentEdit()" aria-label="Editar" title="Editar"><i class="bi bi-pencil" aria-hidden="true"></i> Editar</button>
         </x-slot:headerActions>
     @endif
     @if ($localEditor && ! $bulkEditor)

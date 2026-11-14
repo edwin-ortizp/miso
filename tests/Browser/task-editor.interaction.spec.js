@@ -46,6 +46,55 @@ async function taskSection(dialog, name) {
     await nav.getByRole('button', { name: new RegExp('^' + name) }).click();
 }
 
+for (const width of [360, 390, 1440]) test(`Editar enables Markdown in one action ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const dialog = page.locator('#task-editor');
+    const source = dialog.locator('[data-markdown-source]');
+    await expect(source).toBeVisible(); // Creation starts in write mode.
+    await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    const open = () => page.getByRole('button', { name: 'Abrir tarea: Tarea de prueba de distribución' }).click();
+    await open();
+    await expect(source).toBeHidden();
+    const edit = dialog.locator('.md-form-dialog__head').getByRole('button', { name: 'Editar', exact: true });
+    await expect(edit).toContainText('Editar');
+    await page.screenshot({ path: `storage/framework/testing/playwright/task-consult-${width}.png` });
+    await edit.click();
+    await expect(source).toBeVisible();
+    const description = `Descripción íntegra 🌱 **Markdown** ${width}`;
+    await source.fill(description);
+    await dialog.locator('[data-markdown-mode="preview"]').click();
+    const editor = page.locator('[wire\\:name="task.task-editor"]');
+    await editor.evaluate(async el => { await el.__livewire.$wire.$refresh(); });
+    await expect(source).toBeHidden();
+    await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+    await expect(edit).toBeVisible();
+    await expect(source).toBeHidden();
+    await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    await open();
+    await expect(source).toBeHidden();
+    await edit.click();
+    await expect(source).toHaveValue(description);
+    await source.fill('Borrador que se descartará');
+    await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    const discard = page.getByRole('dialog', { name: 'Tienes cambios sin guardar', exact: true });
+    await expect(discard).toBeVisible();
+    await discard.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
+    await expect(dialog).toBeHidden();
+    await open();
+    await edit.click();
+    await expect(source).toHaveValue(description);
+    await page.screenshot({ path: `storage/framework/testing/playwright/task-edit-${width}.png` });
+    const id = await editor.evaluate(el => el.__livewire.$wire.editingId);
+    await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    await page.evaluate(id => window.dispatchEvent(new CustomEvent('task-editor', { detail: { action: 'openForm', id, mode: 'edit' } })), id);
+    await expect(source).toBeVisible();
+    await expect(source).toHaveValue(description);
+    // Leave the shared fixture unchanged for the existing formatting scenarios.
+    await source.fill('');
+    await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+    await expect(edit).toBeVisible();
+});
+
 test('las fechas y horas se escriben con teclado', async ({ page }) => {
     const dialog = page.locator('#task-editor');
     await dialog.getByRole('textbox', { name: 'Título', exact: true }).fill('Tarea por teclado');
@@ -69,7 +118,7 @@ for (const editing of [false, true]) test(`la barra Markdown aplica formato${edi
         await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
         await page.getByRole('button', { name: 'Abrir tarea: Tarea de prueba de distribución' }).click();
         await expect(dialog.getByRole('textbox', { name: 'Título', exact: true })).toHaveValue('Tarea de prueba de distribución');
-        await dialog.locator('[data-markdown-mode="edit"]').click();
+        await dialog.locator('.md-form-dialog__head').getByRole('button', { name: 'Editar', exact: true }).click();
     }
     const source = dialog.locator('[data-markdown-source]');
     await source.fill('hola');
@@ -108,6 +157,8 @@ test('la barra Markdown pasa a edición desde la vista previa', async ({ page })
     await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
     await page.getByRole('button', { name: 'Abrir tarea: Tarea de prueba de distribución' }).click();
     await expect(dialog.getByRole('textbox', { name: 'Título', exact: true })).toHaveValue('Tarea de prueba de distribución');
+    await dialog.locator('.md-form-dialog__head').getByRole('button', { name: 'Editar', exact: true }).click();
+    await dialog.locator('[data-markdown-mode="preview"]').click();
     const source = dialog.locator('[data-markdown-source]');
     await expect(source).toBeHidden();
     await dialog.locator('[data-markdown-snippet="bold"]').click();

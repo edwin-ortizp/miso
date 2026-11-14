@@ -1781,3 +1781,23 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
     .game-buddy-hero__zzz { animation: game-zzz 2.4s ease-in-out infinite; }
     @keyframes game-zzz { 0%, 100% { opacity: 0.55; transform: translateY(2px); } 50% { opacity: 1; transform: translateY(-3px); } }
 }
+
+/* Personal generation selection (CHG-104), using the shared settings navigation. */
+.game-settings-save { position:sticky; bottom:var(--md-sys-fab-offset-block); z-index:var(--md-sys-z-sticky); display:flex; align-items:center; flex-wrap:wrap; gap:12px; justify-self:start; padding:12px; border:1px solid var(--md-sys-color-outline-variant); border-radius:var(--md-sys-shape-corner-large); background:var(--md-sys-color-surface-container-lowest); box-shadow:var(--md-sys-elevation-level1); }
+.game-generations-summary { display:flex; gap:16px; align-items:flex-start; }
+.game-generations-summary > i { font-size:28px; color:var(--md-sys-color-primary); }
+.game-generation-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr)); gap:16px; }
+.game-generation { display:grid; gap:12px; transition:background-color .15s; }
+.game-generation.is-selected { border-color:var(--md-sys-color-primary); background:var(--md-sys-color-surface-container-low); }
+.game-generation__heading { display:flex; gap:8px; justify-content:space-between; align-items:flex-start; }
+.game-generation__art { display:flex; align-items:center; justify-content:center; gap:8px; min-height:80px; border-radius:var(--md-sys-shape-corner-medium); background:var(--md-sys-color-surface-container-low); }
+.game-generation__art img { object-fit:contain; max-width:28%; }
+.game-generation__progress { display:grid; gap:6px; }
+.game-generation-recommendation { display:flex; flex-wrap:wrap; gap:16px; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.game-generation-paused { display:block; margin-top:4px; text-align:center; }
+@media(max-width:767.98px) { .game-generation-grid { grid-template-columns:minmax(0,1fr); } }
+@media(prefers-reduced-motion:reduce) { .game-generation { transition:none; } }
+
+.game-settings-choice { display:flex; align-items:center; gap:12px; min-height:44px; padding:10px 12px; border:1px solid var(--md-sys-color-outline-variant); border-radius:var(--md-sys-shape-corner-medium); cursor:pointer; }
+.game-settings-choice:has(input:checked) { border-color:var(--md-sys-color-primary); background:var(--md-sys-color-surface-container-low); }
+.game-settings-choice input { accent-color:var(--md-sys-color-primary); }

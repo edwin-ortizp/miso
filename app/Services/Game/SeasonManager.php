@@ -6,9 +6,11 @@ use App\Models\Game\GameCompanion;
 use App\Models\Game\GameEncounter;
 use App\Models\Game\GameEvent;
 use App\Models\Game\GameMission;
+use App\Models\Game\GameQuote;
 use App\Models\Game\GameSeason;
-use App\Models\Game\GameSpecies;
 use App\Models\Game\GameWeek;
+use App\Models\HabitDefinition;
+use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\User;
 use Carbon\CarbonImmutable;
@@ -68,16 +70,17 @@ class SeasonManager
             'seasons_enabled' => $settings['seasons_enabled'],
             'proposal_due' => $this->isDue($userId, $now),
             // Integrante del día (CHG-043): ¿falta la propuesta de frases de esta semana?
-            'quotes_due' => ! \App\Models\Game\GameQuote::where('user_id', $userId)->whereDate('week_start', WeekPlanner::weekStart($now)->toDateString())->exists(),
+            'quotes_due' => ! GameQuote::where('user_id', $userId)->whereDate('week_start', WeekPlanner::weekStart($now)->toDateString())->exists(),
             'quotes_limits' => config('game.quotes'),
             'calendar_hints' => $this->calendarHints($userId, $now),
             'now' => $now->toIso8601String(),
             'categories' => TaskCategory::withoutGlobalScopes()->where('user_id', $userId)->pluck('name', 'key'),
             'pending_tasks_by_category' => app(MissionPendingTasks::class)->counts($userId),
             'collection' => [
-                'species_total' => GameSpecies::query()->where('active', true)->count(),
+                'enabled_generations' => $settings['enabled_generations'],
+                'species_total' => app(SpeciesCatalog::class)->available($userId)->count(),
                 'companions' => GameCompanion::withoutGlobalScopes()->where('user_id', $userId)->count(),
-                'lines_available' => GameSpecies::query()->where('active', true)->where('stage', 1)->count(),
+                'lines_available' => app(SpeciesCatalog::class)->encounters($userId)->pluck('line_key')->unique()->count(),
             ],
             'weeks' => $weeks,
             'active_season' => $active ? $this->summary($active) : null,
@@ -92,7 +95,7 @@ class SeasonManager
             // CHG-026 (aprobado por Alex): tareas abiertas no privadas, sin descripción, para misiones concretas.
             'open_tasks' => $this->openTasks($userId, $now),
             'scopes' => config('game.scopes'),
-            'habit_periods' => \App\Models\HabitDefinition::withoutGlobalScopes()->where('user_id', $userId)->get(['time_of_day'])
+            'habit_periods' => HabitDefinition::withoutGlobalScopes()->where('user_id', $userId)->get(['time_of_day'])
                 ->map(fn ($habit) => $habit->time_of_day ?: 'anytime')->unique()->values()->all(),
             'current_week' => $this->currentWeekSummary($userId, $now),
         ];
@@ -101,7 +104,7 @@ class SeasonManager
     /** @return array<int, array<string, mixed>> */
     private function openTasks(int $userId, CarbonImmutable $now): array
     {
-        return \App\Models\Task::withoutGlobalScopes()->where('user_id', $userId)
+        return Task::withoutGlobalScopes()->where('user_id', $userId)
             ->where('completed', false)->where('is_private', false)->where('is_recurrence_history', false)
             ->orderByRaw('CASE WHEN end_date IS NOT NULL AND end_date < ? THEN 0 ELSE 1 END', [$now])
             ->orderBy('created_at')
@@ -370,7 +373,7 @@ class SeasonManager
     {
         $today = $now->startOfDay();
         $horizon = $today->addWeeks((int) config('game.season.theme_hint_weeks'));
-        $birth = \App\Models\User::query()->whereKey($userId)->value('birth_date');
+        $birth = User::query()->whereKey($userId)->value('birth_date');
         $hints = [];
 
         foreach ((array) config('game.season_themes') as $key => $theme) {

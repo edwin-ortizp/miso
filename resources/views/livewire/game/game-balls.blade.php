@@ -89,7 +89,7 @@
                                 @endif
                             @endforeach
                         </div>
-                    @elseif ($revealed['is_new'] && $revealedSpecies)
+                    @elseif (($revealed['is_new_species'] ?? $revealed['is_new']) && $revealedSpecies)
                         {{-- Especie nueva: se presenta como carta coleccionable que se voltea (CHG-033). --}}
                         <div class="game-discovery__art">
                             <x-game.collectible-card class="game-discovery__card" :species="$revealedSpecies" :level="$revealed['level_to'] ?? 1"
@@ -114,7 +114,7 @@
                     @if ($revealed['evolved'] ?? false)
                         <span class="game-ribbon">¡Evolución!</span>
                         <p class="md-title-large mt-2 mb-1">¡{{ $revealed['evolved_from_name'] }} evolucionó a {{ $revealed['evolved_to_name'] }}!</p>
-                    @elseif ($revealed['is_new'])
+                    @elseif (($revealed['is_new_species'] ?? $revealed['is_new']))
                         <span class="game-ribbon">¡Nueva!</span>
                         <p class="md-title-large mt-2 mb-1">#{{ str_pad($revealed['number'], 3, '0', STR_PAD_LEFT) }} {{ $revealed['name'] }}</p>
                         <x-game.rarity-tag :rarity="$rarity" />
@@ -128,12 +128,12 @@
                     @if ($revealed['ready_to_evolve'] ?? false)
                         <p class="md-body-medium mb-1">Listo para evolucionar: elige en su ficha.</p>
                     @endif
-                    @unless ($revealed['is_new'] && !($revealed['evolved'] ?? false))<p class="md-label-large game-muted mb-1">#{{ str_pad($revealed['number'], 3, '0', STR_PAD_LEFT) }} · {{ $revealed['name'] }}</p>@endunless
+                    @unless (($revealed['is_new_species'] ?? $revealed['is_new']) && !($revealed['evolved'] ?? false))<p class="md-label-large game-muted mb-1">#{{ str_pad($revealed['number'], 3, '0', STR_PAD_LEFT) }} · {{ $revealed['name'] }}</p>@endunless
                     <div class="game-discovery__types">
                         @foreach ($revealedSpecies?->types ?? [] as $type)
                             <span class="game-type-chip {{ \App\Services\Game\CompanionProgress::typeClass($type) }}">{{ $type }}</span>
                         @endforeach
-                        @unless ($revealed['is_new'] && !($revealed['evolved'] ?? false))<x-game.rarity-tag :rarity="$rarity" />@endunless
+                        @unless (($revealed['is_new_species'] ?? $revealed['is_new']) && !($revealed['evolved'] ?? false))<x-game.rarity-tag :rarity="$rarity" />@endunless
                     </div>
                     <div class="game-discovery__bio" tabindex="0" role="region" aria-label="Descripción del Pokémon">
                         @if ($revealed['evolved'] ?? false)<h3 class="md-title-small">Sobre {{ $revealed['name'] }}</h3>@endif

@@ -1,4 +1,4 @@
-import { addSurface, isTopSurface } from './navigation-guard';
+import { addSurface, isTopSurface } from './navigation-guard.js';
 
 const FOCUSABLE = [
     'a[href]',
@@ -24,7 +24,10 @@ function focusable(surface) {
  */
 export function registerUiSurfaces(Alpine) {
     let scrollLocks = 0;
-    Alpine.directive('md-surface', (el, { modifiers, expression }, { cleanup, effect, evaluateLater }) => {
+    const layers = new Map();
+    // Livewire clones nodes while morphing: detached clones must not acquire
+    // scroll locks, focus handlers or a place in the real navigation stack.
+    Alpine.directive('md-surface', Alpine.skipDuringClone((el, { modifiers, expression }, { cleanup, effect, evaluateLater }) => {
         let deactivate = () => {};
         let active = false;
         const activate = () => {
@@ -32,6 +35,14 @@ export function registerUiSurfaces(Alpine) {
         const removeSurface = addSurface(el, () => el.dispatchEvent(new CustomEvent('md-surface-close', {bubbles:true})));
         if (modifiers.includes('nonmodal')) return removeSurface;
         const locksScroll = !modifiers.includes('no-scroll-lock');
+        // A server-rendered form can be appended after the confirmation's
+        // teleport anchor. Match visual stacking to activation order, not DOM order.
+        const layer = el.closest('.md-form-dialog-layer') ?? el;
+        const previousZ = layer.style.zIndex;
+        const baseZ = Number(getComputedStyle(layer).zIndex) || 0;
+        const z = Math.max(baseZ, ...layers.values()) + 1;
+        layers.set(el, z);
+        layer.style.zIndex = String(z);
 
         if (locksScroll) {
             scrollLocks++;
@@ -45,6 +56,7 @@ export function registerUiSurfaces(Alpine) {
         // Alpine puede inicializar la directiva antes de insertar la superficie
         // en el documento; se reintenta hasta que el foco entra de verdad.
         const focusInto = (attempt = 0) => {
+            if (document.querySelector('dialog[open]')) return;
             if (!isTopSurface(el)) return;
             if (el.contains(document.activeElement) && document.activeElement !== document.body) {
                 return;
@@ -63,6 +75,9 @@ export function registerUiSurfaces(Alpine) {
         const timers = [setTimeout(() => focusInto(), 0)];
 
         const onKeydown = (event) => {
+            // Livewire uses a native top-layer dialog for failed HTTP requests.
+            // Let that dialog own focus/Escape without closing the form beneath it.
+            if (document.querySelector('dialog[open]')) return;
             if (!isTopSurface(el)) return;
             if (event.key === 'Escape') {
                 event.stopPropagation();
@@ -95,6 +110,7 @@ export function registerUiSurfaces(Alpine) {
         };
 
         const onFocusIn = (event) => {
+            if (document.querySelector('dialog[open]')) return;
             if (!isTopSurface(el)) return;
             if (!el.contains(event.target)) {
                 (focusable(el)[0] ?? el).focus({ preventScroll: true });
@@ -108,6 +124,8 @@ export function registerUiSurfaces(Alpine) {
 
         return () => {
             removeSurface();
+            layers.delete(el);
+            layer.style.zIndex = previousZ;
             timers.forEach(clearTimeout);
             document.removeEventListener('keydown', onKeydown);
             document.removeEventListener('focusin', onFocusIn);
@@ -132,5 +150,5 @@ export function registerUiSurfaces(Alpine) {
             effect(() => read(update));
         } else update(true);
         cleanup(() => deactivate());
-    });
+    }));
 }

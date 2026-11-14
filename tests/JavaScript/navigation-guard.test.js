@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {formSnapshot,addSurface,guarded,handleBack,confirmDiscard} from '../../resources/js/navigation-guard.js';
+import {formSnapshot,addSurface,guarded,handleBack,confirmDiscard,restoreDiscardedForms} from '../../resources/js/navigation-guard.js';
 const events = new EventTarget();
 globalThis.window = events;
 globalThis.requestAnimationFrame = callback => callback();
@@ -25,4 +25,18 @@ test('discard confirmation fails closed without a mounted surface and ignores re
  let resolve;const listener=event=>{event.preventDefault();resolve=event.detail.resolve;};events.addEventListener('miso-discard-request',listener);
  const first=confirmDiscard();assert.equal(await confirmDiscard(),false);resolve(true);assert.equal(await first,true);
  events.removeEventListener('miso-discard-request',listener);
+});
+
+
+test('discard waits for saved-state restoration before caching a clean form', async () => {
+ const el=new EventTarget();let finish;let reset=false;
+ el.addEventListener('miso-form-discard',event=>event.detail.waitUntil(new Promise(resolve=>{finish=resolve;})));
+ const restoring=restoreDiscardedForms([[el,{reset:()=>{reset=true;}}]]);
+ assert.equal(reset,false);finish();assert.equal(await restoring,true);assert.equal(reset,true);
+});
+
+test('failed restoration keeps the form dirty and cancels navigation', async () => {
+ const el=new EventTarget();let reset=false;
+ el.addEventListener('miso-form-discard',event=>event.detail.waitUntil(Promise.reject(new Error('offline'))));
+ assert.equal(await restoreDiscardedForms([[el,{reset:()=>{reset=true;}}]]),false);assert.equal(reset,false);
 });

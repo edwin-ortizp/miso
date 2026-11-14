@@ -9,7 +9,7 @@ test('modal viewport tracks keyboard resize/offset and cleans up on close and de
     const previous = globalThis.window; globalThis.window = win;
     try {
         let directive, toggle, dispose;
-        registerDialogViewport({ directive(name, callback) { directive = callback; } });
+        registerDialogViewport({ skipDuringClone: callback => callback, directive(name, callback) { directive = callback; } });
         const properties = new Map();
         directive({ style: { setProperty: (key, value) => properties.set(key, value), removeProperty: key => properties.delete(key) } }, { expression: 'open' }, {
             evaluateLater: () => callback => { toggle = callback; callback(true); }, effect: callback => callback(), cleanup: callback => { dispose = callback; },

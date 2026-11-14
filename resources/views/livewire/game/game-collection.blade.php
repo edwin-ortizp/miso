@@ -1,5 +1,20 @@
 <x-module-shell module="game">
-    @if ($total === 0)
+    @if ($generationRecommendation)
+        <section class="md-card-filled game-generation-recommendation" aria-label="Tu próxima generación">
+            <div>
+                <strong class="md-title-medium">¡Completaste la {{ mb_strtolower($generationRecommendation['completed']['name']) }}!</strong>
+                <p class="md-body-medium mb-0">Hay {{ $generationRecommendation['next']['total'] }} Pokémon más en la {{ mb_strtolower($generationRecommendation['next']['name']) }}. ¿Seguimos explorando?</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <x-ui.action :href="route('game.settings.generations')" wire:navigate variant="tonal" icon="bi-compass">Elegir generación</x-ui.action>
+                <x-ui.action variant="text" wire:click="dismissGenerationRecommendation">Ahora no</x-ui.action>
+            </div>
+        </section>
+    @endif
+    @if ($pausedFoundCount)
+        <p class="md-body-small game-muted">También conservas {{ $pausedFoundCount }} descubrimientos de generaciones en pausa.</p>
+    @endif
+    @if ($total === 0 && $pausedFoundCount === 0)
         <section class="md-card-elevated">
             <x-ui.state variant="empty" icon="bi-grid-3x3-gap" title="Aún no hay especies"
                         message="Importa tu catálogo para empezar." />
@@ -76,6 +91,7 @@
                         <li wire:key="species-{{ $entry['species']->id }}">
                             <x-game.species-card :species="$entry['species']" :discovered="$entry['discovered']" :image="$entry['image']"
                                                  :in-team="$entry['inTeam']" wire:click="showSpecies({{ $entry['species']->id }})" />
+                            @if ($entry['paused'])<span class="md-body-small game-muted game-generation-paused">Generación en pausa</span>@endif
                         </li>
                     @endforeach
                 </ul>

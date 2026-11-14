@@ -10,13 +10,14 @@ class GameSpecies extends Model
     protected $table = 'game_species';
 
     protected $fillable = [
-        'number', 'name', 'line_key', 'stage', 'rarity', 'image_key', 'active',
+        'generation', 'number', 'name', 'line_key', 'stage', 'rarity', 'image_key', 'active',
         'description', 'types', 'stats', 'evolves_from_number', 'evolve_level',
     ];
 
     protected function casts(): array
     {
         return [
+            'generation' => 'integer',
             'number' => 'integer',
             'stage' => 'integer',
             'active' => 'boolean',

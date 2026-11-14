@@ -37,7 +37,7 @@ class GameUiTest extends TestCase
     {
         $this->get(route('game.balls'))->assertOk()->assertSee('No tienes balls por abrir');
         $this->get(route('game.collection'))->assertOk()->assertSee('0 de 6 descubiertas');
-        $this->get(route('game.settings'))->assertOk()->assertSee('Máximo de balls por día');
+        $this->get(route('game.settings.rewards'))->assertOk()->assertSee('Máximo de balls por día');
     }
 
     public function test_open_ball_from_ui_survives_reload(): void
@@ -138,18 +138,17 @@ class GameUiTest extends TestCase
 
         Livewire::test(GameSettingsPage::class)
             ->set('enabled', false)
-            ->set('dailyLimit', 3)
             ->call('save')
             ->assertSee('Ajustes guardados.');
 
         $settings = app(GameSettings::class)->for(auth()->id());
         $this->assertFalse($settings['enabled']);
-        $this->assertSame(3, $settings['daily_limit']);
+        $this->assertSame(5, $settings['daily_limit']);
         $this->assertSame(1, GameEncounter::count());
     }
 
     public function test_daily_limit_out_of_range_is_rejected(): void
     {
-        Livewire::test(GameSettingsPage::class)->set('dailyLimit', 500)->call('save')->assertHasErrors('dailyLimit');
+        Livewire::test(GameSettingsPage::class, ['section' => 'rewards'])->set('dailyLimit', 500)->call('save')->assertHasErrors('dailyLimit');
     }
 }

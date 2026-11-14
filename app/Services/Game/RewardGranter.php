@@ -5,7 +5,6 @@ namespace App\Services\Game;
 use App\Models\Game\GameCompanion;
 use App\Models\Game\GameEncounter;
 use App\Models\Game\GameEvent;
-use App\Models\Game\GameSpecies;
 use App\Models\HabitCompletion;
 use App\Models\Task;
 use App\Models\User;
@@ -221,14 +220,16 @@ class RewardGranter
     /** @param array<string, mixed> $baseEffect */
     private function rollEncounter(int $userId, GameEvent $event, array $settings, array $baseEffect): ?GameEncounter
     {
-        $species = GameSpecies::query()->where('active', true)->where('stage', 1)->get();
+        $catalog = app(SpeciesCatalog::class);
+        $species = $catalog->encounters($userId);
+        $knownIds = $catalog->knownIds($userId);
         $knownLines = $this->knownLines($userId);
         $forceNew = $this->ballsWithoutNovelty($userId) >= $settings['pity_threshold'];
         $seed = random_int(1, PHP_INT_MAX >> 1);
         $picked = $this->roller->roll(
             $species, $knownLines, $settings['rarity_weights'], $forceNew, $seed,
             $settings['featured_line'] ?? null, (int) ($settings['featured_weight'] ?? 1),
-            (array) ($settings['featured_types'] ?? []),
+            (array) ($settings['featured_types'] ?? []), $knownIds,
         );
 
         if (! $picked) {
@@ -238,7 +239,7 @@ class RewardGranter
         }
 
         $isNew = ! in_array($picked->line_key, $knownLines, true);
-        $event->update(['effect' => $baseEffect + ['ball' => true, 'new_line' => $isNew, 'forced_new' => $forceNew, 'season_id' => $settings['season_id'] ?? null]]);
+        $event->update(['effect' => $baseEffect + ['ball' => true, 'new_line' => $isNew, 'new_species' => ! in_array($picked->id, $knownIds, true), 'forced_new' => $forceNew, 'season_id' => $settings['season_id'] ?? null]]);
 
         return GameEncounter::withoutGlobalScopes()->create([
             'user_id' => $userId,
@@ -270,7 +271,7 @@ class RewardGranter
             if (! ($event->effect['ball'] ?? false)) {
                 continue;
             }
-            if ($event->effect['new_line'] ?? false) {
+            if ($event->effect['new_species'] ?? $event->effect['new_line'] ?? false) {
                 break;
             }
             $count++;

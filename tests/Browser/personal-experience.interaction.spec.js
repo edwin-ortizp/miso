@@ -45,6 +45,84 @@ test.afterAll(async () => {
 });
 
 
+for (const width of [390, 1440]) {
+    test.describe(`focus viewport ${width}`, () => {
+    test.use({ viewport: { width, height: 844 }, isMobile: width === 390, hasTouch: width === 390 });
+    test(`dashboard manual focus remains usable ${width}`, async ({ page }) => {
+        const errors = [];
+        page.on('pageerror', error => errors.push(error.message));
+        await page.setViewportSize({ width, height: 844 });
+        await page.goto('/login');
+        await page.locator('input[type=email]').fill('focus-dashboard@example.test');
+        await page.locator('input[type=password]').fill('browser-test-password');
+        await page.locator('button[type=submit]').click({ timeout: 60000 });
+        await page.waitForURL(url => !url.pathname.includes('/login'));
+        await page.goto('/');
+        const open = async () => {
+            await page.getByRole('button', { name: 'Crear', exact: true }).click();
+            await page.getByRole('menuitem', { name: 'Registrar sesión de enfoque', exact: true }).click();
+        };
+        for (let cycle = 0; cycle < 3; cycle++) {
+            await open();
+            const dialog = page.locator('#panel-focus-manual-dialog');
+            await expect(dialog).toBeVisible();
+            await dialog.getByLabel('Inicio', { exact: true }).fill('00:00');
+            await dialog.getByLabel('Fin', { exact: true }).fill('00:01');
+            await expect(dialog.getByRole('status')).toContainText('0 h 1 min');
+            await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+            await expect(dialog).toBeHidden();
+            await expect(page.locator('body')).not.toHaveClass(/md-scroll-locked/);
+            await expect(page.getByRole('dialog', { name: 'Tienes cambios sin guardar' })).toBeHidden();
+        }
+        await open();
+        await page.locator('#panel-focus-manual-dialog').getByRole('button', { name: 'Cancelar', exact: true }).click();
+        await expect(page.locator('#panel-focus-manual-dialog')).toBeHidden();
+        await expect(page.locator('body')).not.toHaveClass(/md-scroll-locked/);
+        await page.screenshot({ path: `storage/framework/testing/playwright/personal-experience/focus-dashboard-${width}.png` });
+        await open();
+        const dialog = page.locator('#panel-focus-manual-dialog');
+        await dialog.getByLabel('Inicio', { exact: true }).fill('10:00');
+        await dialog.getByLabel('Fin', { exact: true }).fill('09:00');
+        await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+        await expect(dialog).toContainText('La fecha y hora de fin debe ser posterior al inicio.');
+        await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+        const discard = page.getByRole('dialog', { name: 'Tienes cambios sin guardar', exact: true });
+        await expect(discard).toBeVisible();
+        await discard.getByRole('button', { name: 'Seguir editando', exact: true }).click();
+        await expect(dialog.getByLabel('Inicio', { exact: true })).toHaveValue('10:00');
+        await expect(page.locator('body')).toHaveClass(/md-scroll-locked/);
+        await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+        await discard.getByRole('button', { name: 'Descartar cambios', exact: true }).click();
+        await expect(dialog).toBeHidden();
+        await expect(page.locator('body')).not.toHaveClass(/md-scroll-locked/);
+        await open();
+        await dialog.getByLabel('Inicio', { exact: true }).fill('00:00');
+        await dialog.getByLabel('Fin', { exact: true }).fill('00:01');
+        await dialog.getByLabel('Descripción (opcional)', { exact: true }).fill('Borrador recuperable');
+        const unavailable = async route => {
+            if (route.request().postData()?.includes('saveManualSession')) {
+                await route.fulfill({ status: 503, contentType: 'text/html', body: '<p>Servicio de prueba temporalmente no disponible</p>' });
+            } else await route.continue();
+        };
+        const updateRoute = /\/livewire[^/]*\/update/;
+        await page.route(updateRoute, unavailable);
+        await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+        const failure = page.locator('#livewire-error');
+        await expect(failure).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(failure).toBeHidden();
+        await page.unroute(updateRoute, unavailable);
+        await expect(dialog.getByLabel('Descripción (opcional)', { exact: true })).toHaveValue('Borrador recuperable');
+        await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+        await expect(dialog).toBeHidden();
+        await expect(page.locator('body')).not.toHaveClass(/md-scroll-locked/);
+        await page.getByRole('link', { name: 'Consultar mis objetivos y registrar avances' }).click();
+        await expect(page).toHaveURL(/goals/);
+        expect(errors).toEqual([]);
+    });
+    });
+}
+
 for (const width of [390, 768, 1440]) {
     test(`new user journey and account menu at ${width}`, async ({ page }) => {
         const errors = [];

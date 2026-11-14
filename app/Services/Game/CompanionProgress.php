@@ -8,6 +8,7 @@ use App\Models\Game\GameEvent;
 use App\Models\Game\GameSpecies;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 /**
@@ -18,6 +19,7 @@ use InvalidArgumentException;
 class CompanionProgress
 {
     public const KIND_LEVEL_UP = 'level_up';
+
     public const KIND_EVOLVED = 'evolved';
 
     public function levelFor(int $xp): int
@@ -39,7 +41,7 @@ class CompanionProgress
     /** Clase CSS del tipo (`game-type--fuego`) o la neutra si el tipo no tiene color. */
     public static function typeClass(?string $type): string
     {
-        $slug = $type ? \Illuminate\Support\Str::slug($type) : '';
+        $slug = $type ? Str::slug($type) : '';
 
         return in_array($slug, config('game.type_palette'), true) ? "game-type--{$slug}" : 'game-type--neutral';
     }
@@ -50,7 +52,7 @@ class CompanionProgress
      * @param  array{type: ?string, id: ?string, label: ?string}  $source
      * @return array{level_from: int, level_to: int, evolved_from: ?int, evolved_to: ?int, ready_to_evolve: bool}
      */
-    public function addXp(GameCompanion $companion, int $xp, array $source, string $key): array
+    public function addXp(GameCompanion $companion, int $xp, array $source, string $key, bool $allowEvolution = true): array
     {
         $from = (int) $companion->level;
         $companion->xp = (int) $companion->xp + max(0, $xp);
@@ -64,7 +66,7 @@ class CompanionProgress
         $originalSpecies = $companion->species_id;
         $evolvedTo = null;
         // Avanza etapas mientras haya un único destino y el nivel alcance.
-        for ($guard = 0; $guard < 9; $guard++) {
+        for ($guard = 0; $allowEvolution && $guard < 9; $guard++) {
             $options = $this->options($companion);
             if ($options->count() !== 1 || $companion->level < $options->first()->requiredLevel()) {
                 break;
@@ -92,7 +94,7 @@ class CompanionProgress
             return collect();
         }
 
-        $next = GameSpecies::query()->where('active', true)
+        $next = app(SpeciesCatalog::class)->available((int) $companion->user_id)
             ->where('line_key', $current->line_key)->where('stage', $current->stage + 1)
             ->orderBy('number')->get();
         $direct = $next->where('evolves_from_number', $current->number);

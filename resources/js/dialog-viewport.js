@@ -1,6 +1,6 @@
 // Scoped to modal surfaces: desktop and unrelated overlays retain their geometry.
 export function registerDialogViewport(Alpine) {
-    Alpine.directive('dialog-viewport', (el, { expression }, { evaluateLater, effect, cleanup }) => {
+    Alpine.directive('dialog-viewport', Alpine.skipDuringClone((el, { expression }, { evaluateLater, effect, cleanup }) => {
         const mobile = window.matchMedia('(max-width: 767.98px)');
         const viewport = window.visualViewport;
         let active = false;
@@ -29,5 +29,5 @@ export function registerDialogViewport(Alpine) {
         if (expression) { const read = evaluateLater(expression); effect(() => read(toggle)); }
         else toggle(true);
         cleanup(() => toggle(false));
-    });
+    }));
 }

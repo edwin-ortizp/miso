@@ -5,12 +5,15 @@ namespace App\Livewire\Game;
 use App\Livewire\Concerns\WithManagementCard;
 use App\Models\Game\GameCompanion;
 use App\Models\Game\GameDiscovery;
-use App\Models\Game\GameEvent;
 use App\Models\Game\GameSpecies;
 use App\Models\Game\GameTeamMember;
 use App\Models\Game\GameWeek;
+use App\Services\Game\Albums;
 use App\Services\Game\CompanionProgress;
+use App\Services\Game\GameSettings;
+use App\Services\Game\SpeciesCatalog;
 use App\Services\Game\SpeciesImageProvider;
+use App\Services\Game\SpeciesSheet;
 use App\Services\Game\WeekPlanner;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Layout;
@@ -101,9 +104,9 @@ class GameCollection extends Component
     }
 
     /** Chat del compañero (CHG-100): este ejemplar aparece en lugar del botón de crear. */
-    public function makeFavorite(int $companionId, \App\Services\Game\GameSettings $settings): void
+    public function makeFavorite(int $companionId, GameSettings $settings): void
     {
-        $companion = \App\Models\Game\GameCompanion::query()->with('species')->find($companionId);
+        $companion = GameCompanion::query()->with('species')->find($companionId);
         if (! $companion) {
             return;
         }
@@ -122,13 +125,29 @@ class GameCollection extends Component
         }
     }
 
+    public function dismissGenerationRecommendation(): void
+    {
+        $catalog = app(SpeciesCatalog::class);
+        $userId = (int) auth()->id();
+        $recommendation = $catalog->recommendation($userId);
+        if ($recommendation) {
+            $settings = app(GameSettings::class);
+            $settings->save($userId, ['dismissed_generations' => array_values(array_unique([
+                ...$settings->for($userId)['dismissed_generations'], $recommendation['completed']['generation'],
+            ]))]);
+        }
+    }
+
     public function render(SpeciesImageProvider $images, CompanionProgress $progress)
     {
         $discoveredIds = GameDiscovery::query()->pluck('species_id')
             ->merge(GameCompanion::query()->pluck('species_id'))->unique()->values();
         $teamIds = $this->teamSpeciesIds();
 
-        $query = GameSpecies::query()->where('active', true)->orderBy('number');
+        $catalog = app(SpeciesCatalog::class);
+        $enabledGenerations = app(GameSettings::class)->for((int) auth()->id())['enabled_generations'];
+        $query = GameSpecies::query()->where('active', true)->where(fn ($q) => $q
+            ->whereIn('generation', $enabledGenerations)->orWhereIn('id', $discoveredIds))->orderBy('number');
         match ($this->state) {
             'found' => $query->whereIn('id', $discoveredIds),
             'missing' => $query->whereNotIn('id', $discoveredIds),
@@ -161,19 +180,22 @@ class GameCollection extends Component
             'discovered' => $found->has($item->id),
             'inTeam' => $teamLookup->has($item->id),
             'image' => $images->url($item),
+            'paused' => ! in_array($item->generation, $enabledGenerations, true),
         ]));
 
         return view('livewire.game.game-collection', [
             'entries' => $page,
-            'total' => GameSpecies::query()->where('active', true)->count(),
-            'discoveredCount' => $discoveredIds->count(),
+            'total' => $catalog->available((int) auth()->id())->count(),
+            'generationRecommendation' => $catalog->recommendation((int) auth()->id()),
+            'pausedFoundCount' => GameSpecies::query()->where('active', true)->whereIn('id', $discoveredIds)->whereNotIn('generation', $enabledGenerations)->count(),
+            'discoveredCount' => $catalog->available((int) auth()->id())->whereIn('id', $discoveredIds)->count(),
             'activeFilters' => collect([$this->state !== 'all', $this->type !== '', $this->rarity !== ''])->filter()->count(),
             'types' => $this->typeOptions(),
             // Álbumes por tipo (CHG-078): miden el set completo del tipo, sin búsqueda ni rareza.
-            'albums' => app(\App\Services\Game\Albums::class)->overview((int) auth()->id()),
+            'albums' => app(Albums::class)->overview((int) auth()->id()),
             'rarities' => config('game.rarities'),
             'states' => self::STATES,
-            'favoriteCompanionId' => app(\App\Services\Game\GameSettings::class)->for((int) auth()->id())['favorite_companion_id'],
+            'favoriteCompanionId' => app(GameSettings::class)->for((int) auth()->id())['favorite_companion_id'],
             'sheet' => $this->showSheet && $this->selectedId
                 ? $this->sheet($this->selectedId, $found, $teamLookup)
                 : null,
@@ -204,6 +226,6 @@ class GameCollection extends Component
     /** @return array<string, mixed>|null Lógica compartida con los guardianes (CHG-062). */
     private function sheet(int $speciesId, Collection $discoveredIds, Collection $teamLookup): ?array
     {
-        return app(\App\Services\Game\SpeciesSheet::class)->build($speciesId, $discoveredIds, $teamLookup, $this->historyLimit);
+        return app(SpeciesSheet::class)->build($speciesId, $discoveredIds, $teamLookup, $this->historyLimit);
     }
 }

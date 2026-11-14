@@ -140,6 +140,9 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/game/week', GameWeekView::class)->name('game.week');
     Route::get('/game/season', GameSeasonView::class)->name('game.season');
     Route::get('/game/settings', GameSettingsPage::class)->name('game.settings');
+    foreach (['generations', 'rewards', 'companion', 'celebrations'] as $section) {
+        Route::get('/game/settings/'.$section, GameSettingsPage::class)->defaults('section', $section)->name('game.settings.'.$section);
+    }
     Route::redirect('/meals', '/meals/weekly')->name('meals');
     Route::get('/meals/weekly', MealWeekly::class)->name('meals.weekly');
     Route::get('/meals/preparations', \App\Livewire\Meal\MealPreparations::class)->name('meals.preparations');

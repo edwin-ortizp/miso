@@ -1,9 +1,9 @@
 # CHG-101 · Navegación Android y protección de formularios
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-13 · **Aprobado:** 2026-11-13 · **Cerrado:** —
+**Creado:** 2026-11-13 · **Aprobado:** 2026-11-13 · **Cerrado:** 2026-11-14
 **Relacionado:** CHG-098
 
 ## 0. En palabras simples
@@ -95,3 +95,4 @@ Android/README.md y docs/DEPLOY.md: puente, configuración, pruebas, límites y 
 - 2026-11-13 — Implementación terminada → En verificación
 - 2026-11-13 — Reabierto: Ajustar liberación de efectos reactivos al desmontar formularios antes del cierre local
 - 2026-11-13 — Implementación terminada → En verificación
+- 2026-11-14 — Cerrado por el usuario (Compuerta 3) → done/ (desde el panel)

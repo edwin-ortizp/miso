@@ -49,8 +49,12 @@ class SpeciesSheet
         $teamLookup ??= self::teamLookup();
 
         $discovered = $discoveredIds->has($species->id);
+        if (! $discovered && ! app(SpeciesCatalog::class)->available((int) auth()->id())->whereKey($speciesId)->exists()) {
+            return null;
+        }
         $companion = $discovered ? GameCompanion::query()->with('species')->where('line_key', $species->line_key)->first() : null;
         $chain = GameSpecies::query()->where('line_key', $species->line_key)->where('active', true)
+            ->where(fn ($q) => $q->whereIn('generation', app(GameSettings::class)->for((int) auth()->id())['enabled_generations'])->orWhereIn('id', $discoveredIds->keys()))
             ->orderBy('stage')->orderBy('number')->get()
             ->map(fn (GameSpecies $item) => [
                 'species' => $item,

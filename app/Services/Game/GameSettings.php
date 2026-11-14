@@ -38,6 +38,12 @@ class GameSettings
             fn ($weight) => max(0, (int) $weight),
             array_replace($defaults['rarity_weights'], array_intersect_key((array) ($stored['rarity_weights'] ?? []), $defaults['rarity_weights'])),
         );
+        $settings['enabled_generations'] = array_values(array_unique(array_filter(
+            array_map('intval', (array) $settings['enabled_generations']), fn ($g) => $g >= 1 && $g <= 9,
+        ))) ?: [1];
+        $settings['dismissed_generations'] = array_values(array_unique(array_filter(
+            array_map('intval', (array) $settings['dismissed_generations']), fn ($g) => $g >= 1 && $g <= 9,
+        )));
         $settings['enabled'] = (bool) $settings['enabled'];
         $settings['director_enabled'] = (bool) $settings['director_enabled'];
         $settings['seasons_enabled'] = (bool) $settings['seasons_enabled'];
@@ -61,6 +67,7 @@ class GameSettings
     /** @param array<string, mixed> $settings */
     public function save(int $userId, array $settings): void
     {
+        $this->flush();
         $setting = ModuleSetting::withoutGlobalScopes()->firstOrNew(['user_id' => $userId, 'module' => self::MODULE]);
         $setting->user_id = $userId;
         $setting->settings = array_replace($this->for($userId), $settings);

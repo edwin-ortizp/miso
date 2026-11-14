@@ -1,9 +1,9 @@
 # CHG-100 · Chat del compañero Pokémon reemplaza el FAB
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-12 · **Aprobado:** 2026-11-12 · **Cerrado:** —
+**Creado:** 2026-11-12 · **Aprobado:** 2026-11-12 · **Cerrado:** 2026-11-14
 **Relacionado:** CHG-099 (prototipo, archivado), CHG-097, CHG-043
 
 ## 0. En palabras simples
@@ -143,3 +143,4 @@ Escritorio                               Móvil (hoja inferior)
 - Guía final: docs/companion-chat.md. Evidencia local: storage/framework/testing/playwright/companion-chat y companion-chat-keyboard. No se hizo commit, despliegue ni migración de datos reales.
 - LECCIÓN: ninguna adicional a los contratos ya documentados.
 - 2026-11-13 — Implementación terminada → En verificación
+- 2026-11-14 — Cerrado por el usuario (Compuerta 3) → done/ (desde el panel)

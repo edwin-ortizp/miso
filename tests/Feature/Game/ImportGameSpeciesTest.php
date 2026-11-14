@@ -44,6 +44,7 @@ class ImportGameSpeciesTest extends TestCase
 
         $first = GameSpecies::where('number', 1)->first();
         $this->assertSame('Duerme al sol.', $first->description);
+        $this->assertSame(1, $first->generation);
         $this->assertSame(['planta'], $first->types);
         $this->assertSame(45, $first->stats['hp']);
         $second = GameSpecies::where('number', 2)->first();
@@ -51,11 +52,23 @@ class ImportGameSpeciesTest extends TestCase
         $this->assertSame(12, $second->requiredLevel());
     }
 
+    public function test_generation_is_validated_and_partial_updates_preserve_it(): void
+    {
+        $row = ['number' => 152, 'name' => 'Chico', 'line_key' => 'chico', 'generation' => 2];
+        $this->artisan('game:import-species', ['file' => $this->file([$row])])->assertSuccessful();
+        unset($row['generation']);
+        $this->artisan('game:import-species', ['file' => $this->file([$row])])->assertSuccessful();
+        $this->assertSame(2, GameSpecies::where('number', 152)->first()->generation);
+        $row['generation'] = 10;
+        $this->artisan('game:import-species', ['file' => $this->file([$row])])->assertFailed();
+        $this->assertSame(2, GameSpecies::where('number', 152)->first()->generation);
+    }
+
     public function test_invalid_catalog_writes_nothing(): void
     {
         $path = $this->file([
             ['number' => 1, 'name' => 'Ok', 'line_key' => 'ok'],
-            ['number' => 2, 'name' => 'Mala', 'line_key' => 'Con Espacios', 'rarity' => 'mítica'],
+            ['number' => 2, 'name' => 'Mala', 'line_key' => 'Con Espacios', 'rarity' => 'mítica', 'generation' => 10],
         ]);
 
         $this->artisan('game:import-species', ['file' => $path])->assertFailed();

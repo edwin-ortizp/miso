@@ -114,7 +114,7 @@ class GameNotifierTest extends TestCase
 
     public function test_celebration_settings_are_saved(): void
     {
-        Livewire::test(GameSettingsPage::class)
+        Livewire::test(GameSettingsPage::class, ['section' => 'celebrations'])
             ->set('celebrations', true)
             ->set('celebrationSet', ['cats', 'confetti', 'inventada'])
             ->call('save');
@@ -143,7 +143,7 @@ class GameNotifierTest extends TestCase
 
     public function test_sound_setting_is_saved_and_announced(): void
     {
-        Livewire::test(GameSettingsPage::class)
+        Livewire::test(GameSettingsPage::class, ['section' => 'celebrations'])
             ->assertSee('Probar sonido')
             ->assertSet('sounds', true)
             ->set('sounds', false)

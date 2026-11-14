@@ -156,12 +156,12 @@ class ConsistencyXpTest extends TestCase
 
     public function test_settings_page_saves_each_consistency_source(): void
     {
-        Livewire::test(GameSettingsPage::class)
+        Livewire::test(GameSettingsPage::class, ['section' => 'rewards'])
             ->assertSee('Constancia')
             ->assertSet('consistency.vehicle', true)
             ->set('consistency.vehicle', false)
             ->call('save');
 
-        Livewire::test(GameSettingsPage::class)->assertSet('consistency.vehicle', false)->assertSet('consistency.home', true);
+        Livewire::test(GameSettingsPage::class, ['section' => 'rewards'])->assertSet('consistency.vehicle', false)->assertSet('consistency.home', true);
     }
 }

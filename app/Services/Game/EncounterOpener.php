@@ -34,6 +34,7 @@ class EncounterOpener
             $companion = GameCompanion::withoutGlobalScopes()
                 ->where('user_id', $userId)->where('line_key', $species->line_key)->lockForUpdate()->first();
             $isNew = $companion === null;
+            $isNewSpecies = ! app(SpeciesCatalog::class)->discoveredIds($userId)->contains($species->id);
             $xp = (int) config($isNew ? 'game.welcome_xp' : 'game.duplicate_xp');
 
             if ($isNew) {
@@ -56,14 +57,14 @@ class EncounterOpener
                 'source_type' => $source['type'],
                 'source_id' => $source['id'],
                 'source_label' => $source['label'],
-                'kind' => $isNew ? GameEvent::KIND_DISCOVERED : GameEvent::KIND_XP_GAINED,
+                'kind' => $isNewSpecies ? GameEvent::KIND_DISCOVERED : GameEvent::KIND_XP_GAINED,
                 'effect' => ['encounter_id' => $encounter->id, 'companion_id' => $companion->id, 'species_id' => $species->id, 'xp' => $xp],
                 'idempotency_key' => 'open:'.$encounter->id,
                 'occurred_at' => now(),
             ]);
 
             $currentName = $companion->species()->value('name');
-            $change = $this->progress->addXp($companion, $xp, $source, 'open:'.$encounter->id);
+            $change = $this->progress->addXp($companion, $xp, $source, 'open:'.$encounter->id, $isNew || ! $isNewSpecies);
             $evolvedFrom = $change['evolved_from'] ? GameSpecies::find($change['evolved_from']) : null;
             $evolvedTo = $change['evolved_to'] ? GameSpecies::find($change['evolved_to']) : null;
 
@@ -73,6 +74,7 @@ class EncounterOpener
                 'name' => $species->name,
                 'image' => $this->images->url($species),
                 'is_new' => $isNew,
+                'is_new_species' => $isNewSpecies,
                 'xp_gained' => $xp,
                 'companion_id' => $companion->id,
                 'companion_name' => $currentName,

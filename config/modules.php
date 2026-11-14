@@ -138,7 +138,7 @@ return [
             ['label' => 'Colección', 'route' => 'game.collection', 'icon' => 'bi-grid-3x3-gap', 'active' => ['game.collection'], 'counter' => 'App\Support\Game\TabCounters@collection'],
             ['label' => 'Semana', 'route' => 'game.week', 'icon' => 'bi-people', 'active' => ['game.week'], 'counter' => 'App\Support\Game\TabCounters@week'],
             ['label' => 'Temporada', 'route' => 'game.season', 'icon' => 'bi-calendar-event', 'active' => ['game.season'], 'counter' => 'App\Support\Game\TabCounters@season'],
-            ['label' => 'Ajustes', 'route' => 'game.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['game.settings']],
+            ['label' => 'Ajustes', 'route' => 'game.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['game.settings', 'game.settings.*']],
         ],
     ],
     'pomodoro' => [

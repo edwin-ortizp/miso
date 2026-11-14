@@ -1,8 +1,8 @@
 # CHG-096 · Prototipo de Aprendizaje y reservas con compañeros
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
-**Creado:** 2026-11-12 · **Aprobado:** 2026-11-12 · **Cerrado:** —
+**Creado:** 2026-11-12 · **Aprobado:** 2026-11-12 · **Cerrado:** 2026-11-14
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: recorrido interactivo de Aprendizaje con reservas y Pokémon fieles a MiSo.
@@ -122,3 +122,4 @@ Vacío: [compañero + guía para comenzar] [FAB con tipos de formación]
 - 2026-11-13 — Implementación terminada → En verificación
 - 2026-11-13 — Reabierto: Retirar encabezado redundante del índice de Formación
 - 2026-11-13 — Implementación terminada → En verificación
+- 2026-11-14 — Cerrado por el usuario (Compuerta 3) → done/ (desde el panel)

@@ -4,6 +4,7 @@ namespace App\Services\Game;
 
 use App\Models\Game\GameSpecies;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 /**
  * Elige la especie de una ball de forma determinista a partir de una semilla:
@@ -13,11 +14,11 @@ use Illuminate\Support\Collection;
 class EncounterRoller
 {
     /**
-     * @param  Collection<int, GameSpecies>  $species  especies activas de etapa 1
+     * @param  Collection<int, GameSpecies>  $species  especies elegibles del catálogo personal
      * @param  array<int, string>  $knownLines  líneas que el usuario ya tiene o tiene pendientes
      * @param  array<string, int>  $weights
      */
-    public function roll(Collection $species, array $knownLines, array $weights, bool $forceNew, int $seed, ?string $featuredLine = null, int $featuredWeight = 1, array $featuredTypes = []): ?GameSpecies
+    public function roll(Collection $species, array $knownLines, array $weights, bool $forceNew, int $seed, ?string $featuredLine = null, int $featuredWeight = 1, array $featuredTypes = [], ?array $knownSpeciesIds = null): ?GameSpecies
     {
         if ($species->isEmpty()) {
             return null;
@@ -27,7 +28,8 @@ class EncounterRoller
         try {
             $pool = $species;
             if ($forceNew) {
-                $unknown = $species->reject(fn (GameSpecies $s) => in_array($s->line_key, $knownLines, true));
+                $unknown = $species->reject(fn (GameSpecies $s) => $knownSpeciesIds !== null
+                    ? in_array($s->id, $knownSpeciesIds, true) : in_array($s->line_key, $knownLines, true));
                 $pool = $unknown->isNotEmpty() ? $unknown : $species;
             }
 
@@ -66,7 +68,7 @@ class EncounterRoller
     private function hasType(GameSpecies $species, array $types): bool
     {
         foreach ((array) ($species->types ?? []) as $type) {
-            if (in_array(\Illuminate\Support\Str::slug((string) $type), $types, true)) {
+            if (in_array(Str::slug((string) $type), $types, true)) {
                 return true;
             }
         }

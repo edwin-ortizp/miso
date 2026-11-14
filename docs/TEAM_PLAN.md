@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-13_
+_Última actualización: 2026-11-14_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -100,13 +100,19 @@ _Última actualización: 2026-11-13_
 | CHG-093 | M | Primera experiencia guiada | done | Cerrado | 2/2 |
 | CHG-094 | S | Medicion y prueba de primera experiencia | done | Cerrado | 2/2 |
 | CHG-095 | M | Optimización de backend: consultas repetidas y código sin uso | in-progress | En verificación | 9/9 |
-| CHG-096 | M | Prototipo de Aprendizaje y reservas con compañeros | in-progress | En verificación | 6/6 |
-| CHG-097 | S | Compañero favorito persistente en el prototipo de Aprendizaje | in-progress | En verificación | 2/2 |
-| CHG-098 | M | Contenedor Android híbrido de MiSo con WebView | in-progress | En verificación | 3/3 |
-| CHG-100 | M | Chat del compañero Pokémon reemplaza el FAB | in-progress | En verificación | 4/4 |
-| CHG-101 | M | Navegación Android y protección de formularios | in-progress | En verificación | 2/2 |
+| CHG-096 | M | Prototipo de Aprendizaje y reservas con compañeros | done | Cerrado | 6/6 |
+| CHG-097 | S | Compañero favorito persistente en el prototipo de Aprendizaje | done | Cerrado | 2/2 |
+| CHG-098 | M | Contenedor Android híbrido de MiSo con WebView | done | Cerrado | 3/3 |
+| CHG-100 | M | Chat del compañero Pokémon reemplaza el FAB | done | Cerrado | 4/4 |
+| CHG-101 | M | Navegación Android y protección de formularios | done | Cerrado | 2/2 |
 | CHG-102 | M | Canal Android FCM en Laravel | in-progress | En verificación | 2/2 |
 | CHG-103 | M | Recepción FCM y apertura segura en Android | in-progress | En verificación | 2/2 |
+| CHG-104 | M | Generaciones personales y ajustes de Colección por secciones | in-progress | En verificación | 3/3 |
+| CHG-105 | M | Evitar bloqueo de Mi día al registrar foco en PWA móvil | in-progress | En verificación | 2/4 |
+| CHG-106 | M | Restaurar chat y cierre de superficies en Android | to-do | Borrador | 0/4 |
+| CHG-107 | S | Editar tareas y Markdown con una sola acción | in-progress | En verificación | 2/2 |
+| CHG-108 | M | Secciones de formularios visibles en móvil | to-do | Borrador | 0/4 |
+| CHG-109 | M | Corregir barra de estado y escala de Android | to-do | Borrador | 0/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

@@ -92,7 +92,7 @@ class GameDashboardTest extends TestCase
 
     public function test_settings_save_and_validate_the_threshold(): void
     {
-        Livewire::test(GameSettingsPage::class)
+        Livewire::test(GameSettingsPage::class, ['section' => 'rewards'])
             ->set('streakThreshold', 11)->call('save')->assertHasErrors('streakThreshold')
             ->set('streakThreshold', 5)->set('streakVisible', false)->call('save')->assertHasNoErrors();
 

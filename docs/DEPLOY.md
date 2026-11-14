@@ -99,3 +99,12 @@ El comando muestra conteos de aceptadas y fallidas por Android; `miso:last-run:d
 Rollback: desactivar `ANDROID_PUSH_ENABLED` y regenerar configuración detiene solo los envíos nativos. Mantener tablas para conservar vínculos/historial y no ejecutar `migrate:rollback` sobre datos reales como apagado. Web Push y la aplicación Laravel continúan. Para que el dispositivo deje de mostrar mensajes ya aceptados por FCM, usar Desactivar en este dispositivo; el interruptor del servidor no puede retirar mensajes ya en tránsito.
 
 No se desplegó ni migró producción en esta implementación. La comprobación real queda pendiente de Firebase, cuenta de prueba y dispositivo físico.
+
+
+## Colección por generaciones (CHG-104)
+
+Publicar juntos el código, los assets compilados y `pokemon.json`. La migración `2026_11_14_000001_add_generation_to_game_species` añade e indexa `generation` y completa exclusivamente ese campo por número desde el JSON; valida nombres y cobertura de las especies existentes antes de modificar la tabla. Si hay discrepancias, se detiene: revisar el catálogo sin sobrescribir datos ni inventar generaciones. No volver a importar el catálogo completo para este llenado, porque el importador también actualiza otros campos.
+
+Antes del despliegue autorizado, respaldar la base y comprobar la migración en una base desechable con `php tests/Support/verify-game-generations-mysql.php`. Aplicar la migración con el procedimiento habitual de despliegue solo después de la autorización del responsable; el código nuevo requiere la columna. No se ha aplicado a datos reales como parte del desarrollo.
+
+La selección predeterminada es primera generación para todos los usuarios sin preferencia, incluidos los existentes. No se reescriben sus ajustes ni se eliminan especies obtenidas o Pokébolas pendientes. Después de desplegar, comprobar `/game/settings/generations`, guardar una selección con una cuenta autorizada y verificar colección, contador y encuentros nuevos. Más reglas y comandos de prueba en [Generaciones personales](game-generations.md).

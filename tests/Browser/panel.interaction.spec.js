@@ -54,6 +54,9 @@ for (const width of [1440, 390]) {
   expect(violations.violations.map(v=>v.id)).toEqual([]);
   expect(await dialog.evaluate(el=>el.scrollWidth <= el.clientWidth)).toBe(true);
   await page.keyboard.press('Escape');
+  const discard = page.getByRole('dialog', {name:'Tienes cambios sin guardar', exact:true});
+  await expect(discard).toBeVisible();
+  await discard.getByRole('button', {name:'Descartar cambios', exact:true}).click();
   await expect(dialog).toBeHidden();
   await open();
   await expect(dialog.getByLabel('Inicio', {exact:true})).toHaveValue('');

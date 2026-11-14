@@ -35,6 +35,7 @@ class ImportGameSpecies extends Command
         }
 
         $validator = Validator::make(['species' => $rows], [
+            'species.*.generation' => ['sometimes', 'integer', 'between:1,9'],
             'species.*.number' => ['required', 'integer', 'min:1', 'distinct'],
             'species.*.name' => ['required', 'string', 'max:120'],
             'species.*.line_key' => ['required', 'string', 'max:120', 'regex:/^[a-z0-9_-]+$/'],
@@ -74,6 +75,7 @@ class ImportGameSpecies extends Command
         DB::transaction(function () use ($rows, $resolveFrom): void {
             foreach ($rows as $row) {
                 GameSpecies::updateOrCreate(['number' => $row['number']], [
+                    ...(array_key_exists('generation', $row) ? ['generation' => $row['generation']] : []),
                     'name' => $row['name'],
                     'line_key' => $row['line_key'],
                     'stage' => $row['stage'] ?? 1,
