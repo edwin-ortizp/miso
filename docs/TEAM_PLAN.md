@@ -107,7 +107,7 @@ _Última actualización: 2026-11-14_
 | CHG-101 | M | Navegación Android y protección de formularios | done | Cerrado | 2/2 |
 | CHG-102 | M | Canal Android FCM en Laravel | in-progress | En verificación | 2/2 |
 | CHG-103 | M | Recepción FCM y apertura segura en Android | in-progress | En verificación | 2/2 |
-| CHG-104 | M | Generaciones personales y ajustes de Colección por secciones | in-progress | En verificación | 3/3 |
+| CHG-104 | M | Generaciones personales y ajustes de Colección por secciones | done | Cerrado | 3/3 |
 | CHG-105 | M | Evitar bloqueo de Mi día al registrar foco en PWA móvil | in-progress | En verificación | 2/4 |
 | CHG-106 | M | Restaurar chat y cierre de superficies en Android | to-do | Borrador | 0/4 |
 | CHG-107 | S | Editar tareas y Markdown con una sola acción | in-progress | En verificación | 2/2 |

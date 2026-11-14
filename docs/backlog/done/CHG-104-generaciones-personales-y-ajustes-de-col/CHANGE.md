@@ -1,9 +1,9 @@
 # CHG-104 · Generaciones personales y ajustes de Colección por secciones
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-14 · **Aprobado:** 2026-11-14 · **Cerrado:** —
+**Creado:** 2026-11-14 · **Aprobado:** 2026-11-14 · **Cerrado:** 2026-11-14
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -96,3 +96,4 @@ Móvil
 - 2026-11-14 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-14 — Movido a in-progress/ (En desarrollo)
 - 2026-11-14 — Implementación terminada → En verificación
+- 2026-11-14 — Cerrado por el usuario (Compuerta 3) → done/ (desde el panel)
