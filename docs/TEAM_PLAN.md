@@ -113,6 +113,7 @@ _Última actualización: 2026-11-14_
 | CHG-107 | S | Editar tareas y Markdown con una sola acción | in-progress | En verificación | 2/2 |
 | CHG-108 | M | Secciones de formularios visibles en móvil | to-do | Borrador | 0/4 |
 | CHG-109 | M | Corregir barra de estado y escala de Android | to-do | Borrador | 0/4 |
+| CHG-110 | XS | Alinear controles del header móvil | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

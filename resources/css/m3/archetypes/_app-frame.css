@@ -443,7 +443,7 @@
   }
 
   .lt-topbar { gap: 8px; padding: var(--lt-safe-top) calc(12px + var(--lt-safe-right)) 0 calc(12px + var(--lt-safe-left)); }
-  .lt-topbar__title { font-size: 1.1rem; flex-shrink: 1; min-width: 0; }
+  .lt-topbar__title { font-size: 1.1rem; flex: 1 1 0; min-width: 0; }
   .lt-topbar__tools .md-btn-filled > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .lt-topbar__tools .md-btn-filled { min-width: 40px; padding: 0 12px; }
   .lt-search { max-width: none; margin-left: 0; }
