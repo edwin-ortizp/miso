@@ -4,9 +4,19 @@ Implementación local CHG-091–094. No constituye evidencia de retención ni ce
 
 ## Recorrido
 
-Una cuenta creada por el registro web entra en `/bienvenida`. Debe confirmar contexto e intención, módulos y un hábito propio; puede añadir un objetivo o una tarea y termina con un resumen. Puede cerrar sesión y retomar el último paso confirmado. El perfil permanece disponible. Las cuentas anteriores no quedan bloqueadas y pueden abrir la guía desde Inicio o Personalizar módulos.
+Actualización local CHG-116: una cuenta creada por registro entra en `/bienvenida`, con cuatro pasos: contexto combinable → necesidad guiada → hábito → resumen. El contexto admite trabajo, estudio y cuidados simultáneos, o «Ninguna de estas» de forma exclusiva. La necesidad se elige entre cuidado cotidiano, organización, aprendizaje, algo personal y «Todavía no sé». No se exige redactar una intención.
 
-El registro ya no copia la rutina personal predeterminada ni los hábitos a evitar. Conserva los catálogos técnicos existentes. No se modifican hábitos anteriores. El FAB abre los formularios compartidos y los reintentos actualizan el elemento ya creado, sin duplicarlo.
+Cada necesidad ofrece tres ideas. El contexto solo modifica el orden; «Ver más ideas» permite explorar el catálogo completo. Elegir una tarjeta no crea registros. El FAB «Preparar hábito» abre el diálogo canónico con nombre y momento precargados; «Crear el mío» permite escribir un nombre propio con ejemplos. El formulario muestra «Todos los días» y no pide hora, duración, días, objetivos, acciones automáticas ni recordatorios. Crear no equivale a completar y no concede recompensas. Mi día muestra pendientes del bloque horario actual; Hábitos permite ver el registro diario completo.
+
+Se guardan los pasos confirmados, se mantiene el acceso a perfil y cierre de sesión y se retoma tras volver. Las cuentas existentes pueden usar «Volver a Mi día» y reutilizar un hábito propio. Al editarlo aquí solo cambian nombre y momento: se conservan duración, hora y acciones asociadas. Elegir otra necesidad no sustituye el hábito guardado; preparar otro conserva el anterior.
+
+La selección de módulos y la creación de objetivos se realizan después, desde sus pantallas habituales. Las cuentas nuevas mantienen los módulos iniciales vigentes (Hábitos, Objetivos y Tareas); las preferencias anteriores se conservan y no se activan módulos según ocupación.
+
+### Compatibilidad con la guía anterior
+
+Al abrir la bienvenida se adapta únicamente el estado de ese usuario a `guide_version: 2`, en `module_settings` bajo `personal-experience`. No hay migración ni actualización masiva. Se conservan intención, módulos, registros y eventos anteriores. Los contextos antiguos se convierten a selecciones combinables; una guía incompleta con contexto confirmado retoma en necesidad y mantiene su hábito. Una guía completada sigue completada y muestra resumen con salida. Los nuevos hitos de pasos se distinguen mediante `v2_step_1` a `v2_step_3`. `context` sigue derivándose como study/work/both/other para mantener el informe compatible; cuidados sin estudio/trabajo se agrupan en other.
+
+Las cuentas nuevas siguen sin recibir una rutina personal copiada. Los reintentos recuperan el ID guardado bajo el bloqueo por usuario. Se revalida la propiedad de hábitos al reutilizar, editar, avanzar y finalizar.
 
 ## Preferencias
 
@@ -30,7 +40,7 @@ No hay objetivos porcentuales fijados ni proveedor externo. El informe requiere 
 Reclutar voluntariamente entre 6 y 10 participantes, repartidos entre estudiantes y empleados; admitir quienes estudian y trabajan. No enviar invitaciones automáticamente.
 
 1. Antes del uso: preguntar por una dificultad reciente, cómo intentó resolverla y qué herramienta usa; registrar el contexto sin asumir que una ocupación es un nicho.
-2. Primera sesión: pedir registrarse, elegir módulos y preparar un hábito propio. Observar sin explicar dónde pulsar; registrar tiempo, errores, ayuda necesaria y si entiende cuándo marcar cumplimiento. Pedir que explique cómo cambiar módulos y salir.
+2. Primera sesión: pedir registrarse, elegir contexto y necesidad y preparar un hábito propio. Observar sin explicar dónde pulsar; registrar tiempo, errores, ayuda necesaria y si entiende cuándo marcar cumplimiento. Pedir que explique cómo cambiar módulos y salir.
 3. Días 1–7: observar hitos y regreso, y recoger brevemente obstáculos. Distinguir uso espontáneo de visitas motivadas por contacto del investigador.
 4. Día 7: preguntar qué acción concreta facilitó MiSo y qué le sobró o confundió. Comparar estudiantes y empleados, conservando también casos negativos.
 5. Día 14: revisar continuidad, cumplimiento y utilidad percibida. Identificar combinaciones de problema, contexto y módulos que merecen una prueba más enfocada.
@@ -55,6 +65,15 @@ CHG-091–094 quedan en verificación. La publicación y el estudio con personas
 
 ## Corrección visual de la bienvenida
 
-La guía usa un marco enfocado con marca y cuenta, sin navegación a módulos todavía bloqueados. Un escenario ilustrado de cielo y camino, la ball CSS existente y un mapa de cinco paradas sostienen la temática de primera aventura. La ilustración es decorativa y no entrega compañeros ni recompensas. Las opciones de contexto son radios con estado visible; los módulos usan sus iconos y acentos canónicos, con cuatro opciones iniciales y acceso a las restantes. El resumen convierte las instrucciones en tres próximos pasos.
+La guía conserva un marco enfocado con marca y cuenta, sin navegación a módulos todavía bloqueados. El escenario ilustrado de cielo y camino y la ball CSS existente acompañan cuatro paradas; no entregan compañeros ni recompensas. Contexto usa casillas, necesidad e ideas usan radios. El resumen explica cuándo marcar el hábito. La configuración de módulos se ofrece después en Ajustes.
 
-Se mantiene un único layout responsive: escenario lateral en escritorio y compacto arriba en móvil. Respeta movimiento reducido, mantiene los formularios compartidos y conserva el estado y la obligatoriedad de la guía. El popover de cuenta usa la variante canónica anchored, evitando overrides de componentes base en CSS de módulo.
+Un único layout responsive mantiene escenario lateral en escritorio y compacto arriba en móvil. Respeta movimiento reducido; el editor breve usa el diálogo canónico con protección de borrador y retorno de foco. El menú de cuenta mantiene su variante anclada.
+
+## Validación local CHG-116 (2026-11-15)
+
+- PHP: `php artisan test --filter=PersonalExperienceTest` → 14 pruebas correctas, 170 assertions. Incluye adaptación antigua, contexto múltiple, catálogo, validación, reintentos desde snapshots antiguos, aislamiento y conservación de ajustes ocultos de hábitos reutilizados.
+- Browser: `npx playwright test -c tests/Browser/personal-experience.config.js --grep "new user journey|existing guided"` → 4/4. Cuenta nueva a 390/768/1440 px y cuenta existente a 390 px; axe en contexto, necesidad, diálogo, resumen y preferencia oscura del navegador (la bienvenida conserva la paleta clara vigente); foco de título, Escape, retorno de foco, recarga, creación propia y nombre Unicode largo. Sin errores JS en los tres recorridos nuevos.
+- Capturas revisadas: welcome-390.png, editor-390.png, welcome-1440.png, needs-768.png y existing-dark-390.png en `storage/framework/testing/playwright/personal-experience/`. No se actualizan baselines visuales globales.
+- `npm run build` correcto. Conformidad global: 203 desviaciones frente a inventario de 345; falla por excesos en cuatro superficies ajenas (day-tile-info, game-collection, checkin-sheet y task-list). No señala infracciones del onboarding; no se modifica baseline.
+- Pint focalizado y `git diff --check` del cambio. CLI local sin comandos context/activity: lineamientos leídos directamente y evidencia registrada en el CHG.
+- No hay migraciones nuevas ni cambios de datos reales. Publicación, comprobación en entorno publicado y pruebas con participantes siguen pendientes.

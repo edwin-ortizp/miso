@@ -208,12 +208,14 @@
 .md-btn-icon.md-btn--sm {
   width: 32px;
   height: 32px;
+  padding: 0;
   font-size: 1rem;
 }
 
 .md-btn-icon.md-btn--lg {
   width: 48px;
   height: 48px;
+  padding: 0;
   font-size: 1.5rem;
 }
 

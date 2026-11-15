@@ -14,18 +14,6 @@
     <section {{ $attributes->class(['game-buddy-hero', 'game-buddy-stage', 'game-buddy-hero--night' => $night, 'game-buddy-hero--with-day' => $hasDay, 'game-stage--'.($empty ? 'cielo' : ($buddy['stage'] ?? 'cielo')), $empty ? '' : $buddy['type_class']]) }} aria-label="Bienvenida del día">
         <span class="game-buddy-stage__scene" aria-hidden="true"></span>
         <div class="game-buddy-hero__greeting">
-            @if ($empty)
-                <a href="{{ route('game.balls') }}" wire:navigate class="game-buddy-hero__art" aria-label="Ir a Balls"><x-game.ball class="game-buddy__ball" /></a>
-            @else
-                <a href="{{ route('game.collection', ['species' => $buddy['species_id']]) }}" wire:navigate class="game-buddy-hero__art game-buddy-stage__art" aria-label="Ver ficha de {{ $buddy['name'] }}">
-                    @if ($buddy['image'])
-                        <img src="{{ $buddy['image'] }}" width="120" height="120" loading="lazy" alt="">
-                    @else
-                        <span class="game-placeholder" aria-hidden="true"><i class="bi bi-stars"></i></span>
-                    @endif
-                    @if ($night)<span class="game-buddy-hero__zzz" aria-hidden="true">z<span>z</span><span>z</span></span>@endif
-                </a>
-            @endif
             <div class="game-buddy-hero__body">
                 <p class="game-buddy-hero__meta md-label-medium">
                     @if ($date)<span>{{ $date }}</span>@endif
@@ -55,6 +43,18 @@
                     @endif
                 </div>
             </div>
+            @if ($empty)
+                <a href="{{ route('game.balls') }}" wire:navigate class="game-buddy-hero__art" aria-label="Ir a Balls"><x-game.ball class="game-buddy__ball" /></a>
+            @else
+                <a href="{{ route('game.collection', ['species' => $buddy['species_id']]) }}" wire:navigate class="game-buddy-hero__art game-buddy-stage__art" aria-label="Ver ficha de {{ $buddy['name'] }}">
+                    @if ($buddy['image'])
+                        <img src="{{ $buddy['image'] }}" width="120" height="120" loading="lazy" alt="">
+                    @else
+                        <span class="game-placeholder" aria-hidden="true"><i class="bi bi-stars"></i></span>
+                    @endif
+                    @if ($night)<span class="game-buddy-hero__zzz" aria-hidden="true">z<span>z</span><span>z</span></span>@endif
+                </a>
+            @endif
         </div>
         @if ($hasDay)
             <div class="game-buddy-hero__day" role="group" aria-label="Tu día">

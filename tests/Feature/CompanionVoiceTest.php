@@ -159,7 +159,10 @@ class CompanionVoiceTest extends TestCase
     {
         $goal = $this->ownedGoal();
         $foreign = User::factory()->create()->goals()->create(['title' => 'Privado', 'status' => 'active']);
-        Livewire::test(GoalDetail::class, ['goal' => $goal->id])->set('goalId', $foreign->id)->assertNotFound();
+        $this->assertThrows(
+            fn () => Livewire::test(GoalDetail::class, ['goal' => $goal->id])->set('goalId', $foreign->id),
+            \Livewire\Features\SupportLockedProperties\CannotUpdateLockedPropertyException::class,
+        );
         $this->assertSame('active', $foreign->fresh()->status);
     }
 

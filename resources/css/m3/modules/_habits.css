@@ -1,5 +1,29 @@
 /* ===== Habit tracker ===== */
 
+.habit-date-navigation { display: grid; grid-template-columns: 44px minmax(0, 1fr) 44px; align-items: center; gap: 8px; width: 100%; }
+.habit-date-navigation > .md-btn-icon { width: 44px; height: 44px; color: var(--md-module-accent); }
+.habit-date-navigation > time { display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 0; text-align: center; color: var(--md-sys-color-on-surface); font-size: 1rem; font-weight: 700; }
+.habit-date-navigation > time > i { flex: none; font-size: 18px; color: var(--md-module-accent); }
+@media (max-width: 767.98px) {
+    .habit-date-navigation { gap: 4px; }
+    .habit-date-navigation > time { font-size: .9375rem; }
+}
+
+.habit-tracker .habit-period { padding: 0; overflow: hidden; border: 1px solid var(--md-sys-color-outline-variant); box-shadow: none; }
+.habit-period__heading { padding: 8px 16px; background: var(--md-sys-color-surface-container); }
+.habit-period__toggle { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 48px; padding: 0; border: 0; background: transparent; color: var(--md-sys-color-on-surface); text-align: start; cursor: pointer; }
+.habit-period__toggle:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; border-radius: 8px; }
+.habit-period__body { border-top: 1px solid var(--md-sys-color-outline-variant); }
+.habit-period__body > .habit-routine-start { margin: 12px 16px; min-height: 44px; }
+.habit-period .habit-list-action { min-height: 64px; border-top: 0; }
+.habit-period .habit-list-action + .habit-list-action { border-top: 1px solid var(--md-sys-color-outline-variant); }
+.habit-list-action__content { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
+.habit-list-action__content .md-list-item-content { min-width: 0; overflow-wrap: anywhere; }
+.habit-tracker .game-guardian--rail { gap: 12px; }
+.habit-tracker .game-guardian--rail .game-guardian__art,
+.habit-tracker .game-guardian--rail .game-guardian__art img,
+.habit-tracker .game-guardian--rail .game-placeholder { width: 64px; height: 64px; }
+
 .habit-coach-card { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) minmax(180px, .55fr); gap: 18px; align-items: center; min-height: 154px; overflow: hidden; padding: 24px; border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 22%, var(--md-sys-color-outline-variant)); border-radius: var(--md-sys-shape-corner-extra-large); background: linear-gradient(125deg, color-mix(in srgb, var(--md-sys-color-primary-container) 84%, var(--md-sys-color-surface)) 0%, var(--md-sys-color-surface-container-low) 72%); color: var(--md-sys-color-on-surface); box-shadow: var(--md-sys-elevation-level1); isolation: isolate; }
 .habit-coach-card__glow { position: absolute; z-index: -1; width: 230px; height: 230px; top: -145px; right: 13%; border-radius: 50%; background: color-mix(in srgb, var(--md-sys-color-primary) 24%, transparent); filter: blur(2px); }
 .habit-coach-card__icon { display: grid; width: 58px; height: 58px; place-items: center; border-radius: 20px; background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary); box-shadow: 0 10px 24px color-mix(in srgb, var(--md-sys-color-primary) 28%, transparent); font-size: 1.6rem; transform: rotate(-3deg); }

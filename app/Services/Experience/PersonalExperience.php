@@ -94,6 +94,28 @@ class PersonalExperience
         });
     }
 
+    /** Adapt only this person's guide on entry; preserve historical records and events. */
+    public function prepareGuide(int $userId): void
+    {
+        $this->begin($userId);
+        if (($this->state($userId)['guide_version'] ?? 0) === 2) {
+            return;
+        }
+        $this->change($userId, function ($state) {
+            if (($state['guide_version'] ?? 0) === 2) {
+                return $state;
+            }
+            $state['contexts'] = match ($state['context'] ?? '') {
+                'work' => ['work'], 'study' => ['study'], 'both' => ['work', 'study'], 'other' => ['none'], default => [],
+            };
+            $state['legacy_step'] = $state['step'] ?? 1;
+            $state['guide_version'] = 2;
+            $state['step'] = ! empty($state['completed_at']) ? 4 : (empty($state['contexts']) ? 1 : 2);
+
+            return $state;
+        });
+    }
+
     public function saveModules(int $userId, array $modules): void
     {
         $catalog = $this->catalog();

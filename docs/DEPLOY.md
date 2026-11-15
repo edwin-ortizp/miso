@@ -108,3 +108,12 @@ Publicar juntos el código, los assets compilados y `pokemon.json`. La migració
 Antes del despliegue autorizado, respaldar la base y comprobar la migración en una base desechable con `php tests/Support/verify-game-generations-mysql.php`. Aplicar la migración con el procedimiento habitual de despliegue solo después de la autorización del responsable; el código nuevo requiere la columna. No se ha aplicado a datos reales como parte del desarrollo.
 
 La selección predeterminada es primera generación para todos los usuarios sin preferencia, incluidos los existentes. No se reescriben sus ajustes ni se eliminan especies obtenidas o Pokébolas pendientes. Después de desplegar, comprobar `/game/settings/generations`, guardar una selección con una cuenta autorizada y verificar colección, contador y encuentros nuevos. Más reglas y comandos de prueba en [Generaciones personales](game-generations.md).
+
+
+## Objetivos conectados con hábitos (CHG-111)
+
+Publicar juntos PHP, vistas y assets compilados. La migración `2026_11_15_000001_create_goal_habits_table` añade únicamente vínculos entre objetivos y hábitos, con pareja única y eliminación en cascada del vínculo. No convierte acciones en mediciones ni completa objetivos automáticamente.
+
+Antes de habilitar el código, aplicar esa migración con el procedimiento de despliegue autorizado y respaldo habitual. El detalle requiere la tabla nueva. La migración se validó en MySQL 8.4 desechable con `php tests/Support/verify-goal-habits-mysql.php`; no se ha aplicado sobre datos personales ni producción. Al probar el script, usar una conexión MySQL de pruebas con permiso de crear una base desechable; solo elimina la base aleatoria que él mismo crea.
+
+Tras desplegar, comprobar filtros móviles, apertura del Pokémon, lista → detalle, creación y vinculación de tareas/hábitos y desvinculación sin eliminar registros. Rollback de aplicación: conservar la tabla y los vínculos; no borrar esa información para apagar la funcionalidad.

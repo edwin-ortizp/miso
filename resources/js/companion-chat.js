@@ -81,6 +81,15 @@ export function shouldHint(state) {
 
 /** Un solo chat por módulo en la página (se registra antes de moverlo a <body>). */
 const hosts = new Map();
+if (typeof document !== 'undefined') {
+    document.addEventListener('livewire:navigating', () => {
+        for (const host of hosts.values()) {
+            window.Alpine?.destroyTree(host);
+            host.remove();
+        }
+        hosts.clear();
+    });
+}
 
 const reducedMotion = () => typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -109,6 +118,7 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
         hint: false,
         lastSavedAt: 0,
         wire: null,
+        warned: false,
         lastResult: null,
         suggestionIndex: -1,
 
@@ -123,10 +133,18 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
                     const keyboard = Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop);
                     this.$root?.style.setProperty('--chat-keyboard', `${keyboard}px`);
                 };
+                this.viewportSync = sync;
                 window.visualViewport.addEventListener('resize', sync);
                 window.visualViewport.addEventListener('scroll', sync);
             }
             if (!this.disabled) this.scheduleHint();
+        },
+
+        destroy() {
+            if (this.viewportSync && typeof window !== 'undefined') {
+                window.visualViewport?.removeEventListener('resize', this.viewportSync);
+                window.visualViewport?.removeEventListener('scroll', this.viewportSync);
+            }
         },
 
         /**
@@ -138,7 +156,7 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
             const host = this.$root?.closest('[data-chat-host]');
             if (!host) return;
             // Un solo chat por página: en los renders de Livewire el módulo puede no detectarse.
-            const key = 'page';
+            const key = this.wire?.$id ?? 'page';
             const existing = hosts.get(key);
             if (existing && existing !== host && existing.isConnected !== false) {
                 existing._chatAdopt?.(this.wire);
@@ -150,6 +168,39 @@ export function createCompanionChat(config = {}, { storage = null, local = null 
             host._chatAdopt = (wire) => { this.wire = wire; };
             // Después de que los hijos (wire:model, combobox) se enlacen al componente.
             queueMicrotask(() => document.body.appendChild(host));
+        },
+
+        /** Referencia Livewire utilizable: el proxy muerto de Livewire devuelve funciones para todo. */
+        wireAvailable() {
+            const wire = this.wire;
+            if (!wire) return false;
+            const id = wire.$id;
+            return typeof id === 'string' && id !== '';
+        },
+
+        /**
+         * Ejecuta la acción de un chip y confirma si llegó al componente.
+         * Devuelve false (y avisa) cuando la referencia no sirve, para que el chat
+         * no se cierre dejando al usuario sin formulario (CHG-113).
+         */
+        act(run) {
+            if (!this.wireAvailable()) {
+                this.warnUnavailable();
+                return false;
+            }
+            try {
+                run();
+                return true;
+            } catch (error) {
+                console.error('[companion-chat] La acción del chat falló.', error);
+                return false;
+            }
+        },
+
+        warnUnavailable() {
+            if (this.warned) return;
+            this.warned = true;
+            console.error('[companion-chat] No se encontró el componente Livewire del módulo: la acción no se envió. El host del chat debe conservar la referencia capturada al moverse a <body>.');
         },
 
         /** Pista sutil de las primeras visitas: «Tócame para anotar algo». */

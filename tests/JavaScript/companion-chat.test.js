@@ -154,3 +154,70 @@ test('una propuesta vacía no deja identificadores ni textos sin resolver', asyn
     chat.lastResult={id:'old'};chat.wire={call:async()=>({ok:true,empty:true,message:'No hay pendientes.'})};
     await chat.tap(0);assert.equal(chat.step,'start');assert.equal(chat.lastResult,null);assert.equal(chat.messages.at(-1).text,'No hay pendientes.');
 });
+
+
+test('un render sin contexto de módulo conserva un único host y actualiza su propietario', async () => {
+    const original = globalThis.document;
+    const appended = [];
+    globalThis.document = { body: {appendChild: host => appended.push(host)} };
+    try {
+        const first = {isConnected:true};
+        const duplicate = {isConnected:true, remove() { this.removed = true; }};
+        const owner = { $id:'goal-host-regression' };
+        const chat = createCompanionChat({module:'goals'}, {storage:memoryStore(), local:memoryStore()});
+        chat.wire = owner;
+        chat.$root = {closest: () => first};
+        chat.adoptHost();
+        await Promise.resolve();
+        const rerender = createCompanionChat({}, {storage:memoryStore(), local:memoryStore()});
+        const freshWire = {$id:owner.$id};
+        rerender.wire = freshWire;
+        rerender.$root = {closest: () => duplicate};
+        rerender.adoptHost();
+        await Promise.resolve();
+        assert.deepEqual(appended, [first]);
+        assert.equal(chat.wire, freshWire);
+        assert.equal(duplicate.removed, true);
+        assert.equal(rerender.disabled, true);
+    } finally { globalThis.document = original; }
+});
+
+test('act invoca el método cuando la referencia Livewire está disponible', () => {
+    const chat = createCompanionChat({}, {storage:memoryStore(), local:memoryStore()});
+    let called = 0;
+    chat.wire = {$id:'module-water', openForm: () => { called++; }};
+    assert.equal(chat.act(() => chat.wire.openForm()), true);
+    assert.equal(called, 1);
+});
+
+test('act avisa una sola vez y no invoca con la referencia muerta de Livewire', () => {
+    const original = console.error;
+    const errors = [];
+    console.error = (...args) => errors.push(args[0]);
+    try {
+        const chat = createCompanionChat({}, {storage:memoryStore(), local:memoryStore()});
+        // El proxy muerto de Livewire devuelve una función para cualquier propiedad.
+        chat.wire = {$id: () => {}};
+        let called = false;
+        assert.equal(chat.act(() => { called = true; }), false);
+        assert.equal(called, false);
+        assert.equal(errors.length, 1);
+        assert.match(errors[0], /No se encontró el componente Livewire/);
+        chat.act(() => { called = true; });
+        assert.equal(errors.length, 1);
+        assert.equal(called, false);
+    } finally { console.error = original; }
+});
+
+test('act captura la excepción de la acción para no cerrar el chat', () => {
+    const original = console.error;
+    const errors = [];
+    console.error = (...args) => errors.push(args[0]);
+    try {
+        const chat = createCompanionChat({}, {storage:memoryStore(), local:memoryStore()});
+        chat.wire = {$id:'module-fail'};
+        assert.equal(chat.act(() => { throw new Error('sin componente'); }), false);
+        assert.equal(errors.length, 1);
+        assert.match(errors[0], /La acción del chat falló/);
+    } finally { console.error = original; }
+});

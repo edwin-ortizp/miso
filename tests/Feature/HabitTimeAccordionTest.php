@@ -56,6 +56,18 @@ class HabitTimeAccordionTest extends TestCase
         }
     }
 
+    public function test_toggling_a_habit_keeps_the_context_rail_and_active_module(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $habit = HabitDefinition::create(['name' => 'Leer', 'time_of_day' => 'morning']);
+
+        Livewire::test(HabitTracker::class)
+            ->assertSeeHtml('md-module-workspace--rail')
+            ->call('toggleHabit', $habit->id)
+            ->assertSeeHtml('md-module-workspace--rail')
+            ->assertSeeHtml('aria-pressed="true"');
+    }
+
     private function assertInitiallyOpenAt(string $now, array $expected): void
     {
         Carbon::setTestNow(Carbon::parse($now, 'America/Bogota'));

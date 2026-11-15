@@ -109,7 +109,12 @@ export function registerTaskCalendar(Alpine) {
         layers: readCalendarLayers(),
         draftLayers: defaultLayers(),
         filtersOpen: false,
-        get hasLayerFilter() { return Object.values(this.layers).some(value => !value); },
+        get hasLayerFilter() { return Object.keys(defaultLayers()).some(key => this.layers[key] === false); },
+        get layerFilterLabel() {
+            const labels = { tasks: 'Tareas', plans: 'Planes', birthdays: 'Cumpleaños', meals: 'Comidas' };
+            const hidden = Object.keys(labels).filter(key => this.layers[key] === false).map(key => labels[key]);
+            return hidden.length ? `Ocultos: ${hidden.join(', ')}` : '';
+        },
         openFilters() {
             this.draftLayers = { ...this.layers };
             this.filtersOpen = true;

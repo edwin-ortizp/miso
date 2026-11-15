@@ -184,3 +184,37 @@ test('sin colección conserva el FAB tradicional', async ({page}) => {
     await expect(page.locator('body > .lt-chat-host')).toHaveCount(0);
     await expect(page.locator('.md-fab-split')).toBeVisible();
 });
+
+// CHG-113: el host del chat vive en <body>, así que la acción de método tiene que usar
+// la referencia capturada por el controlador; con wire:click el clic se perdía en silencio.
+test('las acciones del chat abren su formulario en módulos y detalles con datos', async ({page}) => {
+    test.setTimeout(180000);
+    const errors=[];page.on('pageerror',error=>errors.push(error.message));await login(page);
+    const cases=[
+        ['/water/daily','Registrar','Nueva bebida'],
+        ['/pomodoro','Registrar tiempo','Registrar tiempo'],
+        ['/vehicles','Añadir vehículo','Vehículo'],
+        [`/vehicles/${fixture.vehicles.probe}`,'Editar vehículo','Vehículo'],
+        [`/vehicles/${fixture.vehicles.probe}/fuel`,'Registrar repostaje','Registrar repostaje'],
+        [`/vehicles/${fixture.vehicles.probe}/expenses`,'Registrar gasto','Registrar gasto'],
+        [`/vehicles/${fixture.vehicles.probe}/maintenance`,'Activar plan','Activar mantenimiento'],
+        ['/relationships','Agregar persona','Agregar persona'],
+        [`/relationships/${fixture.relationships.probe}`,'Registrar acontecimiento','Registrar acontecimiento'],
+        [`/relationships/${fixture.relationships.probe}/history`,'Registrar acontecimiento','Registrar acontecimiento'],
+        [`/relationships/${fixture.relationships.probe}/tasks`,'Agregar tarea','Agregar tarea asociada'],
+        [`/relationships/${fixture.relationships.probe}/plans`,'Agregar plan','Agregar plan'],
+        [`/plans/${fixture.plans.probe}`,'Registrar visita','Registrar plan realizado'],
+    ];
+    for(const [route,chip,name] of cases){
+        await page.goto(route);
+        const launcher=page.locator('body > .lt-chat-host .lt-chat__launcher');
+        await expect(launcher).toBeVisible();
+        await launcher.click();
+        const panel=page.locator('body > .lt-chat-host .lt-chat__panel');
+        await expect(panel).toBeVisible();
+        await panel.getByRole('button',{name:chip,exact:true}).click();
+        await expect(page.getByRole('dialog',{name,exact:true})).toBeVisible();
+        await expect(panel).toBeHidden();
+    }
+    expect(errors).toEqual([]);
+});

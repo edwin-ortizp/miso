@@ -5,8 +5,6 @@
     'items' => [],
     'quick' => [],
     'greeting' => null,
-    'binding',
-    'tag',
 ])
 
 @php
@@ -18,6 +16,9 @@
      *   step = solo cambia de paso de la conversación.
      * - `items`: las acciones de creación de siempre; abren su formulario como el FAB.
      * El estado vive en el navegador (wire:ignore): los renders de Livewire no lo cierran.
+     * El enlace de cada chip lo resuelve ActionBinding: este host vive en <body>, fuera
+     * del componente Livewire, así que una acción de método se invoca con la referencia
+     * capturada (`wire.metodo()`) y nunca con `wire:click` (CHG-113).
      */
     $quick = collect($quick)->filter()->values()->map(fn ($item, $index) => $item + ['id' => $item['id'] ?? 'q'.$index, 'group' => $item['group'] ?? 'start'])->all();
     $covered = collect($quick)->pluck('more.event')->filter()->all();
@@ -90,11 +91,12 @@
                 </button>
             @endforeach
             @foreach ($items as $item)
-                <{{ $tag($item) }} @if ($tag($item) === 'button') type="button" @endif {!! $binding($item) !!}
+                @php $chipTag = \App\Support\Ui\ActionBinding::tag($item); @endphp
+                <{{ $chipTag }} @if ($chipTag === 'button') type="button" @endif {!! \App\Support\Ui\ActionBinding::chat($item) !!}
                     class="lt-chat__chip lt-chat__chip--link" data-chat-chip style="--i: {{ count($quick) + $loop->index }}"
-                    x-show="step === 'start' || step === 'done'" @click="close({ restoreFocus: false })">
+                    x-show="step === 'start' || step === 'done'">
                     <i class="bi {{ $item['icon'] ?? 'bi-plus-lg' }}" aria-hidden="true"></i><span>{{ $item['label'] }}</span>
-                </{{ $tag($item) }}>
+                </{{ $chipTag }}>
             @endforeach
         </div>
 

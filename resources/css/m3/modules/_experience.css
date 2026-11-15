@@ -22,7 +22,7 @@
 .experience-guide { max-width: 1160px; width: 100%; margin-inline: auto; }
 .experience-guide p, .experience-guide h1, .experience-guide h2 { overflow-wrap: anywhere; }
 .experience-route { margin: 20px auto 30px; max-width: 940px; }
-.experience-route ol { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); list-style: none; padding: 0; margin: 0; }
+.experience-route ol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); list-style: none; padding: 0; margin: 0; }
 .experience-route li { display: flex; align-items: center; justify-content: center; gap: 9px; position: relative; color: var(--md-sys-color-on-surface-variant); font-size: 12px; font-weight: 600; }
 .experience-route li + li::before { content: ''; position: absolute; left: -8%; width: 16%; height: 2px; background: var(--md-sys-color-outline-variant); }
 .experience-route__dot { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 50%; background: var(--md-sys-color-surface); flex: none; }
@@ -168,3 +168,10 @@
     .experience-habit-preview { padding: 16px; }
 }
 @media (prefers-reduced-motion: reduce) { .experience-guide-ball { animation: none; } .experience-context { transition: none; } }
+
+/* Guided first habit: native choices retain the adventure's existing states. */
+.experience-need-grid { display: grid; gap: 10px; }
+.experience-need-grid .experience-context { flex-direction: row; align-items: center; padding-right: 42px; }
+.experience-context input { min-width: 20px; min-height: 20px; }
+.experience-ideas { margin-block: 20px; }
+.experience-reuse { display: grid; gap: 12px; margin-top: 24px; }

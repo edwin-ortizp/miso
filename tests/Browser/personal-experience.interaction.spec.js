@@ -7,7 +7,7 @@ import path from 'node:path';
 const PORT = 8063;
 const directory = path.resolve('storage/framework/testing');
 const database = path.join(directory, 'personal-experience-browser.sqlite');
-let server, fixture;
+let server, fixture, serverLog;
 test.describe.configure({ mode: 'serial' });
 test.use({ baseURL: `http://127.0.0.1:${PORT}` });
 
@@ -21,8 +21,9 @@ test.beforeAll(async () => {
         GAME_IMAGE_BASE_URL: '', TELESCOPE_ENABLED: 'false', NIGHTWATCH_ENABLED: 'false',
         APP_CONFIG_CACHE: path.join(directory, 'unused-personal-experience-config.php') };
     fixture = JSON.parse(execFileSync('php', ['tests/Browser/support/personal-experience-fixture.php'], { env, encoding: 'utf8' }));
+    serverLog = openSync(path.join(directory, 'personal-experience-server.log'), 'w');
     server = spawn('php', ['-S', `127.0.0.1:${PORT}`, path.resolve('vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')],
-        { cwd: path.resolve('public'), env, stdio: 'ignore', windowsHide: true });
+        { cwd: path.resolve('public'), env, stdio: ['ignore', serverLog, serverLog], windowsHide: true });
     for (let i = 0; i < 60; i++) {
         try { if ((await fetch(`http://127.0.0.1:${PORT}/login`)).ok) return; } catch {}
         await new Promise(resolve => setTimeout(resolve, 300));
@@ -36,6 +37,7 @@ test.afterAll(async () => {
         server.kill();
         await stopped;
     }
+    if (serverLog !== undefined) closeSync(serverLog);
     // Solo archivos exactos de esta fixture dentro del directorio de testing.
     for (const suffix of ['', '-wal', '-shm']) {
         const target = database + suffix;
@@ -142,35 +144,70 @@ for (const width of [390, 768, 1440]) {
         await page.screenshot({ path: `storage/framework/testing/playwright/personal-experience/welcome-${width}.png`, fullPage: true });
         const firstAxe = await new AxeBuilder({ page }).include('.experience-guide').analyze();
         expect(firstAxe.violations).toEqual([]);
-        await page.getByRole('radio', { name: 'Estudio', exact: true }).check();
-        await page.getByLabel('¿Qué te gustaría mejorar?').fill('Mantener una rutina de estudio');
+        await expect(page.getByRole('link', { name: 'Volver a Mi día', exact: true })).toHaveCount(0);
         await page.getByRole('button', { name: 'Continuar', exact: true }).click();
-        await expect(page.getByRole('heading', { name: 'MiSo a tu medida' })).toBeVisible();
-        await expect(page.getByRole('checkbox', { name: 'Pomodoro', exact: true })).toBeChecked();
-        await page.getByText('Explorar más módulos', { exact: true }).click();
-        await expect(page.getByRole('checkbox', { name: 'Vehículos', exact: true })).toBeVisible();
-        await page.screenshot({ path: `storage/framework/testing/playwright/personal-experience/modules-${width}.png`, fullPage: true });
+        await expect(page.getByRole('alert')).toContainText('Elige al menos una opción.');
+        if (width === 390) {
+            await page.getByRole('checkbox', { name: 'Trabajo', exact: true }).check();
+            await page.getByRole('checkbox', { name: 'Ninguna de estas', exact: true }).check();
+            await expect(page.getByRole('checkbox', { name: 'Trabajo', exact: true })).not.toBeChecked();
+        } else {
+            await page.getByRole('checkbox', { name: 'Trabajo', exact: true }).check();
+            await page.getByRole('checkbox', { name: 'Estudio', exact: true }).check();
+            await page.getByRole('checkbox', { name: 'Cuido del hogar o de otras personas', exact: true }).check();
+        }
+        await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+        await expect(page.getByRole('heading', { name: '¿Con qué te gustaría empezar?' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: '¿Con qué te gustaría empezar?' })).toBeFocused();
+        await expect(page.getByRole('textbox')).toHaveCount(0);
+        await page.getByRole('radio', { name: width === 390 ? 'Todavía no sé' : 'Aprender o estudiar', exact: true }).check();
+        await page.screenshot({ path: `storage/framework/testing/playwright/personal-experience/needs-${width}.png`, fullPage: true });
+        expect((await new AxeBuilder({ page }).include('.experience-guide').analyze()).violations).toEqual([]);
+        await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+        await expect(page.getByRole('heading', { name: 'Un hábito pequeño', exact: true })).toBeVisible();
         await page.reload();
-        await expect(page.getByRole('heading', { name: 'MiSo a tu medida' })).toBeVisible();
-        await page.getByRole('button', { name: 'Guardar y continuar' }).click();
-        await expect(page.getByRole('heading', { name: 'Tu primer hábito', exact: true })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Un hábito pequeño', exact: true })).toBeVisible();
+        await expect(page.getByRole('radio')).toHaveCount(3);
+        await page.getByRole('button', { name: 'Ver más ideas', exact: true }).click();
+        await expect(page.getByRole('radio')).toHaveCount(12);
+        await page.getByRole('radio', { name: 'Leer unos minutos', exact: true }).check();
         await page.screenshot({ path: `storage/framework/testing/playwright/personal-experience/habit-${width}.png`, fullPage: true });
-        await page.getByRole('button', { name: 'Crear mi hábito', exact: true }).click();
-        const dialog = page.getByRole('dialog', { name: 'Nuevo hábito' });
+        await page.getByRole('button', { name: 'Preparar hábito', exact: true }).click();
+        await page.getByRole('menuitem', { name: 'Preparar hábito', exact: true }).click();
+        const dialog = page.getByRole('dialog', { name: 'Preparar mi hábito' });
         await expect(dialog).toBeVisible();
+        const dialogBox = await dialog.boundingBox();
+        expect(dialogBox.y).toBeGreaterThanOrEqual(0);
+        expect(dialogBox.y + dialogBox.height).toBeLessThanOrEqual(901);
+        await expect(dialog.getByLabel('Nombre', { exact: false })).toHaveValue('Leer unos minutos');
+        await expect(dialog.getByLabel('Momento del día', { exact: false })).toHaveValue('anytime');
+        await expect(dialog.getByText('Todos los días. Puedes ajustar este hábito después.')).toBeVisible();
+        expect((await new AxeBuilder({ page }).include('#onboarding-habit-dialog').analyze()).violations).toEqual([]);
+        await page.screenshot({ path: `storage/framework/testing/playwright/personal-experience/editor-${width}.png`, fullPage: true });
+        // Escape returns to the invoking action without writing a habit.
+        await page.keyboard.press('Escape');
+        await expect(dialog).toBeHidden();
+        await page.getByRole('button', { name: 'Preparar hábito', exact: true }).click();
+        await page.getByRole('menuitem', { name: width === 1440 ? 'Crear el mío' : 'Preparar hábito', exact: true }).click();
+        await expect(dialog).toBeVisible();
+        if (width === 1440) {
+            await expect(dialog.getByLabel('Nombre', { exact: false })).toHaveValue('');
+            await dialog.getByLabel('Nombre', { exact: false }).fill('á'.repeat(121));
+            await dialog.getByRole('button', { name: 'Guardar hábito', exact: true }).click();
+            await expect(dialog.getByLabel('Nombre', { exact: false })).toHaveValue('á'.repeat(121));
+            await expect(dialog.getByLabel('Nombre', { exact: false })).toHaveAttribute('aria-invalid', 'true');
+        }
         await dialog.getByLabel('Nombre', { exact: false }).fill('Leer apuntes durante diez minutos');
-        await dialog.getByRole('button', { name: 'Crear hábito', exact: true }).click();
-        await expect(page.getByRole('article', { name: 'Vista previa del hábito' })).toContainText('Leer apuntes');
+        await dialog.getByRole('button', { name: 'Guardar hábito', exact: true }).click();
+        await expect(dialog).toBeHidden();
+        await expect(page.getByRole('article', { name: 'Tu hábito preparado' })).toContainText('Leer apuntes');
         await page.getByRole('button', { name: 'Continuar', exact: true }).click();
-        await expect(page.getByRole('heading', { name: 'Un siguiente paso, si quieres' })).toBeVisible();
-        await page.screenshot({ path: `storage/framework/testing/playwright/personal-experience/optional-${width}.png`, fullPage: true });
-        await page.getByRole('button', { name: 'Continuar al resumen' }).click();
         await expect(page.getByRole('heading', { name: 'Ya tienes por dónde empezar' })).toBeVisible();
         const guideAxe = await new AxeBuilder({ page }).include('.experience-guide').analyze();
         expect(guideAxe.violations).toEqual([]);
         await page.screenshot({ path: `storage/framework/testing/playwright/personal-experience/summary-${width}.png`, fullPage: true });
         await page.getByRole('button', { name: 'Empezar mi día' }).click();
-        await expect(page).not.toHaveURL(/bienvenida/);
+        await expect(page).not.toHaveURL(/bienvenida/, { timeout: 30000 });
         await expect(page.getByText('Leer apuntes durante diez minutos', { exact: true })).toBeVisible();
         await expect(page.getByText('Registro rápido', { exact: true })).toHaveCount(0);
         await expect(page.getByText('Bitácora del día', { exact: true })).toHaveCount(0);
@@ -213,3 +250,40 @@ for (const width of [390, 768, 1440]) {
         expect(errors).toEqual([]);
     });
 }
+
+
+test('existing guided journey reuses a habit and allows leaving', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 900 });
+    await page.goto('/login');
+    await page.locator('input[type=email]').fill('existing-guide@example.test');
+    await page.locator('input[type=password]').fill('browser-test-password');
+    await page.locator('button[type=submit]').click();
+    await page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 30000 });
+    await page.goto('/bienvenida');
+    await page.getByRole('link', { name: 'Volver a Mi día', exact: true }).click();
+    await expect(page).not.toHaveURL(/bienvenida/, { timeout: 30000 });
+    await page.goto('/bienvenida');
+    await page.getByRole('checkbox', { name: 'Cuido del hogar o de otras personas', exact: true }).check();
+    await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+    await page.getByRole('radio', { name: 'Cuidarme en lo cotidiano', exact: true }).check();
+    await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+    await page.getByLabel('Usar un hábito que ya tengo').selectOption({ label: 'Mi hábito de siempre' });
+    await page.getByRole('button', { name: 'Usar este hábito', exact: true }).click();
+    await expect(page.getByRole('article', { name: 'Tu hábito preparado' })).toContainText('Mi hábito de siempre');
+    await page.getByRole('button', { name: 'Editar mi hábito', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Preparar mi hábito' });
+    await expect(dialog.getByLabel('Nombre', { exact: false })).toHaveValue('Mi hábito de siempre');
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(page.getByRole('button', { name: 'Editar mi hábito', exact: true })).toBeFocused();
+    await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
+    await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
+    expect((await new AxeBuilder({ page }).include('.experience-guide').analyze()).violations).toEqual([]);
+    await page.screenshot({ path: 'storage/framework/testing/playwright/personal-experience/existing-dark-390.png', fullPage: true });
+    await page.getByRole('button', { name: 'Continuar', exact: true }).click();
+    await page.getByRole('button', { name: 'Empezar mi día' }).click();
+    await expect(page).not.toHaveURL(/bienvenida/, { timeout: 30000 });
+    await page.goto('/bienvenida');
+    await expect(page.getByRole('heading', { name: 'Ya tienes por dónde empezar' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Volver a Mi día', exact: true })).toBeVisible();
+});

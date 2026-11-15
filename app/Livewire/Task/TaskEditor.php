@@ -31,8 +31,15 @@ class TaskEditor extends TaskList
     #[\Livewire\Attributes\Locked]
     public string $editorIntent = '';
 
-    public function mount(): void
+    #[\Livewire\Attributes\Locked]
+    public ?string $goalContext = null;
+
+    public function mount(?string $goalContext = null): void
     {
+        if ($goalContext !== null) {
+            abort_unless(auth()->check(), 403);
+            $this->goalContext = \App\Models\Goal::where('user_id', auth()->id())->findOrFail($goalContext)->id;
+        }
         $this->draftTaskId = (string) \Illuminate\Support\Str::uuid();
         if ($this->editTask) $this->openForm($this->editTask);
     }
@@ -166,6 +173,10 @@ class TaskEditor extends TaskList
                 $task->save();
             }
             $this->syncTaskRelations($task);
+            if ($this->goalContext !== null) {
+                $goal = \App\Models\Goal::where('user_id', auth()->id())->findOrFail($this->goalContext);
+                \App\Models\TaskAssociation::link($task, $goal);
+            }
             $this->saveReminders($task);
             $result = null;
             if ($status) {
@@ -187,6 +198,7 @@ class TaskEditor extends TaskList
         $this->dispatch('task-records-changed')->to(TaskList::class);
         $this->dispatch('task-calendar-refresh');
         $this->dispatch('task-editor-saved');
+        if ($this->goalContext !== null) $this->dispatch('goal-relations-changed');
         if ($feedback['completed'] ?? false) $this->dispatch('task-completed', ...$feedback);
         return $feedback;
     }

@@ -90,9 +90,6 @@
 
             {{-- Escritorio: buscador siempre visible. Compacto: icono que expande
                  a buscador de ancho completo, patrón M3 de "search view". --}}
-            <button type="button" class="md-btn-icon" x-show="compact && !searchOpen" @click="searchOpen = true; $nextTick(() => document.getElementById('lt-global-search').focus())" aria-label="Buscar">
-                <i class="bi bi-search" aria-hidden="true"></i>
-            </button>
             <div class="lt-search" role="search" x-show="!compact || searchOpen" x-data="{ open: false }" @click.outside="open = false">
                 <i class="bi bi-search" aria-hidden="true"></i>
                 <label class="visually-hidden" for="lt-global-search">Buscar en todos los módulos</label>
@@ -111,6 +108,10 @@
             </div>
 
             <div class="lt-topbar__tools" x-show="!(compact && searchOpen)">
+                <button type="button" class="md-btn-icon" x-show="compact && !searchOpen" @click="searchOpen = true; $nextTick(() => document.getElementById('lt-global-search').focus())" aria-label="Buscar">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                </button>
+
                 <a href="{{ route('settings') }}" wire:navigate class="md-btn-icon" aria-label="Ajustes">
                     <i class="bi bi-gear" aria-hidden="true"></i>
                 </a>

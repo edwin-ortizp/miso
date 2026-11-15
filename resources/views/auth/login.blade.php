@@ -1,60 +1,40 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('icons/icon-96x96.png') }}">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Iniciar Sesión - MiSo</title>
-    @include('partials.app-styles')
-    <script>window.MisoNative?.postMessage(JSON.stringify({v:1,type:'session',account:null}));</script>
-</head>
-<body style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--md-sys-color-surface);">
-    <div style="max-width: 420px; width: 100%; padding: 0 16px;">
-        <div class="md-card-elevated" style="padding: 32px;">
-            <div class="text-center mb-4">
-                <div class="md-card-icon md-card-icon--primary mx-auto mb-3" style="width: 64px; height: 64px; border-radius: var(--md-sys-shape-corner-large); font-size: 2rem;">
-                    <i class="bi bi-heart-pulse"></i>
-                </div>
-                <h1 class="md-headline-medium" style="color: var(--md-sys-color-on-surface);">MiSo</h1>
-                <p class="md-body-medium" style="color: var(--md-sys-color-on-surface-variant);">Tu socio de crecimiento personal. Inicia sesión para continuar.</p>
-            </div>
-
-            @if ($errors->any())
-                <div class="md-card-filled mb-3" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); padding: 12px 16px;">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-exclamation-circle-fill"></i>
-                        <span class="md-body-medium">{{ $errors->first() }}</span>
-                    </div>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-                <div class="d-flex flex-column gap-3">
-                    <div class="md-text-field">
-                        <input type="email" name="email" value="{{ old('email') }}" required autofocus placeholder=" " id="login-email">
-                        <label for="login-email">Correo electrónico</label>
-                    </div>
-                    <div class="md-text-field">
-                        <input type="password" name="password" required placeholder=" " id="login-pw">
-                        <label for="login-pw">Contraseña</label>
-                    </div>
-                    <label class="md-checkbox">
-                        <input type="checkbox" name="remember">
-                        Recordarme
-                    </label>
-                    <button type="submit" class="md-btn-filled w-100" style="height: 48px; font-size: 1rem;">
-                        <i class="bi bi-box-arrow-in-right"></i> Iniciar Sesión
-                    </button>
-                </div>
-            </form>
-
-            <div class="text-center mt-4">
-                <a href="{{ route('register') }}" class="md-btn-text" style="font-size: 0.875rem;">
-                    ¿No tienes cuenta? Regístrate
-                </a>
-            </div>
+<x-auth-shell>
+    @if ($errors->has('credentials'))
+        <div class="md-login__alert" role="alert" tabindex="-1" data-login-server-error>
+            <i class="bi bi-exclamation-circle" aria-hidden="true"></i>
+            <span>{{ $errors->first('credentials') }}</span>
         </div>
+    @endif
+    <form method="POST" action="{{ route('login') }}" class="md-login__form" data-login-form>
+        @csrf
+        <div data-login-field="email">
+            <x-ui.field name="email" id="login-email" label="Correo electrónico" type="email"
+                :value="old('email')" required autocomplete="username" inputmode="email"
+                autocapitalize="none" spellcheck="false" :aria-describedby="$errors->has('email') ? null : 'login-email-error'" />
+            @unless ($errors->has('email'))
+                <p id="login-email-error" class="md-login__field-error" aria-live="polite" hidden></p>
+            @endunless
+        </div>
+        <div class="md-login__password" data-login-field="password">
+            <x-ui.field name="password" id="login-pw" label="Contraseña" type="password"
+                required autocomplete="current-password" :aria-describedby="$errors->has('password') ? null : 'login-pw-error'" />
+            <x-ui.icon-action icon="bi-eye" label="Mostrar contraseña" class="md-login__reveal"
+                aria-controls="login-pw" aria-pressed="false" data-login-reveal hidden />
+            @unless ($errors->has('password'))
+                <p id="login-pw-error" class="md-login__field-error" aria-live="polite" hidden></p>
+            @endunless
+        </div>
+        <label class="md-checkbox md-login__remember">
+            <input type="checkbox" name="remember" @checked(old('remember'))> Recordarme
+        </label>
+        <x-ui.action type="submit" size="lg" class="md-login__submit" data-login-submit>
+            <span data-login-submit-label>Iniciar sesión</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </x-ui.action>
+        <p class="md-login__status" role="status" data-login-status></p>
+    </form>
+    <div class="md-login__register">
+        <span>¿No tienes cuenta?</span>
+        <x-ui.action variant="text" :href="route('register')">Regístrate</x-ui.action>
     </div>
-</body>
-</html>
+</x-auth-shell>

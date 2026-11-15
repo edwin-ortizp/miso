@@ -207,6 +207,12 @@ class GoalIndex extends Component
         $this->resetPage();
     }
 
+    public function clearFilters(): void
+    {
+        $this->statusFilter = 'all';
+        $this->resetPage();
+    }
+
     protected function filterProperties(): array
     {
         return ['statusFilter'];

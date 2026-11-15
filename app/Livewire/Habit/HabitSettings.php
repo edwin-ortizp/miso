@@ -138,6 +138,7 @@ class HabitSettings extends Component
             $habit = $habit ? tap($habit)->update($payload) : HabitDefinition::create($payload);
 
             $this->syncAction($habit, $validated);
+            $this->afterHabitSaved($habit);
         });
 
         $this->message = $this->editingId
@@ -208,8 +209,10 @@ class HabitSettings extends Component
         ]);
     }
 
+    protected function afterHabitSaved(HabitDefinition $habit): void {}
+
     /** @return array<int, HabitActionField> */
-    private function currentFields(): array
+    protected function currentFields(): array
     {
         return $this->registry()->find($this->actionKey)?->fields() ?? [];
     }
@@ -278,7 +281,7 @@ class HabitSettings extends Component
         ]);
     }
 
-    private function registry(): HabitActionRegistry
+    protected function registry(): HabitActionRegistry
     {
         return app(HabitActionRegistry::class);
     }

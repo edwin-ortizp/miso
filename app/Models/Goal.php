@@ -47,6 +47,11 @@ class Goal extends Model
         static::deleting(fn (self $goal) => $goal->taskAssociations()->delete());
     }
 
+    public function habits(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(HabitDefinition::class, 'goal_habits', 'goal_id', 'habit_id')->withTimestamps();
+    }
+
     public function goalEntries()
     {
         return $this->hasMany(GoalEntry::class);

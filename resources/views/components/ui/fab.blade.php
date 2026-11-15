@@ -27,20 +27,10 @@
     $moduleKey = \App\Support\Ui\ModuleContext::current($module);
     $primary = ['label' => $label, 'icon' => $icon, 'action' => $action, 'href' => $href, 'event' => $event, 'detail' => $detail];
 
-    $binding = static function (array $item): string {
-        if (! empty($item['href'])) {
-            return 'href="'.e($item['href']).'"';
-        }
-        if (! empty($item['event'])) {
-            $expression = '$dispatch('.json_encode($item['event']).', '.json_encode($item['detail'] ?? new \stdClass).')';
-
-            return 'x-on:click="'.e($expression).'"';
-        }
-
-        return 'wire:click="'.e($item['action'] ?? '').'"';
-    };
+    // CHG-113: el enlace de cada acción vive en ActionBinding, compartido con el chat.
+    $binding = static fn (array $item): string => \App\Support\Ui\ActionBinding::fab($item);
     $menuId = 'fab-menu-'.\Illuminate\Support\Str::random(6);
-    $tag = static fn (array $item): string => empty($item['href']) ? 'button' : 'a';
+    $tag = static fn (array $item): string => \App\Support\Ui\ActionBinding::tag($item);
     // CHG-100: con favorito y presentación «Con mi Pokémon», el chat ocupa el lugar del FAB.
     $companion = app(\App\Services\Game\FavoriteCompanion::class)->forChat(auth()->id());
 @endphp
@@ -51,7 +41,7 @@
     <div wire:ignore wire:key="companion-chat-host-{{ $moduleKey }}">
         <div class="md-fab-layer md-fab-host lt-chat-host" data-module="{{ $moduleKey }}" data-chat-host="{{ $moduleKey ?: 'app' }}">
             <x-ui.companion-chat :companion="$companion" :label="$label" :module-key="$moduleKey"
-                                 :items="$actions->prepend($primary)->all()" :quick="$quick" :greeting="$greeting" :binding="$binding" :tag="$tag" />
+                                 :items="$actions->prepend($primary)->all()" :quick="$quick" :greeting="$greeting" />
         </div>
     </div>
 @else

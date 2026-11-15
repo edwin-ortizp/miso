@@ -4,7 +4,9 @@ namespace App\Livewire\Game;
 
 use App\Services\Game\Guardian\GuardianAdvisor;
 use App\Services\Game\ModuleGuardian;
+use Carbon\Carbon;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 /**
@@ -19,6 +21,13 @@ class GuardianCard extends Component
     public string $variant = 'rail';
 
     public ?array $guardian = null;
+
+    /** Avance de la fecha consultada, proporcionado por el módulo padre. */
+    #[Reactive]
+    public ?array $displayProgress = null;
+
+    #[Reactive]
+    public ?string $displayDate = null;
 
     public string $adviceKey = '';
 
@@ -56,13 +65,19 @@ class GuardianCard extends Component
 
     private function advise(?string $except): void
     {
-        if (! $this->guardian) {
+        if (! $this->guardian || $this->isViewingOtherDate()) {
             return;
         }
         $advice = app(GuardianAdvisor::class)->advise($this->module, now(), $except, $this->progress());
         $this->adviceKey = $advice['key'];
         $this->advice = $advice['html'];
         $this->action = $advice['action'] ?? null;
+    }
+
+    private function isViewingOtherDate(): bool
+    {
+        return $this->module === 'habits' && $this->displayDate !== null
+            && $this->displayDate !== now()->toDateString();
     }
 
     /** @return array{done: int, total: int, care: bool} Datos de la frase por avance (CHG-055). */
@@ -79,7 +94,23 @@ class GuardianCard extends Component
 
     public function render()
     {
+        $isOtherDate = $this->isViewingOtherDate();
+        if ($this->guardian && ! $isOtherDate && $this->advice === '') {
+            $this->advise(null);
+        }
+
+        $dateSummary = null;
+        if ($isOtherDate) {
+            $done = $this->displayProgress['done'] ?? 0;
+            $total = $this->displayProgress['total'] ?? 0;
+            $date = Carbon::parse($this->displayDate)->translatedFormat('d \d\e F');
+            $dateSummary = $total === 0 ? 'No hay hábitos para esta fecha.'
+                : "{$done} de {$total} hábitos completados el {$date}.";
+        }
+
         return view('livewire.game.guardian-card', [
+            'isOtherDate' => $isOtherDate,
+            'dateSummary' => $dateSummary,
             'refresh' => (int) config('game.guardian_advice.refresh_seconds', 300),
             'sheet' => $this->showSheet && $this->guardian
                 ? app(\App\Services\Game\SpeciesSheet::class)->build((int) $this->guardian['species_id'])

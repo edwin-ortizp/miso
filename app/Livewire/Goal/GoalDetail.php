@@ -20,6 +20,7 @@ use Livewire\Component;
 class GoalDetail extends Component
 {
     use \App\Livewire\Concerns\HasReminderDraft;
+    #[\Livewire\Attributes\Locked]
     public string $goalId;
 
     /** Confirmación del último evento; no se vuelve a seleccionar durante render. */
@@ -28,7 +29,6 @@ class GoalDetail extends Component
     public bool $showGoalForm = false;
     public bool $showEntryForm = false;
     public bool $showNumericForm = false;
-    public bool $showTaskForm = false;
 
     public string $title = '';
     public string $description = '';
@@ -52,28 +52,11 @@ class GoalDetail extends Component
     public ?string $numericDate = null;
     public string $numericNote = '';
 
-    public string $taskTitle = '';
-    public string $taskDescription = '';
-    public string $taskCategory = '';
-    public string $taskPriority = '';
-    public string $taskSize = '';
-    public ?string $taskDueDate = null;
-
-    public array $categories = [
-        'jikko' => 'Jikko', 'entreagiles' => 'EntreAgiles', 'gesthor' => 'Gesthor', 'certmind' => 'CertMind',
-        'unicauca' => 'Unicauca', 'personal' => 'Personal', 'salud' => 'Salud', 'finanzas' => 'Finanzas',
-        'educacion' => 'Educación', 'hogar' => 'Hogar', 'social' => 'Social', 'creatividad' => 'Creatividad',
-        'tecnologia' => 'Tecnología', 'compras' => 'Compras', 'tramites' => 'Trámites', 'otros' => 'Otros',
-    ];
-
-    public array $priorities = [
-        'urgent-important' => 'Urgente e importante',
-        'not-urgent-important' => 'No urgente, importante',
-        'urgent-not-important' => 'Urgente, no importante',
-        'not-urgent-not-important' => 'No urgente, no importante',
-    ];
-
-    public array $sizes = ['XS' => 'XS', 'S' => 'S', 'M' => 'M', 'L' => 'L', 'XL' => 'XL'];
+    public bool $showLinkForm = false;
+    #[\Livewire\Attributes\Locked]
+    public string $linkKind = 'tasks';
+    public string $linkSearch = '';
+    public array $selectedLinks = [];
 
     public function mount(string $goal): void
     {
@@ -258,51 +241,79 @@ class GoalDetail extends Component
 
     public function openTaskForm(): void
     {
-        $this->feedback = null;
-        $this->resetTaskForm();
-        $this->showTaskForm = true;
+        $this->dispatch('task-editor', action: 'openForm');
     }
 
-    public function saveTask(): void
+    public function openHabitForm(): void
     {
-        $this->feedback = null;
-        $validated = $this->validate([
-            'taskTitle' => ['required', 'string', 'max:255'],
-            'taskDescription' => ['nullable', 'string', 'max:5000'],
-            'taskCategory' => ['nullable', 'in:'.implode(',', array_keys($this->categories))],
-            'taskPriority' => ['nullable', 'in:'.implode(',', array_keys($this->priorities))],
-            'taskSize' => ['nullable', 'in:'.implode(',', array_keys($this->sizes))],
-            'taskDueDate' => ['nullable', 'date'],
-        ]);
-
-        DB::transaction(function () use ($validated): void {
-            $task = Task::create([
-                'task_code' => rand(10000, 99999),
-                'title' => trim($validated['taskTitle']),
-                'description' => trim($validated['taskDescription']) ?: null,
-                'category' => $validated['taskCategory'] ?: null,
-                'priority' => $validated['taskPriority'] ?: null,
-                'size' => $validated['taskSize'] ?: null,
-                'end_date' => $validated['taskDueDate'] ?: null,
-            ]);
-
-            TaskAssociation::link($task, $this->goal());
-        });
-
-        $this->showTaskForm = false;
-        $this->resetTaskForm();
+        $this->dispatch('goal-create-habit')->to(\App\Livewire\Habit\HabitEditor::class);
     }
+
+    public function openTaskLinks(): void { $this->openLinks('tasks'); }
+
+    public function openHabitLinks(): void { $this->openLinks('habits'); }
+
+    public function openLinks(string $kind): void
+    {
+        abort_unless(in_array($kind, ['tasks', 'habits'], true), 422);
+        $this->goal();
+        $this->linkKind = $kind;
+        $this->linkSearch = '';
+        $this->selectedLinks = [];
+        $this->resetValidation();
+        $this->showLinkForm = true;
+    }
+
+    public function saveLinks(): void
+    {
+        $this->validate(['selectedLinks' => ['required', 'array', 'min:1', 'max:100'], 'selectedLinks.*' => $this->linkKind === 'tasks' ? ['required', 'uuid', 'distinct'] : ['required', 'integer', 'min:1', 'distinct']]);
+        DB::transaction(function (): void {
+            $goal = $this->goal();
+            $model = $this->linkKind === 'tasks' ? Task::class : \App\Models\HabitDefinition::class;
+            $records = $model::where('user_id', auth()->id())->whereKey($this->selectedLinks)->get();
+            if ($records->count() !== count($this->selectedLinks)) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['selectedLinks' => 'Algún registro ya no está disponible. Revisa tu selección.']);
+            }
+            foreach ($records as $record) {
+                if ($this->linkKind === 'tasks') TaskAssociation::link($record, $goal);
+                else \App\Models\GoalHabit::link($goal, $record);
+            }
+        });
+        $this->showLinkForm = false;
+        $this->selectedLinks = [];
+        $this->showFeedback('Vínculos guardados', 'Las acciones ya están vinculadas al objetivo.');
+    }
+
+    public function unlinkTask(string $id): void
+    {
+        TaskAssociation::unlink(Task::where('user_id', auth()->id())->findOrFail($id), $this->goal());
+    }
+
+    public function unlinkHabit(int $id): void
+    {
+        \App\Models\GoalHabit::where('user_id', auth()->id())->where('goal_id', $this->goal()->id)->where('habit_id', $id)->delete();
+    }
+
+    #[\Livewire\Attributes\On('goal-relations-changed')]
+    public function refreshRelations(): void {}
 
     public function render()
     {
-        $goal = Goal::query()->with([
+        $goal = Goal::where('user_id', auth()->id())->with([
             'goalEntries' => fn ($query) => $query->orderByDesc('date')->orderByDesc('created_at'),
             'goalNumericEntries' => fn ($query) => $query->orderByDesc('date')->orderByDesc('created_at'),
+            'habits.habitCompletions' => fn ($query) => $query->where('user_id', auth()->id())->where('completed', true)->whereDate('date', '>=', today()->subDays(6)->toDateString())->whereDate('date', '<=', today()->toDateString()),
             'tasks' => fn ($query) => $query->orderBy('completed')->orderByDesc('created_at'),
         ])->findOrFail($this->goalId);
 
         return view('livewire.goal.goal-detail', [
             'goal' => $goal,
+            'linkOptions' => $this->showLinkForm
+                ? ($this->linkKind === 'tasks' ? Task::query() : \App\Models\HabitDefinition::query())
+                    ->where('user_id', auth()->id())
+                    ->when(trim($this->linkSearch) !== '', fn ($query) => $query->where($this->linkKind === 'tasks' ? 'title' : 'name', 'like', '%'.trim($this->linkSearch).'%'))
+                    ->orderBy($this->linkKind === 'tasks' ? 'title' : 'name')->limit(100)->get()
+                : collect(),
             'kpi' => GoalProgress::configuration($goal->numeric_goal),
             'progress' => GoalProgress::calculate($goal->numeric_goal, $goal->start_date, $goal->due_date),
         ]);
@@ -318,7 +329,8 @@ class GoalDetail extends Component
 
     private function goal(): Goal
     {
-        return Goal::query()->findOrFail($this->goalId);
+        abort_unless(auth()->check(), 403);
+        return Goal::where('user_id', auth()->id())->findOrFail($this->goalId);
     }
 
     private function goalEntries()
@@ -404,14 +416,4 @@ class GoalDetail extends Component
         $this->resetValidation(['numericValue', 'numericDate', 'numericNote']);
     }
 
-    private function resetTaskForm(): void
-    {
-        $this->taskTitle = '';
-        $this->taskDescription = '';
-        $this->taskCategory = '';
-        $this->taskPriority = '';
-        $this->taskSize = '';
-        $this->taskDueDate = null;
-        $this->resetValidation(['taskTitle', 'taskDescription', 'taskCategory', 'taskPriority', 'taskSize', 'taskDueDate']);
-    }
 }

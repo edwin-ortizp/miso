@@ -232,6 +232,38 @@ class ModuleGuardianTest extends TestCase
         $this->assertSame(['label' => 'Ir al hábito sugerido', 'target' => 'habit-item-'.$habit->id], $coach['action']);
     }
 
+    public function test_habits_other_date_shows_its_summary_without_today_actions(): void
+    {
+        $this->companion('Brotelo', ['Planta']);
+        Livewire::test(GuardianCard::class, [
+            'module' => 'habits',
+            'displayDate' => now()->subDay()->toDateString(),
+            'displayProgress' => ['done' => 1, 'total' => 4],
+        ])->assertViewHas('isOtherDate', true)
+            ->assertSee('1 de 4 hábitos completados el 10 de noviembre.')
+            ->assertDontSee('Otro consejo')
+            ->assertDontSee('Ir al hábito sugerido')
+            ->call('another')
+            ->assertSet('advice', '');
+    }
+
+    public function test_habits_today_keeps_advice_and_other_dates_with_no_habits_are_neutral(): void
+    {
+        $this->companion('Brotelo', ['Planta']);
+        Livewire::test(GuardianCard::class, [
+            'module' => 'habits',
+            'displayDate' => now()->toDateString(),
+            'displayProgress' => ['done' => 0, 'total' => 0],
+        ])->assertViewHas('isOtherDate', false)->assertSee('Otro consejo');
+
+        Livewire::test(GuardianCard::class, [
+            'module' => 'habits',
+            'displayDate' => now()->addDay()->toDateString(),
+            'displayProgress' => ['done' => 0, 'total' => 0],
+        ])->assertSee('No hay hábitos para esta fecha.')
+            ->assertDontSee('Otro consejo');
+    }
+
     public function test_guardian_sheet_opens_in_a_modal_without_leaving_the_module(): void
     {
         $companion = $this->companion('Gotin', ['Agua'], 3);

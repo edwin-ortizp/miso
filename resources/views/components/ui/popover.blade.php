@@ -3,6 +3,7 @@
     'title',
     'id' => null,
     'variant' => 'responsive',
+    'portal' => false,
 ])
 
 @php
@@ -15,11 +16,17 @@
     El disparador declara `data-popover-trigger` para que su propio clic no la cierre.
 --}}
 {{-- En móvil (< 768 px) es una hoja inferior: scrim, indicador de arrastre, contenido con scroll y footer fijo. --}}
+@if ($portal)
+<div x-data="{ placePopover() { const trigger = document.querySelector('[aria-controls={{ $popoverId }}]'); if (!trigger) return; const rect = trigger.getBoundingClientRect(); this.$refs.portal.style.setProperty('--md-popover-top', (rect.bottom + 4) + 'px'); this.$refs.portal.style.setProperty('--md-popover-right', Math.max(12, innerWidth - rect.right) + 'px'); } }">
+    <template x-teleport="body">
+        <div class="md-popover-portal" x-ref="portal" x-effect="if ({{ $state }}) $nextTick(() => placePopover())" @resize.window="placePopover()" @scroll.window="if ({{ $state }}) placePopover()">
+@endif
 @if ($variant === 'responsive')
 <div class="md-popover__scrim" x-cloak x-show="{{ $state }}" x-transition.opacity.duration.120ms @click="{{ $state }} = false" aria-hidden="true"></div>
 @endif
-<div {{ $attributes->class(['md-popover', 'md-popover--anchored' => $variant === 'anchored']) }}
+<div {{ $attributes->class(['md-popover', 'md-popover--anchored' => $variant === 'anchored', 'md-popover--portal' => $portal]) }}
      id="{{ $popoverId }}"
+     @if ($portal) x-md-surface.no-scroll-lock="{{ $state }}" @md-surface-close.stop="{{ $state }} = false" @endif
      role="dialog"
      aria-labelledby="{{ $popoverId }}-title"
      x-cloak
@@ -46,3 +53,9 @@
         <footer class="md-popover__actions">{{ $actions }}</footer>
     @endisset
 </div>
+
+@if ($portal)
+        </div>
+    </template>
+</div>
+@endif

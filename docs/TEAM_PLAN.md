@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-14_
+_Última actualización: 2026-11-15_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -114,6 +114,12 @@ _Última actualización: 2026-11-14_
 | CHG-108 | M | Secciones de formularios visibles en móvil | to-do | Borrador | 0/4 |
 | CHG-109 | M | Corregir barra de estado y escala de Android | to-do | Borrador | 0/4 |
 | CHG-110 | XS | Alinear controles del header móvil | in-progress | En verificación | 1/1 |
+| CHG-111 | M | Objetivos conectados con tareas y hábitos | in-progress | En verificación | 4/4 |
+| CHG-112 | M | Claridad móvil de personajes, Hábitos y Calendario | in-progress | En verificación | 7/7 |
+| CHG-113 | S | Acciones de creación del chat del compañero siempre abren su formulario | in-progress | En verificación | 4/4 |
+| CHG-114 | M | Login MiSo: Refugio vivo | in-progress | En verificación | 2/2 |
+| CHG-115 | M | Registro MiSo: bienvenida en Refugio vivo | in-progress | En verificación | 2/2 |
+| CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | in-progress | En verificación | 4/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

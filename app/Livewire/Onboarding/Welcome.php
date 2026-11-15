@@ -3,6 +3,7 @@
 namespace App\Livewire\Onboarding;
 
 use App\Models\HabitDefinition;
+use App\Services\Experience\OnboardingChoices;
 use App\Services\Experience\PersonalExperience;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
@@ -15,57 +16,63 @@ use Livewire\Component;
 #[Title('Tu comienzo en MiSo')]
 class Welcome extends Component
 {
-    public string $context = '';
+    public array $contexts = [];
 
-    public string $intention = '';
+    public string $need = '';
 
-    public array $modules = [];
+    public string $suggestion = '';
+
+    public bool $moreIdeas = false;
+
+    public string $existingHabit = '';
 
     public function mount(PersonalExperience $experience): void
     {
-        $experience->begin((int) auth()->id());
+        $experience->prepareGuide((int) auth()->id());
         $state = $experience->state((int) auth()->id());
-        $this->context = $state['context'] ?? '';
-        $this->intention = $state['intention'] ?? '';
-        $this->modules = $state['modules'];
+        $this->contexts = $state['contexts'] ?? [];
+        $this->need = $state['need'] ?? '';
     }
 
-    public function updatedContext(): void
+    public function updatedContexts($value): void
     {
-        if (in_array($this->context, ['study', 'both'], true) && ! in_array('pomodoro', $this->modules, true)) {
-            $this->modules[] = 'pomodoro';
-        }
+        $last = is_array($value) ? end($value) : $value;
+        $this->contexts = $last === 'none' ? ['none'] : array_values(array_diff($this->contexts, ['none']));
     }
 
     public function next(PersonalExperience $experience): void
     {
         $userId = (int) auth()->id();
-        $state = $experience->state($userId);
-        $step = $state['step'] ?? 1;
+        $step = $experience->state($userId)['step'] ?? 1;
         if ($step === 1) {
-            $this->validate(['context' => ['required', Rule::in(['study', 'work', 'both', 'other'])],
-                'intention' => ['required', 'string', 'max:500']], [], ['context' => 'contexto', 'intention' => 'lo que quieres mejorar']);
+            $this->validate(['contexts' => ['required', 'array', 'min:1'], 'contexts.*' => ['required', 'string', 'distinct', Rule::in(array_keys(OnboardingChoices::CONTEXTS))]],
+                ['contexts.required' => 'Elige al menos una opción.', 'contexts.min' => 'Elige al menos una opción.']);
+            if (in_array('none', $this->contexts, true) && count($this->contexts) > 1) {
+                throw ValidationException::withMessages(['contexts' => 'Elige Ninguna de estas o las opciones que describen tu día.']);
+            }
         }
         if ($step === 2) {
-            $this->validate(['modules' => ['required', 'array', 'contains:habits'], 'modules.*' => [Rule::in(array_keys($experience->catalog()))]],
-                ['modules.contains' => 'Mantén Hábitos para configurar tu primer hábito. Después podrás ocultarlo.']);
+            $this->validate(['need' => ['required', Rule::in(array_keys(OnboardingChoices::NEEDS))]],
+                ['need.required' => 'Elige con qué te gustaría empezar.']);
         }
-        $experience->change($userId, function ($state) use ($step) {
+        $experience->change($userId, function ($state) use ($step, $userId) {
             if (($state['step'] ?? 1) !== $step) {
                 return $state;
             }
-            if ($step === 3 && ! HabitDefinition::where('user_id', auth()->id())->whereKey($state['habit_id'] ?? 0)->exists()) {
-                throw ValidationException::withMessages(['habit' => 'Crea tu primer hábito para continuar.']);
+            if ($step === 3 && ! $this->habitExists($userId, $state['habit_id'] ?? null)) {
+                throw ValidationException::withMessages(['habit' => 'Prepara o elige un hábito para continuar.']);
             }
             if ($step === 1) {
-                $state['context'] = $this->context;
-                $state['intention'] = trim($this->intention);
+                $state['contexts'] = array_values($this->contexts);
+                $state['context'] = OnboardingChoices::legacyContext($this->contexts);
             }
             if ($step === 2) {
-                $state['modules'] = array_values(array_unique($this->modules));
+                $state['need'] = $this->need;
+                $this->suggestion = '';
+                $this->moreIdeas = false;
             }
-            $state['events']['step_'.$step] ??= now()->toIso8601String();
-            $state['step'] = min(5, $step + 1);
+            $state['events']['v2_step_'.$step] ??= now()->toIso8601String();
+            $state['step'] = min(4, $step + 1);
 
             return $state;
         });
@@ -82,11 +89,38 @@ class Welcome extends Component
         $this->dispatch('onboarding-step-changed');
     }
 
+    public function prepareHabit(PersonalExperience $experience): void
+    {
+        $state = $experience->state((int) auth()->id());
+        abort_unless(($state['step'] ?? 0) === 3, 403);
+        $this->validate(['suggestion' => ['required', Rule::in(array_keys(OnboardingChoices::habits()))]],
+            ['suggestion.required' => 'Elige una idea o usa Crear el mío.']);
+        $this->dispatch('onboarding-habit', suggestion: $this->suggestion, createNew: true);
+    }
+
+    public function useExistingHabit(PersonalExperience $experience): void
+    {
+        $userId = (int) auth()->id();
+        $this->validate(['existingHabit' => ['required', 'integer']]);
+        $experience->change($userId, function ($state) use ($userId) {
+            abort_unless(($state['step'] ?? 0) === 3, 403);
+            if (! $this->habitExists($userId, $this->existingHabit)) {
+                throw ValidationException::withMessages(['existingHabit' => 'Ese hábito ya no está disponible. Elige otro.']);
+            }
+            $state['habit_id'] = (int) $this->existingHabit;
+
+            return $state;
+        });
+        $this->dispatch('onboarding-created');
+    }
+
     public function finish(PersonalExperience $experience): void
     {
-        $experience->change((int) auth()->id(), function ($state) {
-            abort_unless(($state['step'] ?? 1) === 5 && isset($state['context'])
-                && HabitDefinition::where('user_id', auth()->id())->whereKey($state['habit_id'] ?? 0)->exists(), 422);
+        $userId = (int) auth()->id();
+        $experience->change($userId, function ($state) use ($userId) {
+            abort_unless(($state['step'] ?? 1) === 4 && ! empty($state['contexts'])
+                && (isset(OnboardingChoices::NEEDS[$state['need'] ?? '']) || ! empty($state['completed_at']))
+                && $this->habitExists($userId, $state['habit_id'] ?? null), 422);
             $state['completed_at'] ??= now()->toIso8601String();
             $state['events']['completed'] ??= $state['completed_at'];
 
@@ -97,15 +131,27 @@ class Welcome extends Component
     }
 
     #[On('onboarding-created')]
-    public function refreshSummary(): void {}
+    public function refreshSummary(): void
+    {
+        $this->suggestion = '';
+    }
+
+    private function habitExists(int $userId, $id): bool
+    {
+        return HabitDefinition::where('user_id', $userId)->whereKey($id ?? 0)->exists();
+    }
 
     public function render()
     {
-        $experience = app(PersonalExperience::class);
-        $state = $experience->state((int) auth()->id());
+        $userId = (int) auth()->id();
+        $state = app(PersonalExperience::class)->state($userId);
 
-        return view('livewire.onboarding.welcome', ['state' => $state, 'step' => $state['step'] ?? 1,
-            'catalog' => $experience->catalog(),
-            'habit' => HabitDefinition::where('user_id', auth()->id())->find($state['habit_id'] ?? 0)]);
+        return view('livewire.onboarding.welcome', [
+            'state' => $state, 'step' => $state['step'] ?? 1,
+            'contextChoices' => OnboardingChoices::CONTEXTS, 'needChoices' => OnboardingChoices::NEEDS,
+            'suggestions' => OnboardingChoices::suggestions($state['need'] ?? 'unsure', $state['contexts'] ?? [], $this->moreIdeas),
+            'habit' => HabitDefinition::where('user_id', $userId)->find($state['habit_id'] ?? 0),
+            'existingHabits' => HabitDefinition::where('user_id', $userId)->orderBy('name')->pluck('name', 'id')->all(),
+        ]);
     }
 }

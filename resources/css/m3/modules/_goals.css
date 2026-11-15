@@ -13,3 +13,28 @@
 @media (max-width: 767.98px) { .goal-hero { flex-direction: column; padding: 20px; }.goal-hero__state { justify-content: flex-start; }.goal-kpi-values { grid-template-columns: 1fr; }.goal-section-heading { flex-direction: column; }.goal-detail__rail { grid-template-columns: 1fr; }.goal-kpi-empty { align-items: flex-start; flex-wrap: wrap; }.goal-form-grid, .goal-kpi-form { grid-template-columns: 1fr; }.goal-kpi-form > :first-child { grid-column: auto; }.goal-history__row { grid-template-columns: minmax(0, 1fr) auto; }.goal-history__actions { grid-column: 2; }.goal-history__row time { grid-column: 1; }.goal-timeline__item { grid-template-columns: 24px minmax(0, 1fr); }.goal-timeline__item .goal-history__actions { grid-column: 2; }.goal-progress-legend strong { width: 100%; margin-left: 0; } }
 
 .goal-card__meta { display: flex; flex-wrap: wrap; gap: var(--md-sys-space-xs); margin-top: var(--md-sys-space-2xs); }
+
+/* Connected actions stay in the main reading flow on every viewport. */
+.goal-detail__grid--connected { grid-template-columns: minmax(0, 1fr); }
+.goal-detail__grid--connected .goal-detail__rail { position: static; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); }
+.goal-actions-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; align-items: start; }
+.goal-related-row { display: flex; align-items: center; gap: 8px; border-top: 1px solid var(--md-sys-color-outline-variant); padding-block: 8px; }
+.goal-related-open { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; text-align: left; white-space: normal; overflow-wrap: anywhere; }
+.goal-related-open small, .goal-link-option small { display: block; color: var(--md-sys-color-on-surface-variant); font-size: .75rem; }
+.goal-link-options { display: grid; gap: 4px; }
+.goal-link-option { display: flex; align-items: center; gap: 12px; min-height: 44px; overflow-wrap: anywhere; }
+.goal-link-option input { flex-shrink: 0; width: 20px; height: 20px; }
+@media (max-width: 767.98px) { .goal-actions-grid { grid-template-columns: minmax(0, 1fr); } }
+
+/* Portal escapes the shell stacking context while CSS keeps one responsive surface. */
+.md-popover-portal { display: contents; }
+@media (min-width: 768px) {
+    .md-popover--portal { position: fixed; top: var(--md-popover-top); right: var(--md-popover-right); left: auto; max-width: calc(100vw - 24px); }
+}
+
+.goal-link-error { color: var(--md-sys-color-error); }
+
+@media (max-width: 767.98px) {
+    .goal-kpi-empty { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+    .goal-kpi-empty > button { grid-column: 1 / -1; width: 100%; }
+}

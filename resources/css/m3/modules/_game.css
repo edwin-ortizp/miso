@@ -1417,15 +1417,15 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
 
 /* Guardián de módulo (CHG-055): franja de escenario al inicio de una tarjeta del panel lateral. */
 .game-guardian {
-    position: relative; display: flex; align-items: center; gap: 12px;
-    margin: -16px -16px 16px; padding: 12px 16px 12px 10px;
+    position: relative; display: flex; align-items: center; gap: 16px;
+    margin: -16px -16px 16px; padding: 16px;
     background: linear-gradient(160deg, var(--stage-top, #2f5f8f), var(--stage-bottom, #5b8fbd));
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
     overflow: hidden;
 }
 .health-card__body .game-guardian--rail { margin: -12px -16px 14px; }
-.game-guardian::before {
-    content: ""; position: absolute; left: 14px; bottom: 6px; width: 88px; height: 14px;
+.game-guardian__art::after {
+    content: ""; position: absolute; inset-inline: 10%; bottom: -5px; height: 10px;
     border-radius: 50%; background: rgb(0 0 0 / .22); filter: blur(3px);
 }
 .game-guardian__art { position: relative; flex: 0 0 auto; display: block; width: 96px; height: 96px; border-radius: 16px; }
@@ -1434,7 +1434,8 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
     filter: drop-shadow(0 4px 6px rgb(0 0 0 / .35));
 }
 .game-guardian__art:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
-.game-guardian__talk { flex: 1 1 auto; min-width: 0; display: grid; gap: 6px; }
+.game-guardian__talk { flex: 1 1 auto; min-width: 0; display: grid; gap: 8px; overflow-wrap: anywhere; }
+.game-guardian__heading, .game-guardian__identity { display: contents; }
 .game-guardian__name { color: #fff; font-size: .8rem; font-weight: 700; letter-spacing: .02em; text-shadow: 0 1px 2px rgb(0 0 0 / .4); }
 .game-guardian__team { display: block; color: rgb(255 255 255 / .85); font-size: .7rem; text-shadow: 0 1px 2px rgb(0 0 0 / .4); }
 .game-guardian__bubble {
@@ -1445,7 +1446,7 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
     border-radius: 14px; box-shadow: 0 2px 8px rgb(0 0 0 / .18);
 }
 .game-guardian__bubble::before {
-    content: ""; position: absolute; left: -6px; top: 14px; width: 12px; height: 12px;
+    content: ""; position: absolute; right: -6px; top: calc(50% - 6px); width: 12px; height: 12px;
     background: inherit; transform: rotate(45deg); border-radius: 2px;
 }
 @media (prefers-reduced-motion: no-preference) {
@@ -1454,7 +1455,6 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
 @keyframes game-guardian-breathe { 50% { transform: translateY(-2px) scale(1.03); } }
 @media (max-width: 767.98px) {
     .game-guardian__art, .game-guardian__art img, .game-guardian__art .game-placeholder { width: 72px; height: 72px; }
-    .game-guardian::before { width: 64px; left: 14px; }
     .game-guardian__bubble { font-size: .85rem; }
 }
 
@@ -1467,19 +1467,42 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
 
 /* CHG-057: botón "Otro consejo" y fundido del texto al cambiar. */
 .game-guardian__talk { position: relative; }
-.game-guardian__more.md-btn-icon { margin-left: auto; color: #fff; background: rgb(255 255 255 / .2); }
+.game-guardian__more.md-btn-icon { margin-left: auto; min-width: 44px; min-height: 44px; color: #fff; background: rgb(255 255 255 / .2); }
 .game-guardian__more.md-btn-icon:hover { background: rgb(255 255 255 / .32); }
 .game-guardian__bubble strong { font-weight: 700; }
+.game-guardian__progress { padding: 10px 12px; border-radius: 12px; background: var(--md-sys-color-surface-container-lowest); color: var(--md-sys-color-on-surface); }
+.game-guardian__progress .md-progress-label { margin-bottom: 6px; }
+.game-guardian--habits { grid-template-columns: minmax(0, 1fr) auto; gap: 12px 16px; align-items: center; }
+.game-guardian--habits .game-guardian__talk { display: contents; }
+.game-guardian--habits .game-guardian__heading { grid-column: 1 / -1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.game-guardian--habits .game-guardian__identity { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.game-guardian--habits .game-guardian__more { position: relative; flex: 0 0 44px; width: 44px; height: 44px; margin: -6px -6px 0 0; background: transparent; }
+.game-guardian--habits .game-guardian__more::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: rgb(255 255 255 / .2); pointer-events: none; }
+.game-guardian--habits .game-guardian__more:hover { background: transparent; }
+.game-guardian--habits .game-guardian__more:hover::before { background: rgb(255 255 255 / .32); }
+.game-guardian--habits .game-guardian__bubble { grid-column: 1; grid-row: 2; }
+.game-guardian--habits .game-guardian__art { grid-column: 2; grid-row: 2; }
+.game-guardian--habits .game-guardian__actions { grid-column: 1 / -1; grid-row: 3; }
+.game-guardian--habits .game-guardian__progress { grid-column: 1 / -1; margin: 0 -16px -16px; padding: 12px 16px 14px; border-top: 1px solid rgb(255 255 255 / .2); border-radius: 0; background: rgb(0 0 0 / .18); color: #fff; }
+.game-guardian--habits .game-guardian__progress .md-progress-label { color: inherit; }
+.game-guardian--habits .game-guardian__progress .md-progress-linear { height: 5px; background: rgb(255 255 255 / .3); }
+.game-guardian--habits .game-guardian__progress .md-progress-linear-bar { background: var(--md-custom-color-success-container); }
+@media (max-width: 1199.98px) {
+    .game-guardian--habits.game-guardian--top { display: grid; }
+}
+@media (min-width: 1200px) {
+    .game-guardian--habits.game-guardian--rail { display: grid; }
+}
 @media (prefers-reduced-motion: no-preference) {
     .game-guardian__bubble { animation: game-guardian-fade 150ms ease-out; }
 }
 @keyframes game-guardian-fade { from { opacity: 0; transform: translateY(2px); } }
 
 /* CHG-058: acción del consejo ("Ir al hábito sugerido") junto al botón de otro consejo. */
-.game-guardian__actions { display: flex; align-items: center; gap: 8px; }
-.game-guardian__cue {
-    border: 0; background: none; padding: 4px 0; color: #fff; font-weight: 600; font-size: .85rem;
-    text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-shadow: 0 1px 2px rgb(0 0 0 / .4);
+.game-guardian__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.game-guardian__cue.md-btn-text {
+    min-height: 44px; border: 0; background: none; padding: 4px 0; color: #fff; font-weight: 600; font-size: .85rem;
+    text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-shadow: 0 1px 2px rgb(0 0 0 / .4); white-space: normal; text-align: start;
 }
 .game-guardian__cue:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 4px; }
 .md-context-widget__content .game-guardian--rail { margin: -15px -16px 14px; }
@@ -1495,20 +1518,20 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
     width: 100%; height: 100%; object-fit: contain; display: grid; place-items: center; font-size: 2.5rem;
     filter: drop-shadow(0 6px 6px rgb(0 0 0 / .2)); transform-origin: bottom center;
 }
-.focus-companion__talk { flex: 1 1 auto; min-width: 0; display: grid; gap: 4px; }
+.focus-companion__talk { flex: 1 1 auto; min-width: 0; display: grid; gap: 4px; overflow-wrap: anywhere; }
 .focus-companion__bubble {
     position: relative; margin: 0; padding: 10px 16px; font-size: 1rem; line-height: 1.4;
     color: var(--md-sys-color-on-surface); background: var(--md-sys-color-surface-container-lowest, #fff);
     border-radius: 18px; box-shadow: 0 2px 10px rgb(0 0 0 / .08);
 }
 .focus-companion__bubble::before {
-    content: ""; position: absolute; left: -6px; top: calc(50% - 6px); width: 12px; height: 12px;
+    content: ""; position: absolute; right: -6px; top: calc(50% - 6px); width: 12px; height: 12px;
     background: inherit; transform: rotate(45deg); border-radius: 2px;
 }
 .focus-companion__bubble strong { font-weight: 800; color: var(--stage-bottom, var(--md-sys-color-primary)); filter: brightness(.75); }
 .focus-companion__meta { display: flex; align-items: center; gap: 6px; padding-inline-start: 8px; font-size: .75rem; font-weight: 600; color: var(--md-sys-color-on-surface-variant); }
-.focus-companion__toggle {
-    display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 32px; min-height: 32px; padding: 0 6px;
+.focus-companion__toggle.md-btn-text {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-width: 44px; min-height: 44px; padding: 0 6px;
     border: 0; border-radius: 16px; background: transparent; color: inherit; font: inherit; cursor: pointer; opacity: .8;
 }
 .focus-companion__toggle:hover, .focus-companion__toggle:focus-visible { opacity: 1; background: var(--md-sys-color-surface-container-high); }
@@ -1544,7 +1567,7 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
 }
 
 /* CHG-062: el arte del guardián es un botón que abre su ficha en un modal. */
-button.game-guardian__art { padding: 0; border: 0; background: none; cursor: pointer; }
+.game-guardian__art.md-btn-text { display: block; min-width: 0; padding: 0; border: 0; background: none; cursor: pointer; }
 button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); transition: transform 150ms ease-out; }
 
 /* CHG-064: el guardián dentro de la primera tarjeta del panel de Planes. */
@@ -1590,8 +1613,8 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
 .game-buddy-hero__bubble::before {
     content: '';
     position: absolute;
-    inset-inline-start: 18px;
-    top: -6px;
+    inset-inline-end: -6px;
+    top: calc(50% - 6px);
     width: 12px;
     height: 12px;
     background: inherit;
@@ -1665,7 +1688,7 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
 .game-buddy-hero__greeting { display: flex; align-items: center; gap: 1.25rem; min-width: 0; }
 .game-buddy-hero__quote { margin: 0; font-family: inherit; text-wrap: balance; }
 .game-buddy-hero__meta { opacity: 0.88; }
-.game-buddy-hero__art { position: relative; }
+.game-buddy-hero__art { position: relative; align-self: flex-end; }
 /* La sombra del suelo pertenece al compañero: va bajo su imagen en cualquier tamaño. */
 .game-buddy-hero__art::after { content: ''; position: absolute; inset-inline: 14%; bottom: 2px; height: 12px; border-radius: 50%; background: radial-gradient(closest-side, var(--stage-ground), transparent); z-index: -1; }
 .game-buddy-hero .game-buddy-stage__scene {

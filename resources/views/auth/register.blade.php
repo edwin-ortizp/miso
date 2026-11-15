@@ -1,64 +1,47 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <link rel="icon" type="image/png" sizes="96x96" href="{{ asset('icons/icon-96x96.png') }}">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrarse - MiSo</title>
-    @include('partials.app-styles')
-</head>
-<body style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: var(--md-sys-color-surface);">
-    <div style="max-width: 420px; width: 100%; padding: 0 16px;">
-        <div class="md-card-elevated" style="padding: 32px;">
-            <div class="text-center mb-4">
-                <div class="md-card-icon md-card-icon--primary mx-auto mb-3" style="width: 64px; height: 64px; border-radius: var(--md-sys-shape-corner-large); font-size: 2rem;">
-                    <i class="bi bi-heart-pulse"></i>
-                </div>
-                <h1 class="md-headline-medium" style="color: var(--md-sys-color-on-surface);">MiSo</h1>
-                <p class="md-body-medium" style="color: var(--md-sys-color-on-surface-variant);">Tu socio de crecimiento personal. Crea tu cuenta.</p>
-            </div>
-
-            @if ($errors->any())
-                <div class="md-card-filled mb-3" style="background: var(--md-sys-color-error-container); color: var(--md-sys-color-on-error-container); padding: 12px 16px;">
-                    <ul class="mb-0 ps-3" style="font-size: 0.875rem;">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form method="POST" action="{{ route('register') }}">
-                @csrf
-                <div class="d-flex flex-column gap-3">
-                    <div class="md-text-field">
-                        <input type="text" name="name" value="{{ old('name') }}" required autofocus placeholder=" " id="reg-name">
-                        <label for="reg-name">Nombre</label>
-                    </div>
-                    <div class="md-text-field">
-                        <input type="email" name="email" value="{{ old('email') }}" required placeholder=" " id="reg-email">
-                        <label for="reg-email">Correo electrónico</label>
-                    </div>
-                    <div class="md-text-field">
-                        <input type="password" name="password" required placeholder=" " id="reg-pw">
-                        <label for="reg-pw">Contraseña</label>
-                    </div>
-                    <div class="md-text-field">
-                        <input type="password" name="password_confirmation" required placeholder=" " id="reg-pw-conf">
-                        <label for="reg-pw-conf">Confirmar contraseña</label>
-                    </div>
-                    <button type="submit" class="md-btn-filled w-100" style="height: 48px; font-size: 1rem;">
-                        <i class="bi bi-person-plus"></i> Registrarse
-                    </button>
-                </div>
-            </form>
-
-            <div class="text-center mt-4">
-                <a href="{{ route('login') }}" class="md-btn-text" style="font-size: 0.875rem;">
-                    ¿Ya tienes cuenta? Inicia sesión
-                </a>
-            </div>
+<x-auth-shell :register="true">
+    <form method="POST" action="{{ route('register') }}" class="md-login__form" data-login-form>
+        @csrf
+        <div data-login-field="name">
+            <x-ui.field name="name" id="reg-name" label="Nombre" :value="is_string(old('name')) ? old('name') : ''" required autocomplete="name"
+                :aria-describedby="$errors->has('name') ? null : 'reg-name-error'" />
+            @unless ($errors->has('name'))
+                <p id="reg-name-error" class="md-login__field-error" aria-live="polite" hidden></p>
+            @endunless
         </div>
+        <div data-login-field="email">
+            <x-ui.field name="email" id="reg-email" label="Correo electrónico" type="email" :value="is_string(old('email')) ? old('email') : ''"
+                required autocomplete="username" inputmode="email" autocapitalize="none" spellcheck="false"
+                :aria-describedby="$errors->has('email') ? null : 'reg-email-error'" />
+            @unless ($errors->has('email'))
+                <p id="reg-email-error" class="md-login__field-error" aria-live="polite" hidden></p>
+            @endunless
+        </div>
+        <div class="md-login__password" data-login-field="password">
+            <x-ui.field name="password" id="reg-pw" label="Contraseña" type="password" required
+                autocomplete="new-password" minlength="8" help="Usa 8 caracteres o más." />
+            <x-ui.icon-action icon="bi-eye" label="Mostrar contraseña" class="md-login__reveal"
+                aria-controls="reg-pw" aria-pressed="false" data-login-reveal hidden />
+            @unless ($errors->has('password'))
+                <p id="reg-pw-error" class="md-login__field-error" aria-live="polite" hidden></p>
+            @endunless
+        </div>
+        <div class="md-login__password" data-login-field="password_confirmation">
+            <x-ui.field name="password_confirmation" id="reg-pw-conf" label="Confirmar contraseña" type="password" required
+                autocomplete="new-password" :aria-describedby="$errors->has('password_confirmation') ? null : 'reg-pw-conf-error'" />
+            <x-ui.icon-action icon="bi-eye" label="Mostrar confirmación de contraseña" class="md-login__reveal"
+                aria-controls="reg-pw-conf" aria-pressed="false" data-login-reveal data-password-name="confirmación de contraseña" hidden />
+            @unless ($errors->has('password_confirmation'))
+                <p id="reg-pw-conf-error" class="md-login__field-error" aria-live="polite" hidden></p>
+            @endunless
+        </div>
+        <x-ui.action type="submit" size="lg" class="md-login__submit" data-login-submit>
+            <span data-login-submit-label>Crear mi cuenta</span>
+            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </x-ui.action>
+        <p class="md-login__status" role="status" data-login-status></p>
+    </form>
+    <div class="md-login__register">
+        <span>¿Ya tienes cuenta?</span>
+        <x-ui.action variant="text" :href="route('login')">Inicia sesión</x-ui.action>
     </div>
-</body>
-</html>
+</x-auth-shell>

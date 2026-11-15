@@ -1,10 +1,14 @@
-<x-module-shell module="habits">
+<x-module-shell module="habits" active-route="habits" class="habit-tracker">
     <x-slot:controls>
-        <p class="md-body-medium mb-0">{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l d \d\e F')) }}</p>
+        <div class="habit-date-navigation" role="group" aria-label="Navegación por fecha">
+            <x-ui.icon-action icon="bi-chevron-left" label="Día anterior" wire:click="previousDay" />
+            <time datetime="{{ $selectedDate }}"><i class="bi bi-calendar4" aria-hidden="true"></i><span>{{ ucfirst(\Carbon\Carbon::parse($selectedDate)->translatedFormat('l, d M')) }}</span></time>
+            <x-ui.icon-action icon="bi-chevron-right" label="Día siguiente" wire:click="nextDay" />
+        </div>
     </x-slot:controls>
 
     @if ($hasGuardian)
-        <livewire:game.guardian-card module="habits" variant="top" />
+        <livewire:game.guardian-card module="habits" variant="top" :display-date="$selectedDate" :display-progress="['done' => $completedCount, 'total' => $totalCount]" />
     @else
     <section class="habit-coach-card habit-coach-card--{{ $coachCard['tone'] }} mb-3" aria-labelledby="habit-coach-title">
         <div class="habit-coach-card__glow" aria-hidden="true"></div>
@@ -51,14 +55,12 @@
                 $headingId = "{$sectionId}-heading";
             @endphp
             <div wire:key="habit-section-{{ $timeOfDay }}-{{ $selectedDate }}"
-                 class="md-card-elevated mb-3"
-                 style="padding: 0; overflow: hidden;"
+                 class="md-card-elevated habit-period habit-period--{{ $timeOfDay }} mb-3"
                  x-data="{ open: @js(in_array($timeOfDay, $initiallyOpenTimeOfDay, true)) }">
-                <div style="padding: 16px 16px 8px 16px;">
+                <div class="habit-period__heading">
                     <button type="button"
                             id="{{ $headingId }}"
-                            class="d-flex align-items-center gap-2 w-100 text-start"
-                            style="border: 0; background: transparent; padding: 0; cursor: pointer;"
+                            class="habit-period__toggle"
                             @click="open = !open"
                             :aria-expanded="open.toString()"
                             aria-controls="{{ $sectionId }}">
@@ -71,11 +73,12 @@
                         </span>
                         <i class="bi ms-auto" :class="open ? 'bi-chevron-up' : 'bi-chevron-down'" aria-hidden="true"></i>
                     </button>
+                </div>
+                <div id="{{ $sectionId }}" role="region" aria-labelledby="{{ $headingId }}" class="habit-period__body" x-cloak x-show="open">
                     @if ($isToday && $groupedHabits[$timeOfDay]->contains(fn ($h) => empty($completions[$h->id])))
                         <x-ui.action variant="tonal" size="sm" icon="bi-play-fill" class="habit-routine-start" wire:click="startRoutine('{{ $timeOfDay }}')" wire:loading.attr="disabled">Empezar rutina</x-ui.action>
                     @endif
-                </div>
-                <div id="{{ $sectionId }}" role="region" aria-labelledby="{{ $headingId }}" x-cloak x-show="open">
+
                     @foreach ($groupedHabits[$timeOfDay] as $habit)
                         @php $isCompleted = !empty($completions[$habit->id]); @endphp
                         <button type="button"
@@ -95,7 +98,7 @@
                                     @endif
                                 </div>
                             </div>
-                            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                            <div class="habit-list-action__content">
                                 <span style="font-size: 1.25rem;">{{ $habit->icon }}</span>
                                 <div class="md-list-item-content">
                                     <div class="md-list-item-headline">{{ $habit->name }}</div>
@@ -116,11 +119,11 @@
     <x-slot:rail>
         <x-context-widget title="Constancia" icon="bi-fire" tone="success">
             @if ($hasGuardian)
-                <livewire:game.guardian-card module="habits" variant="rail" />
+                <livewire:game.guardian-card module="habits" variant="rail" :display-date="$selectedDate" :display-progress="['done' => $completedCount, 'total' => $totalCount]" />
             @endif
             <dl class="md-context-list">
                 <div><dt>Mejor racha activa</dt><dd>{{ $monthData['best_streak'] }} días</dd></div>
-                <div><dt>Progreso de hoy</dt><dd>{{ $completedCount }}/{{ $totalCount }}</dd></div>
+                <div><dt>Progreso del día</dt><dd>{{ $completedCount }}/{{ $totalCount }}</dd></div>
             </dl>
             <a href="{{ route('habits.weekly', ['date' => $selectedDate]) }}" class="md-btn-text w-100 mt-2">Abrir resumen semanal</a>
         </x-context-widget>

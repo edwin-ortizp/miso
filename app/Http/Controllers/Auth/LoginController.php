@@ -20,6 +20,10 @@ class LoginController extends Controller
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+        ], [
+            'email.required' => 'Ingresa tu correo electrónico.',
+            'email.email' => 'Ingresa un correo electrónico válido.',
+            'password.required' => 'Ingresa tu contraseña.',
         ]);
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
@@ -29,7 +33,7 @@ class LoginController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Las credenciales no coinciden.',
+            'credentials' => 'El correo o la contraseña no coinciden. Revisa los datos e inténtalo de nuevo.',
         ])->onlyInput('email');
     }
 

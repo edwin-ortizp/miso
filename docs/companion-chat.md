@@ -40,3 +40,20 @@ Playwright usa una cuenta ficticia y una base SQLite desechable con ruta comprob
 - En 375×500 se pudo escribir/enviar una tarea con el botón visible. Sigue pendiente una comprobación en dispositivo físico con teclado nativo.
 - Capturas locales revisadas. La fixture usa placeholders de arte; no certifica la descarga de imágenes externas.
 - `ui:conformance` mantiene 232 desviaciones de la aplicación ajenas a estos cambios; no se declara conformidad global. `git diff --check` aprobado.
+
+
+## Formularios de Objetivos y propietario del chat · CHG-111
+
+Las acciones de formulario del chat usan la referencia Livewire capturada por el controlador, porque el host se mueve a `body` y deja de tener un ancestro Livewire. El host se identifica por el ID del propietario, estable durante renders aunque el contexto de ruta no esté disponible; la navegación Livewire destruye los hosts y sus listeners de viewport antes de montar el siguiente módulo.
+
+Objetivos conserva el creador del índice y ofrece en el detalle crear/vincular tareas y hábitos, registrar avances y mediciones cuando hay indicador. Crear tarea usa TaskEditor; crear hábito reutiliza el formulario y persistencia de HabitSettings mediante HabitEditor. Ambos reciben un objetivo bloqueado y revalidan su usuario al guardar dentro de la transacción. El historial de hábitos se consulta para hoy y seis días anteriores; su cumplimiento se registra en Hábitos y no modifica el indicador del objetivo.
+
+Regresión reproducible: `npx playwright test -c tests/Browser/goals.config.js` y `npx playwright test -c tests/Browser/companion-chat.config.js`. Las fixtures verifican su base SQLite desechable antes de migrar. No certifican un teclado físico, Android ni datos de producción.
+
+## Enlace único de acciones del chat · CHG-113
+
+El host del chat se mueve a `body`, así que no puede usar `wire:click`: Livewire resuelve el componente por ancestro y, sin él, el clic se pierde sin error. `App\Support\Ui\ActionBinding` clasifica la acción (`href`, `event` o método) y produce los atributos del FAB (`wire:click`) y del chip del chat (`act(() => wire.metodo())`); es la única fuente para ambos.
+
+`act()` comprueba que la referencia Livewire capturada siga viva, avisa por consola una sola vez y no cierra el chat cuando no puede invocarla, para no dejar al usuario sin formulario. El chip de un método no usa `wire:click` en ningún caso.
+
+La prueba de navegador recorre Agua, Pomodoro, Vehículos (índice, detalle, combustible, gastos y mantenimiento) y Relaciones (índice, detalle, historial, tareas y planes) con datos de fixture, y exige el diálogo visible sin errores de página: `npx playwright test -c tests/Browser/companion-chat.config.js`. Las pruebas unitarias del controlador cubren referencia válida, referencia muerta y excepción: `node --test tests/JavaScript/companion-chat.test.js`.

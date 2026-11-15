@@ -21,8 +21,8 @@
         <x-ui.metric label="Completados" icon="bi-check-circle-fill" tone="success" :value="$completedCount" />
     </x-ui.metric-grid>
 
-    <x-ui.management-card id="goals" title="Objetivos" icon="bi-flag" :count="'('.$goals->total().')'"
-                          :active-filters="$statusFilter !== 'active' ? 1 : 0" :paginator="$goals" noun="objetivos"
+    <x-ui.management-card id="goals" title="Objetivos" :portal-filters="true" icon="bi-flag" :count="'('.$goals->total().')'"
+                          :active-filters="$statusFilter !== 'all' ? 1 : 0" :paginator="$goals" noun="objetivos"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort">
         <x-slot:filters>
             <div class="md-chip-rail md-mcard__filter-chips" role="group" aria-label="Estado de los objetivos">
@@ -31,6 +31,10 @@
                 @endforeach
             </div>
         </x-slot:filters>
+        <x-slot:filterActions>
+            <x-ui.action variant="outlined" wire:click="clearFilters">Limpiar</x-ui.action>
+            <x-ui.action variant="filled" x-on:click="filtersOpen = false">Filtrar</x-ui.action>
+        </x-slot:filterActions>
         @php
             $appliedChips = array_values(array_filter([
                 $statusFilter !== 'all' ? ['key' => 'statusFilter', 'value' => null, 'label' => 'Estado: '.($statusLabels[$statusFilter] ?? $statusFilter), 'icon' => 'bi-flag'] : null,
@@ -44,7 +48,7 @@
         @if ($goalsState === DataState::CONTENT)
             <x-ui.list label="Objetivos">
                 @foreach ($goals as $goal)
-                    <x-ui.list-item :headline="$goal->title" :supporting="$goal->description" wire:key="goal-{{ $goal->id }}">
+                    <x-ui.list-item :headline="$goal->title" :supporting="$goal->description" :href="route('goals.show', $goal)" wire:key="goal-{{ $goal->id }}">
                         <x-slot:leading>
                             @if ($goal->status === 'active')
                                 <x-ui.icon name="bi-flag-fill" tone="primary" label="Objetivo activo" />

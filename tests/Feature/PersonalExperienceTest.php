@@ -12,6 +12,7 @@ use App\Models\HabitDefinition;
 use App\Models\ModuleSetting;
 use App\Models\User;
 use App\Models\UserActiveDay;
+use App\Services\Experience\OnboardingChoices;
 use App\Services\Experience\PersonalExperience;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
@@ -51,31 +52,157 @@ class PersonalExperienceTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
         $this->experience()->begin($user->id, true);
-        Livewire::test(Welcome::class)->call('next')->assertHasErrors(['context', 'intention']);
-        Livewire::test(Welcome::class)->set('context', 'study')->set('intention', 'Estudiar mejor')->call('next')->assertHasNoErrors();
-        $this->assertSame(2, $this->experience()->state($user->id)['step']);
-        Livewire::test(Welcome::class)->assertSet('context', 'study')->assertSet('intention', 'Estudiar mejor')
-            ->set('modules', ['vehicles'])->call('next')->assertHasErrors('modules');
-        Livewire::test(Welcome::class)->set('modules', ['habits', 'tasks', 'goals'])->call('next')->assertHasNoErrors();
+        Livewire::test(Welcome::class)->call('next')->assertHasErrors('contexts');
+        Livewire::test(Welcome::class)->set('contexts', ['work', 'study', 'care'])->call('next')->assertHasNoErrors();
+        $this->assertSame('both', $this->experience()->state($user->id)['context']);
+        $modules = $this->experience()->state($user->id)['modules'];
+        Livewire::test(Welcome::class)->assertSet('contexts', ['work', 'study', 'care'])
+            ->call('next')->assertHasErrors('need')->set('need', 'unsure')->call('next')->assertHasNoErrors();
         Livewire::test(Welcome::class)->call('next')->assertHasErrors('habit');
-        $editor = Livewire::test(HabitEditor::class)->call('openGuidedHabit')->set('name', 'Leer 10 minutos')->set('baseTime', '18:00')->call('save')->assertHasNoErrors();
-        // Retry the same submitted creation: server-owned ID prevents a second record.
-        $editor->set('name', 'Leer 10 minutos')->set('timeOfDay', 'anytime')->set('baseTime', '18:00')->call('save')->assertHasNoErrors();
+        $editor = Livewire::test(HabitEditor::class)->call('openGuidedHabit', 'water', true)
+            ->assertSet('name', 'Tomar agua')->assertSet('timeOfDay', 'morning')->call('save')->assertHasNoErrors();
+        $editor->set('name', 'Tomar agua')->set('timeOfDay', 'morning')->call('save')->assertHasNoErrors();
         $this->assertDatabaseCount('habit_definitions', 1);
         $this->assertDatabaseCount('habit_completions', 0);
         $this->assertDatabaseCount('game_events', 0);
-        Livewire::test(Welcome::class)->call('next')->assertHasNoErrors();
+        $this->assertDatabaseCount('habit_actions', 0);
+        $habit = HabitDefinition::firstOrFail();
+        $this->assertNull($habit->goal_duration);
+        $this->assertNull($habit->base_time);
         Livewire::test(Welcome::class)->call('next')->call('finish')->assertRedirect(route('home'));
         $this->assertFalse($this->experience()->required($user->id));
-        $this->get('/')->assertOk()->assertSee('Leer 10 minutos')->assertDontSee('Atención para tus vehículos');
+        $this->get('/')->assertOk();
+        $this->get(route('habits'))->assertOk()->assertSee('Tomar agua');
         $state = $this->experience()->state($user->id);
+        $this->assertSame($modules, $state['modules']);
         $this->assertArrayHasKey('completed', $state['events']);
+        $this->assertArrayHasKey('v2_step_2', $state['events']);
         $this->assertArrayNotHasKey('first_real_action', $state['events']);
         UserActiveDay::countRecord($user->id);
         $first = $this->experience()->state($user->id)['events']['first_real_action'];
         $this->travel(1)->hours();
         UserActiveDay::countRecord($user->id);
         $this->assertSame($first, $this->experience()->state($user->id)['events']['first_real_action']);
+    }
+
+    public function test_repeated_creation_from_stale_editor_snapshot_reuses_the_server_owned_id(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+        Livewire::test(Welcome::class)->set('contexts', ['none'])->call('next')->set('need', 'care')->call('next');
+        $first = Livewire::test(HabitEditor::class)->call('openGuidedHabit', 'water', true);
+        $retry = Livewire::test(HabitEditor::class)->call('openGuidedHabit', 'water', true);
+        $first->call('save')->assertHasNoErrors();
+        $id = $this->experience()->state($user->id)['habit_id'];
+        $retry->call('save')->assertHasNoErrors();
+        $this->assertSame($id, $this->experience()->state($user->id)['habit_id']);
+        $this->assertDatabaseCount('habit_definitions', 1);
+        $this->assertDatabaseCount('habit_completions', 0);
+    }
+
+    public function test_context_choices_are_combinable_and_none_is_exclusive(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $guide = Livewire::test(Welcome::class)->set('contexts', ['work', 'study'])
+            ->assertSet('contexts', ['work', 'study'])->set('contexts', ['work', 'study', 'none'])
+            ->assertSet('contexts', ['none'])->set('contexts', ['none', 'care'])
+            ->assertSet('contexts', ['care'])->set('contexts', ['invented'])->call('next')->assertHasErrors('contexts.0');
+        $guide->set('contexts', ['none'])->call('next')->assertHasNoErrors()
+            ->set('need', 'invented')->call('next')->assertHasErrors('need');
+        $this->assertSame('other', $this->experience()->state(auth()->id())['context']);
+    }
+
+    public function test_all_needs_offer_three_ideas_context_only_orders_and_more_ideas_is_complete(): void
+    {
+        $choices = OnboardingChoices::class;
+        foreach (array_keys($choices::NEEDS) as $need) {
+            $neutral = $choices::suggestions($need, ['none']);
+            $combined = $choices::suggestions($need, ['study', 'care', 'work']);
+            $this->assertCount(3, $neutral);
+            $this->assertEqualsCanonicalizing(array_keys($neutral), array_keys($combined));
+            $this->assertCount(12, $choices::suggestions($need, [], true));
+        }
+        $this->assertSame('review', array_key_first($choices::suggestions('learn', ['study'])));
+        $this->assertSame('pause', array_key_first($choices::suggestions('care', ['work'])));
+    }
+
+    public function test_legacy_progress_keeps_preferences_intention_habit_and_events(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+        $habit = HabitDefinition::create(['name' => 'Hábito anterior', 'time_of_day' => 'night']);
+        $this->experience()->begin($user->id, true);
+        $this->experience()->change($user->id, fn ($s) => array_replace($s, [
+            'step' => 5, 'context' => 'both', 'intention' => 'Texto anterior', 'habit_id' => $habit->id,
+            'modules' => ['habits', 'vehicles'], 'events' => ['step_2' => '2026-11-01T10:00:00Z'],
+        ]));
+        Livewire::test(Welcome::class)->assertSet('contexts', ['work', 'study'])->set('need', 'learn')->call('next')->assertHasNoErrors();
+        $state = $this->experience()->state($user->id);
+        $this->assertSame(3, $state['step']);
+        $this->assertSame(5, $state['legacy_step']);
+        $this->assertSame('Texto anterior', $state['intention']);
+        $this->assertSame(['habits', 'vehicles'], $state['modules']);
+        $this->assertSame('2026-11-01T10:00:00Z', $state['events']['step_2']);
+        Livewire::test(Welcome::class)->assertSee('Hábito anterior')->call('next')->call('finish')->assertRedirect(route('home'));
+        $this->assertDatabaseCount('habit_definitions', 1);
+    }
+
+    public function test_completed_legacy_guide_stays_completed_and_voluntary_guide_has_an_exit(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+        Livewire::test(Welcome::class)->assertSee('Volver a Mi día');
+        $this->experience()->change($user->id, function ($s) {
+            unset($s['guide_version']);
+
+            return array_replace($s, ['context' => 'work', 'step' => 5, 'required' => true, 'completed_at' => now()->toIso8601String()]);
+        });
+        Livewire::test(Welcome::class)->assertSee('Ya tienes por dónde empezar')->assertSee('Volver a Mi día');
+        $this->assertFalse($this->experience()->required($user->id));
+    }
+
+    public function test_reusing_and_editing_an_existing_habit_preserves_hidden_settings(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+        $habit = HabitDefinition::create(['name' => 'Ya lo hago', 'time_of_day' => 'night', 'base_time' => '20:30', 'goal_duration' => '15 min']);
+        $action = $habit->action()->create(['action_key' => 'water', 'mode' => 'auto', 'config' => ['amount_ml' => 250], 'enabled' => true]);
+        $original = $action->getAttributes();
+        Livewire::test(Welcome::class)->set('contexts', ['none'])->call('next')->set('need', 'care')->call('next')
+            ->set('existingHabit', (string) $habit->id)->call('useExistingHabit')->assertHasNoErrors();
+        Livewire::test(HabitEditor::class)->call('openGuidedHabit')->set('name', 'Mi práctica diaria')
+            ->set('baseTime', '01:00')->set('goalDuration', 'invalid hidden change')->call('save')->assertHasNoErrors();
+        $habit->refresh();
+        $this->assertSame('Mi práctica diaria', $habit->name);
+        $this->assertSame('20:30', substr($habit->base_time, 0, 5));
+        $this->assertSame('15 min', $habit->goal_duration);
+        $this->assertEquals($original, $action->fresh()->getAttributes());
+        $this->assertDatabaseCount('habit_definitions', 1);
+        $this->assertArrayNotHasKey('habit_created', $this->experience()->state($user->id)['events']);
+    }
+
+    public function test_foreign_habits_and_invalid_suggestions_cannot_be_used(): void
+    {
+        $this->actingAs($other = User::factory()->create());
+        $foreign = HabitDefinition::create(['name' => 'Privado', 'time_of_day' => 'morning']);
+        $this->actingAs($user = User::factory()->create());
+        Livewire::test(Welcome::class)->set('contexts', ['work'])->call('next')->set('need', 'organize')->call('next')
+            ->set('existingHabit', (string) $foreign->id)->call('useExistingHabit')->assertHasErrors('existingHabit')
+            ->set('suggestion', 'invented')->call('prepareHabit')->assertHasErrors('suggestion');
+        $this->experience()->change($user->id, fn ($s) => array_replace($s, ['habit_id' => $foreign->id]));
+        Livewire::test(HabitEditor::class)->call('openGuidedHabit')->set('name', 'No permitido')->call('save')->assertStatus(422);
+        $this->assertSame('Privado', $foreign->fresh()->name);
+    }
+
+    public function test_custom_habit_validation_and_switching_ideas_do_not_overwrite_saved_habits(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+        Livewire::test(Welcome::class)->set('contexts', ['none'])->call('next')->set('need', 'unsure')->call('next');
+        Livewire::test(HabitEditor::class)->call('openGuidedHabit', null, true)->call('save')->assertHasErrors('name')
+            ->set('name', str_repeat('á', 121))->call('save')->assertHasErrors('name')->assertSet('name', str_repeat('á', 121))
+            ->set('name', 'Mirar por la ventana')->call('save')->assertHasNoErrors();
+        $firstId = $this->experience()->state($user->id)['habit_id'];
+        Livewire::test(Welcome::class)->call('previous')->set('need', 'learn')->call('next');
+        $this->assertSame($firstId, $this->experience()->state($user->id)['habit_id']);
+        Livewire::test(HabitEditor::class)->call('openGuidedHabit', 'read', true)->call('save')->assertHasNoErrors();
+        $this->assertDatabaseCount('habit_definitions', 2);
+        $this->assertSame('Mirar por la ventana', HabitDefinition::findOrFail($firstId)->name);
     }
 
     public function test_existing_accounts_and_preferences_are_isolated_and_direct_links_still_work(): void

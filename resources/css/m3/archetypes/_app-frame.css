@@ -442,7 +442,14 @@
     bottom: calc(var(--md-sys-layout-nav-bar-height) + var(--lt-safe-bottom) + 16px);
   }
 
-  .lt-topbar { gap: 8px; padding: var(--lt-safe-top) calc(12px + var(--lt-safe-right)) 0 calc(12px + var(--lt-safe-left)); }
+  .lt-topbar { --lt-topbar-height: 56px; gap: 4px; padding: var(--lt-safe-top) calc(8px + var(--lt-safe-right)) 0 calc(8px + var(--lt-safe-left)); }
+  .lt-topbar__icon { width: 28px; height: 28px; border-radius: 9px; font-size: .95rem; }
+  .lt-topbar__tools { gap: 0; }
+  .lt-topbar .md-btn-icon { flex: 0 0 44px; width: 44px; height: 44px; font-size: 1.15rem; }
+  .lt-topbar__tools > .experience-account,
+  .lt-topbar__tools > .notification-bell-shell { display: flex; align-items: center; justify-content: center; flex: 0 0 44px; width: 44px; }
+  .lt-topbar .lt-topbar__tools .lt-avatar { width: 44px; height: 44px; min-width: 44px; margin: 0; padding: 0; border-radius: 50%; background: transparent; }
+  .lt-topbar__tools .lt-avatar > span:not(.md-btn__spinner) { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; overflow: hidden; background: var(--md-sys-color-secondary-container); font-size: .7rem; }
   .lt-topbar__title { font-size: 1.1rem; flex: 1 1 0; min-width: 0; }
   .lt-topbar__tools .md-btn-filled > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
   .lt-topbar__tools .md-btn-filled { min-width: 40px; padding: 0 12px; }

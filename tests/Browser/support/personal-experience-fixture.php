@@ -17,4 +17,11 @@ Artisan::call('migrate:fresh', ['--force' => true]);
     'email' => 'focus-dashboard@example.test',
     'password' => 'browser-test-password',
 ]);
+$existing = \App\Models\User::factory()->create([
+    'email' => 'existing-guide@example.test', 'password' => 'browser-test-password',
+]);
+\App\Models\HabitDefinition::withoutGlobalScopes()->forceCreate([
+    'user_id' => $existing->id, 'name' => 'Mi hábito de siempre', 'time_of_day' => 'anytime',
+]);
+
 echo json_encode(['ready' => true], JSON_THROW_ON_ERROR);

@@ -17,6 +17,11 @@ class HabitDefinition extends Model
         'base_time',
     ];
 
+    public function goals(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Goal::class, 'goal_habits', 'habit_id', 'goal_id')->withTimestamps();
+    }
+
     public function habitCompletions()
     {
         return $this->hasMany(HabitCompletion::class, 'habit_id');

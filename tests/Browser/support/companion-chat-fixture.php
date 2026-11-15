@@ -18,4 +18,27 @@ foreach ([
 \App\Models\DrinkType::create(['name' => 'Agua de prueba', 'hydration_factor' => 1, 'icon' => '💧']);
 \App\Models\MoodState::create(['text' => 'Calma de prueba', 'emoji' => '🙂', 'value' => 3, 'is_active' => true, 'is_pinned' => true, 'sort_order' => 0]);
 
+// CHG-113: pantallas de detalle con datos propios (vehículo y relación).
+$vehicle = \App\Models\Vehicle::create([
+    'name' => 'Vehículo de prueba',
+    'vehicle_type' => 'automovil',
+    'power_source' => 'gasolina',
+    'usage_unit' => 'km',
+    'current_usage' => 1000,
+    'fuel_volume_unit' => 'gal',
+]);
+$relationship = \App\Models\Relationship::create([
+    'full_name' => 'Contacto de prueba',
+    'category' => 'otro',
+]);
+// Acción con argumento: `openVisitForm('<uuid>')` en el detalle del plan.
+$plan = \App\Models\Plan::create([
+    'title' => 'Plan de prueba',
+    'type' => 'restaurant',
+    'status' => 'pending',
+]);
+$fixture['vehicles'] = ['probe' => $vehicle->id];
+$fixture['relationships'] = ['probe' => $relationship->id];
+$fixture['plans'] = ['probe' => $plan->id];
+
 echo json_encode($fixture, JSON_THROW_ON_ERROR);

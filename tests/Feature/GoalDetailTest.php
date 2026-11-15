@@ -125,10 +125,13 @@ class GoalDetailTest extends TestCase
         Livewire::actingAs($user)
             ->test(GoalDetail::class, ['goal' => $goal->id])
             ->call('openTaskForm')
-            ->set('taskTitle', 'Pedir cotizaciones')
-            ->set('taskCategory', 'hogar')
-            ->set('taskPriority', 'not-urgent-important')
-            ->call('saveTask')
+            ->assertDispatched('task-editor');
+
+        Livewire::actingAs($user)
+            ->test(\App\Livewire\Task\TaskEditor::class, ['goalContext' => $goal->id])
+            ->set('title', 'Pedir cotizaciones')
+            ->set('priority', 'not-urgent-important')
+            ->call('save')
             ->assertHasNoErrors();
 
         $task = $user->tasks()->where('title', 'Pedir cotizaciones')->firstOrFail();

@@ -27,6 +27,18 @@ test('layer preferences validate stored values and tolerate inaccessible storage
     } finally { globalThis.localStorage = original; }
 });
 
+test('default layers have no filter and hidden layers are named explicitly', () => {
+    const state = calendar({});
+    state.layers = { tasks: true, plans: true, birthdays: true, meals: true };
+    assert.equal(state.hasLayerFilter, false);
+    assert.equal(state.layerFilterLabel, '');
+    state.layers.meals = false;
+    assert.equal(state.hasLayerFilter, true);
+    assert.equal(state.layerFilterLabel, 'Ocultos: Comidas');
+    state.layers.plans = false;
+    assert.equal(state.layerFilterLabel, 'Ocultos: Planes, Comidas');
+});
+
 test('only task events can be persisted and failures revert the drag', async () => {
     const calls = [];
     const state = calendar({ moveTask: async (...args) => calls.push(args) });

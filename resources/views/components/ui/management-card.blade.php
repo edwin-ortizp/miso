@@ -12,6 +12,7 @@
     'perPageModel' => 'perPage',
     'alpine' => '',
     'onFiltersOpen' => '',
+    'portalFilters' => false,
     'flush' => false,
     'sortModel' => null,
     'sortOptions' => [],
@@ -99,7 +100,7 @@
                             <x-ui.badge placement="corner" :label="$activeFilters.' '.($activeFilters === 1 ? 'filtro activo' : 'filtros activos')">{{ $activeFilters }}</x-ui.badge>
                         @endif
                     </button>
-                    <x-ui.popover state="filtersOpen" title="Filtros" :id="$cardId.'-filters'">
+                    <x-ui.popover :portal="$portalFilters" state="filtersOpen" title="Filtros" :id="$cardId.'-filters'">
                         {{ $filters }}
                         @isset($filterActions)
                             <x-slot:actions>{{ $filterActions }}</x-slot:actions>
