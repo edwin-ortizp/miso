@@ -10,6 +10,9 @@ use App\Models\GoalEntry;
 use App\Models\GoalNumericEntry;
 use App\Models\HealthEvent;
 use App\Models\HealthLog;
+use App\Models\HealthMeasurement;
+use App\Models\MedicationIntake;
+use App\Models\SleepLog;
 use App\Models\JournalEntry;
 use App\Models\MealPlanEntry;
 use App\Models\MealPlanEntryItem;
@@ -38,7 +41,7 @@ use Laravel\Mcp\Server\Tool;
 #[Description('Línea de tiempo de lo que ha pasado en la vida del usuario en un periodo (por defecto los últimos 7 días), cruzando módulos: tareas completadas, planes y visitas, ejercicio, ánimo, energía, hidratación, hábitos, salud, eventos de sus personas, repostajes, avances en metas, resúmenes del diario, comidas, hábitos negativos y tiempo de foco. Úsala para "¿cómo me fue esta semana?", resúmenes del día o la semana, retomar contexto general o detectar patrones entre módulos. Limita "modules" si solo interesan algunos.')]
 class GetRecentActivityTool extends Tool
 {
-    public const MODULES = ['tasks', 'plans', 'exercise', 'mood', 'energy', 'water', 'habits', 'health', 'relationships', 'vehicles', 'goals', 'journal', 'meals', 'negative_habits', 'focus'];
+    public const MODULES = ['tasks', 'plans', 'exercise', 'mood', 'energy', 'water', 'habits', 'health', 'measurements', 'sleep', 'medications', 'relationships', 'vehicles', 'goals', 'journal', 'meals', 'negative_habits', 'focus'];
 
     public function handle(Request $request): ResponseFactory
     {
@@ -67,6 +70,9 @@ class GetRecentActivityTool extends Tool
                 'water' => $this->water($window),
                 'habits' => $this->habits($window),
                 'health' => $this->health($window, $includeSensitive),
+                'measurements' => $this->measurements($window, $includeSensitive),
+                'sleep' => $this->sleep($window, $includeSensitive),
+                'medications' => $this->medications($window, $includeSensitive),
                 'relationships' => $this->relationshipEvents($window, $includeSensitive),
                 'vehicles' => $this->vehicles($window),
                 'goals' => $this->goals($window),
@@ -252,6 +258,44 @@ class GetRecentActivityTool extends Tool
             ->concat($logs->map(fn (HealthLog $log) => $this->item($log->date->toDateString(), 'salud', "Seguimiento \"{$log->healthEvent?->title}\": intensidad {$log->intensity}/10", 7)));
 
         return [$items, $items->isEmpty() ? null : ['events' => $events->count(), 'recovered' => $recovered->count()]];
+    }
+
+    private function measurements(DateWindow $window, bool $includeSensitive): array
+    {
+        $rows = $this->between(Auth::user()->healthMeasurements(), 'measured_at', $window)
+            ->when(! $includeSensitive, fn ($query) => $query->where('is_sensitive', false))->get();
+
+        $items = $rows->map(fn (HealthMeasurement $m) => $this->item($m->measured_at->toDateString(), 'medición',
+            $m->typeLabel().' '.$m->displayValue().' '.$m->unit.($m->contextLabel() ? ' ('.$m->contextLabel().')' : '').($m->isOutOfRange() ? ' · fuera del rango de referencia general' : ''), 8));
+
+        return [$items->values(), $rows->isEmpty() ? null : ['measurements' => $rows->count(), 'out_of_range' => $rows->filter(fn (HealthMeasurement $m) => $m->isOutOfRange())->count()]];
+    }
+
+    private function sleep(DateWindow $window, bool $includeSensitive): array
+    {
+        $rows = $this->between(Auth::user()->sleepLogs(), 'woke_at', $window)
+            ->when(! $includeSensitive, fn ($query) => $query->where('is_sensitive', false))->get();
+
+        $items = $rows->map(fn (SleepLog $l) => $this->item($l->woke_at->toDateString(), 'sueño',
+            'Durmió '.$l->durationText().' ('.$l->slept_at->format('H:i').' → '.$l->woke_at->format('H:i').')'.($l->quality ? ", calidad {$l->quality}/5" : ''), 9));
+
+        return [$items->values(), $rows->isEmpty() ? null : [
+            'records' => $rows->count(),
+            'average' => SleepLog::formatMinutes((int) round($rows->avg(fn (SleepLog $l) => $l->durationMinutes()))),
+        ]];
+    }
+
+    private function medications(DateWindow $window, bool $includeSensitive): array
+    {
+        $rows = Auth::user()->medicationIntakes()
+            ->where(fn ($q) => $q->whereDate('taken_at', '>=', $window->fromDate())->whereDate('taken_at', '<=', $window->toDate())
+                ->orWhere(fn ($q) => $q->whereNull('taken_at')->whereDate('scheduled_for', '>=', $window->fromDate())->whereDate('scheduled_for', '<=', $window->toDate())))
+            ->when(! $includeSensitive, fn ($query) => $query->where('is_sensitive', false))->get();
+
+        $items = $rows->map(fn (MedicationIntake $i) => $this->item($i->occurredAt()->toDateString(), 'medicamentos',
+            ($i->status === 'skipped' ? 'Omitió ' : 'Tomó ').$i->name.($i->doseText() ? ' '.$i->doseText() : '').' a las '.$i->occurredAt()->format('H:i'), 10));
+
+        return [$items->values(), $rows->isEmpty() ? null : ['taken' => $rows->where('status', 'taken')->count(), 'skipped' => $rows->where('status', 'skipped')->count()]];
     }
 
     private function relationshipEvents(DateWindow $window, bool $includeSensitive): array

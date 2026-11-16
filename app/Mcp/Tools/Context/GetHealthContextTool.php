@@ -5,6 +5,11 @@ namespace App\Mcp\Tools\Context;
 use App\Mcp\Support\McpOutput;
 use App\Mcp\Tools\Health\Concerns\PresentsHealthEvents;
 use App\Models\HealthEvent;
+use App\Models\HealthMeasurement;
+use App\Models\SleepLog;
+use App\Support\HealthTrends;
+use App\Support\MedicationSchedule;
+use App\Support\SleepProgress;
 use App\Models\Task;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Collection;
@@ -16,7 +21,7 @@ use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Reúne en una llamada el contexto de salud relevante: malestares activos con su evolución, citas y exámenes próximos, tareas de salud pendientes o vinculadas, eventos recientes, antecedentes relacionados con lo que se busca y ánimo y energía de los últimos días. Úsala primero cuando el usuario cuente un síntoma, dolor o malestar, hable de una cita, examen o tratamiento, o pregunte por su salud. Pasa en "search" las palabras clave del síntoma o sistema (p. ej. "riñón renal orina fiebre") y en "body_area" la zona si aplica. Omite eventos sensibles salvo include_sensitive=true.')]
+#[Description('Reúne en una llamada el contexto de salud relevante: malestares activos con su evolución, citas y exámenes próximos, tareas de salud pendientes o vinculadas, eventos recientes, antecedentes relacionados con lo que se busca mediciones con unidad de los últimos 30 días, sueño de la última semana, medicamentos de hoy, la relación cautelosa entre sueño y energía y ánimo y energía de los últimos días. El ciclo menstrual nunca se incluye aquí (usa list-cycle-tool solo si preguntó por él). Úsala primero cuando el usuario cuente un síntoma, dolor o malestar, hable de una cita, examen o tratamiento, o pregunte por su salud. Pasa en "search" las palabras clave del síntoma o sistema (p. ej. "riñón renal orina fiebre") y en "body_area" la zona si aplica. Omite eventos sensibles salvo include_sensitive=true.')]
 class GetHealthContextTool extends Tool
 {
     use PresentsHealthEvents;
@@ -60,7 +65,10 @@ class GetHealthContextTool extends Tool
         $shown = $shown->concat($recent->pluck('id'));
         $related = $this->related($data, $visible, $shown, $full ? 20 : 6);
 
-        $hidden = $includeSensitive ? 0 : Auth::user()->healthEvents()->where('is_sensitive', true)->count();
+        $hidden = $includeSensitive ? 0 : (Auth::user()->healthEvents()->where('is_sensitive', true)->count()
+            + Auth::user()->healthMeasurements()->where('is_sensitive', true)->count()
+            + Auth::user()->sleepLogs()->where('is_sensitive', true)->count()
+            + Auth::user()->medications()->where('is_active', true)->where('is_sensitive', true)->count());
 
         return Response::structured(McpOutput::compact([
             'today' => today()->toDateString(),
@@ -73,6 +81,10 @@ class GetHealthContextTool extends Tool
             'recent' => $recent->map(fn (HealthEvent $event) => $this->presentHealthEvent($event, $full))->all(),
             'related_history' => $related?->map(fn (HealthEvent $event) => $this->presentHealthEvent($event, $full))->all(),
             'wellbeing_last_7_days' => $this->wellbeing(),
+            'measurements_last_30_days' => $this->measurements($includeSensitive),
+            'sleep_last_7_days' => $this->sleep($includeSensitive),
+            'sleep_and_energy' => HealthTrends::sleepEnergy(30, null, $includeSensitive)['text'] ?? null,
+            'medications_today' => $this->medicationsToday($includeSensitive),
             'hidden_sensitive' => $hidden ?: null,
         ]));
     }
@@ -131,6 +143,69 @@ class GetHealthContextTool extends Tool
                 'title' => $task->title,
                 'date' => ($task->end_date ?? $task->start_date)?->toDateString(),
             ]))->values()->all();
+    }
+
+    /** Resumen por tipo de las mediciones del último mes; lo sensible solo con include_sensitive. */
+    private function measurements(bool $includeSensitive): ?array
+    {
+        $rows = Auth::user()->healthMeasurements()->where('measured_at', '>=', today()->subDays(29))
+            ->when(! $includeSensitive, fn ($q) => $q->where('is_sensitive', false))
+            ->orderByDesc('measured_at')->get();
+
+        if ($rows->isEmpty()) {
+            return null;
+        }
+
+        return $rows->groupBy('type')->map(function (Collection $group, string $type) {
+            /** @var HealthMeasurement $latest */
+            $latest = $group->first();
+
+            return McpOutput::compact([
+                'type' => $type,
+                'label' => HealthMeasurement::TYPES[$type]['label'] ?? $type,
+                'unit' => $latest->unit,
+                'count' => $group->count(),
+                'latest' => $latest->displayValue().($latest->contextLabel() ? ' ('.$latest->contextLabel().')' : '').' · '.$latest->measured_at->format('Y-m-d H:i'),
+                'average' => round($group->avg('value'), 1),
+                'average_value2' => $group->whereNotNull('value2')->isEmpty() ? null : round($group->whereNotNull('value2')->avg('value2'), 1),
+                'out_of_range' => $group->filter(fn (HealthMeasurement $m) => $m->isOutOfRange())->count() ?: null,
+                'reference_range' => $latest->referenceText(),
+            ]);
+        })->values()->all();
+    }
+
+    private function sleep(bool $includeSensitive): ?array
+    {
+        $logs = SleepProgress::recent(7)->when(! $includeSensitive, fn (Collection $c) => $c->reject(fn (SleepLog $l) => $l->is_sensitive))->values();
+        if ($logs->isEmpty()) {
+            return null;
+        }
+        $goal = SleepProgress::goalMinutes(Auth::user());
+        $summary = SleepProgress::summary($logs, $goal);
+
+        return McpOutput::compact([
+            'records' => $summary['nights'],
+            'average' => SleepLog::formatMinutes($summary['average_minutes']),
+            'goal' => SleepLog::formatMinutes($goal),
+            'meeting_goal' => $summary['meeting_goal'],
+            'average_quality' => $summary['average_quality'],
+        ]);
+    }
+
+    private function medicationsToday(bool $includeSensitive): ?array
+    {
+        $rows = MedicationSchedule::forDay(now(), null, $includeSensitive);
+        if ($rows->isEmpty()) {
+            return null;
+        }
+
+        return McpOutput::compact([
+            'scheduled' => $rows->count(),
+            'taken' => $rows->where('state', 'taken')->count(),
+            'skipped' => $rows->where('state', 'skipped')->count() ?: null,
+            'pending' => $rows->whereIn('state', ['pending', 'overdue'])
+                ->map(fn (array $row) => $row['medication']->name.' '.$row['scheduled_for']->format('H:i').($row['state'] === 'overdue' ? ' (atrasada)' : ''))->values()->all() ?: null,
+        ]);
     }
 
     private function wellbeing(): ?array

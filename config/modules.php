@@ -84,6 +84,7 @@ return [
             ['label' => 'Medicamentos', 'route' => 'health.medications', 'icon' => 'bi-capsule', 'active' => ['health.medications']],
             ['label' => 'Sueño', 'route' => 'health.sleep', 'icon' => 'bi-moon-stars', 'active' => ['health.sleep']],
             ['label' => 'Ciclo', 'route' => 'health.cycle', 'icon' => 'bi-droplet', 'active' => ['health.cycle']],
+            ['label' => 'Tendencias', 'route' => 'health.trends', 'icon' => 'bi-graph-up', 'active' => ['health.trends']],
         ],
     ],
     'vehicles' => [
