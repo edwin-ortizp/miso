@@ -79,6 +79,7 @@ Route::middleware('guest')->group(function () {
     Route::post('/register', [RegisterController::class, 'register']);
 });
 
+Route::patch('/appearance', \App\Http\Controllers\AppearanceController::class)->middleware(['auth', 'throttle:30,1'])->name('appearance.update');
 Route::post('/logout', [LoginController::class, 'logout'])->middleware('auth')->name('logout');
 
 Route::middleware(['auth', 'throttle:30,1'])->prefix('android')->name('android.')->group(function () {

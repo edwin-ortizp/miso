@@ -16,6 +16,7 @@ import { registerUiSurfaces } from './ui-surfaces';
 import { markPlatform, registerAppFrame, registerPageTransitions } from './app-frame';
 import { registerInstallPrompt, registerPushToggle, registerServiceWorker } from './pwa';
 import { registerFeedback } from './feedback';
+import { registerTheme } from './theme';
 import { registerHealthBodyMap } from './health-body-map';
 import { registerTaskCalendar } from './task-calendar';
 import { registerTaskGantt } from './task-gantt';
@@ -38,6 +39,7 @@ registerFormEditor(Alpine);
 registerMarkdownAdapter(Alpine);
 registerAppFrame(Alpine);
 registerFeedback(Alpine);
+registerTheme(Alpine);
 registerHealthBodyMap(Alpine);
 registerTaskCalendar(Alpine);
 registerTaskGantt(Alpine);
@@ -292,6 +294,16 @@ function bootstrapUi() {
             });
         });
     }).observe(document.documentElement, { childList: true, subtree: true });
+
+    // Los gráficos leen los tokens al crearse: al cambiar de tema se vuelven a pintar.
+    window.addEventListener('miso:theme', (event) => {
+        if (!event.detail.changed) return;
+        Object.keys(chartRenderers).forEach((selector) => document.querySelectorAll(selector).forEach((el) => {
+            charts.get(el)?.destroy();
+            charts.delete(el);
+        }));
+        discoverCharts();
+    });
 
     // Respaldo táctil: abre el selector nativo aunque el navegador no lo haga solo al tocar.
     // En escritorio rompería la escritura por segmentos y el botón nativo del selector.

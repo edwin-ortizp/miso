@@ -8,6 +8,8 @@
         @else{{ \Illuminate\Support\Str::of(auth()->user()->name)->explode(' ')->map(fn ($p) => mb_substr($p, 0, 1))->take(2)->implode('') }}@endif
     </x-ui.action>
     <x-ui.popover state="accountOpen" title="Tu cuenta" variant="anchored" id="account-popover">
+        <p class="experience-account__label md-label-medium">Apariencia</p>
+        <x-theme-picker variant="menu" />
         <a href="{{ route('settings') }}" wire:navigate x-ref="profileLink" class="md-btn-text experience-account__action" @click="accountOpen = false"><i class="bi bi-person" aria-hidden="true"></i> Mi perfil</a>
         <form method="POST" action="{{ route('logout') }}">
             @csrf

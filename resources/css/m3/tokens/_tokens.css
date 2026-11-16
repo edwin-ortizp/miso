@@ -335,3 +335,97 @@ body {
   --md-custom-color-panel-night-next: #1F5E3C;
   --md-custom-color-panel-night-rail: #101115;
 }
+
+/* Tema oscuro. `partials/theme-init` y `resources/js/theme.js` resuelven la
+ * preferencia (Claro, Oscuro, Sistema) a `data-theme` en <html>. Solo se
+ * redefinen tokens: los componentes no llevan colores propios por tema. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --md-sys-color-primary: #A5C8FF;
+  --md-sys-color-on-primary: #00315B;
+  --md-sys-color-primary-container: #0F4A85;
+  --md-sys-color-on-primary-container: #D3E4FF;
+  --md-sys-color-primary-fixed: #D3E4FF;
+  --md-sys-color-on-primary-fixed: #001C39;
+
+  --md-sys-color-secondary: #B6C8E0;
+  --md-sys-color-on-secondary: #20324A;
+  --md-sys-color-secondary-container: #33445C;
+  --md-sys-color-on-secondary-container: #D6E3F7;
+
+  --md-sys-color-tertiary: #5FD4EE;
+  --md-sys-color-on-tertiary: #003641;
+  --md-sys-color-tertiary-container: #004E5E;
+  --md-sys-color-on-tertiary-container: #B4EBFB;
+
+  --md-sys-color-error: #FFB4AB;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000A;
+  --md-sys-color-on-error-container: #FFDAD6;
+
+  --md-sys-color-surface: #10141A;
+  --md-sys-color-on-surface: #E1E5EC;
+  --md-sys-color-surface-dim: #10141A;
+  --md-sys-color-surface-bright: #363A41;
+  --md-sys-color-surface-variant: #414954;
+  --md-sys-color-on-surface-variant: #C2C9D6;
+  --md-sys-color-surface-container-lowest: #0B0E13;
+  --md-sys-color-surface-container-low: #181C22;
+  --md-sys-color-surface-container: #1C2026;
+  --md-sys-color-surface-container-high: #272B31;
+  --md-sys-color-surface-container-highest: #32363D;
+
+  --md-sys-color-outline: #8B93A1;
+  --md-sys-color-outline-variant: #414954;
+
+  --md-sys-color-inverse-surface: #E1E5EC;
+  --md-sys-color-inverse-on-surface: #2E3239;
+  --md-sys-color-inverse-primary: #0D6BC4;
+
+  --md-custom-color-success: #7FDB9E;
+  --md-custom-color-on-success: #00391C;
+  --md-custom-color-success-container: #00522B;
+  --md-custom-color-on-success-container: #B7F0CB;
+
+  --md-custom-color-warning: #F5BD4F;
+  --md-custom-color-on-warning: #422C00;
+  --md-custom-color-warning-container: #5D4000;
+  --md-custom-color-on-warning-container: #FFDEA6;
+
+  --md-custom-color-info: #7DCFFF;
+  --md-custom-color-on-info: #00344D;
+  --md-custom-color-info-container: #004C6E;
+  --md-custom-color-on-info-container: #C6E7FF;
+
+  /* Acentos de módulo aclarados: se usan como texto e iconos sobre superficies oscuras. */
+  --md-accent-blue: #6FB0F5;
+  --md-accent-indigo: #9DB0FF;
+  --md-accent-cyan: #55CDE8;
+  --md-accent-teal: #4DD0C4;
+  --md-accent-green: #7BD99C;
+  --md-accent-amber: #F2BD52;
+  --md-accent-orange: #FF9E5E;
+  --md-accent-red: #FF8F86;
+  --md-accent-health: #F48FB1;
+  --md-accent-slate: #A9BBD3;
+  --md-accent-crimson: #FF8A80;
+  --md-accent-ember: #FFA05C;
+  --md-accent-water: #5FBFF2;
+  --md-accent-lime: #A5D86B;
+  --md-accent-deep-purple: #B7A4F5;
+  --md-accent-purple: #D49CEB;
+  --md-accent-violet: #DE9AEF;
+  --md-accent-grape: #D49BE3;
+  --md-accent-magenta: #F08BB5;
+  --md-accent-neutral-indigo: #A3B1F2;
+
+  --md-sys-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.5), 0 1px 3px 1px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-2: 0 1px 2px rgba(0, 0, 0, 0.5), 0 2px 6px 2px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-3: 0 4px 8px 3px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.5);
+  --md-sys-elevation-4: 0 6px 10px 4px rgba(0, 0, 0, 0.35), 0 2px 3px rgba(0, 0, 0, 0.5);
+  --md-sys-elevation-5: 0 8px 12px 6px rgba(0, 0, 0, 0.35), 0 4px 4px rgba(0, 0, 0, 0.5);
+}
+:root[data-theme='dark'] [data-module='health'] {
+  --md-module-on-action: #4A0A0A;
+}

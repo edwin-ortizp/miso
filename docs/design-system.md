@@ -60,6 +60,13 @@ Regla transversal para producción y mockups: **el regreso de una vista de detal
 - **No permitido**: enlace de texto «Volver a…» en una fila propia, acción «Volver» dentro de ⋮ o del menú de acciones, y navegación de pestañas hecha a mano por módulo.
 - Referencias: `resources/views/components/module-tabs.blade.php` (prop `back`), `App\Support\Ui\Tabs\PersonTabs` y `VehicleTabs`; en mockups, `detail_nav()` y `shell(back=…)` de `life-shell.html.jinja`.
 
+## Tema claro y oscuro
+
+- La preferencia del usuario (`system`, `light`, `dark`; por defecto `system`) vive en `users.theme_preference` y se cambia desde Ajustes → Perfil (tarjeta «Apariencia», debajo de «Perfil público») y desde el menú del avatar, ambos con `x-theme-picker`.
+- `partials/theme-init` fija `data-theme="light|dark"` en `<html>` antes del primer pintado; `resources/js/theme.js` lo mantiene al cambiar la preferencia, el modo del dispositivo o tras `wire:navigate`, y emite `miso:theme`.
+- El tema oscuro solo redefine tokens en `:root[data-theme='dark']` (`resources/css/m3/tokens/_tokens.css`). Los componentes usan tokens `--md-sys-*`, `--md-custom-*` y `--md-accent-*`; no se añaden colores hex fijos por tema en componentes. Los acentos de módulo son más claros en oscuro para cumplir contraste AA como texto e icono.
+- Los gráficos leen tokens al crearse: se repintan al recibir `miso:theme`.
+
 ## Responsive y accesibilidad
 
 Existe **un solo marco de aplicación para todos los anchos**. No hay variante por dispositivo: ni capa de vistas paralela, ni detección de user-agent, ni una clase que JavaScript alterne para simular un breakpoint. El ancho del viewport es el único interruptor, y quien lo lee es el CSS. JavaScript decide comportamiento (qué hace el botón de menú, qué etiqueta accesible le corresponde), nunca visibilidad.

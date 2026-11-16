@@ -80,3 +80,26 @@
 /* La ayuda explica la restricción: debe poder leerse aunque el correo esté deshabilitado. */
 .settings-account-form .md-text-field:has(> :disabled) { opacity: 1; }
 .settings-account-form .md-text-field > :disabled { color: var(--md-sys-color-on-surface-variant); background: var(--md-sys-color-surface-container-low); }
+
+/* Apariencia: selector de tema compartido entre Ajustes y el menú de perfil. */
+.settings-appearance { width: 100%; max-width: 760px; }
+.settings-appearance .md-card-header { gap: 12px; margin-bottom: 12px; }
+.settings-appearance .md-card-icon { width: 36px; height: 36px; font-size: 1.25rem; border-radius: 12px; }
+.theme-picker { display: flex; flex-wrap: wrap; gap: 8px; }
+.theme-picker__option {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
+  border: 1px solid var(--md-sys-color-outline); border-radius: 12px; cursor: pointer;
+  background: transparent; color: var(--md-sys-color-on-surface); font: inherit;
+}
+.theme-picker__option[aria-checked='true'] {
+  background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);
+  border-color: transparent;
+}
+.theme-picker__option:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
+.theme-picker__status { flex-basis: 100%; margin: 0; min-height: 1.25rem; font-size: .8125rem; color: var(--md-sys-color-on-surface-variant); }
+.theme-picker__status--error { color: var(--md-sys-color-error); }
+.theme-picker--menu { flex-direction: column; flex-wrap: nowrap; gap: 2px; padding: 0 0 8px; }
+.theme-picker--menu .theme-picker__option { width: 100%; border: 0; border-radius: 8px; padding-inline: 12px; }
+.theme-picker--menu .theme-picker__check { margin-left: auto; }
+.theme-picker--menu .theme-picker__status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.experience-account__label { margin: 0; padding: 4px 12px 0; color: var(--md-sys-color-on-surface-variant); }

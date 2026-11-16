@@ -26,11 +26,20 @@ class User extends Authenticatable
         'activity_level',
         'daily_water_goal',
         'daily_exercise_minutes',
+        'theme_preference',
     ];
+
+    public const THEME_PREFERENCES = ['system', 'light', 'dark'];
 
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /** Preferencia válida de tema; cualquier otro valor guardado se trata como «system». */
+    public function themePreference(): string
+    {
+        return in_array($this->theme_preference, self::THEME_PREFERENCES, true) ? $this->theme_preference : 'system';
+    }
 
     protected function casts(): array
     {
