@@ -116,7 +116,7 @@ flowchart LR
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
-- 2026-11-16 — Pendiente: ampliar `MultitenancySchemaTest` con la cascada de cuentas (hoy cubierta en `FriendIsolationTest`).
+- 2026-11-16 — `MultitenancySchemaTest` ampliado con código único por registro, unicidad del par y del @usuario, cascada al borrar cuenta y esquema social (sin ejecutar: no hay PHP 8.4).
 - 2026-11-16 — Decisión: máximo 100 amigos por cuenta; el avatar visible es el `avatar_url` actual, sin foto social propia; el vínculo con Personas es opcional.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
