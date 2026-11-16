@@ -37,11 +37,16 @@ Actualizar tests de goals que afirmen textos u orden. Comando: `php artisan test
 ## 7. Tareas
 - [x] T1 · KPI como 2.ª pestaña con nombre claro, explicación, pistas por campo y aviso de fechas — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/goal/goal-dialog.blade.php, resources/css/m3/modules/_goals.css, tests de goals — Hecho cuando: el orden y los textos de §3 se ven y los tests de goals pasan.
 
+- [x] T2 · El checkbox del KPI se reemplaza por un botón "Agregar KPI" y, con KPI, un botón "Quitar KPI" — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/goal/goal-dialog.blade.php — Hecho cuando: el botón despliega los campos y "Quitar KPI" los oculta sin guardar KPI.
+
 ## 8. Bitácora de implementación (developer)
 - 2026-11-16 — Implementado en `goal-dialog.blade.php` (orden, textos, ayudas, aviso de fechas); sin CSS nuevo. **Sin ejecutar** tests: el entorno cloud no tiene `vendor/` (PHP 8.3). Los tests de goals no afirman textos. Pendiente: correr `php artisan test --filter=Goal` y revisar a mano.
+- 2026-11-16 — T2: checkbox → botones Agregar/Quitar KPI. Sin ejecutar tests (sin `vendor/`). `.goal-kpi-toggle` se conserva: lo usan otras vistas.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
+- 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Reabierto: Reemplazar el checkbox del KPI por botones Agregar/Quitar KPI
 - 2026-11-16 — Implementación terminada → En verificación

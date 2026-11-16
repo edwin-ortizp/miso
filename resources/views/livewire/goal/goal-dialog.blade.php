@@ -22,10 +22,11 @@
 
         <x-ui.form-dialog-section name="kpi" title="Medir avance (KPI)" description="Un KPI es un número que te dice cuánto avanzas. Ej.: bajar de 82 a 75 kg. Es opcional.">
             <div class="d-flex flex-column gap-3">
-                <label class="goal-kpi-toggle">
-                    <input wire:model.live="kpiEnabled" type="checkbox">
-                    <span><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Medir este objetivo con un número</span>
-                </label>
+                @unless ($kpiEnabled)
+                    <button type="button" class="md-btn-outlined align-self-start" wire:click="$set('kpiEnabled', true)">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar KPI
+                    </button>
+                @endunless
 
                 @if ($kpiEnabled)
                     <div class="goal-kpi-form">
@@ -43,6 +44,7 @@
                         @else
                             <p class="goal-kpi-form__hint">El detalle comparará tu avance real con el ritmo esperado entre esas fechas.</p>
                         @endif
+                        <button type="button" class="md-btn-text align-self-start" wire:click="$set('kpiEnabled', false)">Quitar KPI</button>
                     </div>
                 @endif
             </div>
