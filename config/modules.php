@@ -26,6 +26,7 @@ return [
         ]],
         'life' => ['label' => 'Vida personal', 'icon' => 'bi-person-heart', 'items' => [
             ['label' => 'Diario', 'route' => 'journal', 'module' => 'journal', 'icon' => 'bi-journal-text', 'active' => ['journal*']],
+            ['label' => 'Amigos', 'route' => 'social.friends', 'module' => 'social', 'icon' => 'bi-person-hearts', 'active' => ['social*']],
             ['label' => 'Relaciones', 'route' => 'relationships', 'module' => 'relationships', 'icon' => 'bi-people', 'active' => ['relationships*']],
             ['label' => 'Planes', 'route' => 'plans', 'module' => 'plans', 'icon' => 'bi-map', 'active' => ['plans*']],
             ['label' => 'Ánimo y energía', 'route' => 'mood', 'module' => 'mood', 'icon' => 'bi-emoji-smile', 'active' => ['mood*']],
@@ -190,6 +191,11 @@ return [
             ['label' => 'Progreso', 'route' => 'tasks.progress', 'archetype' => 'dashboard', 'icon' => 'bi-trophy', 'active' => ['tasks.progress']],
             ['label' => 'Ajustes', 'route' => 'tasks.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['tasks.settings', 'tasks.settings.statuses']],
         ],
+    ],
+    'social' => [
+        'archetype' => 'list',
+        'title' => 'Amigos', 'subtitle' => 'Personas de MiSo con las que compartes constancia.', 'icon' => 'bi-person-hearts',
+        'patterns' => ['social*'], 'preserve' => [],
     ],
     'relationships' => [
         'archetype' => 'list',

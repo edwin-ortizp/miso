@@ -1,5 +1,5 @@
 # CHG-121 · Social A: perfil social y amistades por código o usuario
-**Estado:** Aprobado
+**Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -101,16 +101,22 @@ flowchart LR
 - Docs a actualizar: `docs/PRODUCT.md` (alcance social y privacidad), `docs/UX-WRITING.md` (vocabulario «amigo»).
 
 ## 7. Tareas
-- [ ] T1 · Tengo un nombre de usuario y un código para compartir — Resp: developer — Modelo: estandar — Archivos: migraciones de `users`, `app/Models/User.php` — Hecho cuando: el usuario puede guardar un @usuario único y regenerar su código, con pruebas.
-- [ ] T2 · Puedo agregar, aceptar, rechazar, eliminar y bloquear amigos — Resp: developer — Modelo: estandar — Archivos: `app/Models/Friendship.php`, `app/Services/Social/Friends.php`, migración `friendships` — Hecho cuando: las pruebas de duplicado, cruce, bloqueo, límite y respuesta uniforme pasan.
-- [ ] T3 · Veo la pantalla Amigos con mi código y mis solicitudes — Resp: developer — Modelo: estandar — Archivos: `app/Livewire/Social/*`, vistas, `routes/web.php`, `config/modules.php` — Hecho cuando: `/amigos` funciona en móvil y escritorio y `php artisan ui:conformance` pasa.
-- [ ] T4 · Puedo enlazar un amigo con una persona de mi agenda — Resp: developer — Modelo: estandar — Archivos: migración `relationships.friend_user_id`, ficha de Personas — Hecho cuando: el vínculo se guarda y no se expone ningún dato de la ficha al amigo.
-- [ ] T5 · Mis datos solo los veo yo salvo lo que decido mostrar — Resp: developer — Modelo: estandar — Archivos: `app/Services/Social/FriendSnapshot.php`, ajuste `social_visible` — Hecho cuando: un tercero, un bloqueado o alguien con «visible» apagado no obtiene nada.
-- [ ] T6 · Documentación actualizada — Resp: developer — Modelo: estandar — Archivos: `docs/PRODUCT.md`, `docs/UX-WRITING.md` — Hecho cuando: los docs reflejan el alcance y `git diff --check` pasa.
+- [x] T1 · Tengo un nombre de usuario y un código para compartir — Resp: developer — Modelo: estandar — Archivos: migraciones de `users`, `app/Models/User.php` — Hecho cuando: el usuario puede guardar un @usuario único y regenerar su código, con pruebas.
+- [x] T2 · Puedo agregar, aceptar, rechazar, eliminar y bloquear amigos — Resp: developer — Modelo: estandar — Archivos: `app/Models/Friendship.php`, `app/Services/Social/Friends.php`, migración `friendships` — Hecho cuando: las pruebas de duplicado, cruce, bloqueo, límite y respuesta uniforme pasan.
+- [x] T3 · Veo la pantalla Amigos con mi código y mis solicitudes — Resp: developer — Modelo: estandar — Archivos: `app/Livewire/Social/*`, vistas, `routes/web.php`, `config/modules.php` — Hecho cuando: `/amigos` funciona en móvil y escritorio y `php artisan ui:conformance` pasa.
+- [x] T4 · Puedo enlazar un amigo con una persona de mi agenda — Resp: developer — Modelo: estandar — Archivos: migración `relationships.friend_user_id`, ficha de Personas — Hecho cuando: el vínculo se guarda y no se expone ningún dato de la ficha al amigo.
+- [x] T5 · Mis datos solo los veo yo salvo lo que decido mostrar — Resp: developer — Modelo: estandar — Archivos: `app/Services/Social/FriendSnapshot.php`, ajuste `social_visible` — Hecho cuando: un tercero, un bloqueado o alguien con «visible» apagado no obtiene nada.
+- [x] T6 · Documentación actualizada — Resp: developer — Modelo: estandar — Archivos: `docs/PRODUCT.md`, `docs/UX-WRITING.md` — Hecho cuando: los docs reflejan el alcance y `git diff --check` pasa.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — Implementado: migraciones (`users.username`/`friend_code`, `friendships`, `relationships.friend_user_id`), `Friendship`, `Friends`, `SocialSettings`, `FriendSnapshot`, `Username`, `FriendsIndex` (`/amigos`), módulo `social` en `config/modules.php`, vínculo en `RelationshipShow`, pruebas en `tests/Feature/Social/`, docs.
+- Ajustes frente a la spec: el módulo existente se llama «Relaciones», no «Personas»; el @usuario se elige desde una fila de la pantalla (opcional), no en un diálogo forzado; la solicitud devuelve siempre el mismo mensaje exista o no la cuenta («Si esa persona existe, le llegó tu solicitud»), en lugar de «No encontramos a esa persona»; el @usuario exige el prefijo «@» y sin él se interpreta como código.
+- Usuarios que ya hicieron el onboarding con módulos elegidos no verán «Amigos» en el menú hasta activarlo en sus preferencias (comportamiento de `PersonalExperience`).
+- **BLOQUEADO — no verificado:** no se pudo ejecutar `php artisan test` ni `ui:conformance`. El lock de Composer instala Symfony 8 (property hooks, PHP 8.4) y el entorno solo tiene PHP 8.3.6; el proxy bloquea el PPA para instalar 8.4. Solo se comprobó `php -l` en todos los archivos PHP. Falta correr: `php artisan test --filter=Social`, `--filter=MultitenancySchema`, `--filter=Relationship`, `--filter=PersonalExperience`, `--filter=ProtectedScreenContract`, `php artisan ui:conformance`, `npm run build`.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
+- 2026-11-16 — Pendiente: ampliar `MultitenancySchemaTest` con la cascada de cuentas (hoy cubierta en `FriendIsolationTest`).
 - 2026-11-16 — Decisión: máximo 100 amigos por cuenta; el avatar visible es el `avatar_url` actual, sin foto social propia; el vínculo con Personas es opcional.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)

@@ -106,6 +106,8 @@
             <x-slot:menu>
                 <x-ui.menu-item icon="bi-pencil" :href="route('relationships', ['edit' => $relationship->id])" wire:navigate>Editar contacto</x-ui.menu-item>
                 <x-ui.menu-item icon="bi-chat-dots" wire:click="markContact">Marcar contacto</x-ui.menu-item>
+                <x-ui.menu-item icon="bi-person-hearts" wire:click="openFriendLink">{{ $relationship->friend_user_id ? 'Cambiar amigo vinculado' : 'Vincular con un amigo' }}</x-ui.menu-item>
+                @if ($relationship->friend_user_id)<x-ui.menu-item icon="bi-link-45deg" wire:click="unlinkFriend">Quitar vínculo con amigo</x-ui.menu-item>@endif
                 <x-ui.menu-divider />
                 <x-ui.menu-item icon="bi-archive" wire:click="toggleArchive">{{ $relationship->is_archived ? 'Desarchivar' : 'Archivar' }}</x-ui.menu-item>
             </x-slot:menu>
@@ -195,4 +197,8 @@
 
     @include('livewire.relationship.partials.event-dialog')
     @include('livewire.relationship.partials.task-dialog')
+    <x-ui.form-dialog module="relationships" :open="$showFriendLink" close="closeFriendLink" submit-action="saveFriendLink" id="relationship-friend-link" title="Vincular con un amigo" icon="bi-person-hearts">
+        <x-ui.select name="friendChoice" label="Amigo" placeholder="Sin vínculo" :selected="$friendChoice" :options="$friendOptions" wire:model="friendChoice" />
+        <p class="md-body-small">Solo se guarda el vínculo. Tus notas y datos de esta ficha nunca se comparten.</p>
+    </x-ui.form-dialog>
 </x-module-shell>
