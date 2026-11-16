@@ -14,6 +14,7 @@ use Livewire\Attributes\Url;
 #[Title('Objetivos')]
 class GoalIndex extends Component
 {
+    use \App\Livewire\Concerns\AlignsGoalDates;
     use \App\Livewire\Concerns\HasReminderDraft;
     use WithManagementCard;
     #[Url(as: 'status', history: true, keep: true)]

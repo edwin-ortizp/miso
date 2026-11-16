@@ -7,6 +7,7 @@ use App\Models\Plan;
 use App\Models\Relationship;
 use App\Models\Task;
 use App\Models\UserNotification;
+use App\Services\Game\BallNotice;
 use App\Services\Insights\WeeklyInsights;
 use App\Services\Notifications\Push\GuardianNudgePlanner;
 use Carbon\CarbonImmutable;
@@ -35,20 +36,21 @@ class NotificationPresentation
     private function present(UserNotification $notice, $source): array
     {
         $now = CarbonImmutable::now(NotificationSource::TIMEZONE);
-        $special = in_array($notice->source_type, [GuardianNudgePlanner::SOURCE, WeeklyInsights::SOURCE], true);
+        $special = in_array($notice->source_type, [GuardianNudgePlanner::SOURCE, WeeklyInsights::SOURCE, BallNotice::SOURCE], true);
         $kind = match (true) {
             $source instanceof Task => 'Tarea',
             $source instanceof Plan => 'Plan',
             $source instanceof Goal => 'Meta',
             $source instanceof Relationship => 'Cumpleaños',
             $notice->source_type === GuardianNudgePlanner::SOURCE => 'Guardián',
+            $notice->source_type === BallNotice::SOURCE => 'Ball',
             $notice->source_type === WeeklyInsights::SOURCE => 'Resumen semanal',
             default => 'Aviso',
         };
         $icon = match ($notice->type) {
             'task_due' => 'bi-check2-square', 'plan_due' => 'bi-calendar-event',
             'birthday' => 'bi-gift', 'reminder' => 'bi-alarm',
-            'guardian_nudge' => 'bi-stars', 'weekly_insights' => 'bi-bar-chart', default => 'bi-info-circle',
+            'guardian_nudge' => 'bi-stars', 'weekly_insights' => 'bi-bar-chart', 'game_ball' => 'bi-gift', default => 'bi-info-circle',
         };
         $title = $special ? $notice->title : ($source instanceof Relationship ? 'Cumpleaños de '.$source->full_name : ($source?->title ?? 'Elemento no disponible'));
         $body = $special ? $notice->body : '';
@@ -99,6 +101,7 @@ class NotificationPresentation
             $context .= ' · Recordatorio · Sin fecha actual';
         }
         $destination = match (true) {
+            $notice->source_type === BallNotice::SOURCE => route('game.balls'),
             $notice->source_type === WeeklyInsights::SOURCE => route('statistics').'#insights',
             $notice->source_type === GuardianNudgePlanner::SOURCE => route(match (GuardianNudgePlanner::moduleFor((string) $notice->source_id)) {
                 'habits' => 'habits', 'water' => 'water.daily', 'tasks' => 'tasks.list', 'exercise' => 'exercise', default => 'home',

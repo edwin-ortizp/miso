@@ -13,7 +13,6 @@ let serverEnv;
 async function selectSection(dialog, name) {
     await expect(dialog).toBeVisible();
     const section = dialog.getByRole('button', { name, exact: true });
-    if (!await section.isVisible()) await dialog.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
     await section.click();
 }
 
@@ -374,7 +373,6 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
         const dialog = page.getByRole('dialog', { name: 'Registrar compra' });
         await expect(dialog).toBeVisible();
         await dialog.getByRole('combobox', { name: 'Tienda', exact: true }).selectOption({ label: 'Tienda de prueba' });
-        if (viewport.width < 768) await dialog.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
         await dialog.getByRole('button', { name: 'Productos', exact: true }).click();
         const line = dialog.locator('fieldset').first();
         await line.getByRole('combobox', { name: 'Producto', exact: true }).selectOption({ label: 'Pan de prueba' });
@@ -419,7 +417,6 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
         await page.getByRole('button', { name: 'Editar compra', exact: true }).click();
         const editor = page.getByRole('dialog', { name: 'Editar compra' });
         await expect(editor).toBeVisible();
-        if (viewport.width < 768) await editor.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
         await editor.getByRole('button', { name: 'Detalles', exact: true }).click();
         await editor.getByLabel('Notas').fill(`Editada desde ${viewport.width}px`);
         await editor.getByRole('button', { name: 'Guardar', exact: true }).click();
@@ -448,7 +445,6 @@ for (const width of [390, 768, 1440]) {
         }
         const dialog = page.locator('#ingredient-dialog');
         await expect(dialog).toBeVisible();
-        if (width < 768) await dialog.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
         await dialog.getByRole('button', { name: 'Inventario', exact: true }).click();
         const stock = dialog.getByLabel('Existencias contadas');
         // Exercise the server validation as well as HTML's native min/max constraints.

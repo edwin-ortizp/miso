@@ -39,7 +39,6 @@ async function openTaskDialog(page, bulk = false) {
 
 async function taskSection(dialog, name) {
     const nav = dialog.getByRole('navigation', { name: 'Secciones del formulario' });
-    if (!await nav.isVisible()) await dialog.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
     await nav.getByRole('button', { name: new RegExp('^' + name) }).click();
 }
 

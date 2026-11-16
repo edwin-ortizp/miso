@@ -27,6 +27,10 @@ class UserNotification extends Model
 
     public function destination(): string
     {
+        // CHG-117: el aviso de ball lleva a Balls.
+        if ($this->source_type === \App\Services\Game\BallNotice::SOURCE) {
+            return route('game.balls');
+        }
         // CHG-071: el resumen semanal vive en Estadísticas.
         if ($this->source_type === \App\Services\Insights\WeeklyInsights::SOURCE) {
             return route('statistics').'#insights';

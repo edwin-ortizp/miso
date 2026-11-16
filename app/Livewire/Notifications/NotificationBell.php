@@ -13,6 +13,7 @@ use Livewire\WithPagination;
 class NotificationBell extends Component
 {
     #[On('android-notification-received')]
+    #[On('game-notice-refresh')]
     public function refreshAndroidNotice(): void {}
 
     use WithPagination;
@@ -29,7 +30,7 @@ class NotificationBell extends Component
 
     public string $draftType = '';
 
-    public const TYPES = ['birthday' => 'Cumpleaños', 'task_due' => 'Tareas', 'plan_due' => 'Planes', 'reminder' => 'Recordatorios', 'guardian_nudge' => 'Guardián', 'weekly_insights' => 'Resumen semanal'];
+    public const TYPES = ['birthday' => 'Cumpleaños', 'task_due' => 'Tareas', 'plan_due' => 'Planes', 'reminder' => 'Recordatorios', 'guardian_nudge' => 'Guardián', 'weekly_insights' => 'Resumen semanal', 'game_ball' => 'Balls'];
 
     public const READING = ['all' => 'Todas', 'unread' => 'Sin leer', 'read' => 'Leídas'];
 
@@ -94,7 +95,7 @@ class NotificationBell extends Component
         return $this->available()
             ->when($this->reading === 'unread', fn ($q) => $q->whereNull('read_at'))
             ->when($this->reading === 'read', fn ($q) => $q->whereNotNull('read_at'))
-            ->when(in_array($this->type, ['birthday', 'task_due', 'plan_due', 'reminder', 'guardian_nudge', 'weekly_insights']), fn ($q) => $q->where('type', $this->type));
+            ->when(in_array($this->type, ['birthday', 'task_due', 'plan_due', 'reminder', 'guardian_nudge', 'weekly_insights', 'game_ball']), fn ($q) => $q->where('type', $this->type));
     }
 
     public function render()
