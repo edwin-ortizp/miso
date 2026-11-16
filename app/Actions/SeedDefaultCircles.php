@@ -11,11 +11,9 @@ class SeedDefaultCircles
 {
     public const NAMES = [
         'Pareja',
-        'Familia muy cercana',
         'Familia',
-        'Amigos cercanos',
         'Amigos',
-        'Amigos de trabajo',
+        'Trabajo',
     ];
 
     public static function for(User $user): void

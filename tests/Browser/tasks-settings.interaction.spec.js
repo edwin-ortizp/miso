@@ -177,9 +177,9 @@ for (const width of [1280, 1600, 390]) {
         for (const column of ['Nombre', 'Tipo', 'Tareas']) {
             await expect(statusCard.getByRole('columnheader', { name: column, exact: true })).toBeVisible();
         }
-        const doneRow = statusCard.locator('tbody tr').filter({ hasText: 'Done' });
+        const doneRow = statusCard.locator('tbody tr').filter({ hasText: 'Terminada' });
         await expect(doneRow.locator('.md-chip-tonal--success')).toContainText('Terminado');
-        await expect(statusCard.locator('tbody tr').filter({ hasText: 'WIP' }).locator('.md-chip-tonal--warning')).toContainText('En curso');
+        await expect(statusCard.locator('tbody tr').filter({ hasText: 'En marcha' }).locator('.md-chip-tonal--warning')).toContainText('En curso');
 
         // El estado terminado no ofrece eliminar.
         await doneRow.locator('.md-row-actions__more').click();
@@ -187,10 +187,10 @@ for (const width of [1280, 1600, 390]) {
         await page.keyboard.press('Escape');
 
         // Estados con tareas piden reasignar antes de eliminar.
-        await statusCard.locator('tbody tr').filter({ hasText: 'WIP' }).locator('.md-row-actions__more').click();
+        await statusCard.locator('tbody tr').filter({ hasText: 'En marcha' }).locator('.md-row-actions__more').click();
         await page.getByRole('menuitem', { name: 'Eliminar', exact: true }).click();
         const statusDeleteDialog = page.getByRole('dialog');
-        await expect(statusDeleteDialog.getByRole('heading', { name: 'Eliminar «WIP»' })).toBeVisible();
+        await expect(statusDeleteDialog.getByRole('heading', { name: 'Eliminar «En marcha»' })).toBeVisible();
         await expect(statusDeleteDialog.getByLabel('Pasar tareas a')).toBeVisible();
         await statusDeleteDialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
         await expect(page.getByRole('dialog')).toHaveCount(0);

@@ -1,39 +1,32 @@
 <?php
 
-namespace App\Support;
+namespace Database\Seeders;
 
 use App\Models\User;
+use Illuminate\Database\Seeder;
 
-class DefaultHabitDefinitions
+/**
+ * Datos de demostración para desarrollo local: una cuenta ficticia con una rutina de ejemplo.
+ * Nunca se ejecuta en producción ni se ofrece a cuentas reales.
+ */
+class DemoSeeder extends Seeder
 {
-    public static function createFor(User $user): void
+    public function run(): void
     {
-        self::createPositiveFor($user);
-        self::createNegativeFor($user);
-    }
+        $user = User::firstOrCreate(
+            ['email' => 'demo@example.test'],
+            ['name' => 'Cuenta de demostración', 'password' => 'password'],
+        );
 
-    public static function createPositiveFor(User $user): void
-    {
-        foreach (self::positive() as $habit) {
-            $user->habitDefinitions()->firstOrCreate(
-                ['name' => $habit['name'], 'time_of_day' => $habit['time_of_day']],
-                $habit,
-            );
+        foreach ($this->positive() as $habit) {
+            $user->habitDefinitions()->firstOrCreate(['name' => $habit['name'], 'time_of_day' => $habit['time_of_day']], $habit);
         }
-
-    }
-
-    public static function createNegativeFor(User $user): void
-    {
-        foreach (self::negative() as $habit) {
-            $user->negativeHabitDefinitions()->firstOrCreate(
-                ['name' => $habit['name']],
-                $habit,
-            );
+        foreach ($this->negative() as $habit) {
+            $user->negativeHabitDefinitions()->firstOrCreate(['name' => $habit['name']], $habit);
         }
     }
 
-    private static function positive(): array
+    private function positive(): array
     {
         return [
             ['name' => 'Tomar Agua (mañana)', 'icon' => '💧', 'time_of_day' => 'morning', 'goal_duration' => '5 min', 'base_time' => '05:50'],
@@ -62,7 +55,7 @@ class DefaultHabitDefinitions
         ];
     }
 
-    private static function negative(): array
+    private function negative(): array
     {
         return [
             ['name' => 'Saltarse comidas', 'icon' => '🍽️', 'category' => 'health'],

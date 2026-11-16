@@ -77,3 +77,9 @@ Un único layout responsive mantiene escenario lateral en escritorio y compacto 
 - `npm run build` correcto. Conformidad global: 203 desviaciones frente a inventario de 345; falla por excesos en cuatro superficies ajenas (day-tile-info, game-collection, checkin-sheet y task-list). No señala infracciones del onboarding; no se modifica baseline.
 - Pint focalizado y `git diff --check` del cambio. CLI local sin comandos context/activity: lineamientos leídos directamente y evidencia registrada en el CHG.
 - No hay migraciones nuevas ni cambios de datos reales. Publicación, comprobación en entorno publicado y pruebas con participantes siguen pendientes.
+
+## Alta limpia y omitir el hábito (CHG-121)
+
+El registro ejecuta `ProvisionNewUser`: solo crea las categorías de Tareas. Los demás catálogos se siembran al abrir cada módulo (ver `docs/category-catalogs.md`). No existe «Restaurar hábitos predeterminados»: las ideas de hábito son las de la bienvenida y la rutina del autor vive en `DemoSeeder`, solo para desarrollo local. `DatabaseSeeder` no crea cuentas reales ni en producción.
+
+En el paso 3, «Hacerlo después» completa la guía sin hábito (`habit_skipped`, evento `skipped_habit`); el resumen indica crear el primero desde Hábitos. En `experience:report`, la diferencia entre «Fin guía» y «Hábito creado» incluye a quienes lo omitieron. Cuentas nuevas: estados de tarea «Pendiente / Preparada / En marcha / Terminada» y círculos Pareja, Familia, Amigos y Trabajo; las cuentas existentes no cambian.

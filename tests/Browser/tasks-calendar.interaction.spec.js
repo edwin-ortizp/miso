@@ -117,7 +117,7 @@ for (const width of [1440, 768, 390]) {
         await layers.getByRole('button', { name: 'Tareas', exact: true }).click();
         await page.locator('.md-calendar-task').filter({ hasText: 'Calendar recurring task' }).first().click();
         await page.locator('#task-calendar-quick [aria-label="Cambiar estado"]').click();
-        await page.locator('#task-calendar-status-menu').getByRole('menuitem', { name: 'Done', exact: true }).click();
+        await page.locator('#task-calendar-status-menu').getByRole('menuitem', { name: 'Terminada', exact: true }).click();
         await expect(page.locator('[role=dialog]:visible').first()).toBeVisible();
         await expect(page.locator('[role=dialog]:visible').first()).toContainText('repetición');
         await page.goto('/meals/settings/schedules');
@@ -181,7 +181,7 @@ for (const width of [1440, 768, 390]) {
         await expect(trigger).toBeFocused();
         await trigger.press('ArrowDown');
         await expect(menu.locator('button:visible').first()).toBeFocused();
-        const target = (await popover.locator('.md-task-status-split__label').innerText()).trim() === 'WIP' ? 'Ready' : 'WIP';
+        const target = (await popover.locator('.md-task-status-split__label').innerText()).trim() === 'En marcha' ? 'Preparada' : 'En marcha';
         await menu.getByRole('menuitem', { name: target, exact: true }).click();
         await expect(popover).toBeHidden();
         await event.click();

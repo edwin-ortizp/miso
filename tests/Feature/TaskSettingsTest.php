@@ -141,11 +141,11 @@ class TaskSettingsTest extends TestCase
         TaskStatus::ensureFor($user->id);
 
         Livewire::test(TaskSettings::class, ['section' => 'statuses'])
-            ->set('q', 'wip')
-            ->assertSee('WIP')
-            ->assertDontSee('Borrador')
+            ->set('q', 'marcha')
+            ->assertSee('En marcha')
+            ->assertDontSee('Terminada')
             ->set('q', '')
-            ->assertSee('Borrador');
+            ->assertSee('Terminada');
     }
 
     public function test_catalogs_use_twenty_five_rows_by_default_and_accept_the_canonical_sizes(): void
@@ -242,7 +242,7 @@ class TaskSettingsTest extends TestCase
         Livewire::test(TaskSettings::class)->assertSeeHtmlInOrder(['Alfa', 'Hija', 'Zeta']);
 
         Livewire::test(TaskSettings::class, ['section' => 'statuses'])
-            ->assertSeeHtmlInOrder(['Borrador', 'Ready', 'WIP', 'Done']);
+            ->assertSeeHtmlInOrder(['Pendiente', 'Preparada', 'En marcha', 'Terminada']);
     }
 
     public function test_catalogs_and_counters_are_isolated_between_users(): void
@@ -417,7 +417,7 @@ class TaskSettingsTest extends TestCase
         Livewire::test(TaskSettings::class, ['section' => 'statuses'])
             ->call('openStatusForm', $status->id)
             ->assertSet('editingStatusId', $status->id)
-            ->assertSet('statusName', 'Ready')
+            ->assertSet('statusName', 'Preparada')
             ->call('closeStatusForm')
             ->assertSet('editingStatusId', null)
             ->call('deleteStatus', $status->id)

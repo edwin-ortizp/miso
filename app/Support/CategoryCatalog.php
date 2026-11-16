@@ -23,47 +23,54 @@ class CategoryCatalog
     public static function defaults(string $domain): array
     {
         return match ($domain) {
-            'drinks' => ['water' => 'Agua', 'coffee' => 'Café', 'tea' => 'Té', 'juice' => 'Jugo', 'soda' => 'Gaseosa', 'milk' => 'Leche', 'sports' => 'Bebida deportiva', 'beer' => 'Cerveza', 'wine' => 'Vino', 'smoothie' => 'Batido'],
+            'drinks' => array_column(DefaultDrinkTypes::all(), 'name', 'category'),
             'exercise' => DefaultExerciseTypes::CATEGORIES,
             'mood' => array_combine(DefaultMoodStates::categories(), DefaultMoodStates::categories()),
             'contacts' => ['familia' => 'Familia', 'amigo' => 'Amigo', 'trabajo' => 'Trabajo', 'pareja' => 'Pareja', 'otro' => 'Otro'],
             'relationship-events' => \App\Models\RelationshipEvent::CATEGORIES,
             'negative-habits' => ['health' => 'Salud', 'productivity' => 'Productividad', 'social' => 'Social', 'emotional' => 'Emocional', 'finance' => 'Finanzas', 'digital' => 'Digital', 'environment' => 'Medio ambiente'],
+            'maintenance' => DefaultMaintenanceTemplates::CATEGORIES,
             default => [],
         };
     }
 
     public static function seedFor(int $userId): void
     {
-        if (! Schema::hasTable('user_categories')) {
+        foreach (array_keys(self::DOMAINS) as $domain) {
+            self::seedDomain($userId, $domain);
+        }
+    }
+
+    public static function seedDomain(int $userId, string $domain): void
+    {
+        if (! Schema::hasTable('user_categories') || ! isset(self::DOMAINS[$domain])) {
             return;
         }
-        foreach (self::DOMAINS as $domain => [$table]) {
-            $values = self::defaults($domain);
-            if (Schema::hasTable($table)) {
-                $query = DB::table($table)->where(fn ($q) => $q->where('user_id', $userId)
-                    ->when($domain === 'maintenance', fn ($q) => $q->orWhereNull('user_id')));
-                foreach ($query->whereNotNull('category')->distinct()->pluck('category') as $key) {
-                    if ($key !== '') {
-                        $values[$key] ??= $key;
-                    }
+        [$table] = self::DOMAINS[$domain];
+        $values = self::defaults($domain);
+        if (Schema::hasTable($table)) {
+            $query = DB::table($table)->where(fn ($q) => $q->where('user_id', $userId)
+                ->when($domain === 'maintenance', fn ($q) => $q->orWhereNull('user_id')));
+            foreach ($query->whereNotNull('category')->distinct()->pluck('category') as $key) {
+                if ($key !== '') {
+                    $values[$key] ??= $key;
                 }
             }
-            foreach ($values as $key => $name) {
-                if (DB::table('user_categories')->where('user_id', $userId)->where('domain', $domain)->where('key', (string) $key)->exists()) {
-                    continue;
-                }
-                $base = $name;
-                $suffix = 2;
-                while (DB::table('user_categories')->where('user_id', $userId)->where('domain', $domain)->where('normalized_name', mb_strtolower($name))->exists()) {
-                    $name = $base.' ('.$suffix++.')';
-                }
-                DB::table('user_categories')->insertOrIgnore([
-                    'id' => (string) Str::uuid(), 'user_id' => $userId, 'domain' => $domain,
-                    'key' => (string) $key, 'name' => $name, 'normalized_name' => mb_strtolower($name),
-                    'created_at' => now(), 'updated_at' => now(),
-                ]);
+        }
+        foreach ($values as $key => $name) {
+            if (DB::table('user_categories')->where('user_id', $userId)->where('domain', $domain)->where('key', (string) $key)->exists()) {
+                continue;
             }
+            $base = $name;
+            $suffix = 2;
+            while (DB::table('user_categories')->where('user_id', $userId)->where('domain', $domain)->where('normalized_name', mb_strtolower($name))->exists()) {
+                $name = $base.' ('.$suffix++.')';
+            }
+            DB::table('user_categories')->insertOrIgnore([
+                'id' => (string) Str::uuid(), 'user_id' => $userId, 'domain' => $domain,
+                'key' => (string) $key, 'name' => $name, 'normalized_name' => mb_strtolower($name),
+                'created_at' => now(), 'updated_at' => now(),
+            ]);
         }
     }
 

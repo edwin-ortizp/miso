@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\JournalImportController;
 use App\Http\Controllers\Api\MoodImportController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['integration.token', 'throttle:60,1'])
+Route::middleware(['integration.token', \App\Http\Middleware\EnsureAllModuleCatalogs::class, 'throttle:60,1'])
     ->prefix('v1/integrations')
     ->group(function (): void {
         Route::get('/mood-states', [IntegrationMoodStateController::class, 'index']);

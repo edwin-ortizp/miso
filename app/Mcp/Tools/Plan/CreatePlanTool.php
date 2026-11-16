@@ -101,7 +101,7 @@ class CreatePlanTool extends Tool
                 ->description('Notas del plan.'),
             'circle_names' => $schema->array()
                 ->items($schema->string())
-                ->description('Círculos con los que se puede hacer el plan, por nombre exacto de list-circles-tool. Ej. ["Pareja", "Amigos cercanos"].'),
+                ->description('Círculos con los que se puede hacer el plan, por nombre exacto de list-circles-tool. Ej. ["Pareja", "Amigos"].'),
             'contact_names' => $schema->array()
                 ->items($schema->string())
                 ->description('Personas concretas con las que se quiere hacer, por nombre, apodo o alias.'),

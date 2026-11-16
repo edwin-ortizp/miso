@@ -11,17 +11,12 @@ use App\Models\User;
  */
 class DefaultTaskCategories
 {
-    /** Nombres legibles de las categorías de trabajo que existían cuando el catálogo era una lista fija. */
-    public const LEGACY_NAMES = [
-        'siigo' => 'Siigo', 'entreagiles' => 'EntreAgiles', 'gesthor' => 'Gesthor', 'certmind' => 'CertMind', 'unicauca' => 'Unicauca',
-    ];
-
-    /** Nombre para un key sin categoría en el catálogo: el predeterminado, el legado o el key capitalizado. */
+    /** Nombre para un key sin categoría en el catálogo: el predeterminado o el key capitalizado. */
     public static function labelFor(string $key): string
     {
         $defaults = array_column(self::all(), 'name', 'key');
 
-        return $defaults[$key] ?? self::LEGACY_NAMES[$key] ?? mb_substr(\Illuminate\Support\Str::ucfirst($key), 0, 60);
+        return $defaults[$key] ?? mb_substr(\Illuminate\Support\Str::ucfirst($key), 0, 60);
     }
 
     /** @return list<array{key: string, name: string, icon: string}> */

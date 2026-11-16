@@ -114,13 +114,29 @@ class Welcome extends Component
         $this->dispatch('onboarding-created');
     }
 
+    /** Permite entrar sin preparar un hábito: se puede crear el primero después, desde Hábitos. */
+    public function skipHabit(PersonalExperience $experience): void
+    {
+        $userId = (int) auth()->id();
+        $experience->change($userId, function ($state) {
+            abort_unless(($state['step'] ?? 0) === 3, 403);
+            $state['habit_skipped'] = true;
+            $state['events']['v2_step_3'] ??= now()->toIso8601String();
+            $state['events']['skipped_habit'] ??= now()->toIso8601String();
+            $state['step'] = 4;
+
+            return $state;
+        });
+        $this->dispatch('onboarding-step-changed');
+    }
+
     public function finish(PersonalExperience $experience): void
     {
         $userId = (int) auth()->id();
         $experience->change($userId, function ($state) use ($userId) {
             abort_unless(($state['step'] ?? 1) === 4 && ! empty($state['contexts'])
                 && (isset(OnboardingChoices::NEEDS[$state['need'] ?? '']) || ! empty($state['completed_at']))
-                && $this->habitExists($userId, $state['habit_id'] ?? null), 422);
+                && ($this->habitExists($userId, $state['habit_id'] ?? null) || ! empty($state['habit_skipped'])), 422);
             $state['completed_at'] ??= now()->toIso8601String();
             $state['events']['completed'] ??= $state['completed_at'];
 

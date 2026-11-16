@@ -45,7 +45,7 @@ GUARDIAN_NUDGES_ENABLED=true
 
 - Genera las claves **una sola vez** con `/ruta/php84 artisan miso:vapid` y cópialas. Cambiarlas después obliga a cada usuario a reactivar los avisos.
 - Tras editar `.env`: `/ruta/php84 artisan config:clear` (o `config:cache` si usas caché de configuración).
-- Dependencias tras actualizar el código: `composer install --no-dev --optimize-autoloader` y `php artisan migrate --force`.
+- Dependencias tras actualizar el código: `composer install --no-dev --optimize-autoloader` y `php artisan migrate --force`. Las plantillas globales de mantenimiento y la normalización de sus categorías las crea esa migración (CHG-121); `db:seed` ya no es necesario ni crea cuentas.
 
 ## 4. Comprobar
 

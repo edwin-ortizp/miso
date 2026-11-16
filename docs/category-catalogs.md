@@ -14,7 +14,9 @@ En tareas, `category` acepta el enlace antiguo con un valor y la selección múl
 
 ## Migración y validación
 
-La migración `2026_10_13_000001_add_category_hierarchies` añade padres e inicializa los catálogos con valores predeterminados y valores existentes, todos como raíces. Las claves foráneas de padres comprueban propietario y, en `user_categories`, dominio. Las nuevas cuentas reciben sus catálogos automáticamente.
+La migración `2026_10_13_000001_add_category_hierarchies` añade padres e inicializa los catálogos con valores predeterminados y valores existentes, todos como raíces. Las claves foráneas de padres comprueban propietario y, en `user_categories`, dominio. Las cuentas nuevas solo reciben las categorías de Tareas al registrarse; el catálogo inicial de cada módulo (bebidas, ejercicios, ánimo, círculos, categorías de compras, gastos de vehículo y los dominios de `user_categories`) se siembra la primera vez que se abre ese módulo, desde Mi día si está visible, al activarlo en Personalizar módulos, o al usar MCP/API (`App\Services\Catalogs\ModuleCatalogs`). Se recuerda en `module_settings` (clave `catalogs`), así que borrar un valor predeterminado no lo restaura; una migración marcó las cuentas existentes como ya sembradas. Todos los catálogos son editables.
+
+Las plantillas globales de mantenimiento las crea una migración (`DefaultMaintenanceTemplates`), con categorías sin tildes y etiquetas legibles; no dependen de ningún seeder.
 
 Al revertir, los valores predeterminados intactos conservan sus claves; las etiquetas personalizadas o renombradas se copian al campo de texto del registro para conservar su lectura en el esquema anterior. Las plantillas globales no se modifican. La estructura jerárquica desaparece al revertir.
 

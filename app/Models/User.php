@@ -2,8 +2,6 @@
 
 namespace App\Models;
 
-use App\Actions\SeedDefaultCircles;
-use App\Actions\SeedDefaultMealCategories;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -52,15 +50,6 @@ class User extends Authenticatable
             'daily_water_goal' => 'integer',
             'daily_exercise_minutes' => 'integer',
         ];
-    }
-
-    protected static function booted(): void
-    {
-        static::created(function (self $user) {
-            SeedDefaultCircles::for($user);
-            SeedDefaultMealCategories::for($user);
-            \App\Support\CategoryCatalog::seedFor($user->id);
-        });
     }
 
     public function plans()

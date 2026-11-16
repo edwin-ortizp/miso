@@ -102,7 +102,7 @@ if (app()->environment(['local', 'testing'])) {
 // que comprobar.
 Route::view('/offline', 'offline')->name('offline');
 
-Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class, \App\Http\Middleware\EnsureModuleCatalogs::class])->group(function () {
     Route::get('/bienvenida', \App\Livewire\Onboarding\Welcome::class)->name('onboarding');
     Route::get('/', Dashboard::class)->name('home');
     Route::get('/panel', \App\Livewire\Home\WallPanel::class)->name('panel');

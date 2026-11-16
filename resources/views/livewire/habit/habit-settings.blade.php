@@ -29,9 +29,6 @@
                 <x-ui.applied-filters :filters="$appliedChips" />
             </x-slot:strip>
         @endif
-        <x-slot:menu>
-            <x-ui.menu-item icon="bi-arrow-counterclockwise" wire:click="restoreDefaults">Restaurar hábitos predeterminados</x-ui.menu-item>
-        </x-slot:menu>
         <p class="md-mcard__section-label">Un hábito puede además registrar algo en otro módulo al completarlo.</p>
 
         <x-ui.list label="Hábitos">
@@ -69,9 +66,9 @@
             @empty
                 @if ($totalCount === 0)
                     <x-ui.state variant="empty" icon="bi-check2-square" title="Aún no tienes hábitos"
-                                message="Crea un hábito o agrega los predeterminados. Yo me encargo de los aplausos.">
+                                message="Crea el primero cuando quieras. Yo me encargo de los aplausos.">
                         <x-slot:actions>
-                            <x-ui.action variant="filled" icon="bi-arrow-counterclockwise" wire:click="restoreDefaults">Agregar predeterminados</x-ui.action>
+                            <x-ui.action variant="filled" icon="bi-plus-lg" wire:click="openForm">Crear mi primer hábito</x-ui.action>
                         </x-slot:actions>
                     </x-ui.state>
                 @else

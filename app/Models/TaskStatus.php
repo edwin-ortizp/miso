@@ -37,10 +37,10 @@ class TaskStatus extends Model
 
     /** Catálogo inicial de cada cuenta. */
     public const DEFAULTS = [
-        ['name' => 'Borrador', 'type' => self::TODO],
-        ['name' => 'Ready', 'type' => self::READY],
-        ['name' => 'WIP', 'type' => self::IN_PROGRESS],
-        ['name' => 'Done', 'type' => self::DONE],
+        ['name' => 'Pendiente', 'type' => self::TODO],
+        ['name' => 'Preparada', 'type' => self::READY],
+        ['name' => 'En marcha', 'type' => self::IN_PROGRESS],
+        ['name' => 'Terminada', 'type' => self::DONE],
     ];
 
     protected $fillable = ['color', 'name', 'type', 'sort_order'];

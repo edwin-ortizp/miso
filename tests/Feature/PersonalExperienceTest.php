@@ -254,6 +254,30 @@ class PersonalExperienceTest extends TestCase
         $this->assertTrue($this->experience()->required($user->id));
     }
 
+    public function test_habit_can_be_skipped_and_the_guide_completes_without_one(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $this->experience()->begin($user->id, true);
+        Livewire::test(Welcome::class)->call('skipHabit')->assertStatus(403);
+
+        $this->experience()->change($user->id, fn ($state) => $state + ['contexts' => ['none'], 'need' => 'unsure']);
+        $this->experience()->change($user->id, function ($state) {
+            $state['step'] = 3;
+
+            return $state;
+        });
+        Livewire::test(Welcome::class)
+            ->call('skipHabit')
+            ->assertSee('Cuando quieras, crea tu primer hábito desde Hábitos.')
+            ->call('finish')
+            ->assertRedirect(route('home'));
+
+        $this->assertFalse($this->experience()->required($user->id));
+        $this->assertArrayHasKey('skipped_habit', $this->experience()->state($user->id)['events']);
+        $this->assertDatabaseCount('habit_definitions', 0);
+    }
+
     public function test_report_separates_mature_visits_from_actual_habit_use_without_personal_text(): void
     {
         $user = User::factory()->create();

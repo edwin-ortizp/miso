@@ -109,12 +109,17 @@
                     </form>
                 @endif
                 @error('habit')<p class="experience-error" role="alert">{{ $message }}</p>@enderror
-                <div class="experience-step-actions"><x-ui.action trailing-icon="bi-arrow-right" wire:click="next" wire:loading.attr="disabled">Continuar</x-ui.action></div>
+                <div class="experience-step-actions"><x-ui.action trailing-icon="bi-arrow-right" wire:click="next" wire:loading.attr="disabled">Continuar</x-ui.action>
+                    <x-ui.action variant="text" wire:click="skipHabit" wire:loading.attr="disabled">Hacerlo después</x-ui.action></div>
                 <x-ui.fab label="Preparar hábito" action="prepareHabit" module="habits"
                           :actions="[['label' => 'Crear el mío', 'icon' => 'bi-pencil', 'event' => 'onboarding-habit', 'detail' => ['createNew' => true]]]" />
             @else
-                <div class="experience-ready"><i class="bi bi-check-lg" aria-hidden="true"></i><span>Tu hábito está preparado</span></div>
-                @if ($habit)
+                <div class="experience-ready"><i class="bi bi-check-lg" aria-hidden="true"></i><span>{{ $habit || empty($state['habit_skipped']) ? 'Tu hábito está preparado' : 'Todo listo para empezar' }}</span></div>
+                @if (! $habit && ! empty($state['habit_skipped']))
+                    <p>Cuando quieras, crea tu primer hábito desde Hábitos.</p>
+                    <p class="experience-note">Después puedes explorar los módulos en Ajustes → Personalizar módulos y preparar un objetivo cuando quieras.</p>
+                    <div class="experience-step-actions"><x-ui.action trailing-icon="bi-arrow-right" wire:click="finish" wire:loading.attr="disabled">Empezar mi día</x-ui.action></div>
+                @elseif ($habit)
                     <article class="experience-habit-preview" data-module="habits" aria-label="Tu hábito preparado">
                         <span class="experience-habit-preview__icon" aria-hidden="true">{{ $habit->icon ?: '🌱' }}</span>
                         <div><h2>{{ $habit->name }}</h2><p>Todos los días · {{ \App\Livewire\Habit\HabitSettings::TIMES_OF_DAY[$habit->time_of_day] ?? 'En cualquier momento' }}</p></div>

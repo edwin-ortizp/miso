@@ -31,8 +31,8 @@ class LifeTrackerPlanMcpTest extends TestCase
         LifeTrackerServer::actingAs($user)
             ->tool(ListCirclesTool::class, [])
             ->assertOk()
-            ->assertSee('Familia muy cercana')
-            ->assertSee('Amigos de trabajo')
+            ->assertSee('Pareja')
+            ->assertSee('Trabajo')
             ->assertDontSee('Círculo ajeno');
     }
 

@@ -7,11 +7,11 @@ use Laravel\Mcp\Facades\Mcp;
 // Acepta los tokens de integración existentes (lt_ai_…) y los clientes OAuth.
 Route::middleware(\App\Http\Middleware\ValidateMcpTransport::class)->group(function (): void {
     Mcp::web('miso', LifeTrackerServer::class)
-        ->middleware(['mcp.auth', 'throttle:60,1']);
+        ->middleware(['mcp.auth', \App\Http\Middleware\EnsureAllModuleCatalogs::class, 'throttle:60,1']);
 
     // Ruta anterior al cambio de nombre: mantiene funcionando los conectores ya configurados.
     Mcp::web('life-tracker', LifeTrackerServer::class)
-        ->middleware(['mcp.auth', 'throttle:60,1']);
+        ->middleware(['mcp.auth', \App\Http\Middleware\EnsureAllModuleCatalogs::class, 'throttle:60,1']);
 });
 
 /*

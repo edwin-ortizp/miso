@@ -125,6 +125,9 @@ class PersonalExperience
             }
         }
         $this->change($userId, fn ($state) => array_replace($state, ['modules' => array_values(array_unique($modules))]));
+        foreach ($modules as $module) {
+            \App\Services\Catalogs\ModuleCatalogs::ensure($userId, $module);
+        }
     }
 
     public function event(int $userId, string $name): void

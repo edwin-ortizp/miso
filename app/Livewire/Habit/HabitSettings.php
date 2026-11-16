@@ -5,7 +5,6 @@ namespace App\Livewire\Habit;
 use App\Livewire\Concerns\WithManagementCard;
 use App\Models\HabitAction;
 use App\Models\HabitDefinition;
-use App\Support\DefaultHabitDefinitions;
 use App\Support\Habits\HabitActionField;
 use App\Support\Habits\HabitActionRegistry;
 use Illuminate\Support\Facades\DB;
@@ -160,12 +159,6 @@ class HabitSettings extends Component
         $name = $habit->name;
         $habit->delete();
         $this->message = "“{$name}” eliminado junto con su historial.";
-    }
-
-    public function restoreDefaults(): void
-    {
-        DefaultHabitDefinitions::createPositiveFor(auth()->user());
-        $this->message = 'Los hábitos predeterminados que faltaban ya están en tu lista.';
     }
 
     public function updatedSearch(): void

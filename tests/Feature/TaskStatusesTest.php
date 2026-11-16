@@ -33,7 +33,7 @@ class TaskStatusesTest extends TestCase
         $user = User::factory()->create();
         $task = $user->tasks()->create(['title' => 'Escribir prompt']);
 
-        $this->assertSame(['Borrador', 'Ready', 'WIP', 'Done'], TaskStatus::ensureFor($user->id)->pluck('name')->all());
+        $this->assertSame(['Pendiente', 'Preparada', 'En marcha', 'Terminada'], TaskStatus::ensureFor($user->id)->pluck('name')->all());
         $this->assertSame(TaskStatus::TODO, $task->fresh()->status->type);
     }
 
@@ -105,7 +105,7 @@ class TaskStatusesTest extends TestCase
         $this->actingAs($user);
         $task = Task::create(['title' => 'Refinar', 'status_id' => $this->statusOf($user, TaskStatus::READY)->id]);
 
-        $this->get(route('tasks.settings.statuses'))->assertOk()->assertSee('Estados')->assertSee('Ready')->assertSee('Categorías');
+        $this->get(route('tasks.settings.statuses'))->assertOk()->assertSee('Estados')->assertSee('Preparada')->assertSee('Categorías');
 
         Livewire::test(TaskSettings::class, ['section' => 'statuses'])
             ->call('openForm')
@@ -135,7 +135,7 @@ class TaskStatusesTest extends TestCase
         LifeTrackerServer::actingAs($user)
             ->tool(UpdateTaskTool::class, ['task_id' => $draft->id, 'status' => 'ready'])
             ->assertOk()
-            ->assertSee('estado → Ready');
+            ->assertSee('estado → Preparada');
 
         LifeTrackerServer::actingAs($user)
             ->tool(ListTasksTool::class, ['status_type' => ['ready']])
@@ -148,7 +148,7 @@ class TaskStatusesTest extends TestCase
             ->assertSee('"type":"ready"');
 
         LifeTrackerServer::actingAs($user)
-            ->tool(UpdateTaskTool::class, ['task_id' => $draft->id, 'status' => 'Done'])
+            ->tool(UpdateTaskTool::class, ['task_id' => $draft->id, 'status' => 'Terminada'])
             ->assertHasErrors(['complete-task-tool']);
 
         LifeTrackerServer::actingAs($user)
@@ -173,6 +173,6 @@ class TaskStatusesTest extends TestCase
         LifeTrackerServer::actingAs($user)
             ->tool(ManageTaskStatusTool::class, ['action' => 'list'])
             ->assertOk()
-            ->assertSee(['Borrador', 'Esperando', 'in_progress']);
+            ->assertSee(['Pendiente', 'Esperando', 'in_progress']);
     }
 }
