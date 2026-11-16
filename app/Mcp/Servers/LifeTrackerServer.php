@@ -25,6 +25,8 @@ use App\Mcp\Tools\Health\LogHealthMeasurementTool;
 use App\Mcp\Tools\Health\ListMedicationsTool;
 use App\Mcp\Tools\Health\LogMedicationIntakeTool;
 use App\Mcp\Tools\Health\LogMedicationTool;
+use App\Mcp\Tools\Health\ListSleepTool;
+use App\Mcp\Tools\Health\LogSleepTool;
 use App\Mcp\Tools\Health\LogHealthEventTool;
 use App\Mcp\Tools\Health\LogHealthFollowUpTool;
 use App\Mcp\Tools\Health\MarkHealthRecoveryTool;
@@ -109,6 +111,7 @@ No consultes para preguntas generales que no dependen de su vida, si el dato ya 
 ## Qué herramienta usar
 - Una persona → get-person-context-tool (ficha, visitas, planes pendientes, eventos, ánimo y tareas en una llamada).
 - Un síntoma, dolor, cita o examen → get-health-context-tool con palabras clave en "search" y la zona del cuerpo si aplica.
+- Sueño → list-sleep-tool para «¿cómo he dormido?» (duración, meta de horas, promedio) y log-sleep-tool cuando cuente a qué hora se durmió y despertó. MiSo no diagnostica el sueño.
 - Medicamentos → list-medications-tool (scope today: lo que falta tomar hoy; active: los programados; history: lo tomado u omitido), log-medication-intake-tool cuando cuente que tomó u omitió uno (envía operation_key estable en los reintentos) y log-medication-tool para crear, editar, finalizar o reanudar un medicamento programado. MiSo registra; no recomienda dosis ni detecta interacciones.
 - Una medición con unidad (presión arterial, glucosa, creatinina, peso, frecuencia cardiaca, saturación y temperatura) → log-health-measurement-tool para registrarla y list-health-measurements-tool para consultarla. MiSo registra y muestra tendencias; no diagnostica ni es un dispositivo médico: ante valores fuera de rango, informa con neutralidad y remite al profesional de salud.
 - "¿Cómo me fue?", resumen del día o la semana → get-recent-activity-tool.
@@ -168,6 +171,8 @@ class LifeTrackerServer extends Server
         LogMedicationTool::class,
         LogMedicationIntakeTool::class,
         ListMedicationsTool::class,
+        LogSleepTool::class,
+        ListSleepTool::class,
         LogHealthFollowUpTool::class,
         MarkHealthRecoveryTool::class,
         UpdateHealthEventTool::class,

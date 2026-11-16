@@ -128,7 +128,7 @@ _Última actualización: 2026-11-16_
 | CHG-122 | M | Salud: base de mediciones y presión arterial | in-progress | En verificación | 3/3 |
 | CHG-123 | S | Salud: glucosa en sangre | in-progress | En verificación | 2/2 |
 | CHG-124 | S | Salud: creatinina y laboratorios | in-progress | En verificación | 2/2 |
-| CHG-125 | M | Salud: seguimiento del sueño | to-do | Borrador | 0/0 |
+| CHG-125 | M | Salud: seguimiento del sueño | in-progress | En desarrollo | 0/4 |
 | CHG-126 | L | Salud: ciclo menstrual | to-do | Borrador | 0/0 |
 | CHG-127 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | in-progress | En verificación | 2/2 |
 | CHG-128 | M | Salud: tendencias y contexto de mediciones | to-do | Borrador | 0/0 |

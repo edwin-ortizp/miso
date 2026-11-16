@@ -26,6 +26,7 @@ class User extends Authenticatable
         'activity_level',
         'daily_water_goal',
         'daily_exercise_minutes',
+        'daily_sleep_hours',
         'theme_preference',
     ];
 
@@ -51,6 +52,7 @@ class User extends Authenticatable
             'birth_date' => 'date',
             'daily_water_goal' => 'integer',
             'daily_exercise_minutes' => 'integer',
+            'daily_sleep_hours' => 'float',
         ];
     }
 
@@ -196,6 +198,11 @@ class User extends Authenticatable
     public function healthEvents()
     {
         return $this->hasMany(HealthEvent::class);
+    }
+
+    public function sleepLogs()
+    {
+        return $this->hasMany(SleepLog::class);
     }
 
     public function medications()
