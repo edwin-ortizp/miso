@@ -124,6 +124,7 @@ _Última actualización: 2026-11-16_
 | CHG-118 | S | Mover fecha de fin al cambiar la de inicio de una tarea | in-progress | En verificación | 1/1 |
 | CHG-119 | S | Objetivos: alinear fecha límite si el inicio la supera | in-progress | En verificación | 1/1 |
 | CHG-120 | M | Modo oscuro de la app | in-progress | En verificación | 4/4 |
+| CHG-121 | M | Alta de usuario limpia y onboarding sin catálogos ajenos | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
