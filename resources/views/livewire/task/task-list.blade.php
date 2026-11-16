@@ -49,8 +49,8 @@
                             <i class="bi bi-lock-fill" style="color: var(--md-sys-color-on-surface-variant); font-size: 0.75rem;"></i>
                         @endif
                     </div>
-                    @if ($task->description)
-                        <div class="md-list-item-supporting text-truncate">{{ $task->description }}</div>
+                    @if ($preview = $task->descriptionPreview())
+                        <div class="md-list-item-supporting text-truncate">{{ $preview }}</div>
                     @endif
                     <div class="d-flex flex-wrap gap-1 mt-1">
                         @if ($task->priority)
@@ -90,12 +90,12 @@
                         @if (!$task->start_date && !$task->end_date)
                             <span class="md-chip-tonal">Sin fecha</span>
                         @else
+                            {{-- CHG-136: una sola etiqueta para la fecha; si está vencida lo dice ahí mismo. --}}
                             @if ($task->isOverdue())
-                                <span class="md-chip-tonal md-chip-tonal--error"><i class="bi bi-exclamation-circle" style="font-size: 0.625rem;"></i> Vencida</span>
+                                <span class="md-chip-tonal md-chip-tonal--error"><i class="bi bi-exclamation-circle task-row__chip-icon" aria-hidden="true"></i> Vencida · {{ $task->scheduleLabel() }}</span>
+                            @else
+                                <span class="md-chip-tonal"><i class="bi bi-calendar task-row__chip-icon" aria-hidden="true"></i> {{ $task->scheduleLabel() }}</span>
                             @endif
-                            <span class="md-chip-tonal">
-                                <i class="bi bi-calendar" style="font-size: 0.625rem;"></i> {{ ($task->start_date ?? $task->end_date)->translatedFormat('d M, H:i') }}@if($task->end_date && $task->start_date) – {{ $task->end_date->format('H:i') }}@endif
-                            </span>
                         @endif
                         @if ($task->estimated_time)<span class="md-chip-tonal"><i class="bi bi-clock" style="font-size: 0.625rem;"></i> {{ $task->estimated_time_label }}</span>@endif
                     </div>

@@ -78,12 +78,12 @@ Patrón de fondo: los módulos de registro diario se diseñaron como «tabla + p
 ### UX-008 · Tareas: la descripción muestra el Markdown sin interpretar
 - **Prioridad:** P3
 - **Tipo:** Objetivo
-- **Estado:** Propuesto
+- **Estado:** Resuelto
 - **Evidencia:** `resources/views/livewire/task/task-list.blade.php` imprime `$task->description` tal cual en la línea de apoyo: una descripción «**Importante**» se lee con los asteriscos (captura a 390 y 1440 px, auditoría CHG-135).
 - **Propuesta:** mostrar la primera línea como texto plano (sin marcas) en la lista; el diálogo ya la interpreta.
 - **Tamaño:** S
-- **CHG relacionado:** —
-- **Historial:** 2026-11-16 — Hallazgo.
+- **CHG relacionado:** CHG-136
+- **Historial:** 2026-11-16 — Hallazgo. 2026-11-16 — Resuelto en CHG-136 (`Task::descriptionPreview`).
 
 ### UX-009 · Racha: «162 de 3 acciones»
 - **Prioridad:** P3

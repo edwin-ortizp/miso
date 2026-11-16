@@ -12,9 +12,6 @@
     {{-- CHG-072: bienvenida al volver tras una ausencia. --}}
     <livewire:home.welcome-back />
 
-    {{-- CHG-071: resumen del domingo. --}}
-    @if (count($visibleModules) === count($experience->catalog()))<livewire:home.weekly-insights-card />@endif
-
     {{-- CHG-075: bienvenida con el compañero, la fecha y el check-in de 20 s (CHG-069) como su pedido. --}}
     @if ($showModule('game'))
     <x-game.daily-buddy variant="hero" class="mb-3" :buddy="$buddy"
@@ -31,47 +28,47 @@
     @endif
     @if ($showModule('mood')) @include('livewire.home.partials.checkin-sheet') @endif
 
+    {{-- CHG-136: el día de un vistazo; cada casilla lleva a su bloque. --}}
+    @include('livewire.home.partials.day-summary')
+
     @if ($showModule('vehicles') && $vehicleAlerts->isNotEmpty())
-        <a href="{{ route('vehicles') }}" class="md-card-outlined d-block text-decoration-none mb-3" style="color: inherit; border-color: var(--md-custom-color-warning);">
-            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-                <div class="d-flex gap-3"><div class="md-card-icon" style="background: var(--md-custom-color-warning-container); color: var(--md-custom-color-on-warning-container);"><i class="bi bi-wrench-adjustable"></i></div><div><h2 class="md-title-medium mb-1">Atención para tus vehículos</h2><p class="home-muted md-body-small mb-0">{{ $vehicleAlerts->count() }} mantenimiento{{ $vehicleAlerts->count() > 1 ? 's' : '' }} próximo{{ $vehicleAlerts->count() > 1 ? 's' : '' }} o vencido{{ $vehicleAlerts->count() > 1 ? 's' : '' }}.</p></div></div>
-                <div class="d-flex flex-column gap-1">@foreach ($vehicleAlerts as $alert)<span class="md-label-small"><strong>{{ $alert->vehicle->name }}:</strong> {{ $alert->template->name }}</span>@endforeach</div>
-            </div>
+        <a href="{{ route('vehicles') }}" wire:navigate class="home-alert mb-3">
+            <span class="home-card-head__icon home-tone--warning" aria-hidden="true"><i class="bi bi-wrench-adjustable"></i></span>
+            <span class="home-alert__text">
+                <strong class="md-title-small">Atención para tus vehículos</strong>
+                <span class="home-muted md-body-small">{{ $vehicleAlerts->map(fn ($alert) => $alert->vehicle->name.': '.$alert->template->name)->implode(' · ') }}</span>
+            </span>
+            <i class="bi bi-chevron-right home-muted" aria-hidden="true"></i>
         </a>
     @endif
 
-    {{-- Bento grid: mixed-size cards, full width --}}
-    <div class="row g-3">
-        @if ($showModule('water') || $showModule('mood'))
-        <div class="col-12 col-lg-7">
-            @include('livewire.home.partials.quick-log')
-        </div>
-        @endif
+    {{-- Primero lo que hay que hacer (hábitos y tareas), luego lo que se registra y al final la semana. --}}
+    <div class="row g-3 align-items-start">
         @if ($showModule('habits'))
-        <div class="col-12 col-lg-5">
+        <div class="col-12 col-lg-6" id="home-habits">
             @include('livewire.home.partials.habits-today')
         </div>
         @endif
-
         @if ($showModule('tasks'))
-        <div class="col-12 col-lg-5">
+        <div class="col-12 col-lg-6" id="home-tasks">
             @include('livewire.home.partials.tasks-today')
         </div>
         @endif
-        @if ($showModule('water') && $showModule('habits'))
-        <div class="col-12 col-lg-7">
-            @include('livewire.home.partials.weekly-chart')
+
+        @if ($showModule('water') || $showModule('mood'))
+        <div class="col-12 col-lg-7" id="home-quick">
+            @include('livewire.home.partials.quick-log')
         </div>
         @endif
-
         @if ($showModule('meals'))
-        <div class="col-12 col-md-6 col-lg-7">
+        <div class="col-12 col-lg-5">
             @include('livewire.home.partials.meals-today')
         </div>
         @endif
+
         @if ($showModule('journal'))
-        <div class="col-12 col-md-6 col-lg-5">
-            <div class="md-card-elevated h-100">
+        <div class="col-12 col-lg-5">
+            <div class="md-card-elevated">
                 <x-home.card-head icon="bi-journal-text" tone="secondary" title="Bitácora del día"
                     :href="route('journal', ['date' => $selectedDate])" action="Abrir diario" />
                 @if ($journalEntry)
@@ -84,7 +81,17 @@
             </div>
         </div>
         @endif
+        @if ($showModule('water') && $showModule('habits'))
+        <div class="col-12 col-lg-7">
+            @include('livewire.home.partials.weekly-chart')
+        </div>
+        @endif
     </div>
+
+    {{-- CHG-071: hallazgos de la semana, junto a la tendencia (CHG-136: ya no desplazan al compañero). --}}
+    @if (count($visibleModules) === count($experience->catalog()))
+        <div class="mt-3"><livewire:home.weekly-insights-card /></div>
+    @endif
 
     @php
         $createActions = collect([
@@ -100,7 +107,7 @@
         $primaryCreate = $createActions->first();
     @endphp
     @if ($showModule('goals'))
-        <a class="md-btn-text" href="{{ route('goals') }}" wire:navigate>Consultar mis objetivos y registrar avances</a>
+        <p class="home-footer-link"><a class="md-btn-text" href="{{ route('goals') }}" wire:navigate><i class="bi bi-flag" aria-hidden="true"></i> Consultar mis objetivos y registrar avances</a></p>
     @endif
     @if ($primaryCreate)
         <x-ui.fab compact :label="$primaryCreate['label']" :event="$primaryCreate['event']" :detail="$primaryCreate['detail'] ?? null" module="home" :actions="$createActions->slice(1)->values()->all()" />

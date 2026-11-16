@@ -1417,7 +1417,8 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
 
 /* Guardián de módulo (CHG-055): franja de escenario al inicio de una tarjeta del panel lateral. */
 .game-guardian {
-    position: relative; display: flex; align-items: center; gap: 16px;
+    /* CHG-136: una sola composición para todos los módulos: identidad y «Otro consejo» arriba, consejo junto al compañero. */
+    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px 16px;
     margin: -16px -16px 16px; padding: 16px;
     background: linear-gradient(160deg, var(--stage-top, #2f5f8f), var(--stage-bottom, #5b8fbd));
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
@@ -1428,14 +1429,15 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
     content: ""; position: absolute; inset-inline: 10%; bottom: -5px; height: 10px;
     border-radius: 50%; background: rgb(0 0 0 / .22); filter: blur(3px);
 }
-.game-guardian__art { position: relative; flex: 0 0 auto; display: block; width: 96px; height: 96px; border-radius: 16px; }
+.game-guardian__art { position: relative; grid-column: 2; grid-row: 2; display: block; width: 96px; height: 96px; border-radius: 16px; }
 .game-guardian__art img, .game-guardian__art .game-placeholder {
     width: 96px; height: 96px; object-fit: contain; display: block;
     filter: drop-shadow(0 4px 6px rgb(0 0 0 / .35));
 }
 .game-guardian__art:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
-.game-guardian__talk { flex: 1 1 auto; min-width: 0; display: grid; gap: 8px; overflow-wrap: anywhere; }
-.game-guardian__heading, .game-guardian__identity { display: contents; }
+.game-guardian__talk { display: contents; }
+.game-guardian__heading { grid-column: 1 / -1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.game-guardian__identity { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
 .game-guardian__name { color: #fff; font-size: .8rem; font-weight: 700; letter-spacing: .02em; text-shadow: 0 1px 2px rgb(0 0 0 / .4); }
 .game-guardian__team { display: block; color: rgb(255 255 255 / .85); font-size: .7rem; text-shadow: 0 1px 2px rgb(0 0 0 / .4); }
 .game-guardian__bubble {
@@ -1444,6 +1446,7 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
     color: var(--md-sys-color-on-surface);
     background: var(--md-sys-color-surface-container-lowest, #fff);
     border-radius: 14px; box-shadow: 0 2px 8px rgb(0 0 0 / .18);
+    grid-column: 1; grid-row: 2; min-width: 0; overflow-wrap: anywhere;
 }
 .game-guardian__bubble::before {
     content: ""; position: absolute; right: -6px; top: calc(50% - 6px); width: 12px; height: 12px;
@@ -1461,45 +1464,30 @@ a.game-buddy:focus-visible { outline: 2px solid var(--md-sys-color-primary); out
 /* Arriba de la lista solo cuando el panel lateral baja (< 1200 px); el del panel se oculta. */
 .game-guardian--top { display: none; }
 @media (max-width: 1199.98px) {
-    .game-guardian--top { display: flex; margin: 0 0 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 20px; }
+    .game-guardian--top { display: grid; margin: 0 0 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 20px; }
     .game-guardian--rail { display: none; }
 }
 
 /* CHG-057: botón "Otro consejo" y fundido del texto al cambiar. */
-.game-guardian__talk { position: relative; }
-.game-guardian__more.md-btn-icon { margin-left: auto; min-width: 44px; min-height: 44px; color: #fff; background: rgb(255 255 255 / .2); }
-.game-guardian__more.md-btn-icon:hover { background: rgb(255 255 255 / .32); }
+/* Área táctil de 44 px con un círculo visible de 32 px, alineado con la esquina de la franja. */
+.game-guardian__more.md-btn-icon { position: relative; flex: 0 0 44px; width: 44px; height: 44px; min-width: 44px; min-height: 44px; margin: -6px -6px 0 0; color: #fff; background: transparent; }
+.game-guardian__more::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: rgb(255 255 255 / .2); pointer-events: none; }
+.game-guardian__more.md-btn-icon:hover { background: transparent; }
+.game-guardian__more:hover::before { background: rgb(255 255 255 / .32); }
 .game-guardian__bubble strong { font-weight: 700; }
-.game-guardian__progress { padding: 10px 12px; border-radius: 12px; background: var(--md-sys-color-surface-container-lowest); color: var(--md-sys-color-on-surface); }
+.game-guardian__progress { grid-column: 1 / -1; padding: 10px 12px; border-radius: 12px; background: var(--md-sys-color-surface-container-lowest); color: var(--md-sys-color-on-surface); }
 .game-guardian__progress .md-progress-label { margin-bottom: 6px; }
-.game-guardian--habits { grid-template-columns: minmax(0, 1fr) auto; gap: 12px 16px; align-items: center; }
-.game-guardian--habits .game-guardian__talk { display: contents; }
-.game-guardian--habits .game-guardian__heading { grid-column: 1 / -1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.game-guardian--habits .game-guardian__identity { display: grid; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
-.game-guardian--habits .game-guardian__more { position: relative; flex: 0 0 44px; width: 44px; height: 44px; margin: -6px -6px 0 0; background: transparent; }
-.game-guardian--habits .game-guardian__more::before { content: ''; position: absolute; inset: 6px; border-radius: 50%; background: rgb(255 255 255 / .2); pointer-events: none; }
-.game-guardian--habits .game-guardian__more:hover { background: transparent; }
-.game-guardian--habits .game-guardian__more:hover::before { background: rgb(255 255 255 / .32); }
-.game-guardian--habits .game-guardian__bubble { grid-column: 1; grid-row: 2; }
-.game-guardian--habits .game-guardian__art { grid-column: 2; grid-row: 2; }
-.game-guardian--habits .game-guardian__actions { grid-column: 1 / -1; grid-row: 3; }
-.game-guardian--habits .game-guardian__progress { grid-column: 1 / -1; margin: 0 -16px -16px; padding: 12px 16px 14px; border-top: 1px solid rgb(255 255 255 / .2); border-radius: 0; background: rgb(0 0 0 / .18); color: #fff; }
+.game-guardian--habits .game-guardian__progress { margin: 0 -16px -16px; padding: 12px 16px 14px; border-top: 1px solid rgb(255 255 255 / .2); border-radius: 0; background: rgb(0 0 0 / .18); color: #fff; }
 .game-guardian--habits .game-guardian__progress .md-progress-label { color: inherit; }
 .game-guardian--habits .game-guardian__progress .md-progress-linear { height: 5px; background: rgb(255 255 255 / .3); }
 .game-guardian--habits .game-guardian__progress .md-progress-linear-bar { background: var(--md-custom-color-success-container); }
-@media (max-width: 1199.98px) {
-    .game-guardian--habits.game-guardian--top { display: grid; }
-}
-@media (min-width: 1200px) {
-    .game-guardian--habits.game-guardian--rail { display: grid; }
-}
 @media (prefers-reduced-motion: no-preference) {
     .game-guardian__bubble { animation: game-guardian-fade 150ms ease-out; }
 }
 @keyframes game-guardian-fade { from { opacity: 0; transform: translateY(2px); } }
 
 /* CHG-058: acción del consejo ("Ir al hábito sugerido") junto al botón de otro consejo. */
-.game-guardian__actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.game-guardian__actions { grid-column: 1 / -1; grid-row: 3; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .game-guardian__cue.md-btn-text {
     min-height: 44px; border: 0; background: none; padding: 4px 0; color: #fff; font-weight: 600; font-size: .85rem;
     text-decoration: underline; text-underline-offset: 3px; cursor: pointer; text-shadow: 0 1px 2px rgb(0 0 0 / .4); white-space: normal; text-align: start;

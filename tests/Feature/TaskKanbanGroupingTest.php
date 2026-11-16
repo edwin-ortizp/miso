@@ -111,4 +111,25 @@ class TaskKanbanGroupingTest extends TestCase
             ->assertSet('showRecurringCompletion', false)->assertDispatched('task-completed');
         $this->assertDatabaseHas('tasks', ['title' => 'Recurrente', 'completed' => true, 'is_recurrence_history' => true]);
     }
+
+    /** CHG-136: cada columna dibuja 50 tarjetas; «Ver más» suma otra tanda y el contador conserva el total. */
+    public function test_columns_render_fifty_cards_and_show_more_loads_the_rest(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $status = TaskStatus::query()->ordered()->first() ?? TaskStatus::create(['name' => 'Borrador', 'type' => 'todo']);
+        foreach (range(1, 60) as $i) {
+            Task::create(['title' => sprintf('Tarjeta %02d', $i), 'status_id' => $status->id]);
+        }
+        $column = fn ($columns) => $columns[$status->id];
+
+        Livewire::test(TaskKanban::class)
+            ->assertViewHas('columns', fn ($columns) => $column($columns)['total'] === 60 && $column($columns)['tasks']->count() === 50)
+            ->assertSee('Ver 10 más')->assertSee('quedan 10')
+            ->call('showMore', (string) $status->id)
+            ->assertViewHas('columns', fn ($columns) => $column($columns)['total'] === 60 && $column($columns)['tasks']->count() === 60)
+            ->assertDontSee('quedan')
+            ->set('groupBy', 'priority')
+            ->assertSet('columnLimits', [])
+            ->assertViewHas('columns', fn ($columns) => $columns['not-urgent-not-important']['tasks']->count() === 50);
+    }
 }

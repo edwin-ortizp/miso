@@ -28,6 +28,13 @@ class HabitEditor extends HabitSettings
 
     public function render()
     {
-        return view('livewire.home.panel.habit-editor', parent::render()->getData());
+        // CHG-136: el diálogo no usa la lista paginada de Ajustes; aquí solo se arma lo que muestra el formulario.
+        return view('livewire.home.panel.habit-editor', [
+            'timesOfDay' => self::TIMES_OF_DAY,
+            'actionOptions' => $this->registry()->grouped(),
+            'actionFields' => $this->currentFields(),
+            'actionModes' => \App\Models\HabitAction::MODES,
+            'registry' => $this->registry(),
+        ]);
     }
 }

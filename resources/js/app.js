@@ -68,6 +68,10 @@ function localColor(element, name) {
     return getComputedStyle(element).getPropertyValue(name).trim();
 }
 
+// CHG-136: sin barra de herramientas no hay forma de deshacer un zoom; en pantallas táctiles un arrastre
+// accidental dejaba el gráfico vacío. Los gráficos son de lectura: ni zoom ni selección.
+const staticChart = { zoom: { enabled: false }, selection: { enabled: false } };
+
 async function renderHealthChart(element) {
     if (charts.has(element) || pendingCharts.has(element)) {
         return;
@@ -90,6 +94,7 @@ async function renderHealthChart(element) {
             type: 'bar',
             height: 190,
             toolbar: { show: false },
+            ...staticChart,
             fontFamily: 'inherit',
             animations: { easing: 'easeinout', speed: 350 },
             parentHeightOffset: 0,
@@ -141,6 +146,7 @@ async function renderDashboardChart(element) {
             type: 'area',
             height: 200,
             toolbar: { show: false },
+            ...staticChart,
             fontFamily: 'inherit',
             animations: { easing: 'easeinout', speed: 450 },
         },
@@ -183,6 +189,9 @@ async function renderDashboardChart(element) {
             fontSize: '12px',
             labels: { colors: color('--md-sys-color-on-surface-variant') },
             markers: { size: 5 },
+            // Tocar la leyenda ocultaba la serie; con dos series solo confunde.
+            onItemClick: { toggleDataSeries: false },
+            onItemHover: { highlightDataSeries: false },
         },
     });
 
@@ -215,6 +224,7 @@ async function renderHealthMonthsChart(element) {
             type: 'bar',
             height: 150,
             toolbar: { show: false },
+            ...staticChart,
             fontFamily: 'inherit',
             animations: { easing: 'easeinout', speed: 350 },
             parentHeightOffset: 0,

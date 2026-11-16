@@ -38,9 +38,12 @@ class ShoppingEditor extends MealShopping
 
     public function render()
     {
+        // CHG-136: el panel abre con una petición (`panel-shopping`); las listas solo hacen falta con el formulario abierto.
+        $open = $this->showForm || $this->showPurchase;
+
         return view('livewire.home.panel.shopping-editor', [
-            'places' => Store::orderBy('name')->pluck('name', 'id'),
-            'catalogNames' => ShoppingItem::orderBy('name')->pluck('name'),
+            'places' => $open ? Store::orderBy('name')->pluck('name', 'id') : collect(),
+            'catalogNames' => $open ? ShoppingItem::orderBy('name')->pluck('name') : collect(),
             'purchaseItem' => $this->showPurchase ? ShoppingItem::with('variants.brand')->find($this->purchaseItemId) : null,
         ]);
     }

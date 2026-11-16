@@ -220,6 +220,40 @@ class Task extends Model
     }
 
     /** Midnight represents an all-day deadline, inclusive of that day. */
+    /** CHG-136: primera línea de la descripción sin marcas de Markdown, para listas. */
+    public function descriptionPreview(int $limit = 140): ?string
+    {
+        foreach (preg_split('/\R/u', (string) $this->description) as $line) {
+            $line = preg_replace('/!?\[([^\]]*)\]\([^)]*\)/u', '$1', $line);
+            $line = trim(preg_replace(['/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+(\[[ xX]\]\s+)?/u', '/[*_`~]+/u'], '', $line));
+            if ($line !== '') {
+                return \Illuminate\Support\Str::limit($line, $limit);
+            }
+        }
+
+        return null;
+    }
+
+    /** CHG-136: fecha de la tarea para listas; un día completo no muestra «00:00 – 00:00». */
+    public function scheduleLabel(): ?string
+    {
+        $from = $this->start_date ?? $this->end_date;
+        if (! $from) {
+            return null;
+        }
+        $to = $this->start_date && $this->end_date ? $this->end_date : null;
+        $dateOnly = $this->start_date ? $this->start_is_date : $this->end_is_date;
+        if ($dateOnly) {
+            return $from->translatedFormat('d M').($to && ! $to->isSameDay($from) ? ' – '.$to->translatedFormat('d M') : '');
+        }
+
+        return $from->translatedFormat('d M, H:i').match (true) {
+            ! $to => '',
+            $to->isSameDay($from) => ' – '.$to->format('H:i'),
+            default => ' – '.$to->translatedFormat('d M, H:i'),
+        };
+    }
+
     public function isOverdue(): bool
     {
         $deadline = $this->end_date ?? $this->start_date;

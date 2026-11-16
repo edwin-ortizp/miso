@@ -138,7 +138,8 @@ _Última actualización: 2026-11-16_
 | CHG-132 | M | Salud: tendencias y contexto de mediciones | in-progress | En verificación | 4/4 |
 | CHG-133 | M | Salud: medicamentos tomados y por tomar (con MCP) | in-progress | En verificación | 4/4 |
 | CHG-134 | M | Salud: recordatorios de medicamentos con el cron existente | in-progress | En verificación | 4/4 |
-| CHG-135 | M | Auditoría integral: consultas repetidas, suite de pruebas y pulido | to-do | Aprobado | 0/6 |
+| CHG-135 | M | Auditoría integral: consultas repetidas, suite de pruebas y pulido | to-do | Aprobado | 6/6 |
+| CHG-136 | M | Mi día renovado, Kanban por tandas, lista de tareas y guardianes | to-do | Aprobado | 0/7 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

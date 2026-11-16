@@ -22,9 +22,20 @@ class TaskKanban extends Component
     #[Url(as: 'group', history: true)]
     public string $groupBy = 'state';
 
+    /** CHG-136: tarjetas que se dibujan por columna; «Ver más» suma otra tanda. */
+    public const COLUMN_PAGE = 50;
+
+    /** @var array<string, int> tandas extra pedidas por columna (clave de columna => cantidad visible) */
+    public array $columnLimits = [];
+
     public function mount(): void
     {
         $this->updatedGroupBy();
+    }
+
+    public function showMore(string $column): void
+    {
+        $this->columnLimits[$column] = min(5000, ($this->columnLimits[$column] ?? self::COLUMN_PAGE) + self::COLUMN_PAGE);
     }
 
     public function updatedGroupBy(): void
@@ -32,6 +43,7 @@ class TaskKanban extends Component
         if (! in_array($this->groupBy, ['state', 'priority'], true)) {
             $this->groupBy = 'state';
         }
+        $this->columnLimits = [];
     }
 
     public function toggleComplete(string $id, TaskGamificationService $gamification): void
@@ -120,6 +132,12 @@ class TaskKanban extends Component
             } else {
                 $columns['not-urgent-not-important']['tasks']->push($task);
             }
+        }
+
+        // El contador de cada columna sigue siendo el total; solo se dibuja una tanda.
+        foreach ($columns as $key => $column) {
+            $columns[$key]['total'] = $column['tasks']->count();
+            $columns[$key]['tasks'] = $column['tasks']->take(max(self::COLUMN_PAGE, (int) ($this->columnLimits[$key] ?? 0)));
         }
 
         return view('livewire.task.task-kanban', [

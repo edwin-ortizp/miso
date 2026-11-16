@@ -139,7 +139,7 @@
 }
 
 @media (max-width: 1199.98px) {
-    .pomodoro-page .pomodoro-daily-goal .game-guardian--rail { display: flex; }
+    .pomodoro-page .pomodoro-daily-goal .game-guardian--rail { display: grid; }
     .pomodoro-daily-goal .game-guardian__art,
     .pomodoro-daily-goal .game-guardian__art img,
     .pomodoro-daily-goal .game-guardian__art .game-placeholder { width: 64px; height: 64px; }

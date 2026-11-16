@@ -46,6 +46,9 @@ class PlanEditor extends Component
 
     public function render()
     {
-        return view('livewire.home.panel.plan-editor', $this->planDialogOptions());
+        // CHG-136: el panel abre con una petición (`panel-plan`); los catálogos solo hacen falta con un diálogo abierto.
+        return view('livewire.home.panel.plan-editor', $this->showPlanForm || $this->showVisitForm
+            ? $this->planDialogOptions()
+            : ['planCategoryOptions' => [], 'typeOptions' => Plan::TYPES, 'circleOptions' => [], 'peopleOptions' => [], 'planTagOptions' => []]);
     }
 }

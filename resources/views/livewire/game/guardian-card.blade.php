@@ -11,7 +11,7 @@
                             <span class="game-guardian__team md-label-small">Equipo de la semana · {{ $guardian['team_ability'] }}</span>
                         @endif
                     </div>
-                    @if ($module === 'habits' && ! $isOtherDate)
+                    @if (! $isOtherDate)
                         <x-ui.icon-action icon="bi-arrow-repeat" label="Otro consejo" size="sm"
                                           class="game-guardian__more" wire:click="another"
                                           wire:loading.attr="disabled" wire:target="another" />
@@ -19,19 +19,12 @@
                 </div>
                 {{-- El consejo ya viene escapado: solo los nombres van envueltos en <strong>. --}}
                 <p class="game-guardian__bubble" aria-live="polite" wire:key="advice-{{ $adviceKey }}-{{ md5($advice) }}">@if ($isOtherDate){{ $dateSummary }}@else“{!! $advice !!}”@endif</p>
-                @if (! $isOtherDate && ($action || $module !== 'habits'))
+                @if (! $isOtherDate && $action)
                 <div class="game-guardian__actions">
-                    @if ($action)
-                        <x-ui.action variant="text" class="game-guardian__cue" x-data
-                                x-on:click="document.getElementById({{ \Illuminate\Support\Js::from($action['target']) }})?.focus()">
-                            {{ $action['label'] }} <i class="bi bi-arrow-down" aria-hidden="true"></i>
-                        </x-ui.action>
-                    @endif
-                    @if ($module !== 'habits')
-                    <x-ui.icon-action icon="bi-arrow-repeat" label="Otro consejo" size="sm"
-                                      class="game-guardian__more" wire:click="another"
-                                      wire:loading.attr="disabled" wire:target="another" />
-                    @endif
+                    <x-ui.action variant="text" class="game-guardian__cue" x-data
+                            x-on:click="document.getElementById({{ \Illuminate\Support\Js::from($action['target']) }})?.focus()">
+                        {{ $action['label'] }} <i class="bi bi-arrow-down" aria-hidden="true"></i>
+                    </x-ui.action>
                 </div>
                 @endif
             </div>

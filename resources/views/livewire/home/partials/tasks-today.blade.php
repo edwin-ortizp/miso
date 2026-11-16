@@ -7,8 +7,8 @@
     ];
 @endphp
 
-<div class="md-card-elevated h-100">
-    <x-home.card-head icon="bi-list-task" tone="info" title="Tareas de hoy" :count="$pendingTasks.' pendientes'"
+<div class="md-card-elevated">
+    <x-home.card-head icon="bi-list-task" tone="info" title="Tareas de hoy" :count="$todayTaskCount.' para hoy'"
         :href="route('tasks.list')" action="Ver todas" />
 
     @forelse ($todayTasks as $task)
@@ -28,12 +28,13 @@
                     @if ($task->priority && isset($priorityBadges[$task->priority]))
                         <span title="{{ $priorityBadges[$task->priority]['label'] }}">{{ $priorityBadges[$task->priority]['emoji'] }}</span>
                     @endif
-                    <x-ui.task-code :code="$task->code" /> {{ $task->title }}
+                    {{ $task->title }}
                     @if ($task->is_recurrent)
                         <i class="home-muted bi bi-arrow-repeat" title="Recurrente"></i>
                     @endif
                 </div>
                 <div class="md-list-item-supporting">
+                    <x-ui.task-code :code="$task->code" />
                     @if ($isOverdue)
                         <span class="home-tone-text--error">Vencida · {{ $task->end_date->translatedFormat('d M') }}</span>
                     @elseif ($task->end_date)
@@ -51,9 +52,13 @@
         </p>
     @endforelse
 
-    @if ($completedTasksToday > 0)
-        <p class="home-tone-text--success md-label-small mt-2 mb-0">
-            <i class="bi bi-check2-circle"></i> {{ $completedTasksToday }} completada{{ $completedTasksToday > 1 ? 's' : '' }} este día
-        </p>
+    @if ($todayTaskCount > $todayTasks->count())
+        <p class="home-muted md-label-small mt-2 mb-0">Se muestran las {{ $todayTasks->count() }} más importantes de {{ $todayTaskCount }}.</p>
     @endif
+    <p class="home-card-foot md-label-small">
+        @if ($completedTasksToday > 0)
+            <span class="home-tone-text--success"><i class="bi bi-check2-circle" aria-hidden="true"></i> {{ $completedTasksToday }} completada{{ $completedTasksToday > 1 ? 's' : '' }} este día</span>
+        @endif
+        <span class="home-muted">{{ $pendingTasks }} pendiente{{ $pendingTasks === 1 ? '' : 's' }} en total</span>
+    </p>
 </div>

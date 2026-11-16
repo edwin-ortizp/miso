@@ -1,4 +1,4 @@
-<div class="md-card-elevated h-100">
+<div class="md-card-elevated">
     <x-home.card-head icon="bi-lightning-charge" tone="warning" title="Registro rápido" />
 
     @if ($showModule('water'))

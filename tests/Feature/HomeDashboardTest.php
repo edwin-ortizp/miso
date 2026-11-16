@@ -226,4 +226,64 @@ class HomeDashboardTest extends TestCase
             ->set('checkin', true)
             ->assertSet('checkin', true);
     }
+
+    /** CHG-136: el resumen del día usa los mismos datos de las tarjetas y enlaza a cada bloque. */
+    public function test_day_summary_shows_habits_tasks_water_and_mood_at_a_glance(): void
+    {
+        $done = HabitDefinition::create(['name' => 'Meditar', 'time_of_day' => 'morning']);
+        HabitDefinition::create(['name' => 'Leer', 'time_of_day' => 'night']);
+        HabitCompletion::create(['habit_id' => $done->id, 'date' => now()->toDateString(), 'completed' => true]);
+        foreach (range(1, 7) as $i) {
+            Task::create(['title' => "Pendiente {$i}", 'start_date' => now(), 'end_date' => now()]);
+        }
+
+        Livewire::test(Dashboard::class)
+            ->assertViewHas('todayTaskCount', 7)
+            ->assertViewHas('laterHabits', 1)
+            ->assertSeeInOrder(['Tu día de un vistazo', 'Hábitos: 1 de 2', 'Tareas: 7 para hoy', 'Agua: ', 'litros', 'Ánimo: sin registrar'])
+            ->assertSee('7 para hoy')
+            ->assertSee('Se muestran las 5 más importantes de 7.')
+            ->assertSee('7 pendientes en total')
+            ->assertSeeHtml('href="#home-habits"')
+            ->assertSeeHtml('id="home-tasks"');
+    }
+
+    /** CHG-136: los formularios del + no piden sus listas hasta que se abren. */
+    public function test_closed_panel_editors_do_not_load_their_option_lists(): void
+    {
+        \App\Models\Store::create(['name' => 'D1']);
+        \App\Models\Circle::create(['name' => 'Familia', 'sort_order' => 1]);
+
+        $queries = [];
+        \Illuminate\Support\Facades\DB::listen(function ($query) use (&$queries) {
+            $queries[] = $query->sql;
+        });
+        $this->get('/')->assertOk();
+
+        foreach (['from "stores"', 'from "plan_tags"', 'from "circles"', 'from "habit_actions"'] as $table) {
+            $this->assertSame([], array_values(array_filter($queries, fn (string $sql) => str_contains($sql, $table))),
+                "Mi día consultó {$table} con el formulario cerrado.");
+        }
+
+        Livewire::test(\App\Livewire\Home\Panel\ShoppingEditor::class)
+            ->assertViewHas('places', fn ($places) => $places->isEmpty())
+            ->call('openPanelShopping')
+            ->assertSet('showForm', true)
+            ->assertViewHas('places', fn ($places) => $places->values()->all() === ['D1']);
+
+        Livewire::test(\App\Livewire\Home\Panel\PlanEditor::class)
+            ->assertViewHas('circleOptions', [])
+            ->call('openPanelPlan')
+            ->assertSet('showPlanForm', true)
+            ->assertViewHas('circleOptions', fn ($circles) => in_array('Familia', $circles, true));
+
+        Livewire::test(\App\Livewire\Home\Panel\HabitEditor::class)
+            ->call('openPanelHabit')
+            ->assertSet('showForm', true)
+            ->set('name', 'Estirar')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertSet('showForm', false);
+        $this->assertTrue(HabitDefinition::where('name', 'Estirar')->exists());
+    }
 }

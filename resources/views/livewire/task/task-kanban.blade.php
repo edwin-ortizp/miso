@@ -18,7 +18,7 @@
                     <div style="padding: 12px 16px; background: {{ $colors['bg'] }}; color: {{ $colors['text'] }};">
                         <div class="d-flex align-items-center justify-content-between">
                             <span class="md-title-small">{{ $column['label'] }}</span>
-                            <span class="md-chip-tonal" style="background: {{ $colors['accent'] }}; color: white;">{{ $column['tasks']->count() }}</span>
+                            <span class="md-chip-tonal" style="background: {{ $colors['accent'] }}; color: white;">{{ $column['total'] }}</span>
                         </div>
                     </div>
                     <div style="padding: 8px; min-height: 200px; max-height: 500px; overflow-y: auto;">
@@ -63,6 +63,14 @@
                                 <span class="md-body-small">Sin tareas</span>
                             </div>
                         @endforelse
+                        @php $remaining = $column['total'] - $column['tasks']->count(); @endphp
+                        @if ($remaining > 0)
+                            <div class="task-kanban-more">
+                                <x-ui.action variant="tonal" size="sm" icon="bi-chevron-down" wire:click="showMore('{{ $key }}')"
+                                             wire:loading.attr="disabled" wire:target="showMore('{{ $key }}')">Ver {{ min($remaining, \App\Livewire\Task\TaskKanban::COLUMN_PAGE) }} más</x-ui.action>
+                                <span class="md-label-small">quedan {{ $remaining }}</span>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

@@ -117,8 +117,14 @@
   .task-row .md-list-item-supporting { font-size: .78rem; }
   .task-row .md-chip-tonal { height: 21px; padding: 0 8px; font-size: .68rem; }
   .task-row .d-flex.flex-wrap.gap-1 { gap: 5px !important; margin-top: 4px !important; }
-  .task-row__status { flex-basis: auto; }
+  /* CHG-136: el estado baja bajo el contenido para que título y etiquetas usen todo el ancho. */
+  .task-row { flex-wrap: wrap; }
+  .task-row .md-task-open-button { flex: 1 1 0; }
+  .task-row .md-list-item-trailing { order: 2; }
+  .task-row__status { order: 3; flex: 1 1 100%; margin-top: -2px; }
+  .task-row__status:empty { display: none; }
 }
+.task-row__chip-icon { font-size: 0.625rem; }
 
 /* Ajustes de tareas: contenido + navegación lateral derecha de secciones (mismo patrón que Ajustes de planes) */
 .task-settings-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; align-items: start; }
@@ -402,3 +408,6 @@
 .lt-segmented button:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
 .lt-stack-bar { display: flex; gap: 3px; height: 14px; margin-bottom: 14px; border-radius: 999px; overflow: hidden; }
 .lt-stack-bar > span { min-width: 4px; }
+
+/* CHG-136: el Kanban dibuja 50 tarjetas por columna; el resto se pide con «Ver más». */
+.task-kanban-more { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0 4px; color: var(--md-sys-color-on-surface-variant); }

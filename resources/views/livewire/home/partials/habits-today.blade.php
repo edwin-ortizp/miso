@@ -1,4 +1,4 @@
-<div class="md-card-elevated h-100">
+<div class="md-card-elevated">
     <x-home.card-head icon="bi-check2-square" tone="success" title="Hábitos" :count="$completedHabits.'/'.$totalHabits"
         :href="route('habits', ['date' => $selectedDate])" action="Ver todos" />
     <div class="md-progress-linear md-progress-linear--success mb-2">
@@ -16,7 +16,7 @@
                 <div class="md-list-checkbox"></div>
             </div>
             <div class="d-flex align-items-center gap-2 flex-grow-1">
-                <span style="font-size: 1.25rem;">{{ $habit->icon }}</span>
+                <span class="home-habit-icon" aria-hidden="true">{{ $habit->icon }}</span>
                 <div class="md-list-item-content">
                     <div class="md-list-item-headline">{{ $habit->name }}</div>
                     <div class="md-list-item-supporting">{{ $habit->goal_duration }} · {{ $habit->base_time }}</div>
@@ -34,4 +34,7 @@
             @endif
         </p>
     @endforelse
+    @if ($pendingHabits->isNotEmpty() && $laterHabits > 0)
+        <p class="home-card-foot home-muted md-label-small">y {{ $laterHabits }} más en otro momento del día</p>
+    @endif
 </div>

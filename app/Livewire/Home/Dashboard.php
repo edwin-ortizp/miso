@@ -205,12 +205,15 @@ class Dashboard extends Component
             ->values();
 
         // Top tasks for the selected day (planned for the day or overdue), Eisenhower order
-        $todayTasks = Task::where('completed', false)
+        $dayTasks = Task::where('completed', false)
             ->where(fn ($q) => $q
                 ->whereDate('start_date', $date)
                 ->orWhereDate('end_date', $date)
                 ->orWhere(fn ($q2) => $q2->where('end_date', '<', now()))
-            )
+            );
+        // CHG-136: el resumen y la tarjeta dicen cuántas hay para el día, no solo las cinco que se listan.
+        $todayTaskCount = (clone $dayTasks)->count();
+        $todayTasks = $dayTasks
             ->orderByRaw('CASE WHEN priority = "urgent-important" THEN 1 WHEN priority = "not-urgent-important" THEN 2 WHEN priority = "urgent-not-important" THEN 3 ELSE 4 END')
             ->orderBy('end_date')
             ->take(5)
@@ -274,6 +277,8 @@ class Dashboard extends Component
             'completedHabits' => $completedHabits,
             'totalHabits' => $totalHabits,
             'todayTasks' => $todayTasks,
+            'todayTaskCount' => $todayTaskCount,
+            'laterHabits' => max(0, $totalHabits - $completedHabits - $pendingHabits->count()),
             'pendingTasks' => $pendingTasks,
             'completedTasksToday' => $completedTasksToday,
             'meals' => $meals,

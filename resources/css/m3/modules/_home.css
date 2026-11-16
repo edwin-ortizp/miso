@@ -147,3 +147,53 @@
 .day-close__message { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 8px 12px; border-radius: 12px; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container); }
 .day-close__all { align-self: stretch; justify-content: center; }
 .day-close__empty { display: flex; align-items: center; gap: 8px; }
+
+/* CHG-136: Mi día. Resumen del día: cuatro casillas que llevan a su bloque. */
+.home-tone-text--info { color: var(--md-custom-color-info); }
+.home-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px; }
+.home-summary__tile {
+    display: grid; gap: 4px; min-width: 0; padding: 10px 12px;
+    border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-large);
+    background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface); text-decoration: none;
+    transition: background var(--md-sys-motion-duration-short2) var(--md-sys-motion-easing-standard);
+}
+.home-summary__tile:hover { background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-on-surface); }
+.home-summary__tile:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; }
+.home-summary__label { display: flex; align-items: center; gap: 6px; color: var(--md-sys-color-on-surface-variant); white-space: nowrap; }
+.home-summary__value { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0 6px; min-width: 0; line-height: 1.2; }
+.home-summary__value strong { font-size: 1.25rem; font-weight: 700; }
+.home-summary__value small { color: var(--md-sys-color-on-surface-variant); font-size: .75rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-summary__bar { display: block; height: 4px; border-radius: var(--md-sys-shape-corner-full); background: var(--md-sys-color-surface-container-highest); overflow: hidden; }
+.home-summary__bar:empty { visibility: hidden; }
+.home-summary__fill { display: block; width: var(--md-progress-value, 0%); height: 100%; border-radius: inherit; background: var(--md-sys-color-primary); }
+.home-summary__fill--success { background: var(--md-custom-color-success); }
+.home-summary__fill--info { background: var(--md-custom-color-info); }
+@media (max-width: 599.98px) {
+    .home-summary__tile { padding: 8px 10px; }
+    .home-summary__value strong { font-size: 1.1rem; }
+    .home-summary__value small { flex-basis: 100%; }
+}
+/* Las anclas del resumen no quedan bajo la barra superior fija. */
+#home-habits, #home-tasks, #home-quick { scroll-margin-top: 80px; }
+
+.home-alert {
+    display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+    border: 1px solid var(--md-custom-color-warning); border-radius: var(--md-sys-shape-corner-large);
+    background: var(--md-sys-color-surface-container-lowest); color: var(--md-sys-color-on-surface); text-decoration: none;
+}
+.home-alert:hover { background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface); }
+.home-alert__text { display: grid; gap: 2px; flex: 1 1 auto; min-width: 0; }
+
+.home-habit-icon { font-size: 1.25rem; }
+.home-card-foot { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 12px 0 0; }
+.home-meal { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto auto; align-items: baseline; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
+.home-meal:last-of-type { border-bottom: 0; }
+.home-meal__type { color: var(--md-sys-color-on-surface-variant); }
+.home-meal__name { overflow-wrap: anywhere; }
+.home-meal__status { white-space: nowrap; }
+.home-footer-link { margin: 16px 0 0; text-align: center; }
+/* La cabecera de tarjeta no parte el título en dos líneas cuando lleva contador y acción. */
+.home-card-head__text { flex: 1 1 auto; }
+.home-card-head__text h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.home-card-head__count { flex: none; white-space: nowrap; }
+.home-card-head__action { flex: none; white-space: nowrap; }

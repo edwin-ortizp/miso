@@ -183,3 +183,17 @@ Presupuestos nuevos en `tests/Feature/BackendQueryBudgetTest.php`.
 - **Proyección de uso de vehículos** (6 consultas por vehículo): son extremos ascendente y descendente, no duplicados.
 - **Mediciones de salud** (7 consultas, una por tipo): acotado por el número de tipos, no crece con los datos.
 - **Estados como cadenas sueltas.** Planes (`pending`/`scheduled`/`done`/`archived`), comidas (`planned`/`consumed`/`outside`), objetivos y tomas de medicamentos comparan literales en decenas de archivos (`'scheduled'` aparece en 16, `'archived'` en 15), incluidas herramientas MCP. Son máquinas de estado implícitas: las transiciones válidas no están escritas en ningún sitio. Llevarlas a un enum con transiciones explícitas es valioso, pero toca contratos MCP y no tiene un defecto medido detrás; se propone como cambio aparte, empezando por Planes.
+
+## Mi día y Kanban (CHG-136, 16 de noviembre de 2026)
+
+Misma base sintética y método de CHG-135.
+
+| Ruta | Antes | Después | Qué cambió |
+|---|---:|---:|---|
+| `/` | 90 consultas | 81 | los formularios del + (compra, hábito, plan) ya abrían con una petición; ahora calculan sus listas solo con el diálogo abierto |
+| `/panel` | 53 consultas | 43 | usa los mismos editores |
+| `/tasks/kanban` (180 tareas) | 719 KB | 443 KB | 50 tarjetas por columna y «Ver más» |
+
+En la medición, 22 de las consultas de `/` son del reto diario y del resumen semanal, que se escriben una vez al día o a la semana y aquí se revierten en cada pasada; en uso normal la cifra es menor. El editor de tareas sigue cargando sus tres listas (contactos, objetivos, eventos de salud) porque abre sin petición: diferirlas cambiaría esa apertura instantánea.
+
+Los gráficos de ApexCharts quedan sin zoom ni selección: la barra de herramientas está oculta, así que un arrastre en pantalla táctil dejaba el gráfico ampliado sin forma de volver.
