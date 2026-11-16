@@ -11,6 +11,7 @@
             <ol aria-label="Acciones de la semana por persona">
                 @foreach ($rows as $row)
                     <li wire:key="week-{{ $row['id'] }}" @class(['md-title-small' => $row['me']])>
+                        <x-social.avatar :name="$row['name']" :url="$row['avatar_url']" />
                         {{ $row['me'] ? 'Tú' : $row['name'] }}
                         <span class="md-body-medium">{{ $row['actions'] === 1 ? '1 acción' : $row['actions'].' acciones' }}</span>
                     </li>

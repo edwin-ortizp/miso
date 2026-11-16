@@ -20,6 +20,17 @@ class SocialSettings
         return (bool) ($this->read($userId)['social_leaderboard'] ?? false);
     }
 
+    /** ¿Ya se le ofreció elegir su @usuario al abrir Amigos por primera vez? (CHG-121) */
+    public function usernamePrompted(int $userId): bool
+    {
+        return (bool) ($this->read($userId)['username_prompted'] ?? false);
+    }
+
+    public function markUsernamePrompted(int $userId): void
+    {
+        $this->save($userId, ['username_prompted' => true]);
+    }
+
     public function setVisible(int $userId, bool $visible): void
     {
         $this->save($userId, ['social_visible' => $visible]);

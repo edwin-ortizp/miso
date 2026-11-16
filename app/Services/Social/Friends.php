@@ -94,7 +94,7 @@ class Friends
             ->count();
     }
 
-    /** @return Collection<int, array{id: int, friendship_id: int, username: ?string, name: string}> */
+    /** @return Collection<int, array{id: int, friendship_id: int, username: ?string, avatar_url: ?string, name: string}> */
     public function friends(User $me): Collection
     {
         return $this->others($me, Friendship::ACCEPTED);
@@ -132,6 +132,7 @@ class Friends
                 'id' => $other->id,
                 'friendship_id' => $row->id,
                 'username' => $other->username,
+                'avatar_url' => $other->avatar_url,
                 'name' => $other->full_name ?: $other->name,
                 'blocked_by_me' => $row->blocked_by === $me->id,
             ] : null;

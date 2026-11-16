@@ -123,6 +123,9 @@
             </div>
 
             <dl class="md-context-list">
+                @if ($linkedFriend)
+                    <div><dt>Amigo en MiSo</dt><dd>{{ $linkedFriend->full_name ?: $linkedFriend->name }}@if ($linkedFriend->username) &#64;{{ $linkedFriend->username }}@endif</dd></div>
+                @endif
                 @if ($birthday)
                     <div>
                         <dt>Cumpleaños</dt>

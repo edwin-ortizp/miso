@@ -17,6 +17,7 @@
         <x-ui.card title="Solicitudes" icon="bi-envelope-heart">
             <ul>@foreach ($incoming as $row)
                 <li wire:key="in-{{ $row['friendship_id'] }}">
+                    <x-social.avatar :name="$row['name']" :url="$row['avatar_url']" />
                     {{ $row['name'] }}@if($row['username']) <span class="md-body-small">&#64;{{ $row['username'] }}</span>@endif
                     <x-ui.action variant="tonal" size="sm" wire:click="accept({{ $row['friendship_id'] }})">Aceptar</x-ui.action>
                     <x-ui.action variant="text" size="sm" wire:click="decline({{ $row['friendship_id'] }})">Rechazar</x-ui.action>
@@ -28,6 +29,7 @@
     <x-ui.card title="Mis amigos" icon="bi-people">
         @forelse ($friendList as $row)
             <div wire:key="friend-{{ $row['friendship_id'] }}" class="md-body-large">
+                <x-social.avatar :name="$row['name']" :url="$row['avatar_url']" />
                 {{ $row['name'] }}@if($row['username']) <span class="md-body-small">&#64;{{ $row['username'] }}</span>@endif
                 <x-ui.row-actions :label="'Acciones de '.$row['name']">
                     <x-slot:primary wire:click="remove({{ $row['friendship_id'] }})" wire:confirm="¿Eliminar esta amistad?">Eliminar</x-slot:primary>

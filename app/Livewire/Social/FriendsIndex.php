@@ -24,9 +24,14 @@ class FriendsIndex extends Component
     public string $username = '';
     public string $message = '';
 
-    public function mount(): void
+    public function mount(SocialSettings $settings): void
     {
         $this->username = (string) auth()->user()->username;
+        // La primera vez, sin @usuario, se ofrece elegirlo (se puede cerrar con «Cancelar»).
+        if ($this->username === '' && ! $settings->usernamePrompted(auth()->id())) {
+            $settings->markUsernamePrompted(auth()->id());
+            $this->showUsername = true;
+        }
         // Un enlace de invitación abre el diálogo con el código ya escrito.
         $this->showAdd = $this->lookup !== '';
     }
