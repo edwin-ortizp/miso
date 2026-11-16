@@ -4,14 +4,14 @@
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** — · **Cerrado:** —
-**Relacionado:** CHG-122 (aviso «no es dispositivo médico» y criterios de privacidad)
+**Relacionado:** CHG-122 (aviso «no es dispositivo médico» y criterios de privacidad), CHG-130 (recordatorios)
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: en Salud aparece «Medicamentos». Registras cada medicamento que debes tomar (nombre, dosis, cada cuánto y desde cuándo hasta cuándo) y marcas cada toma como «tomado» u «omitido». También puedes anotar un medicamento que tomaste sin tenerlo programado. Ves qué te toca hoy y qué ya tomaste. Todo esto también se puede registrar y consultar desde el asistente (MCP).
 - Cómo comprobarlo tú: crea «Losartán 50 mg, 1 vez al día, mañana», verás una toma pendiente hoy; márcala como tomada y revisa que pase al historial. Pide al asistente «¿qué medicamentos me faltan hoy?» y «registra que tomé ibuprofeno 400 mg».
 
 ## 1. Resumen
-Hoy MiSo no tiene medicamentos. Este CHG agrega dos conceptos: el **medicamento programado** (qué debo tomar y con qué frecuencia) y la **toma** (lo que realmente tomé u omití, con o sin programación). Con ellos se responde «¿qué he consumido?» y «¿qué debo consumir?». Se expone por UI y por MCP con la misma Action. No hay recordatorios ni alertas (decisión previa de enfoque «registro y tendencias»); MiSo no es un dispositivo médico y no recomienda dosis ni detecta interacciones.
+Hoy MiSo no tiene medicamentos. Este CHG agrega dos conceptos: el **medicamento programado** (qué debo tomar y con qué frecuencia) y la **toma** (lo que realmente tomé u omití, con o sin programación). Con ellos se responde «¿qué he consumido?» y «¿qué debo consumir?». Se expone por UI y por MCP con la misma Action. Los recordatorios se especifican aparte en CHG-130, que depende de este y reutiliza el cron existente. MiSo no es un dispositivo médico y no recomienda dosis ni detecta interacciones.
 
 ## 2. Producto (product-manager)
 - Problema / usuario: la persona toma medicamentos (tratamientos crónicos o cortos) y hoy no tiene dónde llevar qué tomó y qué le falta; esto también ayuda a explicar síntomas o energía.
@@ -21,7 +21,7 @@ Hoy MiSo no tiene medicamentos. Este CHG agrega dos conceptos: el **medicamento 
   - Vista «Hoy»: pendientes, tomados y omitidos, y atrasados del día.
   - Historial con filtro por fecha y por medicamento.
   - MCP: registrar medicamento, registrar toma, consultar pendientes del día y consultar historial/consumo.
-- No incluye: recordatorios o notificaciones, alertas de interacciones o dosis máximas, inventario/compra de medicamentos, recetas médicas adjuntas, integración con el inventario del módulo de alimentación.
+- No incluye: recordatorios o notificaciones (van en CHG-130), alertas de interacciones o dosis máximas, inventario/compra de medicamentos, recetas médicas adjuntas, integración con el inventario del módulo de alimentación.
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - CA1. Dado un medicamento «1 vez al día», cuando abro «Hoy», entonces veo una toma pendiente y, al marcarla tomada, pasa al historial con su hora.
   - CA2. Dado un medicamento con fecha de fin pasada o finalizado, cuando abro «Hoy», entonces no genera tomas pendientes, pero su historial se conserva.
@@ -94,7 +94,7 @@ flowchart LR
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M) a pedido del usuario: registrar lo consumido y lo que se debe consumir, con registro y consulta por MCP.
-- Abierta: ¿se necesitan recordatorios? Se dejó fuera por la decisión previa de «registro y tendencias»; requeriría tareas programadas (`docs/DEPLOY.md`).
+- Decidido 2026-11-16: el usuario quiere recordatorios con el cron existente. Se especifican en CHG-130 para mantener este CHG en nivel M.
 - Abierta: ¿frecuencias a soportar en la primera versión? Propuesta: diaria con horarios, cada N horas y días de la semana.
 - Abierta: ¿ligar un medicamento a un evento de salud (enfermedad, cita) en la primera versión?
 - Abierta: privacidad (cifrado, `is_sensitive` para MCP): se resuelve junto con CHG-122 y aplica igual aquí.
