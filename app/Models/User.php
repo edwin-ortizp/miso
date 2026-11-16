@@ -27,6 +27,7 @@ class User extends Authenticatable
         'daily_water_goal',
         'daily_exercise_minutes',
         'theme_preference',
+        'username',
     ];
 
     public const THEME_PREFERENCES = ['system', 'light', 'dark'];
@@ -54,8 +55,39 @@ class User extends Authenticatable
         ];
     }
 
+    /** Alfabeto sin caracteres ambiguos (0/O, 1/I/L) para el código de invitación. */
+    public const FRIEND_CODE_ALPHABET = '23456789ABCDEFGHJKMNPQRSTUVWXYZ';
+
+    public static function newFriendCode(): string
+    {
+        do {
+            $code = '';
+            for ($i = 0; $i < 8; $i++) {
+                $code .= self::FRIEND_CODE_ALPHABET[random_int(0, strlen(self::FRIEND_CODE_ALPHABET) - 1)];
+            }
+        } while (static::where('friend_code', $code)->exists());
+
+        return $code;
+    }
+
+    /** Cuentas anteriores a CHG-122 no tienen código: se crea la primera vez que se pide. */
+    public function ensureFriendCode(): string
+    {
+        return $this->friend_code ?? $this->regenerateFriendCode();
+    }
+
+    public function regenerateFriendCode(): string
+    {
+        $this->forceFill(['friend_code' => self::newFriendCode()])->save();
+
+        return $this->friend_code;
+    }
+
     protected static function booted(): void
     {
+        static::creating(function (self $user) {
+            $user->friend_code ??= self::newFriendCode();
+        });
         static::created(function (self $user) {
             SeedDefaultCircles::for($user);
             SeedDefaultMealCategories::for($user);

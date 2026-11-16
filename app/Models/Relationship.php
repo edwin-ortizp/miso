@@ -27,6 +27,7 @@ class Relationship extends Model
 
     protected $fillable = [
         'circle_id',
+        'friend_user_id',
         'full_name',
         'nickname',
         'pronouns',

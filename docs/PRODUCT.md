@@ -40,12 +40,14 @@ La amplitud de módulos debe servir a ese propósito. La existencia de una capac
 | Alimentación | Gestionar planificación, recetas, preparaciones, compras e inventario |
 | Relaciones y planes | Organizar personas, eventos, actividades y visitas |
 | Vehículos | Registrar consumo, mantenimiento y gastos |
+| Amigos | Conectar con otras cuentas de MiSo mediante un código o @usuario; cada persona decide si es visible (nombre y avatar, CHG-122), si comparte una racha de pareja (CHG-123) y si muestra su conteo semanal de acciones (CHG-124) |
 | Colección | Reconocer acciones y avances mediante recompensas de juego |
 | Estadísticas e integraciones | Consultar información agregada y conectar herramientas externas, incluido MCP |
 
 ## Reglas de negocio clave
 
 - Los datos personales deben mantenerse aislados por usuario.
+- Lo social es opt-in y mínimo: un amigo solo ve lo que la persona decide mostrar (hoy, nombre de usuario, nombre y avatar). Nunca ve tareas, hábitos, diario, salud ni Relaciones; eliminar o bloquear corta toda lectura. No hay buscador público de cuentas.
 - Hábitos y objetivos guían la priorización del producto.
 - La IA complementa la experiencia; no es un requisito para su valor principal.
 - La gamificación reconoce avances. Según la documentación vigente del juego, descansar o ausentarse no debe quitar recompensas obtenidas.

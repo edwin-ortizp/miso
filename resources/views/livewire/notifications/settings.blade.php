@@ -29,6 +29,13 @@
         </div>
     </x-ui.card>
 
+    <x-ui.card class="settings-preference-card" icon="bi-people">
+        <x-slot:header><h2 class="md-title-medium mb-0">Avisos de amigos</h2></x-slot:header>
+        <div class="settings-preference-list">
+            <x-ui.switch name="preferences.friend_notices" label="Solicitudes, aceptaciones y hitos de racha compartida en la campana" wire:model="preferences.friend_notices" />
+        </div>
+    </x-ui.card>
+
     @if ($devices > 0)
         <x-ui.card class="settings-preference-card" icon="bi-sliders">
             <x-slot:header><h2 class="md-title-medium mb-0">Preferencias de avisos al celular</h2></x-slot:header>
@@ -44,7 +51,7 @@
             <fieldset class="settings-preference-group">
                 <legend class="md-label-large">También al celular</legend>
                 <div class="settings-preference-list">
-                    @foreach (['push_birthday' => 'Cumpleaños de hoy', 'push_task_due' => 'Tareas que vencen mañana', 'push_plan_due' => 'Planes para mañana', 'push_reminder' => 'Recordatorios', 'push_weekly_insights' => 'Resumen del domingo'] as $key => $label)
+                    @foreach (['push_birthday' => 'Cumpleaños de hoy', 'push_task_due' => 'Tareas que vencen mañana', 'push_plan_due' => 'Planes para mañana', 'push_reminder' => 'Recordatorios', 'push_weekly_insights' => 'Resumen del domingo', 'push_friend_request' => 'Solicitudes de amistad', 'push_friend_accepted' => 'Solicitud aceptada', 'push_shared_streak' => 'Hitos de racha compartida'] as $key => $label)
                         <x-ui.switch :name="'preferences.'.$key" :label="$label" wire:model="preferences.{{ $key }}" />
                     @endforeach
                 </div>

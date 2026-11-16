@@ -20,3 +20,5 @@ Schedule::command('notifications:dispatch')->everyMinute()->withoutOverlapping(1
 // CHG-071: resumen del domingo en la franja de la tarde (idempotente por semana).
 Schedule::command('miso:weekly-insights')->sundays()->everyFifteenMinutes()->between('14:00', '21:00')
     ->timezone('America/Bogota')->withoutOverlapping(10);
+// CHG-125: hitos de racha compartida entre amigos (idempotente por par y hito).
+Schedule::command('miso:friend-milestones')->hourly()->timezone('America/Bogota')->withoutOverlapping(10);

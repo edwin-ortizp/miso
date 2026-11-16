@@ -16,6 +16,8 @@ class NotificationPreferences
         'push_birthday' => false, 'push_task_due' => false, 'push_plan_due' => false, 'push_reminder' => false,
         // CHG-071: el resumen del domingo llega al celular por defecto.
         'push_weekly_insights' => true,
+        // CHG-125: avisos de amistad en la campana (activos) y qué llega también al celular.
+        'friend_notices' => true, 'push_friend_request' => false, 'push_friend_accepted' => false, 'push_shared_streak' => false,
     ];
 
     /** ¿Este tipo de notificación debe salir por push para este usuario? */

@@ -31,6 +31,10 @@ class UserNotification extends Model
         if ($this->source_type === \App\Services\Game\BallNotice::SOURCE) {
             return route('game.balls');
         }
+        // CHG-125: los avisos de amistad llevan a Amigos.
+        if ($this->source_type === \App\Services\Social\FriendNotices::SOURCE) {
+            return route('social.friends');
+        }
         // CHG-071: el resumen semanal vive en Estadísticas.
         if ($this->source_type === \App\Services\Insights\WeeklyInsights::SOURCE) {
             return route('statistics').'#insights';

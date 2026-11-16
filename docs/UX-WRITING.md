@@ -57,7 +57,10 @@ El entrenador tiene personalidad de compañero: sus reacciones son espontáneas,
 | Tarea | Acción concreta que puede organizar y completar |
 | Avance | Progreso registrado; no implica que el objetivo esté cumplido |
 | Pendiente | Acción aún sin completar; evitar «fracaso» o «deuda» como juicio motivacional |
+| Amigo | Otra cuenta de MiSo con amistad aceptada; no confundir con «Relaciones», que son fichas privadas de la agenda |
 | Racha | Usar cuando corresponda al cálculo real; explicar sus condiciones mediante ayuda contextual |
+| Semana (amigos) | Conteo suave de acciones de la semana; sin «ranking», «último lugar» ni comparaciones negativas |
+| Racha compartida | Días en que los dos amigos cumplieron su racha; al cortarse se habla de «retomar» y de la mejor racha, nunca de «perder» |
 
 Conservar los términos específicos de cada módulo. No alternar sin motivo «objetivo» y «meta» para nombrar la misma entidad.
 
