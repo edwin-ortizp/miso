@@ -34,22 +34,88 @@ Hoy MiSo no tiene medicamentos. Este CHG agrega dos conceptos: el **medicamento 
 ## 3. UX/UI
 <!-- Sin pantallas: escribe "No aplica — motivo" en cada parte. Con UI, approve exige un boceto ASCII en un bloque de código. Si hay flujo, agrega un diagrama en un bloque mermaid. -->
 ### 3.1 Experiencia (ux-designer)
-- Pendiente: flujo, boceto ASCII (escritorio y móvil), estados (sin medicamentos, nada pendiente hoy, todo tomado) y accesibilidad. Principio: marcar una toma debe costar un toque (UX-001 de `docs/backlog/UX-DESIGN.md`). Orden móvil: pendientes de hoy, registro rápido, historial (UX-002).
+- Flujo y cantidad de pasos:
+  - Marcar una toma: Salud → «Medicamentos» → botón «Tomado» en la tarjeta de la toma: **1 toque** (UX-001). «Omitir» abre un diálogo corto con motivo opcional.
+  - Crear un medicamento: FAB «Registrar» → opciones «Medicamento» y «Toma puntual» (mismo FAB, `'create' => true`). Medicamento: nombre, dosis, frecuencia y horarios, inicio; fin, indicaciones, notas y evento de salud van en «Más detalle».
+  - Editar o finalizar: toque en el medicamento. «Finalizar» conserva el historial.
+- Qué contiene cada pantalla y qué es lo más importante: orden `Hoy` (pendientes, atrasadas, hechas) → «Mis medicamentos» (activos, con su siguiente toma) → «Historial». Lo más importante es qué falta tomar hoy; en móvil las pendientes van primero (UX-002).
+- Estados (vacío / carga / error / éxito / validaciones):
+  - Sin medicamentos: invitación a registrar el primero. Nada pendiente hoy: «No tienes tomas pendientes hoy.» Todo tomado: confirmación sin celebración excesiva.
+  - Toma atrasada: se marca «Atrasada» con la hora esperada; se puede registrar igual con la hora real.
+  - Error al guardar: el formulario conserva lo escrito. Validaciones en el servidor.
+  - Éxito de «Tomado»: la tarjeta pasa a «Tomada a las {hora}» con opción de deshacer durante unos segundos.
+- Información necesaria y momento de presentación: dosis y hora visibles en cada toma; el aviso «MiSo no sustituye la indicación de tu profesional de salud» una vez, bajo el título; las indicaciones («con comida») se muestran en la tarjeta si existen.
+- Accesibilidad de uso (teclado, foco, errores): «Tomado» es un botón con nombre accesible completo («Marcar Losartán 50 mg de las 8:00 como tomado»); al marcarla el foco pasa a la siguiente toma; el estado no depende solo del color (ícono + texto); resultado anunciado con `aria-live`.
 
 ```mermaid
 flowchart LR
-  A[Medicamento programado] --> B[Tomas esperadas del día]
-  B --> C{Acción}
-  C -->|Tomado| D[Toma registrada]
-  C -->|Omitido| E[Omisión registrada]
-  F[Toma puntual no programada] --> D
+  A[Salud › Medicamentos] --> B{¿Qué quieres hacer?}
+  B -->|Marcar toma| C[Tomado - 1 toque]
+  B -->|Omitir| D[Diálogo con motivo opcional]
+  B -->|Registrar| E[FAB: Medicamento o Toma puntual]
+  E --> F[Formulario]
+  F --> A
+  C --> A
+```
+
+Boceto escritorio:
+
+```
+┌ Salud ▸ Registro | Vista del cuerpo | Mediciones | Medicamentos ───────┐
+│ MiSo no sustituye la indicación de tu profesional de salud.            │
+│ ┌ Hoy · lunes 16 de noviembre ─────────────── 2 de 4 tomadas ┐        │
+│ │ ⚠ 08:00 Losartán 50 mg · con comida   Atrasada   [Tomado][Omitir]│  │
+│ │ ◷ 14:00 Metformina 850 mg                         [Tomado][Omitir]│  │
+│ │ ✔ 07:00 Vitamina D 1000 UI            Tomada 07:12          ↶      │  │
+│ │ ✔ 07:00 Omeprazol 20 mg               Tomada 07:12          ↶      │  │
+│ └────────────────────────────────────────────────────────────────┘     │
+│ ┌ Mis medicamentos (3) ─ [Buscar] [Filtros ▾] ───────────────────┐     │
+│ │ Losartán 50 mg    1 vez al día · 08:00     desde 1 ago   ⋮     │     │
+│ │ Metformina 850 mg 2 veces al día · 08/20   desde 3 sep   ⋮     │     │
+│ └────────────────────────────────────────────────────────────────┘     │
+│ ┌ Historial ─ [Medicamento ▾] [Fecha ▾] ─────────────────────────┐     │
+│ │ 16 nov 07:12  Omeprazol 20 mg   Tomada                         │     │
+│ │ 15 nov 20:05  Metformina 850 mg Omitida · Se me olvidó         │     │
+│ └────────────────────────────────────────────────────────────────┘     │
+│                                                              (＋ FAB)  │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+Boceto móvil:
+
+```
+┌ Medicamentos ───────────┐   ┌ Registrar medicamento ─── ✕ ┐
+│ Hoy · 2 de 4 tomadas    │   │ Nombre     [Losartán      ] │
+│ ⚠ 08:00 Losartán 50 mg  │   │ Dosis [50] Unidad [mg ▾]    │
+│   Atrasada              │   │ Frecuencia [1 vez al día ▾] │
+│   [  Tomado  ] [Omitir] │   │ Horarios   [08:00] (＋hora) │
+│ ◷ 14:00 Metformina      │   │ Desde      [16 nov 2026 ▾]  │
+│   [  Tomado  ] [Omitir] │   │ ▸ Más detalle               │
+│ ✔ 07:00 Omeprazol       │   │ [Cancelar]        [Guardar] │
+│   Tomada 07:12   ↶      │   └─────────────────────────────┘
+│ Mis medicamentos        │
+│ Historial         (＋)  │
+└─────────────────────────┘
 ```
 
 ### 3.2 Visual (ui-designer)
-- Pendiente. Reutilizar FAB + `x-ui.form-dialog`, `x-ui.management-card` y el acento del módulo salud.
+- Distribución: `x-module-shell module="health"`; tarjeta «Hoy» con filas de toma como acción principal, luego dos `x-ui.management-card` («Mis medicamentos» e «Historial») con el patrón de `water-daily.blade.php`.
+- Componentes existentes a reutilizar (ruta): `x-module-actions` con `quick` de tipo `tap` para «Tomado» desde el chat del compañero, `x-ui.management-card`, `x-ui.form-dialog`, `x-ui.field`, `x-ui.select`, `x-ui.action`, `DataState`.
+- Jerarquía, color, tipografía y espaciado (tokens): la toma atrasada usa tono de advertencia suave con ícono y texto, no error; las tomadas bajan de jerarquía (texto secundario, ícono de check). Acento de módulo desde `config/modules.php`. Sin tonos ni íconos a mano.
+- Responsive y contraste: bajo 1200 px no hay panel lateral; las filas de toma ocupan todo el ancho con botones de 44 px. Contraste AA en claro y oscuro. Validar con 0, 1 y 10+ medicamentos y con nombres largos.
 
 ### 3.3 Escritura (ux-writer)
-- Pendiente. Tono respetuoso y sin humor (`docs/UX-WRITING.md`, salud). «Omitido» sin culpar. Incluir el aviso de que MiSo no sustituye la indicación del profesional de salud.
+- Ubicación y estado: aviso bajo el título; estado de cada toma en su fila.
+- Textos finales (variables y variantes):
+  - Aviso: «MiSo no sustituye la indicación de tu profesional de salud.»
+  - Botones: «Tomado», «Omitir», «Deshacer». Estados: «Pendiente», «Atrasada», «Tomada a las {hora}», «Omitida».
+  - Resumen: «{n} de {total} tomadas hoy.» Sin pendientes: «No tienes tomas pendientes hoy.»
+  - Motivo de omisión (opcional): «¿Quieres anotar el motivo?» con ejemplos en la ayuda del campo.
+  - Vacío: «Aún no tienes medicamentos. Registra el primero con el botón +.»
+  - Finalizar: «Se finalizará “{nombre}”. Su historial de tomas se conserva.» Eliminar una toma: «Se eliminará la toma de “{nombre}” del {fecha}.»
+  - Guardado: «Toma registrada.» Error: «No pudimos guardar la toma. Inténtalo de nuevo.»
+- Reglas de docs/UX-WRITING.md aplicadas: tuteo neutro; salud sin humor; omitir no se presenta como falta («Omitida», sin culpar); acciones con verbo concreto; confirmaciones que nombran el elemento y sus consecuencias.
+- Criterios de aceptación de los textos: ningún texto recomienda dosis, horarios ni suspender un medicamento; el aviso al profesional de salud aparece una vez por pantalla; los textos de omisión no usan lenguaje de culpa.
 
 ## 4. Diseño técnico (software-architect)
 - Archivos a crear / modificar:

@@ -38,25 +38,63 @@ Agrega recordatorios a los medicamentos de CHG-129 reutilizando el sistema de no
 ## 3. UX/UI
 <!-- Sin pantallas: escribe "No aplica — motivo" en cada parte. Con UI, approve exige un boceto ASCII en un bloque de código. Si hay flujo, agrega un diagrama en un bloque mermaid. -->
 ### 3.1 Experiencia (ux-designer)
-- Pendiente: boceto ASCII del aviso con botones «Tomado» y «Abrir» (iPhone sin botones: el aviso abre la app), del interruptor en Ajustes → Notificaciones y de la notificación en la campana. Estados: sin permiso de push, aviso ya atendido, aviso vencido.
+- Flujo y cantidad de pasos: la persona no hace nada para recibir avisos más allá de tener medicamentos con horario. Apagar el push: Ajustes → Notificaciones → interruptor «Medicamentos» (1 toque). Atender un aviso: «Tomado» en la notificación (1 toque, sin abrir la app) o «Abrir» para ir a Salud → Medicamentos.
+- Qué contiene cada pantalla y qué es lo más importante: el aviso dice qué medicamento, qué dosis y a qué hora; el botón principal es «Tomado». En la campana el aviso lleva a Medicamentos.
+- Estados (vacío / carga / error / éxito / validaciones):
+  - Aviso nuevo, aviso atendido (queda como leído y marcado), aviso vencido (más de 60 min: solo en la campana).
+  - Éxito de «Tomado»: la notificación se cierra; al abrir la app la toma figura como tomada. Enlace vencido: al abrir la app se ofrece registrar la toma ahí.
+  - Sin permiso de push: el interruptor sigue disponible y se muestra el estado actual de los permisos como en los otros avisos de Ajustes.
+- Información necesaria y momento de presentación: nombre, dosis y hora en el título y el cuerpo; sin datos clínicos adicionales en la pantalla bloqueada del teléfono (privacidad: no se incluyen indicaciones ni notas).
+- Accesibilidad de uso (teclado, foco, errores): el interruptor tiene etiqueta y estado anunciado; la campana ya es operable con teclado; los botones del aviso los presenta el sistema operativo. iPhone no muestra botones: el aviso abre la app.
 
 ```mermaid
 flowchart LR
-  A[Cron cada minuto] --> B[notifications:generate]
-  B --> C{¿Hora de la toma llegó y sigue pendiente?}
-  C -->|No| X[Nada]
-  C -->|Sí| D[Crear medication_due una sola vez]
-  D --> E[notifications:dispatch]
-  E --> F{¿Dentro de 60 min y push activo?}
-  F -->|Sí| G[Push + campana]
-  F -->|No| H[Solo campana]
+  A[Cron cada minuto] --> B[Aviso a la hora de la toma]
+  B --> C{Push activo y aviso reciente}
+  C -->|Sí| D[Push con Tomado y Abrir]
+  C -->|No| E[Solo campana]
+  D -->|Tomado| F[Toma registrada]
+  D -->|Abrir| G[Salud › Medicamentos]
+  E --> G
+```
+
+Boceto del aviso y de Ajustes:
+
+```
+Notificación push (Android)            Campana (en la app)
+┌────────────────────────────┐         ┌──────────────────────────────┐
+│ MiSo · Salud               │         │ 🔔 Avisos                     │
+│ Es hora de tu Losartán     │         │ ● Es hora de tu Losartán      │
+│ 50 mg (8:00)               │         │   50 mg (8:00)       hace 2 min│
+│ [ Tomado ]  [ Abrir ]      │         │ ○ Resumen de la semana        │
+└────────────────────────────┘         └──────────────────────────────┘
+
+Ajustes ▸ Notificaciones
+┌─────────────────────────────────────────────────────────┐
+│ Avisos al celular (push)                                │
+│  Cumpleaños ................................ [ ○── ]     │
+│  Tareas por vencer ......................... [ ○── ]     │
+│  Medicamentos .............................. [ ──● ]     │
+│  Resumen de la semana ...................... [ ──● ]     │
+│ Los avisos de medicamentos siempre se ven en la campana.│
+└─────────────────────────────────────────────────────────┘
 ```
 
 ### 3.2 Visual (ui-designer)
-- Pendiente. Reutilizar la campana (`resources/views/livewire/notifications/bell.blade.php`) y la pantalla de ajustes existente (`settings.blade.php`).
+- Distribución: el interruptor se suma a la lista de avisos al celular de `resources/views/livewire/notifications/settings.blade.php`, con el mismo componente y espaciado que `push_weekly_insights`. La notificación en la campana usa la fila existente de `bell.blade.php`.
+- Componentes existentes a reutilizar (ruta): `settings.blade.php`, `bell.blade.php`, íconos y color del módulo salud desde `config/modules.php`.
+- Jerarquía, color, tipografía y espaciado (tokens): sin estilos nuevos; el ícono del aviso es el del módulo salud. El texto del push es corto (título y una línea).
+- Responsive y contraste: sin cambios de layout; verificar contraste AA del interruptor en claro y oscuro.
 
 ### 3.3 Escritura (ux-writer)
-- Pendiente. Tono respetuoso y sin humor (`docs/UX-WRITING.md`, salud). Sin culpar por omitir una toma. Ejemplo de partida: «Es hora de tu Losartán 50 mg (8:00)».
+- Ubicación y estado: título y cuerpo del push y de la campana; etiqueta y ayuda del interruptor en Ajustes.
+- Textos finales (variables y variantes):
+  - Push y campana: título «Es hora de tu {medicamento} {dosis}», cuerpo «Toma programada a las {hora}.»
+  - Botones: «Tomado», «Abrir».
+  - Interruptor: «Medicamentos». Ayuda: «Te avisamos a la hora de cada toma programada. En la campana siempre verás el aviso.»
+  - Enlace vencido al abrir: «El botón ya no está disponible. Registra la toma desde Medicamentos.»
+- Reglas de docs/UX-WRITING.md aplicadas: tuteo neutro; tono sereno y sin humor en salud; botones con verbo o estado concreto; no se culpa por no haber tomado; en la pantalla bloqueada solo se muestra lo mínimo.
+- Criterios de aceptación de los textos: ningún aviso incluye instrucciones médicas, indicaciones ni notas; el texto cabe en dos líneas en el push; los nombres largos de medicamento se acortan con «…» sin perder la hora.
 
 ## 4. Diseño técnico (software-architect)
 - Archivos a crear / modificar:
