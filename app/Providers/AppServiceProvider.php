@@ -140,6 +140,8 @@ class AppServiceProvider extends ServiceProvider
             'health-measurement' => \App\Models\HealthMeasurement::class,
             'medication' => \App\Models\Medication::class,
             'sleep-log' => \App\Models\SleepLog::class,
+            'menstrual-cycle' => \App\Models\MenstrualCycle::class,
+            'cycle-day-log' => \App\Models\CycleDayLog::class,
             'medication-intake' => \App\Models\MedicationIntake::class,
             'task' => Task::class,
             'habit-completion' => \App\Models\HabitCompletion::class,

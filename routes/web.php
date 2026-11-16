@@ -118,6 +118,7 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/exercise/settings', ExerciseSettings::class)->name('exercise.settings');
     Route::get('/health', HealthIndex::class)->name('health');
     Route::get('/health/body', HealthBodyMap::class)->name('health.body');
+    Route::get('/health/cycle', \App\Livewire\Health\Cycle::class)->name('health.cycle');
     Route::get('/health/sleep', \App\Livewire\Health\Sleep::class)->name('health.sleep');
     Route::get('/health/medications', \App\Livewire\Health\Medications::class)->name('health.medications');
     Route::get('/health/measurements', \App\Livewire\Health\HealthMeasurements::class)->name('health.measurements');

@@ -200,6 +200,16 @@ class User extends Authenticatable
         return $this->hasMany(HealthEvent::class);
     }
 
+    public function menstrualCycles()
+    {
+        return $this->hasMany(MenstrualCycle::class);
+    }
+
+    public function cycleDayLogs()
+    {
+        return $this->hasMany(CycleDayLog::class);
+    }
+
     public function sleepLogs()
     {
         return $this->hasMany(SleepLog::class);

@@ -129,7 +129,7 @@ _Última actualización: 2026-11-16_
 | CHG-123 | S | Salud: glucosa en sangre | in-progress | En verificación | 2/2 |
 | CHG-124 | S | Salud: creatinina y laboratorios | in-progress | En verificación | 2/2 |
 | CHG-125 | M | Salud: seguimiento del sueño | in-progress | En verificación | 4/4 |
-| CHG-126 | L | Salud: ciclo menstrual | to-do | Borrador | 0/0 |
+| CHG-126 | L | Salud: ciclo menstrual | in-progress | En verificación | 6/6 |
 | CHG-127 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | in-progress | En verificación | 2/2 |
 | CHG-128 | M | Salud: tendencias y contexto de mediciones | to-do | Borrador | 0/0 |
 | CHG-129 | M | Salud: medicamentos tomados y por tomar (con MCP) | in-progress | En verificación | 4/4 |
