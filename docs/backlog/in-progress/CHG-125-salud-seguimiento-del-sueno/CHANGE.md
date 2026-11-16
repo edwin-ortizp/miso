@@ -1,5 +1,5 @@
 # CHG-125 · Salud: seguimiento del sueño
-**Estado:** En desarrollo
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -98,8 +98,8 @@ flowchart LR
 ## 7. Tareas
 - [x] T1 · Registrar mi sueño y ver cuánto dormí frente a mi meta — Resp: developer — Modelo: estandar — Archivos: migraciones, `SleepLog`, `LogSleep`, `SleepProgress`, `Health\Sleep`, vista, ruta, `config/modules.php` — Hecho cuando: CA1 a CA5 y CA8 pasan en pruebas.
 - [x] T2 · Cambiar mi meta de horas de sueño — Resp: developer — Modelo: estandar — Archivos: `Health\Sleep`, migración `daily_sleep_hours` — Hecho cuando: la meta se guarda por persona (entre 4 y 14 h) y el avance usa la nueva meta.
-- [ ] T3 · El asistente registra y consulta mi sueño — Resp: developer — Modelo: estandar — Archivos: `app/Mcp/Tools/Health/*`, `LifeTrackerServer`, `DeleteEntryTool` — Hecho cuando: CA6 y CA7 pasan en pruebas.
-- [ ] T4 · Pruebas, documentación y verificación — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/*`, `docs/UX-WRITING.md` — Hecho cuando: los comandos de §5 pasan y no hay fallas nuevas en la suite.
+- [x] T3 · El asistente registra y consulta mi sueño — Resp: developer — Modelo: estandar — Archivos: `app/Mcp/Tools/Health/*`, `LifeTrackerServer`, `DeleteEntryTool` — Hecho cuando: CA6 y CA7 pasan en pruebas.
+- [x] T4 · Pruebas, documentación y verificación — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/*`, `docs/UX-WRITING.md` — Hecho cuando: los comandos de §5 pasan y no hay fallas nuevas en la suite.
 
 ## 8. Bitácora de implementación (developer)
 - 2026-11-16 — T1: migración `sleep_logs` (índice corto `sl_user_woke_idx`), modelo `SleepLog` (duración y texto «7 h 30 min»), acción `LogSleep` (valida despertar posterior, duración de 10 min a 24 h y cruces; repetir el registro idéntico devuelve el existente), `SleepProgress` (meta, mensaje neutro, últimos 7 días, promedio y registros que cumplen), página `Health\Sleep` («Última noche» con barra y texto, «Últimos 7 días», historial con periodo y orden), ruta `health.sleep` y pestaña «Sueño». El formulario abre precargado: despertar ahora y dormir la meta de horas antes.
@@ -115,3 +115,4 @@ flowchart LR
 - Decidido 2026-11-16: sin cifrado y con `is_sensitive` opcional, como en CHG-122.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
+- 2026-11-16 — Implementación terminada → En verificación
