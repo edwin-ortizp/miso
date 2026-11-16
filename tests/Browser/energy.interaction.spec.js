@@ -129,7 +129,6 @@ for (const width of [390, 1440]) test(`shared modal variants ${width}`, async ({
         const box = await health.getByRole('button', { name, exact: true }).boundingBox();
         expect(box.y).toBeGreaterThanOrEqual(0); expect(box.y + box.height).toBeLessThanOrEqual(width === 390 ? 421 : 901);
     }
-    if (width < 768) await health.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
     await health.getByRole('button', { name: 'Detalles adicionales', exact: true }).click();
     await health.getByRole('button', { name: 'Cerrar', exact: true }).click(); await expect(health).toBeHidden();
     await page.goto('/meals/ingredients');

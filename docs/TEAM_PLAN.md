@@ -111,7 +111,7 @@ _Última actualización: 2026-11-16_
 | CHG-105 | M | Evitar bloqueo de Mi día al registrar foco en PWA móvil | done | Cerrado | 4/4 |
 | CHG-106 | M | Restaurar chat y cierre de superficies en Android | in-progress | En desarrollo | 0/4 |
 | CHG-107 | S | Editar tareas y Markdown con una sola acción | done | Cerrado | 2/2 |
-| CHG-108 | M | Secciones de formularios visibles en móvil | to-do | Borrador | 0/4 |
+| CHG-108 | M | Secciones de formularios visibles en móvil | in-progress | En desarrollo | 0/4 |
 | CHG-109 | M | Corregir barra de estado y escala de Android | to-do | Aprobado | 0/4 |
 | CHG-110 | XS | Alinear controles del header móvil | done | Cerrado | 1/1 |
 | CHG-111 | M | Objetivos conectados con tareas y hábitos | done | Cerrado | 4/4 |

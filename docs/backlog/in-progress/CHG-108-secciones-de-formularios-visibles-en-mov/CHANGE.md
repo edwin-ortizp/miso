@@ -1,9 +1,9 @@
 # CHG-108 · Secciones de formularios visibles en móvil
-**Estado:** Borrador
+**Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-14 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-14 · **Aprobado:** 2026-11-16 · **Cerrado:** —
 **Relacionado:** CHG-015, CHG-101; coordinación con CHG-107
 
 ## 0. En palabras simples
@@ -71,13 +71,14 @@ Mantener etiquetas reales, «Secciones del formulario» y «Contiene errores». 
 Actualizar docs/design-system.md, Formularios: móvil deja de arrancar contraído/superpuesto; escritorio conserva colapso. Actualizar regla del componente en docs/UI-DESIGN.md sin ampliar a layouts del shell.
 
 ## 7. Tareas
-- [ ] T1 · Mostrar secciones arriba en móvil y rail en escritorio — Resp: developer — Modelo: estandar — Archivos: resources/views/components/ui/form-dialog.blade.php, resources/css/m3/patterns/_dialogs.css, tests/Browser/responsive.spec.js — Hecho cuando: CA1–CA4 y CA6 pasan con un solo DOM responsive.
-- [ ] T2 · Conservar selección, errores y teclado — Resp: developer — Modelo: estandar — Archivos: resources/views/components/ui/form-dialog.blade.php, tests/Browser/interaction.spec.js, tests/Browser/task-editor.interaction.spec.js, tests/Browser/accessibility.spec.js — Hecho cuando: CA5 pasa y regresión cubre borrador, foco y cambio de breakpoint.
+- [x] T1 · Mostrar secciones arriba en móvil y rail en escritorio — Resp: developer — Modelo: estandar — Archivos: resources/views/components/ui/form-dialog.blade.php, resources/css/m3/patterns/_dialogs.css, tests/Browser/responsive.spec.js — Hecho cuando: CA1–CA4 y CA6 pasan con un solo DOM responsive.
+- [x] T2 · Conservar selección, errores y teclado — Resp: developer — Modelo: estandar — Archivos: resources/views/components/ui/form-dialog.blade.php, tests/Browser/interaction.spec.js, tests/Browser/task-editor.interaction.spec.js, tests/Browser/accessibility.spec.js — Hecho cuando: CA5 pasa y regresión cubre borrador, foco y cambio de breakpoint.
 - [ ] T3 · Revisar formularios representativos y capturas — Resp: qa-tester — Archivos: CHANGE.md, evidencias en storage/framework/testing — Hecho cuando: matriz §5 ejecutada, Hábitos/Objetivos verificados y limitaciones físicas explícitas.
-- [ ] T4 · Actualizar contrato responsive — Resp: tech-writer — Archivos: docs/design-system.md, docs/UI-DESIGN.md, CHANGE.md — Hecho cuando: regla vigente coincide con comportamiento y referencias válidas.
+- [x] T4 · Actualizar contrato responsive — Resp: tech-writer — Archivos: docs/design-system.md, docs/UI-DESIGN.md, CHANGE.md — Hecho cuando: regla vigente coincide con comportamiento y referencias válidas.
 
 ## 8. Bitácora de implementación (developer)
-Sin implementación; completar al desarrollar.
+- 2026-11-16 — Implementado solo para móvil (< 768 px); escritorio queda igual (rail colapsable). `form-dialog.blade.php`: `navCollapsed` inicia en false y ya no depende de matchMedia ni se contrae al elegir sección; el nav centra la sección activa solo en el eje horizontal (respeta movimiento reducido); el botón de colapso lleva la clase `md-form-dialog__nav-toggle`. `_dialogs.css`: en móvil el nav es una franja flex (una fila, overflow-x local, items de 44 px) en la fila superior de `__main`, y el botón de colapso se oculta por CSS. Tests de navegador existentes dejan de pulsar el menú móvil; nuevas regresiones en `task-editor.interaction.spec.js` (franja visible 360/390 y control de colapso en 1440). `docs/design-system.md` actualizado.
+- **Sin ejecutar:** Playwright, `npm run build` y `ui:conformance` no corrieron (el entorno cloud no tiene PHP 8.4 ni `vendor/`). T3 (QA, capturas y teléfono físico) queda pendiente.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-14 — Creado en to-do/ (Borrador, nivel M) mediante team new.
@@ -89,3 +90,5 @@ Sin implementación; completar al desarrollar.
 - LECCIÓN: ninguna nueva antes de implementación/verificación.
 - 2026-11-14 — Línea base local: PHP filtrado PanelFocusSessionTest/PomodoroTimerTest/CompanionChatTest/TaskEditorDraftTest: 43 pruebas, 304 aserciones, todas pasan; JS pomodoro-timer/dialog-viewport/navigation-guard/companion-chat: 27 pruebas, todas pasan. No reproduce ni certifica los reportes físicos.
 - Perfil estandar sin proveedor configurado en docs/TEAM_MODELS.md; no elegir proveedor externo implícitamente. Bocetos y causa están pendientes de revisión/validación según las tareas, no de redacción.
+- 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)

@@ -84,7 +84,6 @@ for (const width of [1440, 768, 390]) {
         await page.locator('.md-calendar-meal:visible').first().click();
         await expect(page).toHaveURL(/meals\/weekly.*meal=/);
         await expect(page.locator('#meal-plan-editor')).toBeVisible();
-        if (width < 768) await page.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
         await page.getByRole('button', { name: 'Horario', exact: true }).click();
         await page.getByLabel('Hora puntual', { exact: true }).fill('08:15');
         await page.getByRole('button', { name: 'Guardar solo horario' }).click();
