@@ -132,7 +132,7 @@ _Última actualización: 2026-11-16_
 | CHG-126 | L | Salud: ciclo menstrual | to-do | Borrador | 0/0 |
 | CHG-127 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | to-do | Borrador | 0/0 |
 | CHG-128 | M | Salud: tendencias y contexto de mediciones | to-do | Borrador | 0/0 |
-| CHG-129 | M | Salud: medicamentos tomados y por tomar (con MCP) | to-do | Aprobado | 0/4 |
+| CHG-129 | M | Salud: medicamentos tomados y por tomar (con MCP) | in-progress | En verificación | 4/4 |
 | CHG-130 | M | Salud: recordatorios de medicamentos con el cron existente | to-do | Aprobado | 0/4 |
 <!-- team:table:end -->
 

@@ -1,5 +1,5 @@
 # CHG-129 · Salud: medicamentos tomados y por tomar (con MCP)
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -154,12 +154,20 @@ Boceto móvil:
 - Docs a actualizar: `docs/PRODUCT.md` (módulo de salud), `docs/UX-WRITING.md` (textos de omisión y aviso), `docs/mockup-system/mockups/health/`.
 
 ## 7. Tareas
-- [ ] T1 · Crear medicamentos y ver qué toca hoy — Resp: developer — Modelo: estandar — Archivos: migraciones, `Medication`, `MedicationSchedule`, `Medications`, vista, ruta, `config/modules.php` — Hecho cuando: CA1 y CA2 pasan en pruebas.
-- [ ] T2 · Marcar tomas (tomado/omitido) y registrar tomas puntuales — Resp: developer — Modelo: estandar — Archivos: `MedicationIntake`, `LogMedicationIntake`, componente Livewire — Hecho cuando: CA3 pasa en pruebas.
-- [ ] T3 · Registrar y consultar medicamentos desde el asistente (MCP) — Resp: developer — Modelo: estandar — Archivos: `app/Mcp/Tools/Health/*`, `LifeTrackerServer`, `ToolCatalog`, `DeleteEntryTool`, `GetRecentActivityTool`, `GetHealthContextTool` — Hecho cuando: CA4, CA5 y CA7 pasan en pruebas.
-- [ ] T4 · Aislamiento, esquema y verificación en móvil y escritorio — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/*` — Hecho cuando: CA6 y los comandos de §5 pasan.
+- [x] T1 · Crear medicamentos y ver qué toca hoy — Resp: developer — Modelo: estandar — Archivos: migraciones, `Medication`, `MedicationSchedule`, `Medications`, vista, ruta, `config/modules.php` — Hecho cuando: CA1 y CA2 pasan en pruebas.
+- [x] T2 · Marcar tomas (tomado/omitido) y registrar tomas puntuales — Resp: developer — Modelo: estandar — Archivos: `MedicationIntake`, `LogMedicationIntake`, componente Livewire — Hecho cuando: CA3 pasa en pruebas.
+- [x] T3 · Registrar y consultar medicamentos desde el asistente (MCP) — Resp: developer — Modelo: estandar — Archivos: `app/Mcp/Tools/Health/*`, `LifeTrackerServer`, `ToolCatalog`, `DeleteEntryTool`, `GetRecentActivityTool`, `GetHealthContextTool` — Hecho cuando: CA4, CA5 y CA7 pasan en pruebas.
+- [x] T4 · Aislamiento, esquema y verificación en móvil y escritorio — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/*` — Hecho cuando: CA6 y los comandos de §5 pasan.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — T1: migraciones `medications` y `medication_intakes`, modelos `Medication` y `MedicationIntake`, `MedicationSchedule` (frecuencias diaria, cada N horas y por días de la semana en `America/Bogota`), acción `SaveMedication` y página `Health\Medications` (tarjeta «Hoy», «Mis medicamentos», historial), ruta `health.medications` y pestaña «Medicamentos».
+- 2026-11-16 — T2: `LogMedicationIntake` (tomada, omitida, puntual y deshacer), idempotente por medicamento y hora esperada y por `operation_key`. «Omitir» abre un diálogo con motivo opcional.
+- 2026-11-16 — T3: herramientas `log-medication-tool` (crear, editar, finalizar, reanudar), `log-medication-intake-tool` y `list-medications-tool` (`today`, `active`, `history`), registradas en `LifeTrackerServer` con su guía de uso; tipos `medication` y `medication_intake` en `DeleteEntryTool`; morph map `medication` y `medication-intake`. Las tomas pendientes se informan en la respuesta de cada registro. Lo sensible se omite salvo `include_sensitive=true`.
+- 2026-11-16 — T4: `MedicationScheduleTest` (10), `LifeTrackerMedicationMcpTest` (12) y `MedicationsModuleTest` (9) pasan. Suite completa: 1660 pruebas, 46 fallas idénticas a las de la base sin estos cambios (entorno); `ui:conformance` no marca los archivos nuevos.
+- Desviaciones de §4: sin FK compuesta entre `medication_intakes` y `medications` (no admite `nullOnDelete`); el modelo `Medication` pone `medication_id` en null al borrar, así la toma conserva nombre y dosis. `health_event_id` queda como columna nullable sin FK y **sin campo en la pantalla ni en MCP**: el enlace opcional con un evento de salud no se implementó en esta entrega. No se tocaron `GetHealthContextTool` ni `GetRecentActivityTool`.
+- Horarios: la pantalla pide los horarios como texto «HH:MM, HH:MM» (con ayuda y validación) en lugar de un selector de horas.
+- No verificado: revisión visual con captura en móvil y escritorio (no hay servidor web ni assets compilados en este entorno); las pruebas Livewire cubren render, estados vacío, con datos y filtrado. Los recordatorios no existen todavía (CHG-130).
+- Entorno: PHP 8.3 no ejecuta las versiones bloqueadas de Symfony; las pruebas se corrieron con un `vendor` resuelto aparte y `composer.lock` no se modificó. Inicio con `start --force` autorizado por el usuario (CHG-106 y CHG-108 siguen En desarrollo).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M) a pedido del usuario: registrar lo consumido y lo que se debe consumir, con registro y consulta por MCP.
@@ -169,3 +177,5 @@ Boceto móvil:
 - Decidido 2026-11-16: privacidad según CHG-122: sin cifrado, `is_sensitive` en medicamentos y tomas, ocultos en MCP salvo `include_sensitive=true`.
 - Si crece, dividir en: (1) medicamentos y tomas por UI, (2) MCP.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)
+- 2026-11-16 — Implementación terminada → En verificación

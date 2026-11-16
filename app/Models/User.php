@@ -198,6 +198,16 @@ class User extends Authenticatable
         return $this->hasMany(HealthEvent::class);
     }
 
+    public function medications()
+    {
+        return $this->hasMany(Medication::class);
+    }
+
+    public function medicationIntakes()
+    {
+        return $this->hasMany(MedicationIntake::class);
+    }
+
     public function healthMeasurements()
     {
         return $this->hasMany(HealthMeasurement::class);

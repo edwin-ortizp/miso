@@ -137,6 +137,8 @@ class AppServiceProvider extends ServiceProvider
             'relationship' => Relationship::class,
             'health-event' => HealthEvent::class,
             'health-measurement' => \App\Models\HealthMeasurement::class,
+            'medication' => \App\Models\Medication::class,
+            'medication-intake' => \App\Models\MedicationIntake::class,
             'task' => Task::class,
             'habit-completion' => \App\Models\HabitCompletion::class,
             'pomodoro-session' => \App\Models\PomodoroSession::class,

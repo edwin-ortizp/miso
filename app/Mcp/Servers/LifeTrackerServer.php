@@ -22,6 +22,9 @@ use App\Mcp\Tools\Habit\ListHabitsTool;
 use App\Mcp\Tools\Health\ListHealthEventsTool;
 use App\Mcp\Tools\Health\ListHealthMeasurementsTool;
 use App\Mcp\Tools\Health\LogHealthMeasurementTool;
+use App\Mcp\Tools\Health\ListMedicationsTool;
+use App\Mcp\Tools\Health\LogMedicationIntakeTool;
+use App\Mcp\Tools\Health\LogMedicationTool;
 use App\Mcp\Tools\Health\LogHealthEventTool;
 use App\Mcp\Tools\Health\LogHealthFollowUpTool;
 use App\Mcp\Tools\Health\MarkHealthRecoveryTool;
@@ -106,6 +109,7 @@ No consultes para preguntas generales que no dependen de su vida, si el dato ya 
 ## Qué herramienta usar
 - Una persona → get-person-context-tool (ficha, visitas, planes pendientes, eventos, ánimo y tareas en una llamada).
 - Un síntoma, dolor, cita o examen → get-health-context-tool con palabras clave en "search" y la zona del cuerpo si aplica.
+- Medicamentos → list-medications-tool (scope today: lo que falta tomar hoy; active: los programados; history: lo tomado u omitido), log-medication-intake-tool cuando cuente que tomó u omitió uno (envía operation_key estable en los reintentos) y log-medication-tool para crear, editar, finalizar o reanudar un medicamento programado. MiSo registra; no recomienda dosis ni detecta interacciones.
 - Una medición con unidad (por ahora la presión arterial; luego glucosa, creatinina, peso…) → log-health-measurement-tool para registrarla y list-health-measurements-tool para consultarla. MiSo registra y muestra tendencias; no diagnostica ni es un dispositivo médico: ante valores fuera de rango, informa con neutralidad y remite al profesional de salud.
 - "¿Cómo me fue?", resumen del día o la semana → get-recent-activity-tool.
 - Recomendar planes → list-plans-tool (círculo, persona, ciudad, not_visited) + list-plan-visits-tool para no repetir lo reciente.
@@ -161,6 +165,9 @@ class LifeTrackerServer extends Server
         ListHealthEventsTool::class,
         LogHealthMeasurementTool::class,
         ListHealthMeasurementsTool::class,
+        LogMedicationTool::class,
+        LogMedicationIntakeTool::class,
+        ListMedicationsTool::class,
         LogHealthFollowUpTool::class,
         MarkHealthRecoveryTool::class,
         UpdateHealthEventTool::class,
