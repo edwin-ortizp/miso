@@ -60,6 +60,13 @@ Regla transversal para producción y mockups: **el regreso de una vista de detal
 - **No permitido**: enlace de texto «Volver a…» en una fila propia, acción «Volver» dentro de ⋮ o del menú de acciones, y navegación de pestañas hecha a mano por módulo.
 - Referencias: `resources/views/components/module-tabs.blade.php` (prop `back`), `App\Support\Ui\Tabs\PersonTabs` y `VehicleTabs`; en mockups, `detail_nav()` y `shell(back=…)` de `life-shell.html.jinja`.
 
+## Tema claro y oscuro
+
+- La preferencia del usuario (`system`, `light`, `dark`; por defecto `system`) vive en `users.theme_preference` y se cambia desde Ajustes → Perfil (tarjeta «Apariencia», debajo de «Perfil público») y desde el menú del avatar, ambos con `x-theme-picker`.
+- `partials/theme-init` fija `data-theme="light|dark"` en `<html>` antes del primer pintado; `resources/js/theme.js` lo mantiene al cambiar la preferencia, el modo del dispositivo o tras `wire:navigate`, y emite `miso:theme`.
+- El tema oscuro solo redefine tokens en `:root[data-theme='dark']` (`resources/css/m3/tokens/_tokens.css`). Los componentes usan tokens `--md-sys-*`, `--md-custom-*` y `--md-accent-*`; no se añaden colores hex fijos por tema en componentes. Los acentos de módulo son más claros en oscuro para cumplir contraste AA como texto e icono.
+- Los gráficos leen tokens al crearse: se repintan al recibir `miso:theme`.
+
 ## Responsive y accesibilidad
 
 Existe **un solo marco de aplicación para todos los anchos**. No hay variante por dispositivo: ni capa de vistas paralela, ni detección de user-agent, ni una clase que JavaScript alterne para simular un breakpoint. El ancho del viewport es el único interruptor, y quien lo lee es el CSS. JavaScript decide comportamiento (qué hace el botón de menú, qué etiqueta accesible le corresponde), nunca visibilidad.
@@ -146,7 +153,7 @@ En los editores aislados de Salud y Tareas, la visibilidad y los borradores se c
 Patrón común y obligatorio para todo modal que crea o edita información, y destino de todo FAB de creación. Usa secciones cuando el formulario tiene más de un grupo de campos.
 
 - **Cabecera** separada del contenido por una línea divisoria. En orden: control del panel de secciones (solo si hay secciones), ícono de contexto, título, acciones opcionales de cabecera, expandir/restaurar y cerrar. El título nunca se oculta.
-- **Panel de secciones** a la izquierda para formularios largos (por ejemplo: Información básica, Detalles adicionales, Archivos y adjuntos, Resumen). Es un menú, no un wizard: se entra a cualquier sección sin completar la anterior, sin números, progreso ni subtítulos. Es colapsable; al contraerlo solo desaparece la navegación y el formulario gana ancho. En móvil arranca contraído y se superpone.
+- **Panel de secciones** a la izquierda para formularios largos (por ejemplo: Información básica, Detalles adicionales, Archivos y adjuntos, Resumen). Es un menú, no un wizard: se entra a cualquier sección sin completar la anterior, sin números, progreso ni subtítulos. En escritorio es colapsable; al contraerlo solo desaparece la navegación y el formulario gana ancho. En móvil (< 768 px) no se colapsa: pasa a una franja horizontal siempre visible bajo la cabecera, con scroll horizontal local, una sola fila y la sección activa a la vista (CHG-108).
 - **Información básica** contiene solo los datos esenciales; notas, contexto y adjuntos van en las demás secciones.
 - **Footer** separado por una línea divisoria: `Cancelar` (text) completamente a la izquierda y `Guardar` (filled) completamente a la derecha. Sin otras variantes de texto.
 - **Expandir** ocupa casi todo el viewport manteniendo el overlay; no usa el fullscreen del navegador. Restaurar conserva los datos y la sección activa.

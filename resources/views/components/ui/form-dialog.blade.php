@@ -45,7 +45,7 @@
         <div class="md-form-dialog-layer" data-module="{{ $moduleKey }}" x-dialog-viewport="{{ $state ?? '' }}"
              @if($state) x-show="{{ $state }}" x-cloak :class="{'lt-editor-pristine': !submitted}" @endif
              @if($sectionEvent) @task-editor-section.window="section = $event.detail.section" @endif
-             x-data="{ section: @js($firstSection), navCollapsed: window.matchMedia('(max-width: 767.98px)').matches, expanded: @js((bool) $expanded) }" @if($state) x-effect="if ({{ $state }}) { section = @js($firstSection); expanded = @js((bool) $expanded); navCollapsed = window.matchMedia('(max-width: 767.98px)').matches }" @endif>
+             x-data="{ section: @js($firstSection), navCollapsed: false, expanded: @js((bool) $expanded) }" @if($state) x-effect="if ({{ $state }}) { section = @js($firstSection); expanded = @js((bool) $expanded) }" @endif>
             <div class="md-dialog-scrim" x-on:click="$el.parentElement.querySelector('[role=dialog]').dispatchEvent(new CustomEvent('md-surface-close', { bubbles: true }))"></div>
             <section {{ $attributes->class(['md-form-dialog', 'md-form-dialog--sections' => $sections !== []]) }}
                      id="{{ $dialogId }}"
@@ -58,7 +58,7 @@
                 <form class="md-form-dialog__form" novalidate @if($protectChanges && ($submitAction || $submitExpression)) x-dirty-guard{{ $handlesDiscard ? '.external-close' : '' }}="{{ $state ? 'loading' : 'false' }}" @endif @if($state) @submit="submitted = true" @endif @if ($submitExpression) @submit.prevent="{{ $submitExpression }}" @elseif ($submitAction) wire:submit="{{ $submitAction }}" @else @submit.prevent @endif>
                     <header class="md-form-dialog__head" role="presentation">
                         @if ($sections !== [])
-                            <button type="button" class="md-btn-icon" @click="navCollapsed = !navCollapsed"
+                            <button type="button" class="md-btn-icon md-form-dialog__nav-toggle" @click="navCollapsed = !navCollapsed"
                                     :aria-expanded="(!navCollapsed).toString()" aria-controls="{{ $dialogId }}-nav"
                                     aria-label="Mostrar u ocultar secciones" title="Secciones">
                                 <i class="bi bi-layout-sidebar" aria-hidden="true"></i>
@@ -80,10 +80,11 @@
 
                     <div class="md-form-dialog__main">
                         @if ($sections !== [])
-                            <nav id="{{ $dialogId }}-nav" class="md-form-dialog__nav" aria-label="Secciones del formulario">
+                            <nav id="{{ $dialogId }}-nav" class="md-form-dialog__nav" aria-label="Secciones del formulario"
+                                 x-effect="section; $nextTick(() => { const item = $el.querySelector('[aria-current=true]'); if ($el.scrollWidth > $el.clientWidth && item) { const left = item.offsetLeft - ($el.clientWidth - item.offsetWidth) / 2; $el.scrollTo({ left: Math.max(0, left), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }) } })">
                                 @foreach ($sections as $key => $section)
                                     <button type="button" class="md-form-dialog__nav-item"
-                                            @click="section = @js($key); if (window.matchMedia('(max-width: 767.98px)').matches) navCollapsed = true"
+                                            @click="section = @js($key)"
                                             :aria-current="section === @js($key) ? 'true' : null">
                                         <i class="bi {{ $section['icon'] }}" aria-hidden="true"></i>
                                         <span>{{ $section['label'] }}</span>

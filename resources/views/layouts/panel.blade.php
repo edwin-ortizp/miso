@@ -14,6 +14,7 @@
          cambia de tono al instalar la aplicacion. --}}
     <meta name="theme-color" content="#2B5BB5">
     <meta name="color-scheme" content="light dark">
+    @include('partials.theme-init')
 
     {{-- iOS no lee el manifest: necesita sus propias etiquetas para abrirse
          sin barra de navegador y con el icono correcto. --}}

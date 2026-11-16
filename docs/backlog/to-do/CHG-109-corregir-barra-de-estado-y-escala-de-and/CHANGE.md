@@ -1,9 +1,9 @@
 # CHG-109 · Corregir barra de estado y escala de Android
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-14 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-14 · **Aprobado:** 2026-11-16 · **Cerrado:** —
 **Relacionado:** CHG-098, CHG-101; coordinación con CHG-106
 
 ## 0. En palabras simples
@@ -82,3 +82,4 @@ Sin implementación; completar al desarrollar.
 - LECCIÓN: ninguna nueva antes de implementación/verificación.
 - 2026-11-14 — Línea base local: PHP filtrado PanelFocusSessionTest/PomodoroTimerTest/CompanionChatTest/TaskEditorDraftTest: 43 pruebas, 304 aserciones, todas pasan; JS pomodoro-timer/dialog-viewport/navigation-guard/companion-chat: 27 pruebas, todas pasan. No reproduce ni certifica los reportes físicos.
 - Perfil estandar sin proveedor configurado en docs/TEAM_MODELS.md; no elegir proveedor externo implícitamente. Bocetos y causa están pendientes de revisión/validación según las tareas, no de redacción.
+- 2026-11-16 — Aprobado por el usuario (Compuerta 2)

@@ -241,13 +241,16 @@ class RewardGranter
         $isNew = ! in_array($picked->line_key, $knownLines, true);
         $event->update(['effect' => $baseEffect + ['ball' => true, 'new_line' => $isNew, 'new_species' => ! in_array($picked->id, $knownIds, true), 'forced_new' => $forceNew, 'season_id' => $settings['season_id'] ?? null]]);
 
-        return GameEncounter::withoutGlobalScopes()->create([
+        $encounter = GameEncounter::withoutGlobalScopes()->create([
             'user_id' => $userId,
             'game_event_id' => $event->id,
             'species_id' => $picked->id,
             'seed' => $seed,
             'granted_at' => now(),
         ]);
+        app(BallNotice::class)->granted($encounter, $event);
+
+        return $encounter;
     }
 
     /** @return array<int, string> */

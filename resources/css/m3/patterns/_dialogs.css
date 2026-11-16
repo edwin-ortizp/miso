@@ -353,8 +353,15 @@
   .md-form-dialog--sections { height: 92vh; }
   .md-form-dialog.is-expanded { height: 100%; border-radius: 0; }
   .md-form-dialog-layer:has(.is-expanded) { padding: 0; }
-  .md-form-dialog--sections .md-form-dialog__main { position: relative; grid-template-columns: minmax(0, 1fr); }
-  .md-form-dialog--sections:not(.is-nav-collapsed) .md-form-dialog__nav { position: absolute; inset: 0 30% 0 0; z-index: 5; background: var(--md-sys-color-surface-container-lowest); box-shadow: var(--md-sys-elevation-3); }
+  /* CHG-108: en móvil las secciones son una franja superior siempre visible (el colapso es solo de escritorio). */
+  .md-form-dialog--sections .md-form-dialog__main,
+  .md-form-dialog--sections.is-nav-collapsed .md-form-dialog__main { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .md-form-dialog--sections .md-form-dialog__nav,
+  .md-form-dialog--sections.is-nav-collapsed .md-form-dialog__nav { display: flex; align-items: stretch; gap: 4px; padding: 8px 16px; overflow-x: auto; overflow-y: hidden; overscroll-behavior-x: contain; border-right: 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); scrollbar-width: none; }
+  .md-form-dialog--sections .md-form-dialog__nav::-webkit-scrollbar { display: none; }
+  .md-form-dialog--sections .md-form-dialog__nav-item { flex: 0 0 auto; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 999px; white-space: nowrap; }
+  .md-form-dialog--sections .md-form-dialog__nav-item[aria-current="true"] { box-shadow: none; background: color-mix(in srgb, var(--md-module-accent) 14%, transparent); }
+  .md-form-dialog__nav-toggle { display: none; }
   .md-form-dialog__title { font-size: 1rem; }
   .md-form-dialog__body { padding: 20px 16px; }
   .md-form-dialog__grid { grid-template-columns: minmax(0, 1fr); }

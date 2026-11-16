@@ -42,7 +42,6 @@ test.beforeEach(async ({ page }) => {
 
 async function taskSection(dialog, name) {
     const nav = dialog.getByRole('navigation', { name: 'Secciones del formulario' });
-    if (!await nav.isVisible()) await dialog.getByRole('button', { name: 'Mostrar u ocultar secciones' }).click();
     await nav.getByRole('button', { name: new RegExp('^' + name) }).click();
 }
 
@@ -234,4 +233,30 @@ test('el calendario carga FullCalendar sin pedir recursos a /build/', async ({ p
     await page.goto(`${BASE}/tasks/calendar`);
     await expect(page.locator('.md-task-calendar__surface .fc-view-harness')).toBeVisible();
     expect(errors).toEqual([]);
+});
+
+// CHG-108: en móvil las secciones son una franja siempre visible; en escritorio queda el rail colapsable.
+for (const width of [360, 390]) test(`Sections strip stays visible on mobile ${width}`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const dialog = page.locator('#task-editor');
+    const nav = dialog.getByRole('navigation', { name: 'Secciones del formulario' });
+    await expect(nav).toBeVisible();
+    await expect(dialog.getByRole('button', { name: 'Mostrar u ocultar secciones' })).toBeHidden();
+    const strip = await nav.boundingBox();
+    const head = await dialog.locator('.md-form-dialog__head').boundingBox();
+    expect(strip.y).toBeGreaterThanOrEqual(head.y + head.height - 1);
+    const items = nav.getByRole('button');
+    await items.nth(1).click();
+    await expect(nav).toBeVisible();
+    await expect(items.nth(1)).toHaveAttribute('aria-current', 'true');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test('Sections rail keeps its collapse control on desktop', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const dialog = page.locator('#task-editor');
+    const toggle = dialog.getByRole('button', { name: 'Mostrar u ocultar secciones' });
+    await expect(toggle).toBeVisible();
+    await toggle.click();
+    await expect(dialog.getByRole('navigation', { name: 'Secciones del formulario' })).toBeHidden();
 });

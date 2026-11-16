@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="color-scheme" content="light dark">
+    @include('partials.theme-init')
     <title>{{ $title ?? 'Tu comienzo en MiSo' }}</title>
     <link rel="icon" type="image/png" href="{{ asset('icons/icon-96x96.png') }}">
     @include('partials.app-styles')
