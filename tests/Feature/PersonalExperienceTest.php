@@ -205,6 +205,20 @@ class PersonalExperienceTest extends TestCase
         $this->assertSame('Mirar por la ventana', HabitDefinition::findOrFail($firstId)->name);
     }
 
+    public function test_friends_module_is_always_visible_and_not_an_optional_module(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $this->experience()->saveModules($user->id, ['habits']);
+
+        $this->assertTrue($this->experience()->visible('social', $user->id));
+        $this->assertArrayNotHasKey('social', $this->experience()->catalog());
+        $labels = collect($this->experience()->navigation($user->id))->flatMap(fn ($section) => array_column($section['items'], 'label'));
+        $this->assertContains('Amigos', $labels->all());
+        $this->assertNotContains('Vehículos', $labels->all());
+        $this->get(route('social.friends'))->assertOk();
+    }
+
     public function test_existing_accounts_and_preferences_are_isolated_and_direct_links_still_work(): void
     {
         $a = User::factory()->create();

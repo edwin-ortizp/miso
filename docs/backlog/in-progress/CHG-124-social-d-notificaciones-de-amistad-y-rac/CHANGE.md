@@ -89,6 +89,7 @@ flowchart LR
 ## 8. Bitácora de implementación (developer)
 - 2026-11-16 — Implementado: `FriendNotices`, enganches en `Friends` (solicitud, aceptación, cruzada), hito de pareja al abrir `/amigos`, registro en `UserNotification::destination()`, `NotificationPresentation`, `NotificationBell`, `NotificationPreferences`, pantalla de ajustes y `NotificationDispatcher::actions()`, `docs/notifications.md`, `FriendNotificationTest`.
 - Ajustes: `source_id` es uuid y `friendships.id` numérico, así que se usa un uuid v5 del par; la preferencia de campana (`friend_notices`) vive fuera del bloque «solo con dispositivos» de ajustes porque la campana no depende de un dispositivo; el hito de racha se avisa solo por la campana (CHG-122); no se tocó `docs/DEPLOY.md` (sin scheduler nuevo).
+- 2026-11-16 — Scheduler añadido: `miso:friend-milestones` (cada hora, `--dry-run`, cursor en caché y tope de 40 s) para avisar los hitos sin abrir `/amigos`; documentado en `docs/DEPLOY.md` (cinco tareas) y `docs/notifications.md`; `FriendMilestonesCommandTest` ejecuta dos veces y comprueba un solo aviso. Corrige el ajuste anterior «sin scheduler nuevo».
 - **BLOQUEADO — no verificado:** sin PHP 8.4, solo `php -l`. Pendiente: `php artisan test --filter=FriendNotification`, `--filter=Notification`, `--filter=Social`, `php artisan ui:conformance`, `npm run build`.
 
 ## 9. Preguntas abiertas, decisiones e historial
