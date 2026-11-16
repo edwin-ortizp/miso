@@ -44,6 +44,16 @@ El tipo de una formación con contenido queda bloqueado durante la edición para
 10. Abrir Calendario mediante el enlace contextual o la pestaña de Tareas. Filtros conserva Tareas, Reservas, Planes, Cumpleaños y Comidas. Ocultar reservas no las elimina. Arrastrar una reserva cambia esa ocurrencia y conserva las tareas; arrastrar una tarea reprograma explícitamente esa tarea.
 11. Desde las acciones de una tarea, iniciar foco. Pomodoro se abre como módulo independiente. Iniciar/pausar/terminar o «Simular 25 min» registra una sesión sin terminar tareas ni marcar hábitos. Seguimiento agrega sesiones sin duplicarlas cuando una tarea está vinculada varias veces.
 
+## Esta semana, fechas límite y horario · CHG-121
+
+- **Esta semana** abre el listado cuando hay formaciones: clases de hoy y mañana y próximas fechas límite (60 días). Se calcula con datos ya registrados; sin clases o fechas muestra «No tienes clases próximas» y «Nada pendiente por ahora».
+- **Clases** (sección «Clases» al editar una formación o un contenido): profesor o instructor, lugar o enlace y días con hora. Todo es opcional y no hay etiquetas universitarias obligatorias. Un horario fijo no es una reserva de estudio y no aparece en la pestaña Reservas; sí aparece en el calendario.
+- **Evaluaciones**: «Fecha límite» e «Importante» opcionales. Con fecha aparecen en «Esta semana» y en el calendario; sin fecha siguen siendo válidas.
+- **Materiales** son enlaces o referencias (Drive, Notion, Obsidian). No se toman apuntes en MiSo.
+- **Opciones avanzadas** (botón al pie del listado y del detalle) muestra las pestañas Reservas y Seguimiento, la acción «Reservar tiempo de estudio», «Vincular tareas y hábitos» y la sección Relaciones del formulario de formación. Por defecto está cerrado. Los niveles de la jerarquía (periodo, módulo, etapa) se conservan porque forman la estructura de cada tipo de formación.
+- Escenarios: universidad (profesor y aula), inglés (enlace, sin profesor) y guitarra (sin clases ni fechas).
+- Prueba de lógica sin navegador: `node docs/mockup-system/mockups/learning/tests/week.mjs`.
+
 ## Componentes y navegación
 
 - El menú lateral conduce a los módulos existentes. Formación no incorpora pestañas globales de Objetivos, Hábitos ni Pomodoro.

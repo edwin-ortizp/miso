@@ -1,9 +1,9 @@
 # CHG-121 · Aprendizaje simple: horario, fechas límite y vista Esta semana
-**Estado:** Borrador
+**Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-16 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
 **Relacionado:** CHG-096, CHG-097
 
 ## 0. En palabras simples
@@ -31,6 +31,7 @@ Ajuste del prototipo offline de Aprendizaje (solo mockup, sin backend). Hoy orga
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: listado existente de Aprendizaje (`learning-list`) con bloque «Esta semana» arriba y panel lateral de accesos directos y guardián sin cambios; no hay pantalla nueva.
 - Flujo y cantidad de pasos: abrir Aprendizaje → ver «Esta semana» (0 toques). Agregar fecha a una evaluación: 3 toques desde la unidad. Los datos de horario se llenan una vez.
 - Qué contiene cada pantalla y qué es lo más importante: primero «Hoy y mañana», luego «Próximas fechas límite», luego «Mis formaciones». Lo más importante es lo que viene, no la estructura.
 - Estados (vacío / carga / error / éxito / validaciones):
@@ -99,16 +100,22 @@ flowchart LR
 - Docs a actualizar: `docs/mockup-system/docs/learning-prototype.md` (recorridos de «Esta semana», fechas y opciones avanzadas).
 
 ## 7. Tareas
-- [ ] T1 · Poner fecha e importancia a las evaluaciones y mostrarlas en el calendario — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system/mockups/learning — Hecho cuando: una evaluación con fecha sale en el calendario y sin fecha sigue siendo válida.
-- [ ] T2 · Anotar profesor, horario y lugar (opcionales) — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system/mockups/learning — Hecho cuando: se guardan y no aparecen si están vacíos.
-- [ ] T3 · Nueva entrada «Esta semana» — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system/mockups/learning, components/learning-frame.html.jinja — Hecho cuando: muestra hoy, mañana y próximas fechas límite en los tres escenarios.
-- [ ] T4 · Esconder lo avanzado y pasar materiales a enlaces — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system/mockups/learning — Hecho cuando: módulo, etapa, series, foco y vínculos solo se ven en «Opciones avanzadas».
+- [x] T1 · Poner fecha e importancia a las evaluaciones y mostrarlas en el calendario — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system/mockups/learning — Hecho cuando: una evaluación con fecha sale en el calendario y sin fecha sigue siendo válida.
+- [x] T2 · Anotar profesor, horario y lugar (opcionales) — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system/mockups/learning — Hecho cuando: se guardan y no aparecen si están vacíos.
+- [x] T3 · Nueva entrada «Esta semana» — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system/mockups/learning, components/learning-frame.html.jinja — Hecho cuando: muestra hoy, mañana y próximas fechas límite en los tres escenarios.
+- [x] T4 · Esconder lo avanzado y pasar materiales a enlaces — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system/mockups/learning — Hecho cuando: módulo, etapa, series, foco y vínculos solo se ven en «Opciones avanzadas».
 - [ ] T5 · Actualizar pruebas y guía, y revisar tamaños — Resp: developer — Modelo: estandar — Archivos: docs/mockup-system, CHANGE.md — Hecho cuando: build, pruebas y Axe pasan y las capturas se revisaron.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — Implementado en `domain.js`, `entry.js`, `learning-frame.html.jinja`, `mockups.css` y la guía. Fechas e «Importante» en evaluaciones (ya existía el campo fecha del formulario; ahora se muestra en tabla, calendario y «Esta semana»). Sección «Clases» con profesor, lugar y días con hora en formación y contenido; se guarda como un horario fijo semanal (`kind:'class'`) separado de las reservas. «Esta semana» (`weekAgenda`) y botón «Opciones avanzadas» (estado `advanced`, cerrado por defecto) que muestra Reservas, Seguimiento, acciones de reservar y vincular, y la sección Relaciones. Materiales pasan a enlace.
+- Decisiones de alcance: los niveles de la jerarquía (periodo, módulo, etapa) NO se esconden, porque forman la estructura de cada tipo de formación (un curso solo admite módulos). La ponderación de las evaluaciones sigue siendo obligatoria (por defecto 30), no se volvió opcional.
+- Verificado: `node --check` de `entry.js` y `domain.js`, parseo Jinja de `learning-frame.html.jinja` y `tests/week.mjs` (lógica de «Esta semana», escenario vacío y sin profesor) aprobados. `acceptance.mjs` actualizado para abrir «Opciones avanzadas» antes de reservar.
+- NO verificado: el compilador `../mockup-system/build.py` no existe en este entorno, así que no se pudo compilar `dist/learning.html` ni ejecutar `acceptance.mjs`, `shortcuts.mjs`, `favorite.mjs`, `task-creation.mjs`, Axe ni capturas responsive. Eso es lo que queda de T5 y requiere el entorno local del usuario (`build-isolated.py --all` y los cuatro `.mjs`).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-16 — Decisión del usuario: el horario fijo vive en Aprendizaje (no en el calendario de Tareas).
 - 2026-11-16 — Decisión del usuario: lo avanzado se esconde tras «Opciones avanzadas», no se elimina.
 - 2026-11-16 — Criterio del usuario: no todas las personas son universitarias; etiquetas neutrales. Los apuntes no se toman en MiSo.
+- 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)

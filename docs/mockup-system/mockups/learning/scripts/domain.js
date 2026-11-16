@@ -11,8 +11,8 @@ export function seed(settings={}) {
  tasks:[{id:'t1',title:'Practicar mi presentación en inglés',description:'Preparar una presentación de dos minutos y grabarla.',date:offset(monday,4),endDate:offset(monday,4),time:'',endTime:'',status:'ready',category:'Personal',estimate:30,priority:'not-urgent-important',size:'S',private:false,recurrent:false,reminders:[],relations:[]},{id:'t2',title:'Escuchar y resumir un episodio',description:'Anotar cinco expresiones nuevas.',date:offset(monday,5),endDate:offset(monday,5),time:'',endTime:'',status:'todo',category:'Personal',estimate:25,reminders:[],relations:[]},{id:'t3',title:'Entregar propuesta de investigación',description:'Completar problema, pregunta y referencias.',date:offset(monday,4),endDate:offset(monday,4),time:'',endTime:'',status:'wip',category:'Profesional',estimate:120,reminders:[],relations:[]},{id:'t4',title:'Revisar pendientes de la semana',description:'Acción recurrente: se muestra su ocurrencia actual.',date:monday,endDate:monday,time:'09:00',endTime:'09:30',status:'ready',category:'Personal',estimate:30,recurrent:true,recurDays:7,reminders:[],relations:[]}],
  habits:[{id:'h1',title:'Practicar inglés cuatro días por semana',done:false},{id:'h2',title:'Leer veinte minutos',done:false}],
  links:settings.empty?[]:[{id:'a1',node:'conversation',kind:'task',target:'t1'},{id:'a2',node:'conversation',kind:'task',target:'t2'},{id:'a3',node:'research',kind:'task',target:'t3'},{id:'a4',node:'foundation',kind:'habit',target:'h1'}],
- grades:settings.empty?[]:[{id:'g1',node:'research',title:'Propuesta inicial',weight:30,min:0,max:5,score:4.2},{id:'g2',node:'research',title:'Trabajo final',weight:70,min:0,max:5,score:null}],
- slots:settings.empty?[]:[{id:'s1',title:'Inglés · práctica y escucha',learning:'english',date:monday,start:'16:00',end:'18:00',frequency:'weekly',interval:1,days:[1,3],until:offset(monday,90),tasks:['t1','t2'],exceptions:{}},{id:'s2',title:'Investigación · avanzar propuesta',learning:'master',date:offset(monday,1),start:'17:00',end:'18:30',frequency:'weekly',interval:1,days:[2,4],until:offset(monday,90),tasks:['t3'],exceptions:{}}],
+ grades:settings.empty?[]:[{id:'g1',node:'research',title:'Propuesta inicial',weight:30,min:0,max:5,score:4.2,date:offset(today,-7),important:false},{id:'g2',node:'research',title:'Trabajo final',weight:70,min:0,max:5,score:null,date:offset(today,5),important:true}],
+ slots:settings.empty?[]:[{id:'class-research',kind:'class',title:'Metodología de investigación',learning:'master',node:'research',date:today,start:'10:00',end:'12:00',frequency:'weekly',interval:1,days:[dateAt(today).getDay(),dateAt(offset(today,1)).getDay()],tasks:[],exceptions:{}},{id:'s1',title:'Inglés · práctica y escucha',learning:'english',date:monday,start:'16:00',end:'18:00',frequency:'weekly',interval:1,days:[1,3],until:offset(monday,90),tasks:['t1','t2'],exceptions:{}},{id:'s2',title:'Investigación · avanzar propuesta',learning:'master',date:offset(monday,1),start:'17:00',end:'18:30',frequency:'weekly',interval:1,days:[2,4],until:offset(monday,90),tasks:['t3'],exceptions:{}}],
  sessions:settings.empty?[]:[{id:'f1',task:'t1',minutes:25,date:today}],focus:{task:'t1',startedAt:null,elapsed:0},next:100};
  if(!settings.empty){
   state.learnings[0].type='Maestría';state.learnings[1].type='Ruta personal';state.learnings[1].category='Idiomas';
@@ -24,9 +24,12 @@ export function seed(settings={}) {
  // Fictional examples chosen manually; creation and status changes never pin anything.
  if(!settings.empty){
   state.learnings.push({id:'guitar',title:'Clases de guitarra',type:'Curso',category:'Personal',status:'En curso',description:'Aprender acordes y practicar canciones.',goal:''});
+  Object.assign(state.nodes.find(n=>n.id==='research'),{teacher:'Prof. Ruiz',place:'Aula 3'});
+  Object.assign(state.learnings.find(l=>l.id==='english'),{place:'https://meet.example/ingles'});
+  state.slots.push({id:'class-formation-english',kind:'class',title:'Clase de inglés',learning:'english',node:'',date:today,start:'18:00',end:'19:00',frequency:'weekly',interval:1,days:[dateAt(offset(today,1)).getDay()],tasks:[],exceptions:{}});
   state.pins=['node:degree-period','formation:english','formation:guitar'];
  }
- state.materials=state.nodes.filter(n=>n.materials).map((n,i)=>({id:'m'+i,node:n.id,title:n.materials,type:'Apunte',content:n.materials}));
+ state.materials=state.nodes.filter(n=>n.materials).map((n,i)=>({id:'m'+i,node:n.id,title:n.materials,type:'Enlace',content:n.materials}));
  return state;
 }
 export function occurrences(slot,start,end) {
@@ -90,3 +93,13 @@ export function togglePin(state,key){
  if(state.pins.includes(key)){state.pins=state.pins.filter(item=>item!==key);return false;}
  state.pins.push(key);return true;
 }
+
+// Agenda de «Esta semana»: clases de hoy y mañana y próximas fechas límite. Todo se calcula de datos ya registrados.
+export function weekAgenda(state,today){
+ const tomorrow=offset(today,1),limit=offset(today,60);
+ const owner=s=>s.node?state.nodes.find(n=>n.id===s.node):state.learnings.find(l=>l.id===s.learning);
+ const classes=state.slots.filter(s=>s.kind==='class').flatMap(s=>occurrences(s,today,offset(today,2)).map(o=>{const who=owner(s);return {...o,day:o.date===today?'Hoy':'Mañana',where:who?.place||state.learnings.find(l=>l.id===s.learning)?.place||'',who:who?.teacher||''};})).sort((a,b)=>(a.date+a.start).localeCompare(b.date+b.start));
+ const deadlines=state.grades.filter(g=>g.date&&g.date>=today&&g.date<=limit).sort((a,b)=>a.date.localeCompare(b.date)).map(g=>({...g,unit:state.nodes.find(n=>n.id===g.node)?.title||state.learnings.find(l=>'formation:'+l.id===g.node)?.title||''}));
+ return {classes,deadlines,tomorrow};
+}
+export function classDays(slot){return slot?.days||[];}
