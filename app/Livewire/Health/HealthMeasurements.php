@@ -38,6 +38,9 @@ class HealthMeasurements extends Component
     #[Url(as: 'period', history: true, except: 'all')]
     public string $period = 'all';
 
+    #[Url(as: 'type', history: true, except: '')]
+    public string $typeFilter = '';
+
     #[Url(as: 'sort', history: true, except: 'recent')]
     public string $sort = 'recent';
 
@@ -85,15 +88,25 @@ class HealthMeasurements extends Component
         $this->updatedPeriod();
     }
 
-    public function clearFilters(): void
+    public function updatedTypeFilter(): void
     {
-        $this->reset('period');
+        if ($this->typeFilter !== '' && ! array_key_exists($this->typeFilter, HealthMeasurement::TYPES)) {
+            $this->typeFilter = '';
+        }
         $this->resetPage();
     }
 
-    public function applyFilters(string $period): void
+    public function clearFilters(): void
+    {
+        $this->reset('period', 'typeFilter');
+        $this->resetPage();
+    }
+
+    public function applyFilters(string $period, string $type = ''): void
     {
         $this->setPeriod($period);
+        $this->typeFilter = $type;
+        $this->updatedTypeFilter();
     }
 
     public function openForm(): void
@@ -192,6 +205,7 @@ class HealthMeasurements extends Component
             ->filter()->values();
 
         $filtered = (clone $base)
+            ->when($this->typeFilter !== '', fn ($q) => $q->where('type', $this->typeFilter))
             ->when($this->period !== 'all', fn ($q) => $q->where('measured_at', '>=', now()->subDays((int) $this->period)->startOfDay()));
 
         $measurements = $filtered
@@ -211,9 +225,10 @@ class HealthMeasurements extends Component
                     ->mapWithKeys(fn (HealthEvent $e) => [$e->id => $e->title.' · '.$e->event_date->translatedFormat('j M Y')])->all()
                 : [],
             'contextOptions' => collect($definition['contexts'] ?? [])->map(fn (array $c) => $c['label'])->all(),
-            'activeFilters' => $this->period !== 'all'
-                ? [['key' => 'period', 'value' => null, 'label' => 'Periodo: '.self::PERIODS[$this->period], 'icon' => 'bi-calendar-event']]
-                : [],
+            'activeFilters' => [
+                ...($this->period !== 'all' ? [['key' => 'period', 'value' => null, 'label' => 'Periodo: '.self::PERIODS[$this->period], 'icon' => 'bi-calendar-event']] : []),
+                ...($this->typeFilter !== '' ? [['key' => 'typeFilter', 'value' => null, 'label' => 'Tipo: '.(HealthMeasurement::TYPES[$this->typeFilter]['label'] ?? $this->typeFilter), 'icon' => 'bi-heart-pulse']] : []),
+            ],
             'periods' => self::PERIODS,
             'sorts' => self::SORTS,
             'definition' => $definition,

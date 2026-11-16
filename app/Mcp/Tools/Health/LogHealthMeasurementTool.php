@@ -11,7 +11,7 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Registra una medición de salud con unidad del usuario autenticado. Tipos: blood_pressure (presión arterial: value = sistólica, value2 = diastólica, pulse opcional, en mmHg y lpm) creatinine (creatinina en mg/dL) y glucose (glucosa en mg/dL; context opcional: fasting, before_meal, after_meal, bedtime u other). Úsala cuando cuente una medición concreta ("me tomé la presión: 120/80"). No diagnostica: si el valor sale del rango de referencia general, el resultado lo indica con neutralidad y conviene sugerir consultar al profesional de salud. is_sensitive oculta la medición de las consultas amplias.')]
+#[Description('Registra una medición de salud con unidad del usuario autenticado. Tipos: blood_pressure (presión arterial: value = sistólica, value2 = diastólica, pulse opcional, en mmHg y lpm) creatinine (creatinina en mg/dL), weight (peso en kg), heart_rate (frecuencia cardiaca en lpm), oxygen_saturation (saturación de oxígeno en %), temperature (temperatura en °C) y glucose (glucosa en mg/dL; context opcional: fasting, before_meal, after_meal, bedtime u other). Úsala cuando cuente una medición concreta ("me tomé la presión: 120/80"). No diagnostica: si el valor sale del rango de referencia general, el resultado lo indica con neutralidad y conviene sugerir consultar al profesional de salud. is_sensitive oculta la medición de las consultas amplias.')]
 class LogHealthMeasurementTool extends Tool
 {
     public function handle(Request $request): Response
@@ -55,7 +55,7 @@ class LogHealthMeasurementTool extends Tool
                 ->description('Tipo de medición. Disponible: '.implode(', ', array_keys(HealthMeasurement::TYPES)).'.')
                 ->required(),
             'value' => $schema->number()
-                ->description('Valor principal (en la presión arterial, la sistólica; en la glucosa, mg/dL).')
+                ->description('Valor principal (en la presión arterial, la sistólica; en las demás, el valor en la unidad del tipo).')
                 ->required(),
             'value2' => $schema->number()
                 ->description('Segundo valor (en la presión arterial, la diastólica; obligatorio para blood_pressure).'),

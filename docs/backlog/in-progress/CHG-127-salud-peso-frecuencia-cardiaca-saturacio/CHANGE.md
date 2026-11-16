@@ -1,5 +1,5 @@
 # CHG-127 · Salud: peso, frecuencia cardiaca, saturación y temperatura
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -27,13 +27,19 @@ Agrega cuatro tipos al catálogo de mediciones de CHG-122/123: peso, frecuencia 
 ```
 
 ## 7. Tareas
-- [ ] T1 · Registrar peso, frecuencia cardiaca, saturación y temperatura — Resp: developer — Modelo: estandar — Archivos: `HealthMeasurement` (catálogo), `HealthMeasurements` y su vista (filtro por tipo) — Hecho cuando: cada tipo se guarda con su unidad, valores imposibles se rechazan, 39,2 °C sale «Fuera de rango» y el peso no modifica el perfil.
-- [ ] T2 · El asistente registra y consulta las cuatro — Resp: developer — Modelo: estandar — Archivos: `LogHealthMeasurementTool`, `ListHealthMeasurementsTool`, `docs/UX-WRITING.md` — Hecho cuando: el MCP acepta `weight`, `heart_rate`, `oxygen_saturation` y `temperature` y su resumen incluye promedio y rango de referencia por tipo.
+- [x] T1 · Registrar peso, frecuencia cardiaca, saturación y temperatura — Resp: developer — Modelo: estandar — Archivos: `HealthMeasurement` (catálogo), `HealthMeasurements` y su vista (filtro por tipo) — Hecho cuando: cada tipo se guarda con su unidad, valores imposibles se rechazan, 39,2 °C sale «Fuera de rango» y el peso no modifica el perfil.
+- [x] T2 · El asistente registra y consulta las cuatro — Resp: developer — Modelo: estandar — Archivos: `LogHealthMeasurementTool`, `ListHealthMeasurementsTool`, `docs/UX-WRITING.md` — Hecho cuando: el MCP acepta `weight`, `heart_rate`, `oxygen_saturation` y `temperature` y su resumen incluye promedio y rango de referencia por tipo.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — T1: cuatro tipos nuevos en `HealthMeasurement::TYPES`: `weight` (kg, 20–400, sin rango: no se juzga), `heart_rate` (lpm, 25–250, referencia 60–100), `oxygen_saturation` (%, 50–100, referencia 95–100) y `temperature` (°C, 30–45, referencia 36–37,5). Sin tablas ni pantallas nuevas. El historial suma el filtro «Tipo» (con su chip en «Filtros aplicados» y validación de la clave). El peso medido no cambia `users.current_weight_kg` (hay una prueba que lo fija).
+- 2026-11-16 — T2: `log-health-measurement-tool` y `list-health-measurements-tool` aceptan y describen los cuatro tipos; el resumen por tipo trae promedio y rango de referencia.
+- Pruebas: 5 de pantalla y 3 de MCP nuevas (34 en total en mediciones). Suite completa: 1700 pruebas, 46 fallas idénticas a la base (entorno).
+- No verificado: revisión visual con captura en móvil y escritorio (en particular las tarjetas de «Última medición» con seis tipos).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel S)
 - Decidido 2026-11-16: rangos de referencia generales: frecuencia cardiaca 60–100 lpm, saturación 95–100 %, temperatura 36,0–37,5 °C; el peso no tiene rango (no se juzga). No se personalizan todavía.
 - Decidido 2026-11-16: el peso medido NO actualiza `users.current_weight_kg` (afectaría la meta de agua sin que la persona lo pida). Se puede ofrecer como acción explícita más adelante.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)
+- 2026-11-16 — Implementación terminada → En verificación

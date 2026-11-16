@@ -130,7 +130,7 @@ _Última actualización: 2026-11-16_
 | CHG-124 | S | Salud: creatinina y laboratorios | in-progress | En verificación | 2/2 |
 | CHG-125 | M | Salud: seguimiento del sueño | to-do | Borrador | 0/0 |
 | CHG-126 | L | Salud: ciclo menstrual | to-do | Borrador | 0/0 |
-| CHG-127 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | to-do | Aprobado | 0/2 |
+| CHG-127 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | in-progress | En verificación | 2/2 |
 | CHG-128 | M | Salud: tendencias y contexto de mediciones | to-do | Borrador | 0/0 |
 | CHG-129 | M | Salud: medicamentos tomados y por tomar (con MCP) | in-progress | En verificación | 4/4 |
 | CHG-130 | M | Salud: recordatorios de medicamentos con el cron existente | in-progress | En verificación | 4/4 |

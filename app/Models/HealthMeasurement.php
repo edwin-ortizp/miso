@@ -58,6 +58,42 @@ class HealthMeasurement extends Model
             'article' => 'La',
             'icon' => 'bi-clipboard2-pulse',
         ],
+        // CHG-127: el peso se registra con histórico y no se juzga (sin rango). No cambia el peso del perfil.
+        'weight' => [
+            'label' => 'Peso',
+            'unit' => 'kg',
+            'value_label' => 'Peso',
+            'limits' => ['value' => [20, 400]],
+            'article' => 'El',
+            'icon' => 'bi-speedometer2',
+        ],
+        'heart_rate' => [
+            'label' => 'Frecuencia cardiaca',
+            'unit' => 'lpm',
+            'value_label' => 'Frecuencia cardiaca',
+            'limits' => ['value' => [25, 250]],
+            'reference' => ['value' => [60, 100]],
+            'article' => 'La',
+            'icon' => 'bi-activity',
+        ],
+        'oxygen_saturation' => [
+            'label' => 'Saturación de oxígeno',
+            'unit' => '%',
+            'value_label' => 'Saturación de oxígeno',
+            'limits' => ['value' => [50, 100]],
+            'reference' => ['value' => [95, 100]],
+            'article' => 'La',
+            'icon' => 'bi-wind',
+        ],
+        'temperature' => [
+            'label' => 'Temperatura',
+            'unit' => '°C',
+            'value_label' => 'Temperatura',
+            'limits' => ['value' => [30, 45]],
+            'reference' => ['value' => [36, 37.5]],
+            'article' => 'La',
+            'icon' => 'bi-thermometer-half',
+        ],
     ];
 
     protected $fillable = [

@@ -259,4 +259,73 @@ class HealthMeasurementsTest extends TestCase
         $this->assertNull($m->fresh()->health_event_id);
         $this->assertSame(1.0, $m->fresh()->value);
     }
+
+    // --- CHG-127: peso, frecuencia cardiaca, saturación y temperatura ---------------------
+
+    public function test_saves_each_new_type_with_its_unit(): void
+    {
+        $user = User::factory()->create();
+        $cases = [['weight', '72', 'kg'], ['heart_rate', '64', 'lpm'], ['oxygen_saturation', '98', '%'], ['temperature', '36,6', '°C']];
+
+        foreach ($cases as [$type, $value, $unit]) {
+            Livewire::actingAs($user)->test(HealthMeasurements::class)
+                ->call('openForm')->set('type', $type)->set('value', $value)->call('save')->assertHasNoErrors();
+            $this->assertDatabaseHas('health_measurements', ['user_id' => $user->id, 'type' => $type, 'unit' => $unit]);
+        }
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->assertSee('Peso')->assertSee('72 kg')->assertSee('Frecuencia cardiaca')->assertSee('64 lpm')
+            ->assertSee('Saturación de oxígeno')->assertSee('98 %')->assertSee('Temperatura')->assertSee('36,6 °C');
+    }
+
+    public function test_new_types_reject_impossible_values(): void
+    {
+        $user = User::factory()->create();
+
+        $component = Livewire::actingAs($user)->test(HealthMeasurements::class)->call('openForm');
+        foreach ([['weight', '5'], ['weight', '900'], ['heart_rate', '10'], ['oxygen_saturation', '120'], ['temperature', '60']] as [$type, $value]) {
+            $component->set('type', $type)->set('value', $value)->call('save')->assertHasErrors(['value']);
+        }
+
+        $this->assertSame(0, HealthMeasurement::count());
+    }
+
+    public function test_reference_ranges_flag_fever_and_low_saturation_but_never_weight(): void
+    {
+        $user = User::factory()->create();
+        $make = fn (string $type, float $value, string $unit) => $user->healthMeasurements()->create(['type' => $type, 'value' => $value, 'unit' => $unit, 'measured_at' => now()]);
+
+        $this->assertTrue($make('temperature', 39.2, '°C')->isOutOfRange());
+        $this->assertFalse($make('temperature', 36.6, '°C')->isOutOfRange());
+        $this->assertTrue($make('oxygen_saturation', 90, '%')->isOutOfRange());
+        $this->assertTrue($make('heart_rate', 130, 'lpm')->isOutOfRange());
+        $this->assertFalse($make('weight', 250, 'kg')->isOutOfRange());
+        $this->assertNull($make('weight', 72, 'kg')->referenceText());
+    }
+
+    public function test_recording_weight_does_not_change_the_profile_weight(): void
+    {
+        $user = User::factory()->create(['current_weight_kg' => 80]);
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')->set('type', 'weight')->set('value', '70')->call('save')->assertHasNoErrors();
+
+        $this->assertEquals(80, $user->fresh()->current_weight_kg);
+    }
+
+    public function test_type_filter_limits_the_history(): void
+    {
+        $user = User::factory()->create();
+        $this->measurement($user, 111, 71);
+        $user->healthMeasurements()->create(['type' => 'weight', 'value' => 73.5, 'unit' => 'kg', 'measured_at' => now()]);
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('applyFilters', 'all', 'weight')
+            ->assertSet('typeFilter', 'weight')
+            ->assertSee('Tipo: Peso')
+            ->call('removeFilter', 'typeFilter')
+            ->assertSet('typeFilter', '')
+            ->call('applyFilters', 'all', 'inexistente')
+            ->assertSet('typeFilter', '');
+    }
 }

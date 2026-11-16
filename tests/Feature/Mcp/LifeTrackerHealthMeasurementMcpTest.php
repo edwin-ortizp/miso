@@ -166,4 +166,41 @@ class LifeTrackerHealthMeasurementMcpTest extends TestCase
 
         $this->assertSame(0, HealthMeasurement::count());
     }
+
+    public function test_log_tool_accepts_the_four_new_types_and_flags_fever(): void
+    {
+        $user = User::factory()->create();
+        $server = LifeTrackerServer::actingAs($user);
+
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'weight', 'value' => 72])->assertOk()->assertSee('72 kg')->assertDontSee('Fuera del rango');
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'heart_rate', 'value' => 64])->assertOk()->assertSee('64 lpm');
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'oxygen_saturation', 'value' => 98])->assertOk()->assertSee('98 %');
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'temperature', 'value' => 39.2])
+            ->assertOk()->assertSee('39,2 °C')->assertSee('Fuera del rango de referencia general (36–37,5 °C)')->assertSee('profesional de salud');
+
+        $this->assertSame(4, HealthMeasurement::count());
+    }
+
+    public function test_new_types_reject_impossible_values_over_mcp(): void
+    {
+        $user = User::factory()->create();
+        $server = LifeTrackerServer::actingAs($user);
+
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'weight', 'value' => 5])->assertHasErrors();
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'oxygen_saturation', 'value' => 150])->assertHasErrors();
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'temperature', 'value' => 80])->assertHasErrors();
+        $this->assertSame(0, HealthMeasurement::count());
+    }
+
+    public function test_summary_lists_each_type_with_average_and_reference(): void
+    {
+        $user = User::factory()->create();
+        $user->healthMeasurements()->create(['type' => 'weight', 'value' => 70, 'unit' => 'kg', 'measured_at' => now()]);
+        $user->healthMeasurements()->create(['type' => 'weight', 'value' => 72, 'unit' => 'kg', 'measured_at' => now()]);
+        $user->healthMeasurements()->create(['type' => 'heart_rate', 'value' => 64, 'unit' => 'lpm', 'measured_at' => now()]);
+
+        LifeTrackerServer::actingAs($user)
+            ->tool(ListHealthMeasurementsTool::class, ['summary_only' => true])
+            ->assertOk()->assertSee('Peso')->assertSee('71')->assertSee('Frecuencia cardiaca')->assertSee('60–100 lpm');
+    }
 }

@@ -44,14 +44,15 @@
                           :count="'('.$measurements->total().' / '.$totalMeasurements.')'"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
                           :active-filters="count($activeFilters)" :paginator="$measurements" noun="mediciones"
-                          alpine="draftPeriod: ''"
-                          on-filters-open="draftPeriod = $wire.period">
+                          alpine="draftPeriod: '', draftType: ''"
+                          on-filters-open="draftPeriod = $wire.period; draftType = $wire.typeFilter">
         <x-slot:filters>
             <x-ui.select name="filterPeriod" label="Periodo" :options="$periods" :selected="$period" icon="bi-calendar-event" x-model="draftPeriod" />
+            <x-ui.select name="filterType" label="Tipo" placeholder="Todos" :options="$typeOptions" :selected="$typeFilter" icon="bi-heart-pulse" x-model="draftType" />
         </x-slot:filters>
         <x-slot:filterActions>
             <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>
-            <x-ui.action variant="filled" icon="bi-funnel-fill" x-on:click="$wire.applyFilters(draftPeriod); filtersOpen = false">Filtrar</x-ui.action>
+            <x-ui.action variant="filled" icon="bi-funnel-fill" x-on:click="$wire.applyFilters(draftPeriod, draftType); filtersOpen = false">Filtrar</x-ui.action>
         </x-slot:filterActions>
 
         @if (count($activeFilters) > 0)
@@ -103,8 +104,8 @@
                 </tbody>
             </table>
         @elseif ($listState === DataState::FILTERED_EMPTY)
-            <x-ui.state variant="{{ DataState::FILTERED_EMPTY }}" title="Sin mediciones en este periodo"
-                        message="Quita el filtro de periodo para ver otras mediciones." />
+            <x-ui.state variant="{{ DataState::FILTERED_EMPTY }}" title="Sin mediciones con estos filtros"
+                        message="Quita un filtro para ver otras mediciones." />
         @else
             <x-ui.state variant="{{ DataState::EMPTY }}" icon="bi-heart-pulse" title="Aún no tienes mediciones"
                         message="Registra la primera con el botón +." />
