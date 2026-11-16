@@ -2,6 +2,7 @@
 
 namespace App\Actions;
 
+use App\Models\HealthEvent;
 use App\Models\HealthMeasurement;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Validator;
@@ -34,12 +35,14 @@ class LogHealthMeasurement
             'value2' => ['nullable', 'numeric'],
             'pulse' => ['nullable', 'integer'],
             'context' => ['nullable', 'string', isset($definition['contexts']) ? 'in:'.implode(',', array_keys($definition['contexts'])) : 'prohibited'],
+            'health_event_id' => ['nullable', 'string'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'is_sensitive' => ['nullable', 'boolean'],
         ], [
             'type.in' => 'Elige un tipo de medición válido.',
             'value.required' => 'Indica el valor de la medición.',
             'value.numeric' => 'El valor debe ser un número.',
+            'health_event_id.string' => 'Elige un examen válido.',
             'context.in' => 'Elige un momento válido.',
             'context.prohibited' => 'Esta medición no usa un momento.',
             'value2.numeric' => 'El valor debe ser un número.',
@@ -47,6 +50,12 @@ class LogHealthMeasurement
         ]);
 
         $validator->after(function ($validator) use ($data, $definition) {
+            // El examen debe ser un «Chequeo o examen» del propio usuario (el scope de usuario filtra los ajenos).
+            if (filled($data['health_event_id'] ?? null)
+                && ! HealthEvent::where('type', 'checkup')->whereKey($data['health_event_id'])->exists()) {
+                $validator->errors()->add('health_event_id', 'Elige un examen de tu lista.');
+            }
+
             if ($definition === null) {
                 return;
             }
@@ -123,6 +132,7 @@ class LogHealthMeasurement
             'value' => $data['value'],
             'value2' => isset($definition['value2_label']) ? ($data['value2'] ?? null) : null,
             'pulse' => isset($definition['limits']['pulse']) && filled($data['pulse'] ?? null) ? (int) $data['pulse'] : null,
+            'health_event_id' => filled($data['health_event_id'] ?? null) ? $data['health_event_id'] : null,
             'context' => isset($definition['contexts']) && filled($data['context'] ?? null) ? $data['context'] : null,
             'unit' => $definition['unit'],
             'notes' => filled($data['notes'] ?? null) ? $data['notes'] : null,

@@ -137,4 +137,33 @@ class LifeTrackerHealthMeasurementMcpTest extends TestCase
             ->tool(ListHealthMeasurementsTool::class, ['type' => 'glucose'])
             ->assertOk()->assertSee('Glucosa en sangre')->assertSee('100')->assertSee('"out_of_range"');
     }
+
+    public function test_creatinine_with_an_exam_is_recorded_and_listed(): void
+    {
+        $user = User::factory()->create();
+        $exam = $user->healthEvents()->create(['type' => 'checkup', 'title' => 'Laboratorio 12 nov', 'event_date' => '2026-11-12']);
+        $server = LifeTrackerServer::actingAs($user);
+
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'creatinine', 'value' => 0.9, 'health_event_id' => $exam->id])
+            ->assertOk()->assertSee('0,9 mg/dL')->assertDontSee('Fuera del rango');
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'creatinine', 'value' => 2.4])
+            ->assertOk()->assertSee('Fuera del rango de referencia general (0,6–1,3 mg/dL)');
+
+        $server->tool(ListHealthMeasurementsTool::class, ['type' => 'creatinine'])
+            ->assertOk()->assertSee('Laboratorio 12 nov')->assertSee('Creatinina');
+    }
+
+    public function test_creatinine_rejects_impossible_values_and_a_foreign_exam(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        $foreign = $other->healthEvents()->create(['type' => 'checkup', 'title' => 'Ajeno', 'event_date' => '2026-11-12']);
+        $server = LifeTrackerServer::actingAs($user);
+
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'creatinine', 'value' => 0])->assertHasErrors();
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'creatinine', 'value' => 50])->assertHasErrors();
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'creatinine', 'value' => 1, 'health_event_id' => $foreign->id])->assertHasErrors();
+
+        $this->assertSame(0, HealthMeasurement::count());
+    }
 }

@@ -11,7 +11,7 @@ use Laravel\Mcp\Response;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Registra una medición de salud con unidad del usuario autenticado. Tipos: blood_pressure (presión arterial: value = sistólica, value2 = diastólica, pulse opcional, en mmHg y lpm) y glucose (glucosa en mg/dL; context opcional: fasting, before_meal, after_meal, bedtime u other). Úsala cuando cuente una medición concreta ("me tomé la presión: 120/80"). No diagnostica: si el valor sale del rango de referencia general, el resultado lo indica con neutralidad y conviene sugerir consultar al profesional de salud. is_sensitive oculta la medición de las consultas amplias.')]
+#[Description('Registra una medición de salud con unidad del usuario autenticado. Tipos: blood_pressure (presión arterial: value = sistólica, value2 = diastólica, pulse opcional, en mmHg y lpm) creatinine (creatinina en mg/dL) y glucose (glucosa en mg/dL; context opcional: fasting, before_meal, after_meal, bedtime u other). Úsala cuando cuente una medición concreta ("me tomé la presión: 120/80"). No diagnostica: si el valor sale del rango de referencia general, el resultado lo indica con neutralidad y conviene sugerir consultar al profesional de salud. is_sensitive oculta la medición de las consultas amplias.')]
 class LogHealthMeasurementTool extends Tool
 {
     public function handle(Request $request): Response
@@ -22,6 +22,7 @@ class LogHealthMeasurementTool extends Tool
             'value2' => ['nullable', 'numeric'],
             'pulse' => ['nullable', 'integer'],
             'context' => ['nullable', 'string'],
+            'health_event_id' => ['nullable', 'string'],
             'measured_at' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'is_sensitive' => ['nullable', 'boolean'],
@@ -62,6 +63,8 @@ class LogHealthMeasurementTool extends Tool
                 ->description('Pulso en latidos por minuto (opcional).'),
             'context' => $schema->string()
                 ->description('Momento de la medición, si el tipo lo usa. Glucosa: fasting (en ayunas), before_meal, after_meal, bedtime u other.'),
+            'health_event_id' => $schema->string()
+                ->description('Id de un evento de salud de tipo chequeo o examen al que pertenece la medición (opcional; búscalo con list-health-events-tool).'),
             'measured_at' => $schema->string()
                 ->description('Fecha y hora de la medición (YYYY-MM-DD HH:MM). Por defecto ahora.'),
             'notes' => $schema->string()

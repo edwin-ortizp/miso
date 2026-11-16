@@ -48,10 +48,20 @@ class HealthMeasurement extends Model
             'article' => 'La',
             'icon' => 'bi-droplet',
         ],
+        // CHG-124: referencia general; varía por sexo y edad y no se personaliza todavía.
+        'creatinine' => [
+            'label' => 'Creatinina',
+            'unit' => 'mg/dL',
+            'value_label' => 'Creatinina',
+            'limits' => ['value' => [0.1, 20]],
+            'reference' => ['value' => [0.6, 1.3]],
+            'article' => 'La',
+            'icon' => 'bi-clipboard2-pulse',
+        ],
     ];
 
     protected $fillable = [
-        'type', 'value', 'value2', 'pulse', 'unit', 'measured_at', 'context', 'notes',
+        'type', 'value', 'value2', 'pulse', 'unit', 'measured_at', 'context', 'health_event_id', 'notes',
         'is_sensitive', 'source', 'source_key',
     ];
 
@@ -64,6 +74,12 @@ class HealthMeasurement extends Model
             'measured_at' => 'datetime',
             'is_sensitive' => 'boolean',
         ];
+    }
+
+    /** Examen («Chequeo o examen») al que pertenece la medición, si se enlazó. */
+    public function healthEvent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(HealthEvent::class);
     }
 
     public function typeLabel(): string
@@ -125,7 +141,7 @@ class HealthMeasurement extends Model
             return null;
         }
 
-        $parts = array_map(fn (array $range) => $range[0].'–'.$range[1], array_values($reference));
+        $parts = array_map(fn (array $range) => str_replace('.', ',', $range[0].'–'.$range[1]), array_values($reference));
 
         return implode(' / ', $parts).' '.$type['unit'];
     }

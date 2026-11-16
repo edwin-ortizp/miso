@@ -194,4 +194,69 @@ class HealthMeasurementsTest extends TestCase
             ->assertSee('Presión arterial')->assertSee('128/84 mmHg')
             ->assertSee('Glucosa en sangre')->assertSee('92 mg/dL');
     }
+
+    // --- CHG-124: creatinina y examen relacionado -----------------------------------------
+
+    private function exam(User $user, string $title = 'Laboratorio 12 nov', string $type = 'checkup'): \App\Models\HealthEvent
+    {
+        return $user->healthEvents()->create(['type' => $type, 'title' => $title, 'event_date' => '2026-11-12']);
+    }
+
+    public function test_saves_creatinine_linked_to_an_exam_and_flags_it_out_of_range(): void
+    {
+        $user = User::factory()->create();
+        $exam = $this->exam($user);
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')->set('type', 'creatinine')->set('value', '0,9')->set('health_event_id', $exam->id)
+            ->call('save')->assertHasNoErrors()
+            ->assertSee('0,9 mg/dL')->assertSee('En rango')->assertSee('Laboratorio 12 nov');
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')->set('type', 'creatinine')->set('value', '2.4')
+            ->call('save')->assertHasNoErrors()
+            ->assertSee('Fuera de rango')->assertSee('0,6–1,3 mg/dL');
+
+        $this->assertSame($exam->id, HealthMeasurement::where('value', 0.9)->firstOrFail()->health_event_id);
+    }
+
+    public function test_an_exam_that_is_not_a_checkup_or_belongs_to_someone_else_is_rejected(): void
+    {
+        $user = User::factory()->create();
+        $other = User::factory()->create();
+        $symptom = $this->exam($user, 'Dolor', 'symptom');
+        $foreign = $this->exam($other, 'Ajeno');
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')->set('type', 'creatinine')->set('value', '1')
+            ->set('health_event_id', $symptom->id)->call('save')->assertHasErrors(['health_event_id'])
+            ->set('health_event_id', $foreign->id)->call('save')->assertHasErrors(['health_event_id'])
+            ->set('health_event_id', '')->call('save')->assertHasNoErrors();
+    }
+
+    public function test_the_exam_can_be_changed_and_removed_on_edit(): void
+    {
+        $user = User::factory()->create();
+        $exam = $this->exam($user);
+        $m = $user->healthMeasurements()->create(['type' => 'creatinine', 'value' => 1, 'unit' => 'mg/dL', 'measured_at' => now(), 'health_event_id' => $exam->id]);
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('edit', $m->id)->assertSet('health_event_id', $exam->id)
+            ->set('health_event_id', '')->call('save')->assertHasNoErrors();
+
+        $this->assertNull($m->fresh()->health_event_id);
+    }
+
+    public function test_deleting_the_exam_keeps_the_measurement_without_the_link(): void
+    {
+        $user = User::factory()->create();
+        $exam = $this->exam($user);
+        $m = $user->healthMeasurements()->create(['type' => 'creatinine', 'value' => 1, 'unit' => 'mg/dL', 'measured_at' => now(), 'health_event_id' => $exam->id]);
+
+        $this->actingAs($user);
+        $exam->delete();
+
+        $this->assertNull($m->fresh()->health_event_id);
+        $this->assertSame(1.0, $m->fresh()->value);
+    }
 }

@@ -77,7 +77,8 @@
                         <tr wire:key="measurement-{{ $measurement->id }}">
                             <td class="md-table__date">{{ $measurement->measured_at->isToday() ? 'Hoy' : $measurement->measured_at->translatedFormat('j M Y') }}</td>
                             <td class="md-table__date">{{ $measurement->measured_at->format('H:i') }}</td>
-                            <td class="md-table__title">{{ $measurement->typeLabel() }}@if ($measurement->contextLabel()) <span class="md-body-small">· {{ $measurement->contextLabel() }}</span>@endif</td>
+                            <td class="md-table__title">{{ $measurement->typeLabel() }}@if ($measurement->contextLabel()) <span class="md-body-small">· {{ $measurement->contextLabel() }}</span>@endif
+                                @if ($measurement->healthEvent) <span class="md-body-small">· {{ $measurement->healthEvent->title }}</span>@endif</td>
                             <td class="md-table__nowrap">
                                 {{ $measurement->displayValue() }} {{ $measurement->unit }}
                                 @if ($measurement->pulse) <span class="md-body-small">· {{ $measurement->pulse }} lpm</span> @endif
@@ -132,6 +133,9 @@
                     @isset($definition['limits']['pulse'])
                         <x-ui.field name="pulse" label="Pulso (lpm)" type="number" inputmode="numeric" step="1" wire:model="pulse" />
                     @endisset
+                    <x-ui.select name="health_event_id" label="Examen relacionado" placeholder="Ninguno"
+                                 help="Un «Chequeo o examen» de Salud al que pertenece esta medición."
+                                 :options="$examOptions" :selected="$health_event_id" wire:model="health_event_id" />
                     <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
                     <x-ui.switch name="isSensitive" label="Mantener oculta al asistente"
                                  help="Las consultas amplias del asistente no la incluirán."

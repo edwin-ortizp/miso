@@ -13,7 +13,7 @@ use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Attributes\Description;
 use Laravel\Mcp\Server\Tool;
 
-#[Description('Mediciones de salud con unidad registradas por el usuario (presión arterial, glucosa…) en un periodo (por defecto los últimos 30 días), con resumen, promedio y cuántas salen del rango de referencia general. Úsala para "¿cómo ha estado mi presión?" o para cruzar mediciones con síntomas, energía o ejercicio. No diagnostica. Las mediciones marcadas como sensibles se omiten salvo include_sensitive=true; hidden_sensitive dice cuántas se ocultaron.')]
+#[Description('Mediciones de salud con unidad registradas por el usuario (presión arterial, glucosa, creatinina…) en un periodo (por defecto los últimos 30 días), con resumen, promedio y cuántas salen del rango de referencia general. Úsala para "¿cómo ha estado mi presión?" o para cruzar mediciones con síntomas, energía o ejercicio. No diagnostica. Las mediciones marcadas como sensibles se omiten salvo include_sensitive=true; hidden_sensitive dice cuántas se ocultaron.')]
 class ListHealthMeasurementsTool extends Tool
 {
     public function handle(Request $request): ResponseFactory
@@ -39,7 +39,7 @@ class ListHealthMeasurementsTool extends Tool
             $query->where('is_sensitive', false);
         }
 
-        $items = $query->orderByDesc('measured_at')->get();
+        $items = $query->with('healthEvent')->orderByDesc('measured_at')->get();
 
         return Response::structured(McpOutput::compact([
             'period' => $window->toArray(),
@@ -65,6 +65,7 @@ class ListHealthMeasurementsTool extends Tool
                 'value2' => $m->value2,
                 'pulse' => $m->pulse,
                 'context' => $m->context,
+                'exam' => $m->healthEvent ? ['id' => $m->healthEvent->id, 'title' => $m->healthEvent->title] : null,
                 'unit' => $m->unit,
                 'out_of_range' => $m->isOutOfRange(),
                 'notes' => $m->notes,
@@ -78,7 +79,7 @@ class ListHealthMeasurementsTool extends Tool
             'since' => $schema->string()->description('Desde esta fecha (YYYY-MM-DD).'),
             'until' => $schema->string()->description('Hasta esta fecha (YYYY-MM-DD). Por defecto hoy.'),
             'days' => $schema->integer()->description('Días hacia atrás si no envías since (por defecto 30).'),
-            'type' => $schema->string()->description('Filtra por tipo (blood_pressure, glucose).'),
+            'type' => $schema->string()->description('Filtra por tipo (blood_pressure, glucose, creatinine).'),
             'include_sensitive' => $schema->boolean()->description('Incluye las mediciones marcadas como sensibles. Úsalo solo si el tema actual lo necesita.'),
             'summary_only' => $schema->boolean()->description('Devuelve solo el resumen, sin la lista.'),
         ];

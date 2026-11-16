@@ -4,6 +4,7 @@ namespace App\Livewire\Health;
 
 use App\Actions\LogHealthMeasurement;
 use App\Livewire\Concerns\WithManagementCard;
+use App\Models\HealthEvent;
 use App\Models\HealthMeasurement;
 use Illuminate\Support\Carbon;
 use Livewire\Attributes\Layout;
@@ -48,6 +49,7 @@ class HealthMeasurements extends Component
     public string $value2 = '';
     public string $pulse = '';
     public string $context = '';
+    public string $health_event_id = '';
     public string $measuredAt = '';
     public string $notes = '';
     public bool $isSensitive = false;
@@ -112,6 +114,7 @@ class HealthMeasurements extends Component
         $this->value2 = $measurement->value2 !== null ? $this->plain($measurement->value2) : '';
         $this->pulse = $measurement->pulse !== null ? (string) $measurement->pulse : '';
         $this->context = (string) $measurement->context;
+        $this->health_event_id = (string) $measurement->health_event_id;
         $this->measuredAt = $measurement->measured_at->format('Y-m-d\TH:i');
         $this->notes = (string) $measurement->notes;
         $this->isSensitive = $measurement->is_sensitive;
@@ -137,6 +140,7 @@ class HealthMeasurements extends Component
             'value2' => $this->value2 === '' ? null : str_replace(',', '.', $this->value2),
             'pulse' => $this->pulse === '' ? null : $this->pulse,
             'context' => $this->context === '' ? null : $this->context,
+            'health_event_id' => $this->health_event_id === '' ? null : $this->health_event_id,
             'notes' => $this->notes === '' ? null : $this->notes,
             'is_sensitive' => $this->isSensitive,
         ]);
@@ -167,6 +171,7 @@ class HealthMeasurements extends Component
         $this->value2 = '';
         $this->pulse = '';
         $this->context = '';
+        $this->health_event_id = '';
         $this->measuredAt = '';
         $this->notes = '';
         $this->isSensitive = false;
@@ -190,6 +195,7 @@ class HealthMeasurements extends Component
             ->when($this->period !== 'all', fn ($q) => $q->where('measured_at', '>=', now()->subDays((int) $this->period)->startOfDay()));
 
         $measurements = $filtered
+            ->with('healthEvent')
             ->orderBy('measured_at', $this->sort === 'oldest' ? 'asc' : 'desc')
             ->paginate($this->perPage());
 
@@ -200,6 +206,10 @@ class HealthMeasurements extends Component
             'totalMeasurements' => $totalMeasurements,
             'latestByType' => $latestByType,
             'typeOptions' => collect(HealthMeasurement::TYPES)->map(fn (array $t) => $t['label'])->all(),
+            'examOptions' => $this->showForm
+                ? HealthEvent::where('type', 'checkup')->orderByDesc('event_date')->limit(100)->get()
+                    ->mapWithKeys(fn (HealthEvent $e) => [$e->id => $e->title.' · '.$e->event_date->translatedFormat('j M Y')])->all()
+                : [],
             'contextOptions' => collect($definition['contexts'] ?? [])->map(fn (array $c) => $c['label'])->all(),
             'activeFilters' => $this->period !== 'all'
                 ? [['key' => 'period', 'value' => null, 'label' => 'Periodo: '.self::PERIODS[$this->period], 'icon' => 'bi-calendar-event']]
