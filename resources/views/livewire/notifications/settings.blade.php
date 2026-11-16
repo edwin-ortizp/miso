@@ -44,7 +44,7 @@
             <fieldset class="settings-preference-group">
                 <legend class="md-label-large">También al celular</legend>
                 <div class="settings-preference-list">
-                    @foreach (['push_birthday' => 'Cumpleaños de hoy', 'push_task_due' => 'Tareas que vencen mañana', 'push_plan_due' => 'Planes para mañana', 'push_reminder' => 'Recordatorios', 'push_weekly_insights' => 'Resumen del domingo'] as $key => $label)
+                    @foreach (['push_birthday' => 'Cumpleaños de hoy', 'push_task_due' => 'Tareas que vencen mañana', 'push_plan_due' => 'Planes para mañana', 'push_reminder' => 'Recordatorios', 'push_weekly_insights' => 'Resumen del domingo', 'push_medication_due' => 'Medicamentos'] as $key => $label)
                         <x-ui.switch :name="'preferences.'.$key" :label="$label" wire:model="preferences.{{ $key }}" />
                     @endforeach
                 </div>

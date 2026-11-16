@@ -27,6 +27,10 @@ class UserNotification extends Model
 
     public function destination(): string
     {
+        // CHG-130: el aviso de medicamento lleva a Salud › Medicamentos.
+        if ($this->type === 'medication_due') {
+            return route('health.medications');
+        }
         // CHG-117: el aviso de ball lleva a Balls.
         if ($this->source_type === \App\Services\Game\BallNotice::SOURCE) {
             return route('game.balls');

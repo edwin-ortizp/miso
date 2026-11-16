@@ -40,6 +40,9 @@ class NotificationDispatcher
             ->whereNull('push_sent_at')->whereNull('cancelled_at')->whereNull('read_at')
             ->where('scheduled_for', '<=', $now)
             ->where('scheduled_for', '>=', $now->copy()->subHours((int) config('game.nudges.max_age_hours', 12)))
+            // CHG-130: una toma de medicamento solo se avisa por push dentro de su ventana corta.
+            ->where(fn ($q) => $q->where('type', '!=', \App\Services\Notifications\GenerateMedicationReminders::TYPE)
+                ->orWhere('scheduled_for', '>=', $now->copy()->subMinutes(\App\Services\Notifications\GenerateMedicationReminders::PUSH_WINDOW_MINUTES)))
             ->whereIn('user_id', PushSubscription::select('user_id'))
             ->orderBy('scheduled_for')
             ->chunkById(100, function ($notices) use (&$result, &$prefs, $dryRun, $started, $maxSeconds, $maxSends) {
@@ -103,6 +106,19 @@ class NotificationDispatcher
         $checkin = route('home', ['checkin' => 1, 'via' => 'checkin']);
         $isWater = $notice->type === GuardianNudgePlanner::TYPE
             && GuardianNudgePlanner::moduleFor((string) $notice->source_id) === 'water';
+
+        // CHG-130: la toma de un medicamento se registra desde el aviso, con un enlace firmado que vence al terminar el día local de la toma.
+        if ($notice->type === \App\Services\Notifications\GenerateMedicationReminders::TYPE) {
+            return [
+                'actions' => [['action' => 'quick-medication', 'title' => 'Tomado'], ['action' => 'open', 'title' => 'Abrir']],
+                'quick_url' => \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'push.quick-medication',
+                    \Illuminate\Support\Carbon::parse($notice->scheduled_for)->setTimezone(\App\Services\Notifications\NotificationSource::TIMEZONE)->endOfDay(),
+                    ['notification' => $notice->id],
+                ),
+                'checkin_url' => $checkin,
+            ];
+        }
 
         if ($isWater) {
             return [

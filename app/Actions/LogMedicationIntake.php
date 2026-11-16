@@ -4,6 +4,7 @@ namespace App\Actions;
 
 use App\Models\Medication;
 use App\Models\MedicationIntake;
+use App\Services\Notifications\GenerateMedicationReminders;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Facades\Validator;
@@ -112,11 +113,14 @@ class LogMedicationIntake
         $intake = MedicationIntake::where('medication_id', $medication->id)->where('scheduled_for', $scheduled)->first();
         if ($intake) {
             $intake->update($attributes);
-
-            return $intake;
+        } else {
+            $intake = MedicationIntake::create([...$attributes, 'medication_id' => $medication->id, 'scheduled_for' => $scheduled]);
         }
 
-        return MedicationIntake::create([...$attributes, 'medication_id' => $medication->id, 'scheduled_for' => $scheduled]);
+        // CHG-130: una toma registrada ya no necesita su aviso.
+        GenerateMedicationReminders::cancelSlot($medication, $scheduled);
+
+        return $intake;
     }
 
     private static function byOperationKey(string $key): ?MedicationIntake

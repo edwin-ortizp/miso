@@ -16,6 +16,8 @@ class NotificationPreferences
         'push_birthday' => false, 'push_task_due' => false, 'push_plan_due' => false, 'push_reminder' => false,
         // CHG-071: el resumen del domingo llega al celular por defecto.
         'push_weekly_insights' => true,
+        // CHG-130: el aviso de cada toma de medicamento llega al celular por defecto (la campana siempre lo muestra).
+        'push_medication_due' => true,
     ];
 
     /** ¿Este tipo de notificación debe salir por push para este usuario? */

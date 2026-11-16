@@ -64,6 +64,9 @@ class GenerateNotifications
                     }
                 });
 
+            // CHG-130: los avisos de medicamentos no dependen de las preferencias ni de la hora de las 9:00.
+            $created += app(GenerateMedicationReminders::class)->run($user);
+
             return ['created' => $created, 'date' => $today->toDateString(), 'timezone' => NotificationSource::TIMEZONE];
         }, 3);
     }

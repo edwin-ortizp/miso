@@ -1,5 +1,5 @@
 # CHG-130 · Salud: recordatorios de medicamentos con el cron existente
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -101,7 +101,7 @@ Ajustes ▸ Notificaciones
 - Archivos a crear / modificar:
   - `app/Services/Notifications/GenerateNotifications.php`: rama o servicio nuevo (`GenerateMedicationReminders`) invocado desde `notifications:generate`. Usa `MedicationSchedule` de CHG-129 para calcular las tomas del día y `CreateNotification::create` (`app/Services/Notifications/CreateNotification.php:12-25`) con tipo `medication_due`, origen el medicamento y `occurrence_key = "{Y-m-d}:{HH:MM}"`. La clave única existente `notifications_occurrence_unique` garantiza una sola notificación por (usuario, medicamento, toma).
   - Recuperación tras un cron caído: recorrer las tomas del día cuya hora ya llegó; las de más de 60 min se crean sin push.
-  - `NotificationPreferences::DEFAULTS` (líneas 11-19): `push_medication` en `true` (solo controla el push; la campana siempre muestra el aviso). Interruptor en `resources/views/livewire/notifications/settings.blade.php` y regla `boolean` en `NotificationSettings`.
+  - `NotificationPreferences::DEFAULTS` (líneas 11-19): `push_medication_due` en `true` (solo controla el push; la campana siempre muestra el aviso). Interruptor en `resources/views/livewire/notifications/settings.blade.php` y regla `boolean` en `NotificationSettings`.
   - Despacho: `notifications:dispatch` ya envía por push y marca `push_sent_at`; agregar la ventana corta de vigencia para `medication_due` (el máximo general es 12 h, `config/game.php`).
   - Acción «Tomado»: `actions()` de `NotificationDispatcher` (`app/Services/Notifications/Push/NotificationDispatcher.php:101`) devuelve, para `medication_due`, `[['action' => 'quick-medication', 'title' => 'Tomado'], ['action' => 'open', 'title' => 'Abrir']]` y `quick_url` con `URL::temporarySignedRoute('push.quick-medication', …)`. Nuevo `app/Http/Controllers/Push/QuickMedicationController.php`, copia del patrón de `QuickWaterController`: reclama `action_done_at` con UPDATE condicional (repetir devuelve `already-done`), fija el usuario dueño de la notificación y llama a `LogMedicationIntake` con la toma esperada (`scheduled_for`). Ruta junto a `push.quick-water`. El service worker debe manejar la acción `quick-medication` como maneja `quick-water`. El enlace vence al final del día local (`America/Bogota`) de la toma, a diferencia del de agua (12 h); pasado ese momento responde que ya no está disponible y la toma se registra desde la app.
   - Cancelación: al registrar una toma o finalizar un medicamento, cancelar la notificación pendiente (`cancelled_at`), siguiendo `NotificationSourceObserver`. Registrar `medication` en el morph map si aún no lo está.
@@ -134,12 +134,21 @@ Ajustes ▸ Notificaciones
 - Docs a actualizar: `docs/notifications.md` (sección «Acciones del aviso»: añadir «Tomado» y su ruta firmada), `docs/DEPLOY.md` (tabla de tareas, ~línea 26: «medicamentos corren dentro de `notifications:generate`», límite de precisión y zona horaria), `docs/notifications.md` (nuevo tipo `medication_due` y preferencias), `docs/UX-WRITING.md` (texto del aviso).
 
 ## 7. Tareas
-- [ ] T1 · Recibir un aviso a la hora de cada toma pendiente — Resp: developer — Modelo: estandar — Archivos: `GenerateMedicationReminders`, `GenerateNotifications`, observer de cancelación — Hecho cuando: CA1, CA2, CA3 y CA7 pasan en pruebas.
-- [ ] T2 · Tocar «Tomado» en el aviso y registrar la toma sin abrir la app — Resp: developer — Modelo: estandar — Archivos: `NotificationDispatcher::actions`, `QuickMedicationController`, rutas, service worker — Hecho cuando: CA8, CA9 y CA10 pasan en pruebas.
-- [ ] T3 · Push solo si el aviso es reciente y puedo apagarlo en Ajustes — Resp: developer — Modelo: estandar — Archivos: `NotificationPreferences`, `NotificationSettings`, `settings.blade.php`, despacho — Hecho cuando: CA4 y CA5 pasan en pruebas.
-- [ ] T4 · Aislamiento, documentación y verificación — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/*`, `docs/DEPLOY.md`, `docs/notifications.md` — Hecho cuando: CA6 y los comandos de §5 pasan.
+- [x] T1 · Recibir un aviso a la hora de cada toma pendiente — Resp: developer — Modelo: estandar — Archivos: `GenerateMedicationReminders`, `GenerateNotifications`, observer de cancelación — Hecho cuando: CA1, CA2, CA3 y CA7 pasan en pruebas.
+- [x] T2 · Tocar «Tomado» en el aviso y registrar la toma sin abrir la app — Resp: developer — Modelo: estandar — Archivos: `NotificationDispatcher::actions`, `QuickMedicationController`, rutas, service worker — Hecho cuando: CA8, CA9 y CA10 pasan en pruebas.
+- [x] T3 · Push solo si el aviso es reciente y puedo apagarlo en Ajustes — Resp: developer — Modelo: estandar — Archivos: `NotificationPreferences`, `NotificationSettings`, `settings.blade.php`, despacho — Hecho cuando: CA4 y CA5 pasan en pruebas.
+- [x] T4 · Aislamiento, documentación y verificación — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/*`, `docs/DEPLOY.md`, `docs/notifications.md` — Hecho cuando: CA6 y los comandos de §5 pasan.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — T1: `GenerateMedicationReminders` (llamado desde `GenerateNotifications::run`, sin tocar `routes/console.php`): crea `medication_due` por cada toma de hoy ya vencida y sin registro, con ocurrencia `{Y-m-d}:{HH:MM}` en hora de Bogotá y `scheduled_for` en UTC. `Medication` entra en `NotificationSource::TYPES` (con `active()`: activo y dentro de `ends_on`). No pasa por la compuerta de las 9:00 ni por las preferencias de creación.
+- 2026-11-16 — T2: `QuickMedicationController` y ruta `push.quick-medication` (`signed`, `throttle:30,1`), `actions()` con «Tomado»/«Abrir» y enlace que vence al final del día local de la toma, y rama `quick-medication` en `public/sw.js` (con respaldo a `/health/medications`). El reclamo de `action_done_at` se libera si el registro falla o el medicamento ya no está activo; si la toma ya estaba tomada en la app no se duplica ni se cambia su hora.
+- 2026-11-16 — T3: preferencia **`push_medication_due`** (en lugar de `push_medication`, porque `pushAllowed()` arma `push_{tipo}`), activada por defecto, con interruptor «Medicamentos» en Ajustes. Ventana de 60 minutos solo para este tipo en `NotificationDispatcher` y en `AndroidDispatcher`. Presentación: ícono `bi-capsule`, etiqueta «Medicamento», destino Salud › Medicamentos, y `medication_due` agregado a las dos listas de `NotificationBell`.
+- 2026-11-16 — Cancelación: `LogMedicationIntake` cancela el aviso de la toma registrada; `MedicationReminderObserver` cancela los avisos de hoy al finalizar, eliminar o cambiar la programación.
+- 2026-11-16 — T4: `MedicationReminderTest` (13) y `QuickMedicationTest` (6) pasan. Suite completa: 1679 pruebas, 46 fallas idénticas a las de la base sin estos cambios (entorno); `ui:conformance` no marca los archivos tocados. Documentado en `docs/DEPLOY.md`, `docs/notifications.md` y `docs/UX-WRITING.md`.
+- Decisión nueva del usuario: los medicamentos sensibles avisan con texto genérico («Es hora de una toma programada»), sin nombre ni dosis, en push y campana.
+- Nota de comportamiento: deshacer una toma borra el registro y el generador reabre el aviso de esa toma (misma clave); si ya se había enviado por push no se reenvía.
+- No verificado: no se probó con un navegador ni un teléfono reales (ni en iPhone): se probaron el payload, la ruta firmada y el despacho con un doble del canal push, no el `sw.js` ni la notificación del sistema. Tampoco hay revisión visual de la pantalla de Ajustes ni de la campana. Cambié `public/sw.js` sin subir `VERSION`; el navegador lo actualiza al cambiar el archivo.
+- Entorno: PHP 8.3 con un `vendor` resuelto aparte; `composer.lock` sin tocar. Inicio con `start --force` autorizado por el usuario (CHG-106 y CHG-108 siguen En desarrollo).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M). Decisión del usuario: incluir recordatorios usando el cron existente. Se separa de CHG-129 para mantener cada CHG en nivel M.
@@ -151,3 +160,5 @@ Ajustes ▸ Notificaciones
 - Decidido 2026-11-16: zona horaria por usuario fuera de alcance; se mantiene `America/Bogota`.
 - Decidido 2026-11-16: ventana de vigencia de 60 minutos.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)
+- 2026-11-16 — Implementación terminada → En verificación

@@ -86,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
                 app(\App\Support\RequestMemo::class)->flush();
             }
         };
+        \App\Models\Medication::observe(\App\Observers\MedicationReminderObserver::class);
         foreach ([Task::class, \App\Models\TaskCategory::class] as $catalogSource) {
             $catalogSource::saved($forgetTaskCatalog);
             $catalogSource::deleted($forgetTaskCatalog);

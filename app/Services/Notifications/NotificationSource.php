@@ -3,6 +3,7 @@
 namespace App\Services\Notifications;
 
 use App\Models\Goal;
+use App\Models\Medication;
 use App\Models\Plan;
 use App\Models\Relationship;
 use App\Models\Task;
@@ -12,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class NotificationSource
 {
-    public const TYPES = ['task' => Task::class, 'plan' => Plan::class, 'goal' => Goal::class, 'relationship' => Relationship::class];
+    public const TYPES = ['task' => Task::class, 'plan' => Plan::class, 'goal' => Goal::class, 'relationship' => Relationship::class, 'medication' => Medication::class];
 
     public const TIMEZONE = 'America/Bogota';
 
@@ -40,6 +41,9 @@ class NotificationSource
             $source instanceof Plan => $source->status === 'scheduled',
             $source instanceof Goal => $source->status === 'active',
             $source instanceof Relationship => ! $source->is_archived,
+            // CHG-130: un medicamento avisa mientras esté activo y dentro de su fecha de fin.
+            $source instanceof Medication => $source->is_active
+                && ($source->ends_on === null || $source->ends_on->toDateString() >= now(self::TIMEZONE)->toDateString()),
             default => false,
         };
     }
