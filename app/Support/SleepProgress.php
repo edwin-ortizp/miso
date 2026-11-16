@@ -7,7 +7,7 @@ use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
-/** CHG-125: meta de horas, avance de una noche y resumen de los últimos días. */
+/** CHG-129: meta de horas, avance de una noche y resumen de los últimos días. */
 final class SleepProgress
 {
     public const DEFAULT_HOURS = 8.0;

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Registra o actualiza un periodo de sueño (CHG-125). Compartida por la pantalla y las herramientas MCP.
+ * Registra o actualiza un periodo de sueño (CHG-129). Compartida por la pantalla y las herramientas MCP.
  * Repetir un registro idéntico devuelve el existente en lugar de duplicarlo.
  */
 class LogSleep

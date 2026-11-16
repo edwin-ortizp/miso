@@ -1,21 +1,21 @@
-# CHG-127 · Salud: peso, frecuencia cardiaca, saturación y temperatura
+# CHG-131 · Salud: peso, frecuencia cardiaca, saturación y temperatura
 **Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-122 (base)
+**Relacionado:** CHG-126 (base)
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: en Salud → Mediciones puedes registrar también tu peso (kg), frecuencia cardiaca (lpm), saturación de oxígeno (%) y temperatura (°C). Cada una aparece en «Última medición» y en el historial, y se marca de forma neutra si sale del rango de referencia general. El peso queda con histórico. El asistente también las registra y consulta.
 - Cómo comprobarlo tú: registra 72 kg, 64 lpm, 98 % y 36,6 °C; verás una tarjeta por cada una. Registra 39,2 °C y verás «Fuera de rango» con la invitación a consultar a tu profesional de salud.
 
 ## 1. Resumen
-Agrega cuatro tipos al catálogo de mediciones de CHG-122/123: peso, frecuencia cardiaca, saturación de oxígeno y temperatura. No hay tablas ni pantallas nuevas: son entradas del catálogo con su unidad, topes fisiológicos y rango de referencia general. El peso del perfil (`users.current_weight_kg`, que alimenta la meta de agua) NO cambia con estas mediciones. MiSo registra; no diagnostica.
+Agrega cuatro tipos al catálogo de mediciones de CHG-126/123: peso, frecuencia cardiaca, saturación de oxígeno y temperatura. No hay tablas ni pantallas nuevas: son entradas del catálogo con su unidad, topes fisiológicos y rango de referencia general. El peso del perfil (`users.current_weight_kg`, que alimenta la meta de agua) NO cambia con estas mediciones. MiSo registra; no diagnostica.
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
-- Plantilla: pestaña «Mediciones» del módulo Salud (patrón de CHG-122; no existe plantilla específica en `## Anatomía` de docs/UX-DESIGN.md).
+- Plantilla: pestaña «Mediciones» del módulo Salud (patrón de CHG-126; no existe plantilla específica en `## Anatomía` de docs/UX-DESIGN.md).
 - Cambios: «Tipo» incluye las cuatro métricas nuevas; «Última medición» muestra una tarjeta por cada tipo con datos; el historial ofrece un filtro por tipo.
 
 ```
@@ -43,3 +43,4 @@ Agrega cuatro tipos al catálogo de mediciones de CHG-122/123: peso, frecuencia 
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Renumerado de CHG-127 a CHG-131 (choque con los CHG sociales CHG-122 a CHG-125 que ya estaban en main).

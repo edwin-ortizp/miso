@@ -27,7 +27,7 @@ class UserNotification extends Model
 
     public function destination(): string
     {
-        // CHG-130: el aviso de medicamento lleva a Salud › Medicamentos.
+        // CHG-134: el aviso de medicamento lleva a Salud › Medicamentos.
         if ($this->type === 'medication_due') {
             return route('health.medications');
         }

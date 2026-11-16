@@ -9,7 +9,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-/** CHG-128: evolución de las mediciones y del sueño. Describe lo registrado; no diagnostica ni afirma causas. */
+/** CHG-132: evolución de las mediciones y del sueño. Describe lo registrado; no diagnostica ni afirma causas. */
 #[Layout('layouts.app')]
 #[Title('Tendencias de salud')]
 class Trends extends Component

@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Inicio y fin del periodo y registro diario del ciclo (CHG-126). Compartida por la pantalla y MCP.
+ * Inicio y fin del periodo y registro diario del ciclo (CHG-130). Compartida por la pantalla y MCP.
  * Todo queda sensible por defecto; las fechas se interpretan en la zona de la aplicación.
  */
 class LogCycle

@@ -27,12 +27,12 @@ Tareas que ejecuta `schedule:run`:
 
 | Comando | Qué hace | Por qué correrlo de más no repite nada |
 |---|---|---|
-| `notifications:generate` | Crea avisos de cumpleaños, tareas, planes, recordatorios y, cada minuto, el aviso `medication_due` de cada toma de medicamento cuya hora ya llegó (CHG-130; sin cron nuevo) | Índice único de `notifications` (usuario, origen, tipo, ocurrencia `{fecha}:{HH:MM}`) |
+| `notifications:generate` | Crea avisos de cumpleaños, tareas, planes, recordatorios y, cada minuto, el aviso `medication_due` de cada toma de medicamento cuya hora ya llegó (CHG-134; sin cron nuevo) | Índice único de `notifications` (usuario, origen, tipo, ocurrencia `{fecha}:{HH:MM}`) |
 | `miso:guardian-nudges` | Crea el aviso del guardián de la franja actual | Ocurrencia `{fecha}:{franja}` en el mismo índice único |
 | `miso:weekly-insights` | Domingos 14–21 h: resumen semanal y su aviso | Único `weekly_insights` (usuario, semana) y el índice de `notifications` |
 | `notifications:dispatch` | Envía por push lo disponible | Cada fila se reclama con `UPDATE … WHERE push_sent_at IS NULL` antes de enviar |
 
-Precisión de los recordatorios de medicamentos (CHG-130): el aviso sale a la hora de la toma con el retraso del cron (hasta 1 minuto con la línea recomendada; hasta el intervalo del crontab si el hosting no permite cada minuto). Las horas y el «día» se calculan en `America/Bogota`; no hay zona horaria por usuario. Si el cron se cae, al volver se crean los avisos de las tomas de hoy ya vencidas, que quedan en la campana pero no salen por push pasados 60 minutos.
+Precisión de los recordatorios de medicamentos (CHG-134): el aviso sale a la hora de la toma con el retraso del cron (hasta 1 minuto con la línea recomendada; hasta el intervalo del crontab si el hosting no permite cada minuto). Las horas y el «día» se calculan en `America/Bogota`; no hay zona horaria por usuario. Si el cron se cae, al volver se crean los avisos de las tomas de hoy ya vencidas, que quedan en la campana pero no salen por push pasados 60 minutos.
 
 Además, cada tarea usa `withoutOverlapping`: si una corrida sigue viva, la siguiente no arranca. Cada corrida se detiene sola a los 40 s o 200 envíos (`config/game.php` › `nudges`) y la siguiente continúa.
 

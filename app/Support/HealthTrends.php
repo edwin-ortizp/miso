@@ -10,7 +10,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 /**
- * CHG-128: series diarias, resumen y dirección cautelosa de las mediciones y del sueño, y la
+ * CHG-132: series diarias, resumen y dirección cautelosa de las mediciones y del sueño, y la
  * correlación sueño–energía. Solo describe lo registrado: no diagnostica ni afirma causas.
  * Usa los scopes del usuario autenticado.
  */

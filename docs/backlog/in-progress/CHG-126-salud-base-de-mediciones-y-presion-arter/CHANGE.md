@@ -1,17 +1,17 @@
-# CHG-122 · Salud: base de mediciones y presión arterial
+# CHG-126 · Salud: base de mediciones y presión arterial
 **Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-123, CHG-124, CHG-125, CHG-126, CHG-127, CHG-128
+**Relacionado:** CHG-127, CHG-128, CHG-129, CHG-130, CHG-131, CHG-132
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: en Salud aparece una pestaña «Mediciones» donde guardas tu presión arterial (sistólica y diastólica) con fecha y hora, ves tu historial y recibes un aviso neutro si un valor sale del rango de referencia. MiSo registra y muestra tendencias; no diagnostica.
 - Cómo comprobarlo tú: entra a Salud → Mediciones, registra «120/80», mira que aparezca en el historial; registra «160/100» y comprueba que se marque como fuera de rango con la invitación a consultar a tu profesional de salud.
 
 ## 1. Resumen
-Hoy Salud solo guarda eventos (citas, síntomas, vacunas) y seguimiento de intensidad; no hay valores medidos con unidad. Este CHG crea la base común para todas las mediciones: la tabla `health_measurements`, un catálogo de tipos con unidad y rango de referencia, el formulario de captura, el historial, el aviso «MiSo no es un dispositivo médico» y las herramientas MCP genéricas. La presión arterial es la primera métrica y valida el esqueleto; glucosa, creatinina, peso, etc. se agregan después como entradas del catálogo (CHG-123, 124, 127).
+Hoy Salud solo guarda eventos (citas, síntomas, vacunas) y seguimiento de intensidad; no hay valores medidos con unidad. Este CHG crea la base común para todas las mediciones: la tabla `health_measurements`, un catálogo de tipos con unidad y rango de referencia, el formulario de captura, el historial, el aviso «MiSo no es un dispositivo médico» y las herramientas MCP genéricas. La presión arterial es la primera métrica y valida el esqueleto; glucosa, creatinina, peso, etc. se agregan después como entradas del catálogo (CHG-127, 124, 127).
 
 ## 2. Producto (product-manager)
 - Problema / usuario: la persona quiere llevar en MiSo sus mediciones de salud y ver su evolución, y hoy no tiene dónde.
@@ -21,7 +21,7 @@ Hoy Salud solo guarda eventos (citas, síntomas, vacunas) y seguimiento de inten
   - Marca neutra de «fuera del rango de referencia».
   - Aviso «no es dispositivo médico» visible en la pestaña.
   - Herramientas MCP `log-health-measurement-tool` y `list-health-measurements-tool`.
-- No incluye: diagnóstico, recomendaciones de tratamiento, recordatorios o alertas programadas, gráficas de tendencia (CHG-128), otras métricas (CHG-123 a 127), importación desde dispositivos.
+- No incluye: diagnóstico, recomendaciones de tratamiento, recordatorios o alertas programadas, gráficas de tendencia (CHG-132), otras métricas (CHG-127 a 127), importación desde dispositivos.
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - CA1. Dado un usuario autenticado, cuando registra 120/80 mmHg, entonces queda guardada con su fecha y hora y aparece en su historial.
   - CA2. Dado un valor fuera del rango de referencia, cuando se muestra, entonces lleva una marca informativa sin lenguaje de diagnóstico y con remisión al profesional de salud.
@@ -146,16 +146,17 @@ Boceto móvil (el diálogo ocupa la pantalla):
 - 2026-11-16 — T1: migración `2026_11_16_000002_create_health_measurements_table`, modelo `HealthMeasurement` (catálogo `TYPES` con presión arterial; rango de referencia 90–120 / 60–80 mmHg, inclusivo, para que 120/80 cuente «En rango»), Action `LogHealthMeasurement` (validación y guardado compartidos), página `Health\HealthMeasurements`, vista `health-measurements`, ruta `health.measurements` y pestaña «Mediciones».
 - 2026-11-16 — T2: herramientas `log-health-measurement-tool` y `list-health-measurements-tool`, registradas en `LifeTrackerServer` (con la guía de uso), tipo `health_measurement` en `DeleteEntryTool` y morph map `health-measurement`. Las sensibles se omiten salvo `include_sensitive=true`. `ToolCatalog` las agrupa por la carpeta `Health`.
 - 2026-11-16 — T3: `HealthMeasurementsTest` (7) y `LifeTrackerHealthMeasurementMcpTest` (6) pasan. Suite completa: 1629 pruebas, 46 fallas que son idénticas sin estos cambios (verificado con `git stash`); `ui:conformance` no marca los archivos nuevos.
-- Desviaciones de §4: se agregó la columna `pulse` (el pulso opcional necesitaba dónde guardarse) y se omitió `health_event_id`: un FK compuesto con `user_id` no puede usar `nullOnDelete`, así que el enlace con «Chequeo o examen» queda para CHG-124. No se tocó `GetRecentActivityTool` ni `GetHealthContextTool`: la presencia en el contexto de salud va en CHG-128.
+- Desviaciones de §4: se agregó la columna `pulse` (el pulso opcional necesitaba dónde guardarse) y se omitió `health_event_id`: un FK compuesto con `user_id` no puede usar `nullOnDelete`, así que el enlace con «Chequeo o examen» queda para CHG-128. No se tocó `GetRecentActivityTool` ni `GetHealthContextTool`: la presencia en el contexto de salud va en CHG-132.
 - No verificado: revisión visual en móvil y escritorio con captura (no hay servidor web ni assets compilados en este entorno). Las pruebas Livewire cubren el render y los estados vacío, con datos y filtrado.
 - Entorno: PHP 8.3 no ejecuta las versiones bloqueadas (Symfony 8). Las pruebas se corrieron con un `vendor` resuelto aparte para 8.3; `composer.lock` no se modificó.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M). Decisiones del usuario: un CHG por métrica sobre esta base; enfoque «registro y tendencias» (sin diagnóstico ni recordatorios); aviso «no es dispositivo médico».
-- Decidido 2026-11-16: sin cifrado en la primera versión, para poder ordenar y promediar en SQL. Se reevalúa en CHG-126 (ciclo menstrual).
+- Decidido 2026-11-16: sin cifrado en la primera versión, para poder ordenar y promediar en SQL. Se reevalúa en CHG-130 (ciclo menstrual).
 - Decidido 2026-11-16: las mediciones se marcan `is_sensitive` (patrón de `health_events`): las consultas amplias de MCP no las devuelven salvo `include_sensitive=true`.
 - Decidido 2026-11-16: rangos de referencia fijos en la primera versión (constantes de `HealthMeasurement::TYPES`); configurables por persona queda para después.
 - Nota: `docs/DOCUMENTATION.md` está citado en `CLAUDE.md` pero no existe.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Renumerado de CHG-122 a CHG-126 (choque con los CHG sociales CHG-122 a CHG-125 que ya estaban en main).

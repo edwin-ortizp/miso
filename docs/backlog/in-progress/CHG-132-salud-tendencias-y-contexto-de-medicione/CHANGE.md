@@ -1,17 +1,17 @@
-# CHG-128 · Salud: tendencias y contexto de mediciones
+# CHG-132 · Salud: tendencias y contexto de mediciones
 **Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-122 (base)
+**Relacionado:** CHG-126 (base)
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: en Salud aparece «Tendencias»: una gráfica por cada medición que registras (presión, glucosa, peso…) y una del sueño, con el rango de referencia sombreado y un resumen en texto («promedio», «mínimo», «máximo», «cuántas salieron del rango»). Si hay suficientes datos, MiSo te muestra con cautela si tu energía tiende a ser distinta los días que cumples tu meta de sueño. El asistente también ve este resumen cuando le hablas de tu salud.
 - Cómo comprobarlo tú: registra varias mediciones de presión en una semana y abre Salud → Tendencias: verás la línea, el promedio y la banda del rango. Cambia entre «30 días» y «90 días». Pregúntale al asistente «¿cómo van mis mediciones y mi sueño?».
 
 ## 1. Resumen
-Agrega la vista de tendencias sobre lo que ya se registra (CHG-122/123/124/125/127): gráficas simples por tipo de medición y por sueño, hechas en el servidor con SVG (sin librería de gráficas), con el rango de referencia, un resumen en texto y una tabla de datos para lectores de pantalla. Agrega una correlación cauta entre sueño y energía («tiende a») y suma las mediciones, el sueño y los medicamentos de hoy al contexto de salud que lee el asistente (`get-health-context-tool` y `get-recent-activity-tool`). No diagnostica ni establece causas. El ciclo menstrual queda fuera de las tendencias y del contexto amplio por privacidad. El cierre del día no cambia (ver §9).
+Agrega la vista de tendencias sobre lo que ya se registra (CHG-126/123/124/125/127): gráficas simples por tipo de medición y por sueño, hechas en el servidor con SVG (sin librería de gráficas), con el rango de referencia, un resumen en texto y una tabla de datos para lectores de pantalla. Agrega una correlación cauta entre sueño y energía («tiende a») y suma las mediciones, el sueño y los medicamentos de hoy al contexto de salud que lee el asistente (`get-health-context-tool` y `get-recent-activity-tool`). No diagnostica ni establece causas. El ciclo menstrual queda fuera de las tendencias y del contexto amplio por privacidad. El cierre del día no cambia (ver §9).
 
 ## 2. Producto (product-manager)
 - Problema / usuario: tener los datos no basta; la persona quiere ver si un valor sube, baja o se mantiene y si cumple su sueño, sin interpretar tablas.
@@ -111,3 +111,4 @@ Agrega la vista de tendencias sobre lo que ya se registra (CHG-122/123/124/125/1
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Renumerado de CHG-128 a CHG-132 (choque con los CHG sociales CHG-122 a CHG-125 que ya estaban en main).

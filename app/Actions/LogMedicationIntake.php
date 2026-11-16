@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Registra una toma de medicamento: tomada u omitida, programada o puntual (CHG-129).
+ * Registra una toma de medicamento: tomada u omitida, programada o puntual (CHG-133).
  * Compartida por la pantalla, las herramientas MCP y, más adelante, la acción «Tomado» del aviso.
  *
  * Es idempotente: una toma programada (medicamento + hora esperada) se registra una sola vez y
@@ -117,7 +117,7 @@ class LogMedicationIntake
             $intake = MedicationIntake::create([...$attributes, 'medication_id' => $medication->id, 'scheduled_for' => $scheduled]);
         }
 
-        // CHG-130: una toma registrada ya no necesita su aviso.
+        // CHG-134: una toma registrada ya no necesita su aviso.
         GenerateMedicationReminders::cancelSlot($medication, $scheduled);
 
         return $intake;

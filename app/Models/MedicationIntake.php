@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/** Toma real de un medicamento (CHG-129): tomada u omitida, programada o puntual. */
+/** Toma real de un medicamento (CHG-133): tomada u omitida, programada o puntual. */
 class MedicationIntake extends Model
 {
     use BelongsToUser, HasUuids;

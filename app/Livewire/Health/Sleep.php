@@ -13,7 +13,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-/** CHG-125: seguimiento del sueño con meta de horas. Registra y muestra tendencias; no diagnostica. */
+/** CHG-129: seguimiento del sueño con meta de horas. Registra y muestra tendencias; no diagnostica. */
 #[Layout('layouts.app')]
 #[Title('Sueño')]
 class Sleep extends Component

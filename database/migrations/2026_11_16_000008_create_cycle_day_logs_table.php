@@ -14,7 +14,7 @@ return new class extends Migration
             $table->date('date');
             // none, spotting, light, medium o heavy; sin cifrar para poder contar y ordenar.
             $table->string('flow', 10)->nullable();
-            // Síntomas y notas cifrados con los casts `encrypted:array` y `encrypted` (CHG-126).
+            // Síntomas y notas cifrados con los casts `encrypted:array` y `encrypted` (CHG-130).
             $table->text('symptoms')->nullable();
             $table->text('notes')->nullable();
             $table->boolean('is_sensitive')->default(true);

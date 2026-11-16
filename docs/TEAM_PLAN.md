@@ -125,15 +125,15 @@ _Última actualización: 2026-11-16_
 | CHG-119 | S | Objetivos: alinear fecha límite si el inicio la supera | in-progress | En verificación | 1/1 |
 | CHG-120 | M | Modo oscuro de la app | in-progress | En verificación | 4/4 |
 | CHG-121 | S | Objetivos: crear un KPI más intuitivo | in-progress | En verificación | 2/2 |
-| CHG-122 | M | Salud: base de mediciones y presión arterial | in-progress | En verificación | 3/3 |
-| CHG-123 | S | Salud: glucosa en sangre | in-progress | En verificación | 2/2 |
-| CHG-124 | S | Salud: creatinina y laboratorios | in-progress | En verificación | 2/2 |
-| CHG-125 | M | Salud: seguimiento del sueño | in-progress | En verificación | 4/4 |
-| CHG-126 | L | Salud: ciclo menstrual | in-progress | En verificación | 6/6 |
-| CHG-127 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | in-progress | En verificación | 2/2 |
-| CHG-128 | M | Salud: tendencias y contexto de mediciones | in-progress | En verificación | 4/4 |
-| CHG-129 | M | Salud: medicamentos tomados y por tomar (con MCP) | in-progress | En verificación | 4/4 |
-| CHG-130 | M | Salud: recordatorios de medicamentos con el cron existente | in-progress | En verificación | 4/4 |
+| CHG-126 | M | Salud: base de mediciones y presión arterial | in-progress | En verificación | 3/3 |
+| CHG-127 | S | Salud: glucosa en sangre | in-progress | En verificación | 2/2 |
+| CHG-128 | S | Salud: creatinina y laboratorios | in-progress | En verificación | 2/2 |
+| CHG-129 | M | Salud: seguimiento del sueño | in-progress | En verificación | 4/4 |
+| CHG-130 | L | Salud: ciclo menstrual | in-progress | En verificación | 6/6 |
+| CHG-131 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | in-progress | En verificación | 2/2 |
+| CHG-132 | M | Salud: tendencias y contexto de mediciones | in-progress | En verificación | 4/4 |
+| CHG-133 | M | Salud: medicamentos tomados y por tomar (con MCP) | in-progress | En verificación | 4/4 |
+| CHG-134 | M | Salud: recordatorios de medicamentos con el cron existente | in-progress | En verificación | 4/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

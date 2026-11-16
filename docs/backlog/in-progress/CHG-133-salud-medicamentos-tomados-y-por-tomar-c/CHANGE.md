@@ -1,17 +1,17 @@
-# CHG-129 · Salud: medicamentos tomados y por tomar (con MCP)
+# CHG-133 · Salud: medicamentos tomados y por tomar (con MCP)
 **Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-122 (aviso «no es dispositivo médico» y criterios de privacidad), CHG-130 (recordatorios)
+**Relacionado:** CHG-126 (aviso «no es dispositivo médico» y criterios de privacidad), CHG-134 (recordatorios)
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: en Salud aparece «Medicamentos». Registras cada medicamento que debes tomar (nombre, dosis, cada cuánto y desde cuándo hasta cuándo) y marcas cada toma como «tomado» u «omitido». También puedes anotar un medicamento que tomaste sin tenerlo programado. Ves qué te toca hoy y qué ya tomaste. Todo esto también se puede registrar y consultar desde el asistente (MCP).
 - Cómo comprobarlo tú: crea «Losartán 50 mg, 1 vez al día, mañana», verás una toma pendiente hoy; márcala como tomada y revisa que pase al historial. Pide al asistente «¿qué medicamentos me faltan hoy?» y «registra que tomé ibuprofeno 400 mg».
 
 ## 1. Resumen
-Hoy MiSo no tiene medicamentos. Este CHG agrega dos conceptos: el **medicamento programado** (qué debo tomar y con qué frecuencia) y la **toma** (lo que realmente tomé u omití, con o sin programación). Con ellos se responde «¿qué he consumido?» y «¿qué debo consumir?». Se expone por UI y por MCP con la misma Action. Los recordatorios se especifican aparte en CHG-130, que depende de este y reutiliza el cron existente. MiSo no es un dispositivo médico y no recomienda dosis ni detecta interacciones.
+Hoy MiSo no tiene medicamentos. Este CHG agrega dos conceptos: el **medicamento programado** (qué debo tomar y con qué frecuencia) y la **toma** (lo que realmente tomé u omití, con o sin programación). Con ellos se responde «¿qué he consumido?» y «¿qué debo consumir?». Se expone por UI y por MCP con la misma Action. Los recordatorios se especifican aparte en CHG-134, que depende de este y reutiliza el cron existente. MiSo no es un dispositivo médico y no recomienda dosis ni detecta interacciones.
 
 ## 2. Producto (product-manager)
 - Problema / usuario: la persona toma medicamentos (tratamientos crónicos o cortos) y hoy no tiene dónde llevar qué tomó y qué le falta; esto también ayuda a explicar síntomas o energía.
@@ -21,7 +21,7 @@ Hoy MiSo no tiene medicamentos. Este CHG agrega dos conceptos: el **medicamento 
   - Vista «Hoy»: pendientes, tomados y omitidos, y atrasados del día.
   - Historial con filtro por fecha y por medicamento.
   - MCP: registrar medicamento, registrar toma, consultar pendientes del día y consultar historial/consumo.
-- No incluye: recordatorios o notificaciones (van en CHG-130), alertas de interacciones o dosis máximas, inventario/compra de medicamentos, recetas médicas adjuntas, integración con el inventario del módulo de alimentación.
+- No incluye: recordatorios o notificaciones (van en CHG-134), alertas de interacciones o dosis máximas, inventario/compra de medicamentos, recetas médicas adjuntas, integración con el inventario del módulo de alimentación.
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - CA1. Dado un medicamento «1 vez al día», cuando abro «Hoy», entonces veo una toma pendiente y, al marcarla tomada, pasa al historial con su hora.
   - CA2. Dado un medicamento con fecha de fin pasada o finalizado, cuando abro «Hoy», entonces no genera tomas pendientes, pero su historial se conserva.
@@ -133,7 +133,7 @@ Boceto móvil:
   - Zona horaria y «día» de la toma: usar la zona del usuario y probar el cambio de día.
   - Frecuencias complejas (cada 8 h, ciclos): limitar a diaria, N veces al día con horarios, cada N horas y días de la semana; lo demás, a CHG posterior.
   - Borrar un medicamento no debe perder el historial: la toma conserva su nombre.
-  - Datos sensibles: sin cifrado en esta versión; columna `is_sensitive` (default false) en `medications` y `medication_intakes`; las consultas amplias de MCP la excluyen salvo `include_sensitive=true` (decisión de CHG-122).
+  - Datos sensibles: sin cifrado en esta versión; columna `is_sensitive` (default false) en `medications` y `medication_intakes`; las consultas amplias de MCP la excluyen salvo `include_sensitive=true` (decisión de CHG-126).
 - Qué NO tocar: `health_events`/`health_logs`, inventario y compras.
 
 ## 5. Pruebas (qa-tester)
@@ -166,16 +166,17 @@ Boceto móvil:
 - 2026-11-16 — T4: `MedicationScheduleTest` (10), `LifeTrackerMedicationMcpTest` (12) y `MedicationsModuleTest` (9) pasan. Suite completa: 1660 pruebas, 46 fallas idénticas a las de la base sin estos cambios (entorno); `ui:conformance` no marca los archivos nuevos.
 - Desviaciones de §4: sin FK compuesta entre `medication_intakes` y `medications` (no admite `nullOnDelete`); el modelo `Medication` pone `medication_id` en null al borrar, así la toma conserva nombre y dosis. `health_event_id` queda como columna nullable sin FK y **sin campo en la pantalla ni en MCP**: el enlace opcional con un evento de salud no se implementó en esta entrega. No se tocaron `GetHealthContextTool` ni `GetRecentActivityTool`.
 - Horarios: la pantalla pide los horarios como texto «HH:MM, HH:MM» (con ayuda y validación) en lugar de un selector de horas.
-- No verificado: revisión visual con captura en móvil y escritorio (no hay servidor web ni assets compilados en este entorno); las pruebas Livewire cubren render, estados vacío, con datos y filtrado. Los recordatorios no existen todavía (CHG-130).
+- No verificado: revisión visual con captura en móvil y escritorio (no hay servidor web ni assets compilados en este entorno); las pruebas Livewire cubren render, estados vacío, con datos y filtrado. Los recordatorios no existen todavía (CHG-134).
 - Entorno: PHP 8.3 no ejecuta las versiones bloqueadas de Symfony; las pruebas se corrieron con un `vendor` resuelto aparte y `composer.lock` no se modificó. Inicio con `start --force` autorizado por el usuario (CHG-106 y CHG-108 siguen En desarrollo).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M) a pedido del usuario: registrar lo consumido y lo que se debe consumir, con registro y consulta por MCP.
-- Decidido 2026-11-16: el usuario quiere recordatorios con el cron existente. Se especifican en CHG-130 para mantener este CHG en nivel M.
+- Decidido 2026-11-16: el usuario quiere recordatorios con el cron existente. Se especifican en CHG-134 para mantener este CHG en nivel M.
 - Decidido 2026-11-16: frecuencias de la primera versión: diaria con horarios, cada N horas y días de la semana.
 - Decidido 2026-11-16: el medicamento puede ligarse opcionalmente a un evento de salud (en «Más detalle»).
-- Decidido 2026-11-16: privacidad según CHG-122: sin cifrado, `is_sensitive` en medicamentos y tomas, ocultos en MCP salvo `include_sensitive=true`.
+- Decidido 2026-11-16: privacidad según CHG-126: sin cifrado, `is_sensitive` en medicamentos y tomas, ocultos en MCP salvo `include_sensitive=true`.
 - Si crece, dividir en: (1) medicamentos y tomas por UI, (2) MCP.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Renumerado de CHG-129 a CHG-133 (choque con los CHG sociales CHG-122 a CHG-125 que ya estaban en main).

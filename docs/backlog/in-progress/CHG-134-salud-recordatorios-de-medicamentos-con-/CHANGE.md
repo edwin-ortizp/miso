@@ -1,17 +1,17 @@
-# CHG-130 · Salud: recordatorios de medicamentos con el cron existente
+# CHG-134 · Salud: recordatorios de medicamentos con el cron existente
 **Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-129 (depende de él: medicamentos y tomas)
+**Relacionado:** CHG-133 (depende de él: medicamentos y tomas)
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: a la hora de cada toma de un medicamento programado, MiSo te avisa en la campana de la app y, si lo tienes activado, con una notificación push. El aviso trae un botón «Tomado»: lo tocas y la toma queda registrada sin abrir la app. Si ya registraste la toma, no te avisa. En Ajustes → Notificaciones puedes apagar estos avisos.
 - Cómo comprobarlo tú: crea un medicamento con una toma dentro de unos minutos; al llegar la hora recibes un solo aviso (aunque el servidor corra varias veces). Toca «Tomado» en el aviso y comprueba que la toma aparece como tomada en Salud → Medicamentos (y que tocarlo otra vez no la duplica). Márcala como tomada antes de la hora y comprueba que no llega aviso. En iPhone el aviso no muestra botones: abre la app como siempre.
 
 ## 1. Resumen
-Agrega recordatorios a los medicamentos de CHG-129 reutilizando el sistema de notificaciones y el cron que ya existen (`schedule:run` → `notifications:generate` y `notifications:dispatch`, cada minuto). No se crea ningún cron ni proceso nuevo. Cada toma esperada genera como máximo una notificación `medication_due`, identificada por su hora, de modo que correr la tarea varias veces no duplica avisos. MiSo recuerda, no prescribe: no sugiere dosis ni cambia horarios.
+Agrega recordatorios a los medicamentos de CHG-133 reutilizando el sistema de notificaciones y el cron que ya existen (`schedule:run` → `notifications:generate` y `notifications:dispatch`, cada minuto). No se crea ningún cron ni proceso nuevo. Cada toma esperada genera como máximo una notificación `medication_due`, identificada por su hora, de modo que correr la tarea varias veces no duplica avisos. MiSo recuerda, no prescribe: no sugiere dosis ni cambia horarios.
 
 ## 2. Producto (product-manager)
 - Problema / usuario: tomar un medicamento a tiempo se olvida con facilidad; registrar las tomas sin aviso depende de acordarse.
@@ -99,7 +99,7 @@ Ajustes ▸ Notificaciones
 
 ## 4. Diseño técnico (software-architect)
 - Archivos a crear / modificar:
-  - `app/Services/Notifications/GenerateNotifications.php`: rama o servicio nuevo (`GenerateMedicationReminders`) invocado desde `notifications:generate`. Usa `MedicationSchedule` de CHG-129 para calcular las tomas del día y `CreateNotification::create` (`app/Services/Notifications/CreateNotification.php:12-25`) con tipo `medication_due`, origen el medicamento y `occurrence_key = "{Y-m-d}:{HH:MM}"`. La clave única existente `notifications_occurrence_unique` garantiza una sola notificación por (usuario, medicamento, toma).
+  - `app/Services/Notifications/GenerateNotifications.php`: rama o servicio nuevo (`GenerateMedicationReminders`) invocado desde `notifications:generate`. Usa `MedicationSchedule` de CHG-133 para calcular las tomas del día y `CreateNotification::create` (`app/Services/Notifications/CreateNotification.php:12-25`) con tipo `medication_due`, origen el medicamento y `occurrence_key = "{Y-m-d}:{HH:MM}"`. La clave única existente `notifications_occurrence_unique` garantiza una sola notificación por (usuario, medicamento, toma).
   - Recuperación tras un cron caído: recorrer las tomas del día cuya hora ya llegó; las de más de 60 min se crean sin push.
   - `NotificationPreferences::DEFAULTS` (líneas 11-19): `push_medication_due` en `true` (solo controla el push; la campana siempre muestra el aviso). Interruptor en `resources/views/livewire/notifications/settings.blade.php` y regla `boolean` en `NotificationSettings`.
   - Despacho: `notifications:dispatch` ya envía por push y marca `push_sent_at`; agregar la ventana corta de vigencia para `medication_due` (el máximo general es 12 h, `config/game.php`).
@@ -151,7 +151,7 @@ Ajustes ▸ Notificaciones
 - Entorno: PHP 8.3 con un `vendor` resuelto aparte; `composer.lock` sin tocar. Inicio con `start --force` autorizado por el usuario (CHG-106 y CHG-108 siguen En desarrollo).
 
 ## 9. Preguntas abiertas, decisiones e historial
-- 2026-11-16 — Creado en to-do/ (Borrador, nivel M). Decisión del usuario: incluir recordatorios usando el cron existente. Se separa de CHG-129 para mantener cada CHG en nivel M.
+- 2026-11-16 — Creado en to-do/ (Borrador, nivel M). Decisión del usuario: incluir recordatorios usando el cron existente. Se separa de CHG-133 para mantener cada CHG en nivel M.
 - Decidido: sin cron ni proceso nuevo; se reutiliza `notifications:generate` y `notifications:dispatch`.
 - Decidido 2026-11-16: el usuario considera muy útil el botón de acción en la notificación; «Tomado» entra en este CHG con el patrón de CHG-069.
 - Decidido 2026-11-16: el enlace de «Tomado» vale hasta el fin del día local de la toma.
@@ -162,3 +162,4 @@ Ajustes ▸ Notificaciones
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Renumerado de CHG-130 a CHG-134 (choque con los CHG sociales CHG-122 a CHG-125 que ya estaban en main).

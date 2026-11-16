@@ -9,7 +9,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 /**
- * CHG-126: día del ciclo, promedios y estimación cautelosa del próximo periodo, más el calendario del mes.
+ * CHG-130: día del ciclo, promedios y estimación cautelosa del próximo periodo, más el calendario del mes.
  * Lógica pura sobre los ciclos ya cargados. La estimación es informativa: no es un método anticonceptivo
  * ni un diagnóstico, y solo existe con tres o más inicios registrados.
  */

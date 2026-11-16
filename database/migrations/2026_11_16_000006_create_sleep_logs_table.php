@@ -27,7 +27,7 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            // Meta de horas de sueño por noche (CHG-125).
+            // Meta de horas de sueño por noche (CHG-129).
             $table->decimal('daily_sleep_hours', 3, 1)->default(8);
         });
     }

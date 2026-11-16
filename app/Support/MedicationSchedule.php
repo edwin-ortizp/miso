@@ -9,7 +9,7 @@ use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 /**
- * CHG-129: calcula las tomas esperadas de un día a partir de la programación del medicamento.
+ * CHG-133: calcula las tomas esperadas de un día a partir de la programación del medicamento.
  * Las tomas esperadas no se guardan por adelantado: se derivan aquí y solo se persiste lo que ocurre.
  * El día y las horas se interpretan en la zona de la aplicación (America/Bogota).
  */

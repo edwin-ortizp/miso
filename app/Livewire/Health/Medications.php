@@ -16,7 +16,7 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 
 /**
- * CHG-129: medicamentos programados y sus tomas. «Hoy» muestra lo que toca; el historial lista lo
+ * CHG-133: medicamentos programados y sus tomas. «Hoy» muestra lo que toca; el historial lista lo
  * tomado u omitido. MiSo registra; no recomienda dosis ni detecta interacciones.
  */
 #[Layout('layouts.app')]

@@ -13,7 +13,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
- * CHG-126: ciclo menstrual. Registra y muestra tendencias; no diagnostica ni es un método anticonceptivo.
+ * CHG-130: ciclo menstrual. Registra y muestra tendencias; no diagnostica ni es un método anticonceptivo.
  * Los datos son íntimos: sensibles por defecto y con notas y síntomas cifrados.
  */
 #[Layout('layouts.app')]

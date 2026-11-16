@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Crea, edita y finaliza medicamentos programados (CHG-129). Compartida por la pantalla
+ * Crea, edita y finaliza medicamentos programados (CHG-133). Compartida por la pantalla
  * de Medicamentos y las herramientas MCP para que ambas validen y guarden igual.
  */
 class SaveMedication

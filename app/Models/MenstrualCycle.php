@@ -6,7 +6,7 @@ use App\Models\Traits\BelongsToUser;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-/** Periodo menstrual (CHG-126): inicio y fin. Íntimo: sensible por defecto y con notas cifradas. */
+/** Periodo menstrual (CHG-130): inicio y fin. Íntimo: sensible por defecto y con notas cifradas. */
 class MenstrualCycle extends Model
 {
     use BelongsToUser, HasUuids;

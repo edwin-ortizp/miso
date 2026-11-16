@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * CHG-130: «Tomado» desde el aviso push de un medicamento, sin abrir la app. Lo autoriza la URL
+ * CHG-134: «Tomado» desde el aviso push de un medicamento, sin abrir la app. Lo autoriza la URL
  * firmada (vence al final del día local de la toma, una por notificación), no la sesión.
  * La notificación se reclama con un UPDATE condicional sobre `action_done_at`: repetir la
  * petición no registra otra toma. Si el registro no se puede hacer, el reclamo se libera.

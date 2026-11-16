@@ -102,7 +102,7 @@ class HealthEvent extends Model
     {
         static::deleting(function (self $event) {
             $event->taskAssociations()->delete();
-            // CHG-124: las mediciones enlazadas a este examen conservan su valor y pierden el enlace.
+            // CHG-128: las mediciones enlazadas a este examen conservan su valor y pierden el enlace.
             HealthMeasurement::withoutGlobalScopes()->where('user_id', $event->user_id)
                 ->where('health_event_id', $event->id)->update(['health_event_id' => null]);
         });

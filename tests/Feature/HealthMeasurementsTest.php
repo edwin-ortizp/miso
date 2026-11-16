@@ -130,7 +130,7 @@ class HealthMeasurementsTest extends TestCase
             ->assertSee('122/82');
     }
 
-    // --- CHG-123: glucosa ---------------------------------------------------------------
+    // --- CHG-127: glucosa ---------------------------------------------------------------
 
     public function test_saves_glucose_with_its_moment_and_flags_it_against_that_moment(): void
     {
@@ -195,7 +195,7 @@ class HealthMeasurementsTest extends TestCase
             ->assertSee('Glucosa en sangre')->assertSee('92 mg/dL');
     }
 
-    // --- CHG-124: creatinina y examen relacionado -----------------------------------------
+    // --- CHG-128: creatinina y examen relacionado -----------------------------------------
 
     private function exam(User $user, string $title = 'Laboratorio 12 nov', string $type = 'checkup'): \App\Models\HealthEvent
     {
@@ -260,7 +260,7 @@ class HealthMeasurementsTest extends TestCase
         $this->assertSame(1.0, $m->fresh()->value);
     }
 
-    // --- CHG-127: peso, frecuencia cardiaca, saturación y temperatura ---------------------
+    // --- CHG-131: peso, frecuencia cardiaca, saturación y temperatura ---------------------
 
     public function test_saves_each_new_type_with_its_unit(): void
     {

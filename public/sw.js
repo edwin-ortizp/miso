@@ -206,7 +206,7 @@ self.addEventListener('notificationclick', (event) => {
         return;
     }
 
-    // CHG-130: «Tomado» registra la toma del medicamento con la URL firmada; si falla, abre Medicamentos.
+    // CHG-134: «Tomado» registra la toma del medicamento con la URL firmada; si falla, abre Medicamentos.
     if (event.action === 'quick-medication' && data.quickUrl) {
         event.waitUntil(
             fetch(data.quickUrl, { method: 'POST', headers: { Accept: 'application/json' } })

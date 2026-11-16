@@ -1,10 +1,10 @@
-# CHG-126 · Salud: ciclo menstrual
+# CHG-130 · Salud: ciclo menstrual
 **Estado:** En verificación
 **Nivel:** L
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-122 (base)
+**Relacionado:** CHG-126 (base)
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: en Salud aparece una pestaña «Ciclo». Con un toque marcas «Empezó mi periodo» y, cuando termina, «Terminó mi periodo». Puedes anotar cada día el flujo y los síntomas. MiSo te muestra en qué día del ciclo vas, un calendario del mes y, cuando ya hay varios ciclos registrados, una estimación del próximo periodo. Todo es privado por defecto: el asistente solo lo ve si se lo pides expresamente. El asistente también puede registrar «me llegó el periodo».
@@ -22,7 +22,7 @@ Agrega el seguimiento del ciclo menstrual como módulo propio dentro de Salud: i
   - Promedios de duración del ciclo y del periodo y estimación del próximo inicio con una ventana de ±2 días.
   - Historial de ciclos con duración.
   - MCP: `log-cycle-tool` (iniciar, terminar, registrar un día) y `list-cycle-tool`; borrado con `DeleteEntryTool`.
-- No incluye: recordatorios o avisos, predicción de ovulación o fertilidad, uso como anticonceptivo, importación desde otras apps, gráficas (CHG-128), compartir con terceros.
+- No incluye: recordatorios o avisos, predicción de ovulación o fertilidad, uso como anticonceptivo, importación desde otras apps, gráficas (CHG-132), compartir con terceros.
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - CA1. Dado un usuario, cuando marca «Empezó mi periodo», entonces se crea un ciclo abierto con esa fecha; si ya hay un periodo abierto o la fecha cae dentro de otro periodo, se rechaza con un mensaje claro.
   - CA2. Dado un periodo abierto, cuando marca «Terminó», entonces se guarda su fin (no anterior al inicio ni más de 14 días después).
@@ -83,7 +83,7 @@ flowchart LR
 
 ## 4. Diseño técnico (software-architect)
 - Archivos a crear / modificar: migración `menstrual_cycles` (`uuid id`, `user_id`, `started_on`, `ended_on` nullable, `notes` cifrada, `is_sensitive` default **true**, `source`; único corto `mc_user_start_unique`) y `cycle_day_logs` (`uuid id`, `user_id`, `date`, `flow`, `symptoms` cifrado, `notes` cifrada, `is_sensitive` default true; único `cd_user_date_unique`); modelos `MenstrualCycle` y `CycleDayLog` (casts `encrypted`/`encrypted:array`); relaciones en `User` y morph map; `app/Actions/LogCycle.php` (iniciar, terminar, registrar día, validaciones); `app/Support/CycleProgress.php` (día del ciclo, promedios, estimación y calendario del mes, lógica pura); `app/Livewire/Health/Cycle.php` + vista; ruta `health.cycle` y pestaña; `app/Mcp/Tools/Health/LogCycleTool.php` y `ListCycleTool.php`; `LifeTrackerServer` y `DeleteEntryTool` (tipos `menstrual_cycle` y `cycle_day`).
-- Enfoque y patrones a seguir: `Sleep` / `LogSleep` / `SleepProgress` (CHG-125); `Relationship.document_number` (`'encrypted'`) para el cifrado; patrón `is_sensitive` + `include_sensitive`.
+- Enfoque y patrones a seguir: `Sleep` / `LogSleep` / `SleepProgress` (CHG-129); `Relationship.document_number` (`'encrypted'`) para el cifrado; patrón `is_sensitive` + `include_sensitive`.
 - Riesgos y mitigación: datos de salud íntimos (cifrado de texto libre, sensibles por defecto, sin avisos ni push, sin enviarlos a terceros); la estimación mal interpretada como anticonceptivo (aviso fijo y texto cauto); fechas en la zona `America/Bogota`.
 - Qué NO tocar: avisos y notificaciones (no hay recordatorios), `health_events`, mediciones y sueño.
 
@@ -121,9 +121,10 @@ flowchart LR
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel L)
-- Decidido 2026-11-16: privacidad del ciclo. Todo se guarda como sensible por defecto (el asistente solo lo consulta con `include_sensitive=true`), `notes` y `symptoms` se cifran con el cast `encrypted` de Laravel; las fechas y el flujo no se cifran para poder ordenar y calcular promedios en SQL. Responde la pregunta abierta de cifrado de CHG-122 para los datos más íntimos.
+- Decidido 2026-11-16: privacidad del ciclo. Todo se guarda como sensible por defecto (el asistente solo lo consulta con `include_sensitive=true`), `notes` y `symptoms` se cifran con el cast `encrypted` de Laravel; las fechas y el flujo no se cifran para poder ordenar y calcular promedios en SQL. Responde la pregunta abierta de cifrado de CHG-126 para los datos más íntimos.
 - Decidido 2026-11-16: sin recordatorios ni notificaciones del ciclo. Estimación solo con tres o más inicios registrados, con ventana de ±2 días y lenguaje cauto; sin ovulación ni fertilidad.
 - Nota: el validador recomienda dividir los CHG de nivel L; se mantiene como uno solo porque las seis tareas comparten modelo y pantalla y se verifican juntas.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Renumerado de CHG-126 a CHG-130 (choque con los CHG sociales CHG-122 a CHG-125 que ya estaban en main).

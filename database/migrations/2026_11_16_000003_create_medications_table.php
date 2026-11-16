@@ -25,7 +25,7 @@ return new class extends Migration
             $table->date('ends_on')->nullable();
             $table->string('instructions')->nullable();
             $table->text('notes')->nullable();
-            // Enlace opcional a un evento de salud. Sin FK compuesta: no admite nullOnDelete (CHG-122).
+            // Enlace opcional a un evento de salud. Sin FK compuesta: no admite nullOnDelete (CHG-126).
             $table->uuid('health_event_id')->nullable();
             $table->boolean('is_active')->default(true);
             $table->boolean('is_sensitive')->default(false);

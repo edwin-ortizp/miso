@@ -13,7 +13,7 @@ use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
- * CHG-122: mediciones de salud con unidad (presión arterial primero). Registra y muestra
+ * CHG-126: mediciones de salud con unidad (presión arterial primero). Registra y muestra
  * historial; no diagnostica. Los nombres `value`, `value2` y `pulse` coinciden con las claves
  * de LogHealthMeasurement::validate para que cada error caiga en su campo.
  */

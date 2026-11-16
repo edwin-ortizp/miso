@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Registra o actualiza una medición de salud. Compartida por la pantalla de Mediciones
- * y las herramientas MCP (CHG-122), para que ambas validen y guarden igual.
+ * y las herramientas MCP (CHG-126), para que ambas validen y guarden igual.
  *
  * El dueño del registro lo asigna el trait BelongsToUser a partir del usuario autenticado.
  */

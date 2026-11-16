@@ -41,7 +41,7 @@ class NotificationSource
             $source instanceof Plan => $source->status === 'scheduled',
             $source instanceof Goal => $source->status === 'active',
             $source instanceof Relationship => ! $source->is_archived,
-            // CHG-130: un medicamento avisa mientras esté activo y dentro de su fecha de fin.
+            // CHG-134: un medicamento avisa mientras esté activo y dentro de su fecha de fin.
             $source instanceof Medication => $source->is_active
                 && ($source->ends_on === null || $source->ends_on->toDateString() >= now(self::TIMEZONE)->toDateString()),
             default => false,

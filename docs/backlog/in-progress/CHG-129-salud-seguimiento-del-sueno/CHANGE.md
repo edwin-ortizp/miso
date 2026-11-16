@@ -1,10 +1,10 @@
-# CHG-125 · Salud: seguimiento del sueño
+# CHG-129 · Salud: seguimiento del sueño
 **Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-122 (base)
+**Relacionado:** CHG-126 (base)
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: en Salud aparece una pestaña «Sueño». Registras a qué hora te dormiste y a qué hora despertaste (y, si quieres, cómo dormiste del 1 al 5). MiSo calcula cuánto dormiste, lo compara con tu meta de horas (8 h por defecto, la puedes cambiar) y te muestra el promedio de los últimos 7 días. El asistente también puede registrar y consultar tu sueño.
@@ -21,7 +21,7 @@ Agrega el seguimiento del sueño como módulo propio dentro de Salud, porque cad
   - Tarjeta «Última noche», promedio de los últimos 7 días y noches que cumplieron la meta.
   - Historial con filtro de periodo y orden.
   - MCP: `log-sleep-tool` y `list-sleep-tool`; borrado con `DeleteEntryTool`.
-- No incluye: fases del sueño, datos de relojes o apps, recordatorios para dormir, gráficas (CHG-128), consejos o diagnósticos.
+- No incluye: fases del sueño, datos de relojes o apps, recordatorios para dormir, gráficas (CHG-132), consejos o diagnósticos.
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - CA1. Dado 23:00 a 06:30, cuando guardo, entonces se registra una duración de 7 h 30 min.
   - CA2. Dado despertar anterior o igual a dormir, o una duración mayor de 24 h o menor de 10 min, cuando guardo, entonces se rechaza con un mensaje que indica qué corregir.
@@ -107,12 +107,13 @@ flowchart LR
 - 2026-11-16 — T3: `log-sleep-tool` y `list-sleep-tool` (resumen con meta, promedio y registros que cumplen; sensibles ocultos salvo `include_sensitive=true`), registrados en `LifeTrackerServer` con su guía; tipo `sleep` en `DeleteEntryTool`; morph map `sleep-log`.
 - 2026-11-16 — T4: `SleepModuleTest` (13) y `LifeTrackerSleepMcpTest` (5) pasan. Suite completa: 1717 pruebas, 46 fallas idénticas a la base (entorno).
 - Decisión: una «noche» se identifica por la fecha en que despertó; las siestas son registros normales; la meta se redondea a medias horas.
-- No se hizo: el aviso fijo de CHG-122 solo está en el texto de la pantalla; no hay gráfica (CHG-128). No verificado: revisión visual con captura en móvil y escritorio.
+- No se hizo: el aviso fijo de CHG-126 solo está en el texto de la pantalla; no hay gráfica (CHG-132). No verificado: revisión visual con captura en móvil y escritorio.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
 - Decidido 2026-11-16: tabla propia (`sleep_logs`) porque cada registro tiene inicio y fin; las siestas son registros normales. Meta de horas por persona en `users.daily_sleep_hours` (8 por defecto), como la meta de agua.
-- Decidido 2026-11-16: sin cifrado y con `is_sensitive` opcional, como en CHG-122.
+- Decidido 2026-11-16: sin cifrado y con `is_sensitive` opcional, como en CHG-126.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Renumerado de CHG-125 a CHG-129 (choque con los CHG sociales CHG-122 a CHG-125 que ya estaban en main).

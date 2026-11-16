@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Medicamento programado (CHG-129): qué debo tomar y con qué frecuencia. Las tomas reales
+ * Medicamento programado (CHG-133): qué debo tomar y con qué frecuencia. Las tomas reales
  * viven en MedicationIntake. MiSo registra; no recomienda dosis ni detecta interacciones.
  */
 class Medication extends Model

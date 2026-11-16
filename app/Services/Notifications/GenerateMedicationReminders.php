@@ -10,7 +10,7 @@ use App\Support\MedicationSchedule;
 use Carbon\CarbonInterface;
 
 /**
- * CHG-130: crea el aviso `medication_due` de cada toma de hoy cuya hora ya llegó y sigue sin registrar.
+ * CHG-134: crea el aviso `medication_due` de cada toma de hoy cuya hora ya llegó y sigue sin registrar.
  *
  * Corre dentro de `notifications:generate` (sin cron nuevo). Es idempotente: la clave única de
  * `notifications` (usuario, origen, tipo y ocurrencia) deja una sola fila por toma. No reconstruye

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->date('started_on');
             $table->date('ended_on')->nullable();
-            // Texto libre cifrado con el cast `encrypted` (CHG-126).
+            // Texto libre cifrado con el cast `encrypted` (CHG-130).
             $table->text('notes')->nullable();
             // Íntimo por defecto: las consultas amplias de MCP lo omiten salvo include_sensitive.
             $table->boolean('is_sensitive')->default(true);

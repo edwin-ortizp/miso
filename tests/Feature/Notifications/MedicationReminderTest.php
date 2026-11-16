@@ -18,7 +18,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
 
-/** CHG-130: aviso `medication_due` a la hora de cada toma, sin cron nuevo. */
+/** CHG-134: aviso `medication_due` a la hora de cada toma, sin cron nuevo. */
 class MedicationReminderTest extends TestCase
 {
     use RefreshDatabase;

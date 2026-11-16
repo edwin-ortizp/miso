@@ -13,7 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\URL;
 use Tests\TestCase;
 
-/** CHG-130: botón «Tomado» del aviso de un medicamento. */
+/** CHG-134: botón «Tomado» del aviso de un medicamento. */
 class QuickMedicationTest extends TestCase
 {
     use RefreshDatabase;

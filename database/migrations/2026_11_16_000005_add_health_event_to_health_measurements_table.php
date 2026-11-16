@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('health_measurements', function (Blueprint $table) {
             // Examen («Chequeo o examen») al que pertenece la medición. Sin FK compuesta: no admite nullOnDelete;
-            // HealthEvent la pone en null al eliminarse (CHG-124).
+            // HealthEvent la pone en null al eliminarse (CHG-128).
             $table->uuid('health_event_id')->nullable()->after('context');
             $table->index(['user_id', 'health_event_id'], 'hm_user_event_idx');
         });

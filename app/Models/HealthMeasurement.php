@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 /**
- * Medición de salud con unidad (CHG-122). MiSo registra y muestra tendencias; no diagnostica.
+ * Medición de salud con unidad (CHG-126). MiSo registra y muestra tendencias; no diagnostica.
  * Agregar una métrica nueva es agregar una entrada a TYPES, no una tabla.
  */
 class HealthMeasurement extends Model
@@ -31,7 +31,7 @@ class HealthMeasurement extends Model
             'article' => 'La',
             'icon' => 'bi-heart-pulse',
         ],
-        // CHG-123: referencias generales y aproximadas por momento; no son un diagnóstico.
+        // CHG-127: referencias generales y aproximadas por momento; no son un diagnóstico.
         'glucose' => [
             'label' => 'Glucosa en sangre',
             'unit' => 'mg/dL',
@@ -48,7 +48,7 @@ class HealthMeasurement extends Model
             'article' => 'La',
             'icon' => 'bi-droplet',
         ],
-        // CHG-124: referencia general; varía por sexo y edad y no se personaliza todavía.
+        // CHG-128: referencia general; varía por sexo y edad y no se personaliza todavía.
         'creatinine' => [
             'label' => 'Creatinina',
             'unit' => 'mg/dL',
@@ -58,7 +58,7 @@ class HealthMeasurement extends Model
             'article' => 'La',
             'icon' => 'bi-clipboard2-pulse',
         ],
-        // CHG-127: el peso se registra con histórico y no se juzga (sin rango). No cambia el peso del perfil.
+        // CHG-131: el peso se registra con histórico y no se juzga (sin rango). No cambia el peso del perfil.
         'weight' => [
             'label' => 'Peso',
             'unit' => 'kg',

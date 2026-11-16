@@ -36,7 +36,7 @@ class NotificationPresentation
     private function present(UserNotification $notice, $source): array
     {
         $now = CarbonImmutable::now(NotificationSource::TIMEZONE);
-        // CHG-130: el aviso de medicamento lleva su propio título y cuerpo (texto genérico si es sensible).
+        // CHG-134: el aviso de medicamento lleva su propio título y cuerpo (texto genérico si es sensible).
         $special = in_array($notice->source_type, [GuardianNudgePlanner::SOURCE, WeeklyInsights::SOURCE, BallNotice::SOURCE], true)
             || $notice->type === 'medication_due';
         $kind = match (true) {

@@ -6,7 +6,7 @@ use App\Models\Traits\BelongsToUser;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-/** Registro de sueño (CHG-125): una noche o una siesta, con inicio y fin. */
+/** Registro de sueño (CHG-129): una noche o una siesta, con inicio y fin. */
 class SleepLog extends Model
 {
     use BelongsToUser, HasUuids;

@@ -1,21 +1,21 @@
-# CHG-124 · Salud: creatinina y laboratorios
+# CHG-128 · Salud: creatinina y laboratorios
 **Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-122 (base)
+**Relacionado:** CHG-126 (base)
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: en Salud → Mediciones puedes registrar tu creatinina (mg/dL) y, si el valor viene de un examen que ya tienes en Salud, enlazarla a ese «Chequeo o examen». MiSo la marca de forma neutra si sale del rango de referencia general. El asistente también la registra y consulta.
 - Cómo comprobarlo tú: registra 0,9 mg/dL enlazada a un examen y mira que aparezca «En rango»; registra 2,4 y verás «Fuera de rango» con la invitación a consultar a tu profesional de salud.
 
 ## 1. Resumen
-Agrega la creatinina como tipo de medición sobre la base de CHG-122/123 y la opción de enlazar cualquier medición a un evento «Chequeo o examen» de Salud, para agrupar los valores de un mismo laboratorio. El enlace es un campo opcional sin clave foránea (una FK compuesta con `user_id` no admite `nullOnDelete`): si el examen se elimina, la medición conserva su valor y pierde el enlace. MiSo registra; no diagnostica.
+Agrega la creatinina como tipo de medición sobre la base de CHG-126/123 y la opción de enlazar cualquier medición a un evento «Chequeo o examen» de Salud, para agrupar los valores de un mismo laboratorio. El enlace es un campo opcional sin clave foránea (una FK compuesta con `user_id` no admite `nullOnDelete`): si el examen se elimina, la medición conserva su valor y pierde el enlace. MiSo registra; no diagnostica.
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
-- Plantilla: pestaña «Mediciones» del módulo Salud (patrón de CHG-122; no existe plantilla específica en `## Anatomía` de docs/UX-DESIGN.md).
+- Plantilla: pestaña «Mediciones» del módulo Salud (patrón de CHG-126; no existe plantilla específica en `## Anatomía` de docs/UX-DESIGN.md).
 - Cambios: «Tipo» incluye «Creatinina». En «Más detalle» aparece «Examen relacionado» (lista de los «Chequeo o examen» del usuario, opcional). El historial muestra el nombre del examen enlazado.
 
 ```
@@ -49,3 +49,4 @@ Agrega la creatinina como tipo de medición sobre la base de CHG-122/123 y la op
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Renumerado de CHG-124 a CHG-128 (choque con los CHG sociales CHG-122 a CHG-125 que ya estaban en main).

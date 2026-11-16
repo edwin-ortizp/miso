@@ -6,7 +6,7 @@ use App\Models\Traits\BelongsToUser;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-/** Registro de un día del ciclo (CHG-126): flujo y síntomas. Íntimo: síntomas y notas van cifrados. */
+/** Registro de un día del ciclo (CHG-130): flujo y síntomas. Íntimo: síntomas y notas van cifrados. */
 class CycleDayLog extends Model
 {
     use BelongsToUser, HasUuids;
