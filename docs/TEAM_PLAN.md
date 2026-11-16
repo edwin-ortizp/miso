@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-15_
+_Última actualización: 2026-11-16_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -120,6 +120,10 @@ _Última actualización: 2026-11-15_
 | CHG-114 | M | Login MiSo: Refugio vivo | in-progress | En verificación | 2/2 |
 | CHG-115 | M | Registro MiSo: bienvenida en Refugio vivo | in-progress | En verificación | 2/2 |
 | CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | in-progress | En verificación | 4/4 |
+| CHG-117 | M | Social A: perfil social y amistades por código o usuario | to-do | Borrador | 0/0 |
+| CHG-118 | M | Social B: racha compartida sin castigo entre amigos | to-do | Borrador | 0/0 |
+| CHG-119 | M | Social C: tabla semanal de amigos con doble opt-in | to-do | Borrador | 0/0 |
+| CHG-120 | M | Social D: notificaciones de amistad y racha compartida | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
