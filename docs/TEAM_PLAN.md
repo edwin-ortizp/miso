@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-15_
+_Última actualización: 2026-11-16_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -120,6 +120,7 @@ _Última actualización: 2026-11-15_
 | CHG-114 | M | Login MiSo: Refugio vivo | in-progress | En verificación | 2/2 |
 | CHG-115 | M | Registro MiSo: bienvenida en Refugio vivo | in-progress | En verificación | 2/2 |
 | CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | in-progress | En verificación | 4/4 |
+| CHG-117 | M | Modo oscuro de la app | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
