@@ -23,6 +23,7 @@ El alta de usuario hoy siembra datos en dos sitios (`User::booted` y `RegisterCo
   - Dada una cuenta existente, Cuando se despliega, Entonces no se agrega ni se quita ningún catálogo.
   - Dado «Hábitos» sin registros, Entonces no hay acción para restaurar predeterminados y se ofrece crear el primero.
   - Dado el paso 3 de la bienvenida, Cuando elige «Hacerlo después», Entonces la guía se completa sin hábito y entra a Mi día.
+  - Dado cualquier catálogo, Entonces la persona puede renombrar, agregar y eliminar sus valores, incluidos los predeterminados; los iniciales son pocos y neutros (nada íntimo, de una profesión concreta ni en primera persona).
   - Dado un entorno de producción, Entonces `db:seed` no crea ningún usuario.
 
 ## 3. UX/UI
@@ -53,7 +54,7 @@ Paso 3 de 4 · Tu primer hábito
 
 ### 3.3 Escritura (ux-writer)
 - Ubicación y estado: paso 3, resumen, estado vacío de Hábitos, estados de tarea, círculos.
-- Textos finales: «Hacerlo después»; resumen sin hábito: «Cuando quieras, crea tu primer hábito desde Hábitos.»; vacío: «Aún no tienes hábitos» / «Crear mi primer hábito»; estados «Por hacer», «Listo para empezar», «En curso», «Hecho»; círculos «Pareja», «Familia», «Amigos», «Trabajo» solo si se confirma (ver §9).
+- Textos finales: «Hacerlo después»; resumen sin hábito: «Cuando quieras, crea tu primer hábito desde Hábitos.»; vacío: «Aún no tienes hábitos» / «Crear mi primer hábito»; estados «Por hacer», «Listo para empezar», «En curso», «Hecho»; círculos «Pareja», «Familia», «Amigos», «Trabajo».
 - Reglas de docs/UX-WRITING.md aplicadas: tono sin culpa, verbo claro, sin jerga (WIP, Ready, Done).
 - Criterios de aceptación de los textos: ningún anglicismo en estados nuevos; ningún texto presiona a crear el hábito.
 
@@ -100,6 +101,7 @@ Paso 3 de 4 · Tu primer hábito
 - [ ] T4 · Plantillas de mantenimiento fiables y categorías legibles — Resp: developer — Modelo: estandar — Archivos: database/seeders/MaintenanceTemplateSeeder.php, database/migrations/*_seed_maintenance_templates_and_normalize_categories.php, app/Support/CategoryCatalog.php, tests/Feature/MaintenanceTemplateMigrationTest.php — Hecho cuando: las plantillas globales existen sin ejecutar seeders; no hay categorías duplicadas por tilde; los nombres visibles son legibles y los registros conservan su categoría.
 - [ ] T5 · «Hacerlo después» en la bienvenida — Resp: developer — Modelo: estandar — Archivos: app/Livewire/Onboarding/Welcome.php, resources/views/livewire/onboarding/welcome.blade.php, app/Services/Experience/PersonalExperience.php, app/Console/Commands (experience:report), tests/Feature/PersonalExperienceTest.php, tests/Browser/personal-experience.spec.js — Hecho cuando: se puede completar la guía sin hábito, el estado persiste, el informe lo cuenta aparte y axe/teclado pasan a 390/768/1440 px.
 - [ ] T6 · Vocabulario sencillo y sin nombres del autor — Resp: developer — Modelo: estandar — Archivos: app/Models/TaskStatus.php, app/Actions/SeedDefaultCircles.php, app/Support/DefaultTaskCategories.php, database/migrations/*_backfill_legacy_task_categories.php, tests/Feature/TaskStatusTest.php — Hecho cuando: cuentas nuevas ven los estados y círculos nuevos; las existentes no cambian; ninguna lógica depende del nombre literal de un estado; no quedan Siigo/EntreAgiles/Gesthor/CertMind/Unicauca en código.
+- [ ] T8 · Todos los catálogos editables y con un conjunto inicial neutro — Resp: developer — Modelo: estandar — Archivos: app/Livewire/Relationship/RelationshipIndex.php (círculos), app/Livewire/Meal/MealSettings.php (categorías de compras), app/Livewire/Category/CategorySettings.php, app/Livewire/Task/TaskSettings.php, app/Livewire/Vehicle/VehicleCatalog.php, ajustes de Hidratación, Ejercicio y Ánimo, tests/Feature/CatalogEditabilityTest.php — Hecho cuando: para cada catálogo (círculos, compras, bebidas, ejercicios, ánimo, gastos de vehículo, categorías y estados de tarea, `user_categories`, mantenimiento) una prueba renombra, agrega y elimina un valor predeterminado (con aviso si está en uso); los valores iniciales son neutros (ver criterio) y los que faltan de edición se completan con el diálogo canónico.
 - [ ] T7 · Documentación al día — Resp: tech-writer — Modelo: estandar — Archivos: docs/first-experience.md, docs/category-catalogs.md, docs/DEPLOY.md, docs/backlog/UX-DESIGN.md — Hecho cuando: refleja el comportamiento nuevo y marca los hallazgos como resueltos.
 
 ## 8. Bitácora de implementación (developer)
@@ -107,6 +109,7 @@ Paso 3 de 4 · Tu primer hábito
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-16 — Decisión del usuario: corregir UX-008, 009, 010, 011, 012 y 014; UX-013 queda fuera.
-- ABIERTA: círculos para cuentas nuevas. Propuesta: Pareja, Familia, Amigos, Trabajo (hoy 6, con solapes). ¿Se conserva «Pareja» como círculo inicial?
+- 2026-11-16 — Decisión del usuario: «Pareja» es un círculo inicial válido. Círculos de cuentas nuevas: Pareja, Familia, Amigos, Trabajo.
+- 2026-11-16 — Decisión del usuario: todos los catálogos deben ser editables (renombrar, reordenar, eliminar, agregar) y traer un conjunto inicial corto y no personal. Ver T8.
 - 2026-11-16 — Decisión: los estados nuevos aplican solo a cuentas nuevas (los flujos externos que usan «Ready»/«Borrador» por texto no se tocan). Antes: estados de tarea nuevos cambian nombres que algunos flujos externos (skills de MiSo) usan por texto («Ready», «Borrador»). Propuesta: solo cuentas nuevas; la cuenta del autor no cambia.
 - Nota de entorno: el entorno cloud tiene PHP 8.3 y `composer.lock` exige 8.4; las pruebas pueden no poder ejecutarse aquí (lección de CHG-117).
