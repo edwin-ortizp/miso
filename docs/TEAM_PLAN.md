@@ -120,7 +120,7 @@ _Última actualización: 2026-11-16_
 | CHG-114 | M | Login MiSo: Refugio vivo | in-progress | En verificación | 2/2 |
 | CHG-115 | M | Registro MiSo: bienvenida en Refugio vivo | in-progress | En verificación | 2/2 |
 | CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | in-progress | En verificación | 4/4 |
-| CHG-117 | S | Aviso de ball en la campanita del header | to-do | Borrador | 0/0 |
+| CHG-117 | S | Aviso de ball en la campanita del header | in-progress | En verificación | 3/3 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

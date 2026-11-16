@@ -56,6 +56,11 @@ class GameNotifier extends Component
             return;
         }
 
+        // CHG-117: hay balls nuevas → la campanita suma su aviso sin recargar.
+        if (in_array('ball', array_column($result['toasts'], 'type'), true) || in_array('goal', array_column($result['toasts'], 'type'), true)) {
+            $this->dispatch('game-notice-refresh');
+        }
+
         foreach ($result['toasts'] as $toast) {
             $this->toasts[] = $toast + ['id' => ++$this->toastSequence];
         }

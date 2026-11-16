@@ -90,6 +90,7 @@ class EncounterOpener
                 'source_label' => $source['label'],
             ];
             $encounter->update(['opened_at' => now(), 'result' => $result]);
+            app(BallNotice::class)->opened($userId, (int) $encounter->id);
 
             return $result;
         });
