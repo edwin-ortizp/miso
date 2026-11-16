@@ -5,6 +5,7 @@ namespace App\Livewire\Social;
 use App\Models\User;
 use App\Rules\Username;
 use App\Services\Social\Friends;
+use App\Services\Social\FriendNotices;
 use App\Services\Social\SharedStreak;
 use App\Services\Social\SocialSettings;
 use Illuminate\Validation\Rule;
@@ -129,10 +130,17 @@ class FriendsIndex extends Component
         $settings->setVisible(auth()->id(), ! $settings->visible(auth()->id()));
     }
 
-    public function render(Friends $friends, SocialSettings $settings, SharedStreak $shared)
+    public function render(Friends $friends, SocialSettings $settings, SharedStreak $shared, FriendNotices $notices)
     {
         /** @var User $me */
         $me = auth()->user();
+        $friendList = $friends->friends($me)->map(fn (array $row) => $row + ['streak' => $shared->for($me, $row['id'])]);
+        // Hito de pareja alcanzado: aviso en la campana, idempotente por par y hito (CHG-124).
+        foreach ($friendList as $row) {
+            if ($row['streak'] && ($milestone = $shared->milestoneReached($row['streak']['days']))) {
+                $notices->sharedStreak($me, $row['id'], $milestone);
+            }
+        }
 
         return view('livewire.social.friends-index', [
             'module' => 'social',
@@ -140,7 +148,7 @@ class FriendsIndex extends Component
             'inviteUrl' => route('social.friends', ['codigo' => $me->ensureFriendCode()]),
             'incoming' => $friends->incoming($me),
             'outgoing' => $friends->outgoing($me),
-            'friendList' => $friends->friends($me)->map(fn (array $row) => $row + ['streak' => $shared->for($me, $row['id'])]),
+            'friendList' => $friendList,
             'blockedList' => $friends->blocked($me),
             'visible' => $settings->visible($me->id),
         ]);

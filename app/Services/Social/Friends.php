@@ -57,6 +57,7 @@ class Friends
             return false;
         }
         $friendship->update(['status' => Friendship::ACCEPTED, 'responded_at' => now()]);
+        app(FriendNotices::class)->accepted($friendship, $me->id);
 
         return true;
     }
@@ -154,11 +155,14 @@ class Friends
             DB::transaction(function () use ($me, $target) {
                 $existing = Friendship::query()->between($me->id, $target->id)->lockForUpdate()->first();
                 if (! $existing) {
-                    Friendship::create(['requester_id' => $me->id, 'addressee_id' => $target->id, 'status' => Friendship::PENDING]);
+                    app(FriendNotices::class)->requested(
+                        Friendship::create(['requester_id' => $me->id, 'addressee_id' => $target->id, 'status' => Friendship::PENDING]),
+                    );
                 } elseif ($existing->status === Friendship::PENDING && $existing->addressee_id === $me->id
                     && $this->count($me->id, accepted: true) < self::LIMIT) {
                     // Solicitud cruzada: ambos quieren; queda aceptada.
                     $existing->update(['status' => Friendship::ACCEPTED, 'responded_at' => now()]);
+                    app(FriendNotices::class)->accepted($existing, $me->id);
                 }
                 // Aceptada, bloqueada o ya enviada: no cambia nada y no se avisa de la diferencia.
             });

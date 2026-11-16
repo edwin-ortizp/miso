@@ -1,5 +1,5 @@
 # CHG-124 · Social D: notificaciones de amistad y racha compartida
-**Estado:** Aprobado
+**Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -81,14 +81,18 @@ flowchart LR
 - Docs a actualizar: `docs/notifications.md`; `docs/DEPLOY.md` solo si se agrega algo al scheduler.
 
 ## 7. Tareas
-- [ ] T1 · Me avisan cuando me envían o aceptan una solicitud — Resp: developer — Modelo: estandar — Archivos: `UserNotification::destination()`, `Friends` — Hecho cuando: las pruebas de aviso e idempotencia pasan.
-- [ ] T2 · Me avisan cuando llegamos a un hito de racha compartida — Resp: developer — Modelo: estandar — Archivos: `SharedStreak`, `notifications:generate` si aplica — Hecho cuando: ambos reciben un aviso una sola vez, incluso ejecutando dos veces.
-- [ ] T3 · Puedo apagar estos avisos — Resp: developer — Modelo: estandar — Archivos: preferencias del módulo `notifications` — Hecho cuando: con la preferencia apagada no hay campana ni push.
-- [ ] T4 · Documentación actualizada — Resp: developer — Modelo: estandar — Archivos: `docs/notifications.md`, `docs/DEPLOY.md` si aplica — Hecho cuando: `git diff --check` pasa.
+- [x] T1 · Me avisan cuando me envían o aceptan una solicitud — Resp: developer — Modelo: estandar — Archivos: `UserNotification::destination()`, `Friends` — Hecho cuando: las pruebas de aviso e idempotencia pasan.
+- [x] T2 · Me avisan cuando llegamos a un hito de racha compartida — Resp: developer — Modelo: estandar — Archivos: `SharedStreak`, `notifications:generate` si aplica — Hecho cuando: ambos reciben un aviso una sola vez, incluso ejecutando dos veces.
+- [x] T3 · Puedo apagar estos avisos — Resp: developer — Modelo: estandar — Archivos: preferencias del módulo `notifications` — Hecho cuando: con la preferencia apagada no hay campana ni push.
+- [x] T4 · Documentación actualizada — Resp: developer — Modelo: estandar — Archivos: `docs/notifications.md`, `docs/DEPLOY.md` si aplica — Hecho cuando: `git diff --check` pasa.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — Implementado: `FriendNotices`, enganches en `Friends` (solicitud, aceptación, cruzada), hito de pareja al abrir `/amigos`, registro en `UserNotification::destination()`, `NotificationPresentation`, `NotificationBell`, `NotificationPreferences`, pantalla de ajustes y `NotificationDispatcher::actions()`, `docs/notifications.md`, `FriendNotificationTest`.
+- Ajustes: `source_id` es uuid y `friendships.id` numérico, así que se usa un uuid v5 del par; la preferencia de campana (`friend_notices`) vive fuera del bloque «solo con dispositivos» de ajustes porque la campana no depende de un dispositivo; el hito de racha se avisa solo por la campana (CHG-122); no se tocó `docs/DEPLOY.md` (sin scheduler nuevo).
+- **BLOQUEADO — no verificado:** sin PHP 8.4, solo `php -l`. Pendiente: `php artisan test --filter=FriendNotification`, `--filter=Notification`, `--filter=Social`, `php artisan ui:conformance`, `npm run build`.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-16 — Decisión: sin MCP ni cambios al Director; sin scheduler nuevo. Requiere CHG-121 y CHG-122.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)
