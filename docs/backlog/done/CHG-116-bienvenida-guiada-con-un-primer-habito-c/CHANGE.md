@@ -1,9 +1,9 @@
 # CHG-116 · Bienvenida guiada con un primer hábito cotidiano
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** —
+**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** 2026-11-16
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -107,3 +107,4 @@ Base antes de editar: PersonalExperienceTest 6/6, 91 assertions. Cambios ajenos 
 - 2026-11-15 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-15 — Movido a in-progress/ (En desarrollo)
 - 2026-11-15 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/

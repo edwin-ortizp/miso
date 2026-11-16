@@ -1,9 +1,9 @@
 # CHG-110 · Alinear controles del header móvil
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** XS
 **Modelo sugerido:** rapido
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-14 · **Aprobado:** 2026-11-14 · **Cerrado:** —
+**Creado:** 2026-11-14 · **Aprobado:** 2026-11-14 · **Cerrado:** 2026-11-16
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -27,3 +27,4 @@
 - Plan aprobado: mantener búsqueda, ajustes, notificaciones y perfil a la derecha con un único layout responsive; modificar solamente la distribución del título móvil. Sin APIs ni cambios funcionales.
 - LECCIÓN: ninguna.
 - 2026-11-14 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/

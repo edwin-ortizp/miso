@@ -1,9 +1,9 @@
 # CHG-107 · Editar tareas y Markdown con una sola acción
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-14 · **Aprobado:** 2026-11-14 · **Cerrado:** —
+**Creado:** 2026-11-14 · **Aprobado:** 2026-11-14 · **Cerrado:** 2026-11-16
 **Relacionado:** CHG-015; coordinación con CHG-108
 
 ## 0. En palabras simples
@@ -91,3 +91,4 @@ Inicio local 2026-11-14 con especificación aprobada. Rama main con cambios ajen
 - T1 y T2 verificadas localmente. Capturas 360/390/1440 revisadas por geometría y muestra visual 360 inspeccionada; consulta conserva preview y Editar habilita escritura sin forzarla tras renders. Siguiente paso: QA; no cierre automático.
 - LECCIÓN: ninguna adicional a la propuesta compartida de CHG-105.
 - 2026-11-14 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/

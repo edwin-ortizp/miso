@@ -1,9 +1,9 @@
 # CHG-095 · Optimización de backend: consultas repetidas y código sin uso
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** —
+**Creado:** 2026-11-11 · **Aprobado:** 2026-11-11 · **Cerrado:** 2026-11-16
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -107,3 +107,4 @@ Hábitos a evitar                      ┌ Registrar incidencia ─────�
 - 2026-11-11 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-11 — Movido a in-progress/ (En desarrollo)
 - 2026-11-12 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/

@@ -1,9 +1,9 @@
 # CHG-111 · Objetivos conectados con tareas y hábitos
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** —
+**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** 2026-11-16
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -72,3 +72,4 @@ Actualizar contrato de chat si cambia y nota de migración en DEPLOY. No existe 
 
 - Diagnóstico web: barra inferior intercepta Filtrar a 375 px. Portal opt-in del popover escapa el stacking context; escritorio conserva anclaje mediante coordenadas y CSS responsive.
 - 2026-11-15 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/

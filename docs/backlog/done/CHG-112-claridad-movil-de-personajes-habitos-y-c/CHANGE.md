@@ -1,8 +1,8 @@
 # CHG-112 · Claridad móvil de personajes, Hábitos y Calendario
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
-**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** —
+**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** 2026-11-16
 **Relacionado:** CHG-058, CHG-086, CHG-016
 
 ## 0. En palabras simples
@@ -137,3 +137,4 @@ Usuario aprobó e indicó continuar. Composición: anterior · icono + fecha cen
 - T7 navegador: 6 pruebas focales/regresión pasan. Nueva comprobación de navegación, pie integrado, consejo anclado, resumen y retorno a hoy a 320/390/768/1440; axe sin infracciones en fecha/guardián y sin desbordamiento. Se conservan actualización de progreso, acordeones, ausencia de compañero y composiciones de foco/calendario compartidas. Capturas inspeccionadas: after-habits-integrated-{320,390,768,1440}.png y after-habits-other-date-{320,390,768,1440}.png.
 - T7 LECCIÓN: ninguna adicional a las propuestas previas. CHG queda para revisión visual; no se hicieron commits ni despliegue.
 - 2026-11-15 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/

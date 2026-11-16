@@ -1,9 +1,9 @@
 # CHG-117 · Aviso de ball en la campanita del header
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
+**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** 2026-11-16
 **Relacionado:** CHG-019 (balls), CHG-034/038 (avisos del juego), CHG-085 (bandeja compacta), CHG-068 (patrón de aviso con fuente sintética)
 
 ## 0. En palabras simples
@@ -56,3 +56,5 @@ Tests en `tests/Feature/Game` y `tests/Feature/Notifications*` (ver tareas). Val
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/
+- 2026-11-16 — Cerrado por el usuario con los tests sin ejecutar (entorno cloud PHP 8.3 vs lock PHP 8.4). LECCIÓN(developer): el entorno cloud debe traer PHP 8.4 para poder correr la suite antes de pasar a verificación.

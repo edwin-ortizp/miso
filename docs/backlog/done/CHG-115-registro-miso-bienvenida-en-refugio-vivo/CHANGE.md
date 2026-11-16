@@ -1,8 +1,8 @@
 # CHG-115 · Registro MiSo: bienvenida en Refugio vivo
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
-**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** —
+**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** 2026-11-16
 **Relacionado:** CHG-114
 
 ## 0. En palabras simples
@@ -99,3 +99,4 @@ Decisiones y evidencia en este CHANGE.md; mantener referencias a CHG-114. No cre
 - 2026-11-15 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-15 — Movido a in-progress/ (En desarrollo)
 - 2026-11-15 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/

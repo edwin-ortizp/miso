@@ -99,28 +99,28 @@ _Última actualización: 2026-11-16_
 | CHG-092 | M | Modulos e Inicio personalizados | done | Cerrado | 2/2 |
 | CHG-093 | M | Primera experiencia guiada | done | Cerrado | 2/2 |
 | CHG-094 | S | Medicion y prueba de primera experiencia | done | Cerrado | 2/2 |
-| CHG-095 | M | Optimización de backend: consultas repetidas y código sin uso | in-progress | En verificación | 9/9 |
+| CHG-095 | M | Optimización de backend: consultas repetidas y código sin uso | done | Cerrado | 9/9 |
 | CHG-096 | M | Prototipo de Aprendizaje y reservas con compañeros | done | Cerrado | 6/6 |
 | CHG-097 | S | Compañero favorito persistente en el prototipo de Aprendizaje | done | Cerrado | 2/2 |
 | CHG-098 | M | Contenedor Android híbrido de MiSo con WebView | done | Cerrado | 3/3 |
 | CHG-100 | M | Chat del compañero Pokémon reemplaza el FAB | done | Cerrado | 4/4 |
 | CHG-101 | M | Navegación Android y protección de formularios | done | Cerrado | 2/2 |
-| CHG-102 | M | Canal Android FCM en Laravel | in-progress | En verificación | 2/2 |
-| CHG-103 | M | Recepción FCM y apertura segura en Android | in-progress | En verificación | 2/2 |
+| CHG-102 | M | Canal Android FCM en Laravel | done | Cerrado | 2/2 |
+| CHG-103 | M | Recepción FCM y apertura segura en Android | done | Cerrado | 2/2 |
 | CHG-104 | M | Generaciones personales y ajustes de Colección por secciones | done | Cerrado | 3/3 |
 | CHG-105 | M | Evitar bloqueo de Mi día al registrar foco en PWA móvil | in-progress | En verificación | 2/4 |
 | CHG-106 | M | Restaurar chat y cierre de superficies en Android | to-do | Borrador | 0/4 |
-| CHG-107 | S | Editar tareas y Markdown con una sola acción | in-progress | En verificación | 2/2 |
+| CHG-107 | S | Editar tareas y Markdown con una sola acción | done | Cerrado | 2/2 |
 | CHG-108 | M | Secciones de formularios visibles en móvil | to-do | Borrador | 0/4 |
 | CHG-109 | M | Corregir barra de estado y escala de Android | to-do | Borrador | 0/4 |
-| CHG-110 | XS | Alinear controles del header móvil | in-progress | En verificación | 1/1 |
-| CHG-111 | M | Objetivos conectados con tareas y hábitos | in-progress | En verificación | 4/4 |
-| CHG-112 | M | Claridad móvil de personajes, Hábitos y Calendario | in-progress | En verificación | 7/7 |
-| CHG-113 | S | Acciones de creación del chat del compañero siempre abren su formulario | in-progress | En verificación | 4/4 |
-| CHG-114 | M | Login MiSo: Refugio vivo | in-progress | En verificación | 2/2 |
-| CHG-115 | M | Registro MiSo: bienvenida en Refugio vivo | in-progress | En verificación | 2/2 |
-| CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | in-progress | En verificación | 4/4 |
-| CHG-117 | S | Aviso de ball en la campanita del header | in-progress | En verificación | 3/3 |
+| CHG-110 | XS | Alinear controles del header móvil | done | Cerrado | 1/1 |
+| CHG-111 | M | Objetivos conectados con tareas y hábitos | done | Cerrado | 4/4 |
+| CHG-112 | M | Claridad móvil de personajes, Hábitos y Calendario | done | Cerrado | 7/7 |
+| CHG-113 | S | Acciones de creación del chat del compañero siempre abren su formulario | done | Cerrado | 4/4 |
+| CHG-114 | M | Login MiSo: Refugio vivo | done | Cerrado | 2/2 |
+| CHG-115 | M | Registro MiSo: bienvenida en Refugio vivo | done | Cerrado | 2/2 |
+| CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | done | Cerrado | 4/4 |
+| CHG-117 | S | Aviso de ball en la campanita del header | done | Cerrado | 3/3 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

@@ -1,9 +1,9 @@
 # CHG-113 · Acciones de creación del chat del compañero siempre abren su formulario
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** —
+**Creado:** 2026-11-15 · **Aprobado:** 2026-11-15 · **Cerrado:** 2026-11-16
 **Relacionado:** CHG-100, CHG-111
 
 ## 0. En palabras simples
@@ -48,3 +48,4 @@ Sin cambios de rutas, datos ni endpoints.
 - 2026-11-15 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-15 — Movido a in-progress/ (En desarrollo)
 - 2026-11-15 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/

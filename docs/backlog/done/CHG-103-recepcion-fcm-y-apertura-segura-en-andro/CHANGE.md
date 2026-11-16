@@ -1,10 +1,10 @@
-# CHG-102 · Canal Android FCM en Laravel
-**Estado:** En verificación
+# CHG-103 · Recepción FCM y apertura segura en Android
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-13 · **Aprobado:** 2026-11-13 · **Cerrado:** —
-**Relacionado:** CHG-101
+**Creado:** 2026-11-13 · **Aprobado:** 2026-11-13 · **Cerrado:** 2026-11-16
+**Relacionado:** CHG-101, CHG-102
 
 ## 0. En palabras simples
 MiSo conserva su interfaz y gana navegación y avisos integrados con Android. Comprobar en el APK de pruebas y revisar la matriz de validación.
@@ -13,7 +13,7 @@ MiSo conserva su interfaz y gana navegación y avisos integrados con Android. Co
 - Cómo comprobarlo tú:
 
 ## 1. Resumen
-Instalaciones y entregas Android aisladas por usuario; FCM HTTP v1 opcional, reintentos acotados y cron existente. Plan completo aprobado por el usuario en conversación el 2026-11-13. Laravel conserva pantallas, datos y reglas. Depende de CHG-101 → CHG-102 → CHG-103.
+Permisos y recepción FCM opcionales; avisos genéricos, vínculos revocables y apertura autenticada sin descartar formularios. Plan completo aprobado por el usuario en conversación el 2026-11-13. Laravel conserva pantallas, datos y reglas. Depende de CHG-101 → CHG-102 → CHG-103.
 <!-- Qué se cambia y por qué (3-5 líneas). Entendimiento aprobado por el usuario. -->
 
 ## 2. Producto (product-manager)
@@ -92,3 +92,4 @@ Android/README.md y docs/DEPLOY.md: puente, configuración, pruebas, límites y 
 - 2026-11-13 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-13 — Movido a in-progress/ (En desarrollo)
 - 2026-11-13 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario (Compuerta 3) → done/
