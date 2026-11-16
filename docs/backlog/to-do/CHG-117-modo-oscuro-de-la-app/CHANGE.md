@@ -8,7 +8,7 @@
 
 ## 0. En palabras simples
 <!-- Para el usuario: sin jerga. Si no se entiende en 30 segundos, reescríbelo. -->
-- Qué vas a ver distinto: la app tiene un modo oscuro. Lo eliges en **Ajustes → Perfil** (primera opción, donde editas nombre y correo) con tres opciones: *Claro*, *Oscuro* o *Igual que mi dispositivo*. También puedes cambiarlo al instante desde el menú del avatar del header, sin entrar a Ajustes.
+- Qué vas a ver distinto: la app tiene un modo oscuro. Lo eliges en **Ajustes → Perfil** (la primera opción; primero editas nombre y correo y debajo está la apariencia) con tres opciones: *Claro*, *Oscuro* o *Igual que mi dispositivo*. También puedes cambiarlo al instante desde el menú del avatar del header, sin entrar a Ajustes.
 - Cómo comprobarlo tú: abre el menú del avatar, toca «Oscuro» y toda la app cambia sin recargar; recarga y sigue oscura; entra desde otro dispositivo con tu cuenta y también está oscura. En Ajustes → Perfil aparece la misma elección y se mantiene sincronizada con el menú.
 
 ## 1. Resumen
@@ -30,7 +30,7 @@ Añadir un tema oscuro a toda la app web (tokens M3 en `resources/css/m3/tokens`
 <!-- Sin pantallas: escribe "No aplica — motivo" en cada parte. Con UI, approve exige un boceto ASCII en un bloque de código. Si hay flujo, agrega un diagrama en un bloque mermaid. -->
 ### 3.1 Experiencia (ux-designer)
 - Flujo y cantidad de pasos: desde el header, 2 toques (avatar → opción). Desde Ajustes, 1 toque en la opción (se aplica y guarda al instante, sin botón «Guardar», porque es una preferencia visual reversible).
-- Qué contiene cada pantalla y qué es lo más importante: Ajustes → Perfil: nueva tarjeta «Apariencia» **arriba** de «Perfil público» (primera opción). Menú del avatar: grupo «Apariencia» con tres opciones sobre «Mi perfil» / «Cerrar sesión».
+- Qué contiene cada pantalla y qué es lo más importante: Ajustes → Perfil: primero «Perfil público» (nombre y correo) y debajo la nueva tarjeta «Apariencia». Menú del avatar: grupo «Apariencia» con tres opciones sobre «Mi perfil» / «Cerrar sesión».
 - Estados (vacío / carga / error / éxito / validaciones): opción activa marcada; si falla el guardado, el tema se mantiene aplicado en la sesión y se muestra aviso de error con reintento; valor inválido rechazado en servidor.
 - Información necesaria y momento de presentación: la opción vigente siempre visible; «Igual que mi dispositivo» explica que sigue el sistema.
 - Accesibilidad de uso (teclado, foco, errores): grupo de radios (`role="radiogroup"`) con flechas y foco visible; el menú actual conserva Escape y retorno del foco; cambio anunciado con `aria-live="polite"`.
@@ -44,12 +44,12 @@ Añadir un tema oscuro a toda la app web (tokens M3 en `resources/css/m3/tokens`
 ```
 Ajustes → Perfil                         Menú del avatar
 ┌──────────────────────────────┐        ┌───────────────────────┐
-│ Apariencia                   │        │ Tu cuenta             │
-│ ( ) Claro  (•) Oscuro        │        │ Apariencia            │
-│ ( ) Igual que mi dispositivo │        │  ☀ Claro              │
-├──────────────────────────────┤        │  ☾ Oscuro      ✓      │
-│ Perfil público               │        │  ◐ Sistema            │
-│ Nombre / Email   [Guardar]   │        │ ───────────────────── │
+│ Perfil público               │        │ Tu cuenta             │
+│ Nombre / Email   [Guardar]   │        │ Apariencia            │
+├──────────────────────────────┤        │  ☀ Claro              │
+│ Apariencia                   │        │  ☾ Oscuro      ✓      │
+│ ( ) Claro  (•) Oscuro        │        │  ◐ Sistema            │
+│ ( ) Igual que mi dispositivo │        │ ───────────────────── │
 └──────────────────────────────┘        │ 👤 Mi perfil          │
                                         │ ⎋ Cerrar sesión       │
                                         └───────────────────────┘
@@ -100,3 +100,4 @@ Ajustes → Perfil                         Menú del avatar
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
+- 2026-11-16 — Orden en Ajustes → Perfil: primero los datos del perfil, luego la preferencia de tema (indicado por el usuario).
