@@ -1,9 +1,9 @@
 # CHG-121 · Objetivos: crear un KPI más intuitivo
-**Estado:** Borrador
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-16 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -14,6 +14,8 @@
 El KPI es jerga, estaba de 3.ª pestaña y sin ejemplos. Se reordena y se agregan textos de ayuda (tuteo, tono entrenador, `docs/UX-WRITING.md`). No cambia la lógica ni la validación.
 
 ## 3. UX/UI
+### 3.1 Experiencia (ux-designer)
+Plantilla: formulario modal canónico de Objetivos (secciones en pestañas); solo cambian orden y textos.
 ```
 [Información básica] [Medir avance (KPI)] [Recordatorios]
 Un KPI es un número que te dice cuánto avanzas. Ej.: bajar de 82 a 75 kg.
@@ -33,9 +35,13 @@ Solo `resources/views/livewire/goal/goal-dialog.blade.php` (orden en `:sections`
 Actualizar tests de goals que afirmen textos u orden. Comando: `php artisan test --filter=Goal`.
 
 ## 7. Tareas
-- [ ] T1 · KPI como 2.ª pestaña con nombre claro, explicación, pistas por campo y aviso de fechas — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/goal/goal-dialog.blade.php, resources/css/m3/modules/_goals.css, tests de goals — Hecho cuando: el orden y los textos de §3 se ven y los tests de goals pasan.
+- [x] T1 · KPI como 2.ª pestaña con nombre claro, explicación, pistas por campo y aviso de fechas — Resp: developer — Modelo: estandar — Archivos: resources/views/livewire/goal/goal-dialog.blade.php, resources/css/m3/modules/_goals.css, tests de goals — Hecho cuando: el orden y los textos de §3 se ven y los tests de goals pasan.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — Implementado en `goal-dialog.blade.php` (orden, textos, ayudas, aviso de fechas); sin CSS nuevo. **Sin ejecutar** tests: el entorno cloud no tiene `vendor/` (PHP 8.3). Los tests de goals no afirman textos. Pendiente: correr `php artisan test --filter=Goal` y revisar a mano.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel S)
+- 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)
+- 2026-11-16 — Implementación terminada → En verificación
