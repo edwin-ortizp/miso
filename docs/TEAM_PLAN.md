@@ -124,8 +124,8 @@ _Última actualización: 2026-11-16_
 | CHG-118 | S | Mover fecha de fin al cambiar la de inicio de una tarea | in-progress | En verificación | 1/1 |
 | CHG-119 | S | Objetivos: alinear fecha límite si el inicio la supera | in-progress | En verificación | 1/1 |
 | CHG-120 | M | Modo oscuro de la app | in-progress | En verificación | 4/4 |
-| CHG-121 | M | Social A: perfil social y amistades por código o usuario | in-progress | En desarrollo | 0/6 |
-| CHG-122 | M | Social B: racha compartida sin castigo entre amigos | to-do | Aprobado | 0/5 |
+| CHG-121 | M | Social A: perfil social y amistades por código o usuario | in-progress | En desarrollo | 6/6 |
+| CHG-122 | M | Social B: racha compartida sin castigo entre amigos | in-progress | En desarrollo | 0/5 |
 | CHG-123 | M | Social C: tabla semanal de amigos con doble opt-in | to-do | Aprobado | 0/5 |
 | CHG-124 | M | Social D: notificaciones de amistad y racha compartida | to-do | Aprobado | 0/4 |
 <!-- team:table:end -->

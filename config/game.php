@@ -58,6 +58,8 @@ return [
         'grace_days_per_month' => 2,
         'milestones' => [3, 7, 14, 30, 60, 100, 180, 365],
         'history_days' => 400,
+        // Hitos de la racha compartida entre amigos (CHG-122); solo se avisan, sin ball.
+        'shared_milestones' => [7, 30, 100],
     ],
 
     // Reto del día (CHG-077): plantillas v1, metas (mín, máx) y lo esperado por día de cada área

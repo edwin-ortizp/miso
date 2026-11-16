@@ -33,10 +33,16 @@
                     <x-slot:primary wire:click="remove({{ $row['friendship_id'] }})" wire:confirm="¿Eliminar esta amistad?">Eliminar</x-slot:primary>
                     <x-ui.menu-item icon="bi-slash-circle" tone="danger" wire:click="block({{ $row['friendship_id'] }})" wire:confirm="¿Bloquear a esta persona?">Bloquear</x-ui.menu-item>
                 </x-ui.row-actions>
+                @if ($row['streak'])
+                    <x-social.shared-streak :streak="$row['streak']" :name="$row['name']" />
+                @endif
             </div>
         @empty
             <x-ui.state variant="empty" icon="bi-people" title="Aún no tienes amigos" message="Comparte tu código para empezar." />
         @endforelse
+        @if ($friendList->isNotEmpty() && ! $visible)
+            <p class="md-body-small">La racha compartida aparece cuando tú y tu amigo activan «Visible para mis amigos».</p>
+        @endif
     </x-ui.card>
 
     @if ($outgoing->isNotEmpty())

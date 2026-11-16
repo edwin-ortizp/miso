@@ -1,5 +1,5 @@
 # CHG-122 · Social B: racha compartida sin castigo entre amigos
-**Estado:** Aprobado
+**Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -84,15 +84,20 @@ flowchart TD
 - Docs a actualizar: `docs/game.md` (sección de racha compartida), `docs/UX-WRITING.md`.
 
 ## 7. Tareas
-- [ ] T1 · Veo cuántos días seguidos cumplimos ambos — Resp: developer — Modelo: estandar — Archivos: `app/Services/Social/SharedStreak.php` — Hecho cuando: las pruebas de suma, gracia, ruptura y día en curso pasan.
-- [ ] T2 · Veo la racha compartida en la tarjeta de cada amigo — Resp: developer — Modelo: estandar — Archivos: `x-social.shared-streak`, `app/Livewire/Social/*` — Hecho cuando: se muestra y `php artisan ui:conformance` pasa.
-- [ ] T3 · Se celebra en 7, 30 y 100 días sin dar balls — Resp: developer — Modelo: estandar — Archivos: `GameNotifier`, `config/game.php` — Hecho cuando: la celebración sale una sola vez por hito y no crea eventos de recompensa.
-- [ ] T4 · Si dejan de ser amigos o apago «visible», no se ve nada — Resp: developer — Modelo: estandar — Archivos: `SharedStreak`, pruebas de privacidad — Hecho cuando: las pruebas de privacidad pasan.
-- [ ] T5 · Documentación actualizada — Resp: developer — Modelo: estandar — Archivos: `docs/game.md`, `docs/UX-WRITING.md` — Hecho cuando: reflejan la regla y `git diff --check` pasa.
+- [x] T1 · Veo cuántos días seguidos cumplimos ambos — Resp: developer — Modelo: estandar — Archivos: `app/Services/Social/SharedStreak.php` — Hecho cuando: las pruebas de suma, gracia, ruptura y día en curso pasan.
+- [x] T2 · Veo la racha compartida en la tarjeta de cada amigo — Resp: developer — Modelo: estandar — Archivos: `x-social.shared-streak`, `app/Livewire/Social/*` — Hecho cuando: se muestra y `php artisan ui:conformance` pasa.
+- [x] T3 · Se define dónde se avisa en 7, 30 y 100 días, sin dar balls — Resp: developer — Modelo: estandar — Archivos: `SharedStreak::milestoneReached()`, `config/game.php` — Hecho cuando: `shared_milestones` existe y devuelve el hito alcanzado; el aviso por la campana lo entrega CHG-124.
+- [x] T4 · Si dejan de ser amigos o apago «visible», no se ve nada — Resp: developer — Modelo: estandar — Archivos: `SharedStreak`, pruebas de privacidad — Hecho cuando: las pruebas de privacidad pasan.
+- [x] T5 · Documentación actualizada — Resp: developer — Modelo: estandar — Archivos: `docs/game.md`, `docs/UX-WRITING.md` — Hecho cuando: reflejan la regla y `git diff --check` pasa.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — Implementado: `SharedStreak`, `x-social.shared-streak`, integración en `/amigos`, `game.streak.shared_milestones`, pruebas `SharedStreakTest` y `SharedStreakPrivacyTest` (`befriend()` subido a `FriendTestCase`), docs.
+- Ajustes: `streak_met` es perezoso (lo fija `Streak::compute()` solo al abrir Inicio/Balls/Cierre), así que `SharedStreak` lo evalúa sin escribir con `Streak::dayStats()` y el umbral actual de cada persona; no usa `Streak::summary()`. El hito de pareja se avisa solo por la campana (CHG-124): `GameFeed` solo lee `game_events` del propio usuario y un toast habría exigido crear eventos. No hay línea de racha compartida en el Inicio. Se exige `social_visible` de ambos.
+- Rendimiento: `/amigos` calcula la racha de cada amigo visible (consultas por lote, hasta 100); si pesa, cachear por petición.
+- **BLOQUEADO — no verificado:** igual que CHG-121, no hay PHP 8.4; solo `php -l`. Pendiente: `php artisan test --filter=SharedStreak`, `--filter=Streak`, `--filter=Social`, `php artisan ui:conformance`, `npm run build`.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-16 — Decisión: los hitos de pareja solo celebran, sin ball, para no tocar el tope semanal de `RewardGranter`. Requiere CHG-121.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)

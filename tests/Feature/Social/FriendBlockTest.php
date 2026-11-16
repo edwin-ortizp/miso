@@ -10,11 +10,6 @@ use App\Services\Social\SocialSettings;
 
 class FriendBlockTest extends FriendTestCase
 {
-    private function befriend(User $a, User $b): Friendship
-    {
-        return Friendship::create(['requester_id' => $a->id, 'addressee_id' => $b->id, 'status' => Friendship::ACCEPTED]);
-    }
-
     public function test_snapshot_requires_friendship_and_visibility(): void
     {
         [$ana, $luis, $tercero] = User::factory()->count(3)->create();

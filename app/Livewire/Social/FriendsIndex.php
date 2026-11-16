@@ -5,6 +5,7 @@ namespace App\Livewire\Social;
 use App\Models\User;
 use App\Rules\Username;
 use App\Services\Social\Friends;
+use App\Services\Social\SharedStreak;
 use App\Services\Social\SocialSettings;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
@@ -128,7 +129,7 @@ class FriendsIndex extends Component
         $settings->setVisible(auth()->id(), ! $settings->visible(auth()->id()));
     }
 
-    public function render(Friends $friends, SocialSettings $settings)
+    public function render(Friends $friends, SocialSettings $settings, SharedStreak $shared)
     {
         /** @var User $me */
         $me = auth()->user();
@@ -139,7 +140,7 @@ class FriendsIndex extends Component
             'inviteUrl' => route('social.friends', ['codigo' => $me->ensureFriendCode()]),
             'incoming' => $friends->incoming($me),
             'outgoing' => $friends->outgoing($me),
-            'friendList' => $friends->friends($me),
+            'friendList' => $friends->friends($me)->map(fn (array $row) => $row + ['streak' => $shared->for($me, $row['id'])]),
             'blockedList' => $friends->blocked($me),
             'visible' => $settings->visible($me->id),
         ]);
