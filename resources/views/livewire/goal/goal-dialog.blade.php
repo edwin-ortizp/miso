@@ -3,8 +3,8 @@
                       :submit="$editingId ? 'Actualizar' : 'Guardar'"
                       :sections="[
                           'basic' => ['label' => 'Información básica', 'icon' => 'bi-flag', 'error' => $errors->hasAny(['title', 'startDate', 'dueDate'])],
+                          'kpi' => ['label' => 'Medir avance (KPI)', 'icon' => 'bi-graph-up-arrow', 'error' => $errors->hasAny(['kpiName', 'kpiUnit', 'kpiStartValue', 'kpiTargetValue'])],
                           'reminders' => ['label' => 'Recordatorios', 'icon' => 'bi-bell', 'error' => $errors->hasAny(['reminders', 'reminders.*'])],
-                          'kpi' => ['label' => 'Indicador (KPI)', 'icon' => 'bi-graph-up-arrow', 'error' => $errors->hasAny(['kpiName', 'kpiUnit', 'kpiStartValue', 'kpiTargetValue'])],
                       ]">
         <x-ui.form-dialog-section name="basic" title="Información básica">
             <div class="d-flex flex-column gap-3">
@@ -20,30 +20,37 @@
             </div>
         </x-ui.form-dialog-section>
 
-        <x-ui.form-dialog-section name="reminders" title="Recordatorios">
-            @include('livewire.notifications.reminder-fields')
-        </x-ui.form-dialog-section>
-        <x-ui.form-dialog-section name="kpi" title="Indicador (KPI)" description="Opcional: compara el avance real con el ritmo esperado.">
+        <x-ui.form-dialog-section name="kpi" title="Medir avance (KPI)" description="Un KPI es un número que te dice cuánto avanzas. Ej.: bajar de 82 a 75 kg. Es opcional.">
             <div class="d-flex flex-column gap-3">
-                <label class="goal-kpi-toggle">
-                    <input wire:model.live="kpiEnabled" type="checkbox">
-                    <span><i class="bi bi-graph-up-arrow" aria-hidden="true"></i> Configurar KPI único</span>
-                </label>
+                @unless ($kpiEnabled)
+                    <button type="button" class="md-btn-outlined align-self-start" wire:click="$set('kpiEnabled', true)">
+                        <i class="bi bi-plus-lg" aria-hidden="true"></i> Agregar KPI
+                    </button>
+                @endunless
 
                 @if ($kpiEnabled)
                     <div class="goal-kpi-form">
-                        <x-ui.field name="kpiName" label="Nombre del KPI" wire:model="kpiName" />
-                        <x-ui.field name="kpiUnit" label="Unidad" wire:model="kpiUnit" />
-                        <x-ui.select name="kpiDirection" label="Dirección" :selected="$kpiDirection"
-                                     :options="['increase' => 'Aumentar hasta la meta', 'decrease' => 'Reducir hasta la meta']"
+                        <x-ui.field name="kpiName" label="¿Qué vas a medir?" help="Ej.: Peso corporal, Ahorro, Páginas leídas" wire:model="kpiName" />
+                        <x-ui.field name="kpiUnit" label="Unidad" help="Ej.: kg, $, páginas" wire:model="kpiUnit" />
+                        <x-ui.select name="kpiDirection" label="¿Hacia dónde va?" :selected="$kpiDirection"
+                                     :options="['increase' => 'Subir hasta la meta', 'decrease' => 'Bajar hasta la meta']"
                                      wire:model="kpiDirection" />
                         <div class="md-field-pair">
-                            <x-ui.field name="kpiStartValue" label="Valor inicial" type="number" step="0.01" wire:model="kpiStartValue" />
-                            <x-ui.field name="kpiTargetValue" label="Valor objetivo" type="number" step="0.01" wire:model="kpiTargetValue" />
+                            <x-ui.field name="kpiStartValue" label="Valor inicial" help="Dónde estás hoy" type="number" step="0.01" wire:model="kpiStartValue" />
+                            <x-ui.field name="kpiTargetValue" label="Valor objetivo" help="Dónde quieres llegar" type="number" step="0.01" wire:model="kpiTargetValue" />
                         </div>
-                        <p class="goal-kpi-form__hint">Con fechas de inicio y límite, el detalle comparará el avance real con el ritmo esperado.</p>
+                        @if (! $startDate || ! $dueDate)
+                            <p class="goal-kpi-form__hint" role="status"><i class="bi bi-exclamation-circle" aria-hidden="true"></i> Para comparar tu avance con el ritmo esperado, agrega fecha de inicio y límite en Información básica.</p>
+                        @else
+                            <p class="goal-kpi-form__hint">El detalle comparará tu avance real con el ritmo esperado entre esas fechas.</p>
+                        @endif
+                        <button type="button" class="md-btn-text align-self-start" wire:click="$set('kpiEnabled', false)">Quitar KPI</button>
                     </div>
                 @endif
             </div>
+        </x-ui.form-dialog-section>
+
+        <x-ui.form-dialog-section name="reminders" title="Recordatorios">
+            @include('livewire.notifications.reminder-fields')
         </x-ui.form-dialog-section>
     </x-ui.form-dialog>
