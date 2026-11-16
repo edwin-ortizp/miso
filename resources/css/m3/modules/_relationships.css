@@ -161,7 +161,7 @@
 .md-relationship-home { display: grid; gap: 16px; min-width: 0; }
 
 .md-relationship-profile { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.md-relationship-profile__avatar { display: grid; flex: none; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: color-mix(in srgb, var(--md-module-accent) 16%, var(--md-sys-color-surface-container-lowest)); color: var(--md-module-accent); font-size: 1.1rem; font-weight: 700; }
+.md-relationship-profile__avatar { display: grid; flex: none; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: color-mix(in srgb, var(--md-module-accent) 16%, var(--md-sys-color-surface-container-lowest)); color: var(--md-module-accent); font-size: 1.1rem; font-weight: 700; object-fit: cover; }
 .md-relationship-profile__body { min-width: 0; }
 .md-relationship-profile__body strong { display: block; color: var(--md-sys-color-on-surface); font-size: .95rem; }
 .md-relationship-profile__body span { display: block; margin-top: 2px; font-size: .76rem; }
