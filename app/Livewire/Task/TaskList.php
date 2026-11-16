@@ -107,6 +107,36 @@ class TaskList extends Component
         'XL' => 'XL (> 4h)',
     ];
 
+    /**
+     * CHG-118: al mover la fecha de inicio, la de fin se desplaza los mismos días (se conserva la duración).
+     * Sin fecha de inicio previa, o sin fecha de fin, no hay nada que desplazar; si aun así el fin queda
+     * antes del nuevo inicio, se alinea con él.
+     */
+    public function updatingStartDate(mixed $value): void
+    {
+        $old = $this->startDate;
+        if (! filled($value) || ! filled($this->endDate)) {
+            return;
+        }
+        try {
+            $new = Carbon::createFromFormat('!Y-m-d', (string) $value);
+            $end = Carbon::createFromFormat('!Y-m-d', (string) $this->endDate);
+            $from = filled($old) ? Carbon::createFromFormat('!Y-m-d', (string) $old) : null;
+        } catch (\Throwable) {
+            return;
+        }
+        if (! $new || ! $end) {
+            return;
+        }
+        if ($from) {
+            $end = $end->copy()->addDays((int) $from->diffInDays($new, false));
+        }
+        if ($end->lt($new)) {
+            $end = $new->copy();
+        }
+        $this->endDate = $end->toDateString();
+    }
+
     public function updatedSort(): void
     {
         $this->sort = array_key_exists($this->sort, self::SORTS) ? $this->sort : 'updated';

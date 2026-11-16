@@ -111,7 +111,7 @@ _Última actualización: 2026-11-16_
 | CHG-105 | M | Evitar bloqueo de Mi día al registrar foco en PWA móvil | done | Cerrado | 4/4 |
 | CHG-106 | M | Restaurar chat y cierre de superficies en Android | in-progress | En desarrollo | 0/4 |
 | CHG-107 | S | Editar tareas y Markdown con una sola acción | done | Cerrado | 2/2 |
-| CHG-108 | M | Secciones de formularios visibles en móvil | in-progress | En desarrollo | 0/4 |
+| CHG-108 | M | Secciones de formularios visibles en móvil | in-progress | En desarrollo | 3/4 |
 | CHG-109 | M | Corregir barra de estado y escala de Android | to-do | Aprobado | 0/4 |
 | CHG-110 | XS | Alinear controles del header móvil | done | Cerrado | 1/1 |
 | CHG-111 | M | Objetivos conectados con tareas y hábitos | done | Cerrado | 4/4 |
@@ -121,6 +121,7 @@ _Última actualización: 2026-11-16_
 | CHG-115 | M | Registro MiSo: bienvenida en Refugio vivo | done | Cerrado | 2/2 |
 | CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | done | Cerrado | 4/4 |
 | CHG-117 | S | Aviso de ball en la campanita del header | done | Cerrado | 3/3 |
+| CHG-118 | S | Mover fecha de fin al cambiar la de inicio de una tarea | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
