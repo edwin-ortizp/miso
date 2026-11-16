@@ -127,7 +127,7 @@ _Última actualización: 2026-11-16_
 | CHG-121 | M | Social A: perfil social y amistades por código o usuario | in-progress | En desarrollo | 6/6 |
 | CHG-122 | M | Social B: racha compartida sin castigo entre amigos | in-progress | En desarrollo | 5/5 |
 | CHG-123 | M | Social C: tabla semanal de amigos con doble opt-in | in-progress | En desarrollo | 5/5 |
-| CHG-124 | M | Social D: notificaciones de amistad y racha compartida | in-progress | En desarrollo | 0/4 |
+| CHG-124 | M | Social D: notificaciones de amistad y racha compartida | in-progress | En desarrollo | 4/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
