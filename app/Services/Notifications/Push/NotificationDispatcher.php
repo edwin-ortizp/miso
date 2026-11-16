@@ -120,6 +120,11 @@ class NotificationDispatcher
             ];
         }
 
+        // CHG-125: un aviso de amistad no es un check-in; solo se ofrece abrirlo.
+        if ($notice->source_type === \App\Services\Social\FriendNotices::SOURCE) {
+            return ['actions' => [['action' => 'open', 'title' => 'Abrir']], 'checkin_url' => $checkin];
+        }
+
         if ($isWater) {
             return [
                 'actions' => [['action' => 'quick-water', 'title' => '+1 vaso'], ['action' => 'open', 'title' => 'Abrir']],

@@ -30,7 +30,7 @@ class NotificationBell extends Component
 
     public string $draftType = '';
 
-    public const TYPES = ['birthday' => 'Cumpleaños', 'task_due' => 'Tareas', 'plan_due' => 'Planes', 'reminder' => 'Recordatorios', 'guardian_nudge' => 'Guardián', 'weekly_insights' => 'Resumen semanal', 'game_ball' => 'Balls', 'medication_due' => 'Medicamentos'];
+    public const TYPES = ['birthday' => 'Cumpleaños', 'task_due' => 'Tareas', 'plan_due' => 'Planes', 'reminder' => 'Recordatorios', 'guardian_nudge' => 'Guardián', 'weekly_insights' => 'Resumen semanal', 'game_ball' => 'Balls', 'friend_request' => 'Solicitudes de amistad', 'friend_accepted' => 'Amistades', 'shared_streak' => 'Racha compartida', 'medication_due' => 'Medicamentos'];
 
     public const READING = ['all' => 'Todas', 'unread' => 'Sin leer', 'read' => 'Leídas'];
 
@@ -95,7 +95,7 @@ class NotificationBell extends Component
         return $this->available()
             ->when($this->reading === 'unread', fn ($q) => $q->whereNull('read_at'))
             ->when($this->reading === 'read', fn ($q) => $q->whereNotNull('read_at'))
-            ->when(in_array($this->type, ['birthday', 'task_due', 'plan_due', 'reminder', 'guardian_nudge', 'weekly_insights', 'game_ball', 'medication_due']), fn ($q) => $q->where('type', $this->type));
+            ->when(in_array($this->type, array_keys(self::TYPES)), fn ($q) => $q->where('type', $this->type));
     }
 
     public function render()

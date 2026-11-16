@@ -105,3 +105,13 @@ La copia recuperable previa está en `storage/framework/testing/notifications-be
 - Cancelación: registrar una toma cancela solo el aviso de esa toma; finalizar, eliminar o cambiar la programación de un medicamento cancela los avisos de hoy (`MedicationReminderObserver`).
 - Pruebas: `php artisan test --filter='MedicationReminder|QuickMedication'`.
 
+## Avisos de amistad (CHG-125)
+
+Tres tipos en la campana, con origen `friendship` (`App\Services\Social\FriendNotices`): `friend_request` (solicitud recibida), `friend_accepted` (solicitud aceptada) y `shared_streak` (hito de racha compartida: 7, 30 y 100 días, `game.streak.shared_milestones`).
+
+- **Se crean al ocurrir el hecho:** al enviar o aceptar una solicitud (`Friends`). Los hitos de racha los crea el comando `miso:friend-milestones` (cada hora, ver `docs/DEPLOY.md`) y también al abrir `/amigos`; la misma clave los hace idempotentes.
+- **Idempotencia:** índice único `(usuario, origen, tipo, ocurrencia)` con el par de cuentas normalizado (`req:{menor}:{mayor}`, `acc:…`, `streak:…:{n}`), así que reenviar una solicitud o abrir la pantalla dos veces no duplica. `source_id` es un uuid v5 derivado del par.
+- **Preferencias** (módulo `notifications`): `friend_notices` (campana, activo por defecto) y `push_friend_request`, `push_friend_accepted`, `push_shared_streak` (celular, apagados por defecto). La preferencia solo la aplica el productor: con `friend_notices` apagado no se crea el aviso.
+- **Bloqueo:** si el par está bloqueado no se crea ningún aviso.
+- **Destino:** `/amigos`. El push solo ofrece «Abrir» (no «Check-in»).
+- No hay MCP ni cambios al Director.

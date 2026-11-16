@@ -10,6 +10,7 @@ use App\Models\UserNotification;
 use App\Services\Game\BallNotice;
 use App\Services\Insights\WeeklyInsights;
 use App\Services\Notifications\Push\GuardianNudgePlanner;
+use App\Services\Social\FriendNotices;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
@@ -37,7 +38,7 @@ class NotificationPresentation
     {
         $now = CarbonImmutable::now(NotificationSource::TIMEZONE);
         // CHG-134: el aviso de medicamento lleva su propio título y cuerpo (texto genérico si es sensible).
-        $special = in_array($notice->source_type, [GuardianNudgePlanner::SOURCE, WeeklyInsights::SOURCE, BallNotice::SOURCE], true)
+        $special = in_array($notice->source_type, [GuardianNudgePlanner::SOURCE, WeeklyInsights::SOURCE, BallNotice::SOURCE, FriendNotices::SOURCE], true)
             || $notice->type === 'medication_due';
         $kind = match (true) {
             $source instanceof Task => 'Tarea',
@@ -47,13 +48,15 @@ class NotificationPresentation
             $notice->type === 'medication_due' => 'Medicamento',
             $notice->source_type === GuardianNudgePlanner::SOURCE => 'Guardián',
             $notice->source_type === BallNotice::SOURCE => 'Ball',
+            $notice->source_type === FriendNotices::SOURCE => 'Amigos',
             $notice->source_type === WeeklyInsights::SOURCE => 'Resumen semanal',
             default => 'Aviso',
         };
         $icon = match ($notice->type) {
             'task_due' => 'bi-check2-square', 'plan_due' => 'bi-calendar-event',
             'birthday' => 'bi-gift', 'reminder' => 'bi-alarm',
-            'guardian_nudge' => 'bi-stars', 'weekly_insights' => 'bi-bar-chart', 'game_ball' => 'bi-gift', 'medication_due' => 'bi-capsule', default => 'bi-info-circle',
+            'guardian_nudge' => 'bi-stars', 'weekly_insights' => 'bi-bar-chart', 'game_ball' => 'bi-gift',
+            'friend_request' => 'bi-person-plus', 'friend_accepted' => 'bi-person-check', 'shared_streak' => 'bi-fire', 'medication_due' => 'bi-capsule', default => 'bi-info-circle',
         };
         $title = $special ? $notice->title : ($source instanceof Relationship ? 'Cumpleaños de '.$source->full_name : ($source?->title ?? 'Elemento no disponible'));
         $body = $special ? $notice->body : '';
@@ -106,6 +109,7 @@ class NotificationPresentation
         $destination = match (true) {
             $notice->type === 'medication_due' => route('health.medications'),
             $notice->source_type === BallNotice::SOURCE => route('game.balls'),
+            $notice->source_type === FriendNotices::SOURCE => route('social.friends'),
             $notice->source_type === WeeklyInsights::SOURCE => route('statistics').'#insights',
             $notice->source_type === GuardianNudgePlanner::SOURCE => route(match (GuardianNudgePlanner::moduleFor((string) $notice->source_id)) {
                 'habits' => 'habits', 'water' => 'water.daily', 'tasks' => 'tasks.list', 'exercise' => 'exercise', default => 'home',

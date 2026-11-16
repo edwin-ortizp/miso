@@ -315,6 +315,26 @@ Cuenta los días seguidos en que la persona cuida varias partes de su vida. No r
 - **Sin racha pero con acciones hoy (CHG-070):** la línea dice «A N acciones de tu racha» y «Llevas X de Y hoy. Aún estás a tiempo.». «Empieza hoy» queda solo para 0 acciones.
 - Zona horaria: la de la app (America/Bogota). Servicio: `App\Services\Game\Streak`.
 
+## Racha compartida (CHG-123)
+
+Entre dos amigos de MiSo (CHG-122). Un día cuenta cuando **ambos** cumplieron su racha personal; no resta nada: si se corta se conserva la mejor racha y el conteo vuelve a empezar.
+
+- **Visibilidad:** hay amistad aceptada y los dos activaron «Visible para mis amigos». Solo se comparten los días cumplidos, nunca qué se hizo.
+- **Cálculo (`App\Services\Social\SharedStreak`):** solo lee. Un día fijado en `user_active_days.streak_met` se usa tal cual (conserva su umbral); si aún es `NULL` se evalúa con `Streak::dayStats()` y el umbral actual de esa persona, sin escribir. Sin fila, no cumplido. Hoy se calcula en vivo y nunca rompe.
+- **Gracias:** `game.streak.grace_days_per_month` (2) por mes, compartidas por la pareja y solo si hay racha que proteger.
+- **Hitos:** `game.streak.shared_milestones` (7, 30, 100). Sin ball: se avisan por la campana (CHG-125).
+- **Dónde se ve:** tarjeta `x-social.shared-streak` en cada amigo de `/amigos`.
+- **Límite:** día de America/Bogota para ambos.
+
+## Tabla semanal de amigos (CHG-124)
+
+Pestaña **Semana** del módulo Amigos (`/amigos/semana`). Muestra cuántas acciones del juego hizo cada amigo en la semana (lunes a domingo, America/Bogota, como `WeekPlanner`); empieza en cero cada lunes, sin arrastre.
+
+- **Doble opt-in:** aparece quien activó «Visible para mis amigos» y «Mostrar mi semana» (ambos apagados por defecto). Sin los dos propios, no ves a nadie.
+- **Qué se comparte:** un número por persona (eventos `activity` de `game_events`); nunca el origen ni el contenido. No aplica el antifarmeo de tareas del mismo día de la racha.
+- **Presentación:** orden por acciones con tu fila resaltada («Tú»), sin posiciones ni «último lugar». Tope de 100 personas.
+- **Servicio:** `FriendSnapshot::weekly()`; ajustes en `module_settings` (módulo `social`: `social_visible`, `social_leaderboard`).
+
 ## Cierre del día (CHG-070)
 
 Ritual nocturno sin recompensa ni culpa: ver cómo fue el día y dejar mañana listo.

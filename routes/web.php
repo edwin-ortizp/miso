@@ -39,6 +39,8 @@ use App\Livewire\Plan\PlanShow;
 use App\Livewire\Pomodoro\PomodoroSettings;
 use App\Livewire\Pomodoro\PomodoroTimer;
 use App\Livewire\Relationship\RelationshipBirthdays;
+use App\Livewire\Social\FriendsIndex;
+use App\Livewire\Social\WeeklyBoard;
 use App\Livewire\Relationship\RelationshipEvents;
 use App\Livewire\Relationship\RelationshipHistory;
 use App\Livewire\Relationship\RelationshipIndex;
@@ -176,6 +178,8 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/tasks/progress', TaskProgress::class)->name('tasks.progress');
     Route::get('/tasks/settings', TaskSettings::class)->name('tasks.settings');
     Route::get('/tasks/settings/statuses', TaskSettings::class)->defaults('section', 'statuses')->name('tasks.settings.statuses');
+    Route::get('/amigos', FriendsIndex::class)->name('social.friends');
+    Route::get('/amigos/semana', WeeklyBoard::class)->name('social.week');
     Route::get('/relationships', RelationshipIndex::class)->name('relationships');
     Route::get('/relationships/events', RelationshipEvents::class)->name('relationships.events');
     Route::get('/relationships/birthdays', RelationshipBirthdays::class)->name('relationships.birthdays');

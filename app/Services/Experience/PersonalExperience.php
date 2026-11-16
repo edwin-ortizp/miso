@@ -12,6 +12,9 @@ class PersonalExperience
 {
     public const KEY = 'personal-experience';
 
+    /** Módulos que nunca se ocultan ni se ofrecen como opcionales; «social» solo muestra un código y ajustes opt-in (CHG-122). */
+    public const ALWAYS_VISIBLE = ['home', 'settings', 'social'];
+
     private array $states = [];
 
     public function catalog(): array
@@ -19,7 +22,7 @@ class PersonalExperience
         $items = [];
         foreach (config('modules.navigation', []) as $section) {
             foreach ($section['items'] as $item) {
-                if (! in_array($item['module'], ['home', 'settings'], true)) {
+                if (! in_array($item['module'], self::ALWAYS_VISIBLE, true)) {
                     $items[$item['module']] = ['label' => $item['label'], 'icon' => $item['icon'],
                         'description' => config('modules.'.$item['module'].'.subtitle', 'Organiza y consulta esta parte de tu día.')];
                 }
@@ -36,7 +39,7 @@ class PersonalExperience
 
     public function visible(string $module, ?int $userId = null): bool
     {
-        if (in_array($module, ['home', 'settings'], true)) {
+        if (in_array($module, self::ALWAYS_VISIBLE, true)) {
             return true;
         }
         $state = $this->state($userId ?? (int) auth()->id());
@@ -49,7 +52,7 @@ class PersonalExperience
         $state = $this->state($userId ?? (int) auth()->id());
         $sections = config('modules.navigation');
         foreach ($sections as $key => &$section) {
-            $section['items'] = array_values(array_filter($section['items'], fn ($item) => in_array($item['module'], ['home', 'settings'], true)
+            $section['items'] = array_values(array_filter($section['items'], fn ($item) => in_array($item['module'], self::ALWAYS_VISIBLE, true)
                 || ! isset($state['modules']) || in_array($item['module'], $state['modules'], true)));
             if (! $section['items']) {
                 unset($sections[$key]);
