@@ -1,9 +1,9 @@
 # CHG-129 · Salud: medicamentos tomados y por tomar (con MCP)
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-16 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
 **Relacionado:** CHG-122 (aviso «no es dispositivo médico» y criterios de privacidad), CHG-130 (recordatorios)
 
 ## 0. En palabras simples
@@ -29,11 +29,13 @@ Hoy MiSo no tiene medicamentos. Este CHG agrega dos conceptos: el **medicamento 
   - CA4. Dado el asistente vía MCP, cuando pregunta por los pendientes de hoy, entonces recibe la misma lista que la UI.
   - CA5. Dado el asistente vía MCP, cuando registra una toma con medicamento y dosis, entonces se crea igual que desde la UI (mismo Action) y devuelve confirmación con el estado de las pendientes.
   - CA6. Dado otro usuario, cuando consulta por UI o MCP, entonces nunca ve estos datos.
+  - CA8. Dado un medicamento o toma sensible, cuando el asistente consulta por MCP sin pedirlo expresamente, entonces no se devuelven; con `include_sensitive=true` sí.
   - CA7. Dado un registro repetido (mismo medicamento y misma toma programada), cuando se reintenta, entonces no duplica (idempotente por clave de operación).
 
 ## 3. UX/UI
 <!-- Sin pantallas: escribe "No aplica — motivo" en cada parte. Con UI, approve exige un boceto ASCII en un bloque de código. Si hay flujo, agrega un diagrama en un bloque mermaid. -->
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: pestaña nueva «Medicamentos» del módulo Salud (patrón de módulo con pestañas de `config/modules.php`). No existe una plantilla específica en `## Anatomía` de docs/UX-DESIGN.md.
 - Flujo y cantidad de pasos:
   - Marcar una toma: Salud → «Medicamentos» → botón «Tomado» en la tarjeta de la toma: **1 toque** (UX-001). «Omitir» abre un diálogo corto con motivo opcional.
   - Crear un medicamento: FAB «Registrar» → opciones «Medicamento» y «Toma puntual» (mismo FAB, `'create' => true`). Medicamento: nombre, dosis, frecuencia y horarios, inicio; fin, indicaciones, notas y evento de salud van en «Más detalle».
@@ -131,7 +133,7 @@ Boceto móvil:
   - Zona horaria y «día» de la toma: usar la zona del usuario y probar el cambio de día.
   - Frecuencias complejas (cada 8 h, ciclos): limitar a diaria, N veces al día con horarios, cada N horas y días de la semana; lo demás, a CHG posterior.
   - Borrar un medicamento no debe perder el historial: la toma conserva su nombre.
-  - Datos sensibles: seguir la decisión de privacidad de CHG-122 (cifrado y `is_sensitive` abiertos).
+  - Datos sensibles: sin cifrado en esta versión; columna `is_sensitive` (default false) en `medications` y `medication_intakes`; las consultas amplias de MCP la excluyen salvo `include_sensitive=true` (decisión de CHG-122).
 - Qué NO tocar: `health_events`/`health_logs`, inventario y compras.
 
 ## 5. Pruebas (qa-tester)
@@ -140,6 +142,7 @@ Boceto móvil:
 | Pendientes del día según frecuencia (CA1, CA2) | Unitaria | Support | `MedicationScheduleTest` |
 | Marcar tomada/omitida y toma puntual (CA1, CA3) | Feature | Livewire | `MedicationsModuleTest` |
 | Paridad UI/MCP y pendientes (CA4, CA5) | Feature | MCP | `LifeTrackerMedicationMcpTest` |
+| Sensibles ocultos en MCP salvo `include_sensitive` (CA8) | Feature | MCP | `LifeTrackerMedicationMcpTest` |
 | Aislamiento entre usuarios (CA6) | Feature | Livewire + MCP | ambos |
 | Idempotencia por `operation_key` (CA7) | Feature | MCP | `LifeTrackerMedicationMcpTest` |
 | Cambio de día y zona horaria | Unitaria | Support | `MedicationScheduleTest` |
@@ -161,7 +164,8 @@ Boceto móvil:
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M) a pedido del usuario: registrar lo consumido y lo que se debe consumir, con registro y consulta por MCP.
 - Decidido 2026-11-16: el usuario quiere recordatorios con el cron existente. Se especifican en CHG-130 para mantener este CHG en nivel M.
-- Abierta: ¿frecuencias a soportar en la primera versión? Propuesta: diaria con horarios, cada N horas y días de la semana.
-- Abierta: ¿ligar un medicamento a un evento de salud (enfermedad, cita) en la primera versión?
-- Abierta: privacidad (cifrado, `is_sensitive` para MCP): se resuelve junto con CHG-122 y aplica igual aquí.
+- Decidido 2026-11-16: frecuencias de la primera versión: diaria con horarios, cada N horas y días de la semana.
+- Decidido 2026-11-16: el medicamento puede ligarse opcionalmente a un evento de salud (en «Más detalle»).
+- Decidido 2026-11-16: privacidad según CHG-122: sin cifrado, `is_sensitive` en medicamentos y tomas, ocultos en MCP salvo `include_sensitive=true`.
 - Si crece, dividir en: (1) medicamentos y tomas por UI, (2) MCP.
+- 2026-11-16 — Aprobado por el usuario (Compuerta 2)

@@ -1,9 +1,9 @@
 # CHG-130 · Salud: recordatorios de medicamentos con el cron existente
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-16 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
 **Relacionado:** CHG-129 (depende de él: medicamentos y tomas)
 
 ## 0. En palabras simples
@@ -38,6 +38,7 @@ Agrega recordatorios a los medicamentos de CHG-129 reutilizando el sistema de no
 ## 3. UX/UI
 <!-- Sin pantallas: escribe "No aplica — motivo" en cada parte. Con UI, approve exige un boceto ASCII en un bloque de código. Si hay flujo, agrega un diagrama en un bloque mermaid. -->
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: no aplica una plantilla de página; es un aviso (push y campana) más un interruptor en la pantalla existente de Ajustes → Notificaciones.
 - Flujo y cantidad de pasos: la persona no hace nada para recibir avisos más allá de tener medicamentos con horario. Apagar el push: Ajustes → Notificaciones → interruptor «Medicamentos» (1 toque). Atender un aviso: «Tomado» en la notificación (1 toque, sin abrir la app) o «Abrir» para ir a Salud → Medicamentos.
 - Qué contiene cada pantalla y qué es lo más importante: el aviso dice qué medicamento, qué dosis y a qué hora; el botón principal es «Tomado». En la campana el aviso lleva a Medicamentos.
 - Estados (vacío / carga / error / éxito / validaciones):
@@ -147,5 +148,6 @@ Ajustes ▸ Notificaciones
 - Decidido 2026-11-16: el enlace de «Tomado» vale hasta el fin del día local de la toma.
 - Decidido 2026-11-16: el aviso solo tiene «Tomado» y «Abrir»; omitir se hace desde la app.
 - Decidido 2026-11-16: el interruptor «Medicamentos» apaga solo el push; la campana siempre muestra el aviso.
-- Abierta: zona horaria por usuario (hoy fija en `America/Bogota`). Propuesta: no tocarla en este CHG.
-- Abierta: ventana de vigencia de 60 min; ¿otro valor?
+- Decidido 2026-11-16: zona horaria por usuario fuera de alcance; se mantiene `America/Bogota`.
+- Decidido 2026-11-16: ventana de vigencia de 60 minutos.
+- 2026-11-16 — Aprobado por el usuario (Compuerta 2)

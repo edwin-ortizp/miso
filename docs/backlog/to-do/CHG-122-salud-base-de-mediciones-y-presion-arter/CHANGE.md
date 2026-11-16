@@ -1,9 +1,9 @@
 # CHG-122 · Salud: base de mediciones y presión arterial
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-16 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
 **Relacionado:** CHG-123, CHG-124, CHG-125, CHG-126, CHG-127, CHG-128
 
 ## 0. En palabras simples
@@ -25,6 +25,7 @@ Hoy Salud solo guarda eventos (citas, síntomas, vacunas) y seguimiento de inten
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - CA1. Dado un usuario autenticado, cuando registra 120/80 mmHg, entonces queda guardada con su fecha y hora y aparece en su historial.
   - CA2. Dado un valor fuera del rango de referencia, cuando se muestra, entonces lleva una marca informativa sin lenguaje de diagnóstico y con remisión al profesional de salud.
+  - CA6. Dado una medición, cuando el asistente consulta por MCP sin pedirlo expresamente, entonces las mediciones marcadas como sensibles no se devuelven; con `include_sensitive=true` sí.
   - CA3. Dado otro usuario, cuando consulta sus mediciones por UI o MCP, entonces nunca ve las del primero.
   - CA4. Dado un valor imposible (diastólica mayor que sistólica, o fuera de límites fisiológicos), cuando guarda, entonces se rechaza con un mensaje que indica qué corregir.
   - CA5. Dado el asistente vía MCP, cuando registra una presión, entonces el resultado coincide con el de la UI.
@@ -32,6 +33,7 @@ Hoy Salud solo guarda eventos (citas, síntomas, vacunas) y seguimiento de inten
 ## 3. UX/UI
 <!-- Sin pantallas: escribe "No aplica — motivo" en cada parte. Con UI, approve exige un boceto ASCII en un bloque de código. Si hay flujo, agrega un diagrama en un bloque mermaid. -->
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: pestaña nueva «Mediciones» del módulo Salud (patrón de módulo con pestañas de `config/modules.php`, como las pestañas de Agua). No existe una plantilla específica en `## Anatomía` de docs/UX-DESIGN.md.
 - Flujo y cantidad de pasos: Salud → pestaña «Mediciones» → FAB «Registrar» → diálogo (sistólica, diastólica, listo) → «Guardar». Son 2 pasos y 3 campos obligatorios; la fecha y hora vienen en «ahora» y el pulso y las notas van plegados en «Más detalle» (UX-003). Editar: toque en la fila abre el mismo diálogo. Eliminar pide confirmación que nombra el valor.
 - Qué contiene cada pantalla y qué es lo más importante: primero la **última medición** con su marca de rango (lo que la persona quiere ver al abrir), después el registro rápido (FAB) y al final el historial. En móvil el orden es el mismo (UX-002).
 - Estados (vacío / carga / error / éxito / validaciones):
@@ -107,7 +109,7 @@ Boceto móvil (el diálogo ocupa la pantalla):
 
 ## 4. Diseño técnico (software-architect)
 - Archivos a crear / modificar:
-  - Migración `create_health_measurements_table`: `uuid id`, `user_id`, `type`, `value`, `value2` nullable, `unit`, `measured_at`, `context` nullable, `notes`, `health_event_id` nullable (FK compuesta con `user_id`), `source`, `source_key`. Índice `[user_id, type, measured_at]` con nombre corto explícito.
+  - Migración `create_health_measurements_table`: `uuid id`, `user_id`, `type`, `value`, `value2` nullable, `unit`, `measured_at`, `context` nullable, `notes`, `health_event_id` nullable (FK compuesta con `user_id`), `is_sensitive` boolean default false, `source`, `source_key`. Índice `[user_id, type, measured_at]` con nombre corto explícito.
   - `app/Models/HealthMeasurement.php` (`BelongsToUser`, `HasUuids`) con catálogo `TYPES` (etiqueta, unidad, límites fisiológicos, rango de referencia). Relación en `User`.
   - `app/Actions/LogHealthMeasurement.php` compartida entre UI y MCP (modelo: `LogDrink`).
   - `app/Livewire/Health/HealthMeasurements.php` y vista en `resources/views/livewire/health/`; ruta en `routes/web.php`; pestaña en `config/modules.php`.
@@ -123,6 +125,7 @@ Boceto móvil (el diálogo ocupa la pantalla):
 |---|---|---|---|
 | Guardar y listar presión (CA1) | Feature | Livewire | `HealthMeasurementsTest` |
 | Fuera de rango marcado (CA2) | Feature | Livewire | `HealthMeasurementsTest` |
+| Sensibles ocultas en MCP salvo `include_sensitive` (CA6) | Feature | MCP | `LifeTrackerHealthMeasurementMcpTest` |
 | Aislamiento entre usuarios (CA3) | Feature | Livewire + MCP | `HealthMeasurementsTest`, `LifeTrackerHealthMeasurementMcpTest` |
 | Validación de límites (CA4) | Feature | Livewire | `HealthMeasurementsTest` |
 | Paridad UI/MCP (CA5) | Feature | MCP | `LifeTrackerHealthMeasurementMcpTest` |
@@ -143,7 +146,8 @@ Boceto móvil (el diálogo ocupa la pantalla):
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M). Decisiones del usuario: un CHG por métrica sobre esta base; enfoque «registro y tendencias» (sin diagnóstico ni recordatorios); aviso «no es dispositivo médico».
-- Abierta: ¿cifrar los valores (`encrypted`, como `Relationship.document_number`)? Impide ordenar o promediar en SQL.
-- Abierta: ¿marcar las mediciones como sensibles para ocultarlas de consultas amplias de MCP (patrón `is_sensitive`)?
-- Abierta: ¿rangos de referencia fijos o configurables por persona (edad, sexo, condición)?
+- Decidido 2026-11-16: sin cifrado en la primera versión, para poder ordenar y promediar en SQL. Se reevalúa en CHG-126 (ciclo menstrual).
+- Decidido 2026-11-16: las mediciones se marcan `is_sensitive` (patrón de `health_events`): las consultas amplias de MCP no las devuelven salvo `include_sensitive=true`.
+- Decidido 2026-11-16: rangos de referencia fijos en la primera versión (constantes de `HealthMeasurement::TYPES`); configurables por persona queda para después.
 - Nota: `docs/DOCUMENTATION.md` está citado en `CLAUDE.md` pero no existe.
+- 2026-11-16 — Aprobado por el usuario (Compuerta 2)
