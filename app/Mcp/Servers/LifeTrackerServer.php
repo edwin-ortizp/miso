@@ -20,6 +20,8 @@ use App\Mcp\Tools\Game\ProposeGameWeekMissionsTool;
 use App\Mcp\Tools\Habit\CompleteHabitTool;
 use App\Mcp\Tools\Habit\ListHabitsTool;
 use App\Mcp\Tools\Health\ListHealthEventsTool;
+use App\Mcp\Tools\Health\ListHealthMeasurementsTool;
+use App\Mcp\Tools\Health\LogHealthMeasurementTool;
 use App\Mcp\Tools\Health\LogHealthEventTool;
 use App\Mcp\Tools\Health\LogHealthFollowUpTool;
 use App\Mcp\Tools\Health\MarkHealthRecoveryTool;
@@ -104,6 +106,7 @@ No consultes para preguntas generales que no dependen de su vida, si el dato ya 
 ## Qué herramienta usar
 - Una persona → get-person-context-tool (ficha, visitas, planes pendientes, eventos, ánimo y tareas en una llamada).
 - Un síntoma, dolor, cita o examen → get-health-context-tool con palabras clave en "search" y la zona del cuerpo si aplica.
+- Una medición con unidad (por ahora la presión arterial; luego glucosa, creatinina, peso…) → log-health-measurement-tool para registrarla y list-health-measurements-tool para consultarla. MiSo registra y muestra tendencias; no diagnostica ni es un dispositivo médico: ante valores fuera de rango, informa con neutralidad y remite al profesional de salud.
 - "¿Cómo me fue?", resumen del día o la semana → get-recent-activity-tool.
 - Recomendar planes → list-plans-tool (círculo, persona, ciudad, not_visited) + list-plan-visits-tool para no repetir lo reciente.
 - Los códigos legibles (p. ej. SGX-00002) identifican tareas: usa get-task-tool con task_id igual al código antes de refinar; update, complete y link también aceptan código o UUID.
@@ -156,6 +159,8 @@ class LifeTrackerServer extends Server
         ListHabitsTool::class,
         LogHealthEventTool::class,
         ListHealthEventsTool::class,
+        LogHealthMeasurementTool::class,
+        ListHealthMeasurementsTool::class,
         LogHealthFollowUpTool::class,
         MarkHealthRecoveryTool::class,
         UpdateHealthEventTool::class,

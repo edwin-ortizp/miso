@@ -1,0 +1,131 @@
+@php
+    use App\Support\Ui\DataState;
+
+    $listState = $measurements->count() > 0
+        ? DataState::CONTENT
+        : ($totalMeasurements > 0 && count($activeFilters) > 0 ? DataState::FILTERED_EMPTY : DataState::EMPTY);
+@endphp
+
+<x-module-shell module="health">
+    <x-slot:actions>
+        <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+    </x-slot:actions>
+
+    <p class="md-body-medium" id="health-measurements-notice">
+        MiSo registra tus mediciones y muestra su evolución. No es un dispositivo médico ni reemplaza a tu profesional de salud.
+    </p>
+
+    @if ($latest)
+        <x-ui.section title="Última medición" :level="2" id="health-latest-measurement">
+            <p class="md-title-large mb-0">
+                <i class="bi {{ \App\Models\HealthMeasurement::TYPES[$latest->type]['icon'] ?? 'bi-heart-pulse' }}" aria-hidden="true"></i>
+                {{ $latest->typeLabel() }}
+                <strong>{{ $latest->displayValue() }} {{ $latest->unit }}</strong>
+            </p>
+            <p class="md-body-medium mb-0">
+                {{ $latest->measured_at->isToday() ? 'Hoy' : $latest->measured_at->translatedFormat('j M Y') }} · {{ $latest->measured_at->format('H:i') }}
+                @if ($latest->pulse) · Pulso {{ $latest->pulse }} lpm @endif
+            </p>
+            @if ($latest->isOutOfRange())
+                <p class="md-body-medium mb-0" role="status">
+                    <i class="bi bi-info-circle" aria-hidden="true"></i>
+                    Fuera del rango de referencia general ({{ $latest->referenceText() }}). Si te preocupa, consúltalo con tu profesional de salud.
+                </p>
+            @endif
+        </x-ui.section>
+    @endif
+
+    <x-ui.management-card id="health-measurements-history" title="Historial" icon="bi-clock-history"
+                          :count="'('.$measurements->total().' / '.$totalMeasurements.')'"
+                          sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
+                          :active-filters="count($activeFilters)" :paginator="$measurements" noun="mediciones"
+                          alpine="draftPeriod: ''"
+                          on-filters-open="draftPeriod = $wire.period">
+        <x-slot:filters>
+            <x-ui.select name="filterPeriod" label="Periodo" :options="$periods" :selected="$period" icon="bi-calendar-event" x-model="draftPeriod" />
+        </x-slot:filters>
+        <x-slot:filterActions>
+            <x-ui.action variant="outlined" icon="bi-eraser" wire:click="clearFilters" x-on:click="filtersOpen = false">Limpiar</x-ui.action>
+            <x-ui.action variant="filled" icon="bi-funnel-fill" x-on:click="$wire.applyFilters(draftPeriod); filtersOpen = false">Filtrar</x-ui.action>
+        </x-slot:filterActions>
+
+        @if (count($activeFilters) > 0)
+            <x-slot:strip>
+                <x-ui.applied-filters :filters="$activeFilters" />
+            </x-slot:strip>
+        @endif
+
+        @if ($listState === DataState::CONTENT)
+            <table class="md-table md-table--stack">
+                <thead>
+                    <tr>
+                        <th scope="col">Fecha</th>
+                        <th scope="col">Hora</th>
+                        <th scope="col">Medición</th>
+                        <th scope="col">Valor</th>
+                        <th scope="col">Estado</th>
+                        <th scope="col" class="md-table__actions"><span class="visually-hidden">Acciones</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($measurements as $measurement)
+                        <tr wire:key="measurement-{{ $measurement->id }}">
+                            <td class="md-table__date">{{ $measurement->measured_at->isToday() ? 'Hoy' : $measurement->measured_at->translatedFormat('j M Y') }}</td>
+                            <td class="md-table__date">{{ $measurement->measured_at->format('H:i') }}</td>
+                            <td class="md-table__title">{{ $measurement->typeLabel() }}</td>
+                            <td class="md-table__nowrap">
+                                {{ $measurement->displayValue() }} {{ $measurement->unit }}
+                                @if ($measurement->pulse) <span class="md-body-small">· {{ $measurement->pulse }} lpm</span> @endif
+                            </td>
+                            <td>
+                                @if ($measurement->isOutOfRange())
+                                    <x-ui.badge tone="warning"><i class="bi bi-info-circle" aria-hidden="true"></i> Fuera de rango</x-ui.badge>
+                                @else
+                                    <x-ui.badge tone="neutral">En rango</x-ui.badge>
+                                @endif
+                            </td>
+                            <td class="md-table__actions">
+                                <x-ui.icon-action icon="bi-pencil" label="Editar la medición de {{ $measurement->displayValue() }} {{ $measurement->unit }}"
+                                                  wire:click="edit('{{ $measurement->id }}')" />
+                                <x-ui.destructive-action label="Eliminar la medición de {{ $measurement->displayValue() }} {{ $measurement->unit }}" :iconOnly="true"
+                                                         action="delete('{{ $measurement->id }}')"
+                                                         title="Eliminar medición"
+                                                         message="Se eliminará la medición de {{ $measurement->displayValue() }} {{ $measurement->unit }} del {{ $measurement->measured_at->translatedFormat('j M Y') }}." />
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @elseif ($listState === DataState::FILTERED_EMPTY)
+            <x-ui.state variant="{{ DataState::FILTERED_EMPTY }}" title="Sin mediciones en este periodo"
+                        message="Quita el filtro de periodo para ver otras mediciones." />
+        @else
+            <x-ui.state variant="{{ DataState::EMPTY }}" icon="bi-heart-pulse" title="Aún no tienes mediciones"
+                        message="Registra la primera con el botón +." />
+        @endif
+    </x-ui.management-card>
+
+    @if ($showForm)
+        <div wire:key="health-measurement-form-{{ $editingId ?? 'new' }}">
+            <x-ui.form-dialog :open="$showForm" close="closeForm"
+                              title="{{ $editingId ? 'Editar medición' : 'Registrar medición' }}"
+                              submit-action="save" id="health-measurement-form">
+                <p class="md-body-small">{{ $definition['label'] }}</p>
+                <x-ui.field name="value" :label="$definition['value_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
+                            step="1" wire:model="value" />
+                <x-ui.field name="value2" :label="$definition['value2_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
+                            step="1" wire:model="value2" />
+                <x-ui.field name="measuredAt" label="Fecha y hora" type="datetime-local" wire:model="measuredAt" />
+
+                <details>
+                    <summary>Más detalle</summary>
+                    <x-ui.field name="pulse" label="Pulso (lpm)" type="number" inputmode="numeric" step="1" wire:model="pulse" />
+                    <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
+                    <x-ui.switch name="isSensitive" label="Mantener oculta al asistente"
+                                 help="Las consultas amplias del asistente no la incluirán."
+                                 :checked="$isSensitive" wire:model="isSensitive" />
+                </details>
+            </x-ui.form-dialog>
+        </div>
+    @endif
+</x-module-shell>

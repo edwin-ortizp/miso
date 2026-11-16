@@ -1,5 +1,5 @@
 # CHG-122 · Salud: base de mediciones y presión arterial
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -138,11 +138,17 @@ Boceto móvil (el diálogo ocupa la pantalla):
 
 ## 7. Tareas
 <!-- Primero lo que cambia para el usuario; el detalle técnico después. -->
-- [ ] T1 · Registrar y ver presión arterial en Salud → Mediciones — Resp: developer — Modelo: estandar — Archivos: migración, `HealthMeasurement`, `LogHealthMeasurement`, `HealthMeasurements`, vista, ruta, `config/modules.php` — Hecho cuando: CA1, CA2 y CA4 pasan en pruebas.
-- [ ] T2 · El asistente puede registrar y consultar mediciones — Resp: developer — Modelo: estandar — Archivos: `app/Mcp/Tools/Health/*`, `LifeTrackerServer`, `ToolCatalog`, `DeleteEntryTool` — Hecho cuando: CA3 y CA5 pasan en pruebas.
-- [ ] T3 · Pruebas y verificación en móvil y escritorio — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/*` — Hecho cuando: los comandos de §5 pasan.
+- [x] T1 · Registrar y ver presión arterial en Salud → Mediciones — Resp: developer — Modelo: estandar — Archivos: migración, `HealthMeasurement`, `LogHealthMeasurement`, `HealthMeasurements`, vista, ruta, `config/modules.php` — Hecho cuando: CA1, CA2 y CA4 pasan en pruebas.
+- [x] T2 · El asistente puede registrar y consultar mediciones — Resp: developer — Modelo: estandar — Archivos: `app/Mcp/Tools/Health/*`, `LifeTrackerServer`, `ToolCatalog`, `DeleteEntryTool` — Hecho cuando: CA3 y CA5 pasan en pruebas.
+- [x] T3 · Pruebas y verificación en móvil y escritorio — Resp: developer — Modelo: estandar — Archivos: `tests/Feature/*` — Hecho cuando: los comandos de §5 pasan.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — T1: migración `2026_11_16_000002_create_health_measurements_table`, modelo `HealthMeasurement` (catálogo `TYPES` con presión arterial; rango de referencia 90–120 / 60–80 mmHg, inclusivo, para que 120/80 cuente «En rango»), Action `LogHealthMeasurement` (validación y guardado compartidos), página `Health\HealthMeasurements`, vista `health-measurements`, ruta `health.measurements` y pestaña «Mediciones».
+- 2026-11-16 — T2: herramientas `log-health-measurement-tool` y `list-health-measurements-tool`, registradas en `LifeTrackerServer` (con la guía de uso), tipo `health_measurement` en `DeleteEntryTool` y morph map `health-measurement`. Las sensibles se omiten salvo `include_sensitive=true`. `ToolCatalog` las agrupa por la carpeta `Health`.
+- 2026-11-16 — T3: `HealthMeasurementsTest` (7) y `LifeTrackerHealthMeasurementMcpTest` (6) pasan. Suite completa: 1629 pruebas, 46 fallas que son idénticas sin estos cambios (verificado con `git stash`); `ui:conformance` no marca los archivos nuevos.
+- Desviaciones de §4: se agregó la columna `pulse` (el pulso opcional necesitaba dónde guardarse) y se omitió `health_event_id`: un FK compuesto con `user_id` no puede usar `nullOnDelete`, así que el enlace con «Chequeo o examen» queda para CHG-124. No se tocó `GetRecentActivityTool` ni `GetHealthContextTool`: la presencia en el contexto de salud va en CHG-128.
+- No verificado: revisión visual en móvil y escritorio con captura (no hay servidor web ni assets compilados en este entorno). Las pruebas Livewire cubren el render y los estados vacío, con datos y filtrado.
+- Entorno: PHP 8.3 no ejecuta las versiones bloqueadas (Symfony 8). Las pruebas se corrieron con un `vendor` resuelto aparte para 8.3; `composer.lock` no se modificó.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M). Decisiones del usuario: un CHG por métrica sobre esta base; enfoque «registro y tendencias» (sin diagnóstico ni recordatorios); aviso «no es dispositivo médico».
@@ -151,3 +157,5 @@ Boceto móvil (el diálogo ocupa la pantalla):
 - Decidido 2026-11-16: rangos de referencia fijos en la primera versión (constantes de `HealthMeasurement::TYPES`); configurables por persona queda para después.
 - Nota: `docs/DOCUMENTATION.md` está citado en `CLAUDE.md` pero no existe.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)
+- 2026-11-16 — Implementación terminada → En verificación

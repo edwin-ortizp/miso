@@ -198,6 +198,11 @@ class User extends Authenticatable
         return $this->hasMany(HealthEvent::class);
     }
 
+    public function healthMeasurements()
+    {
+        return $this->hasMany(HealthMeasurement::class);
+    }
+
     public function healthLogs()
     {
         return $this->hasMany(HealthLog::class);

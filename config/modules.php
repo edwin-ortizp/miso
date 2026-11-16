@@ -80,6 +80,7 @@ return [
         'tabs' => [
             ['label' => 'Registro', 'route' => 'health', 'icon' => 'bi-clock-history', 'active' => ['health']],
             ['label' => 'Vista del cuerpo', 'route' => 'health.body', 'archetype' => 'detail', 'icon' => 'bi-person-standing', 'active' => ['health.body']],
+            ['label' => 'Mediciones', 'route' => 'health.measurements', 'icon' => 'bi-activity', 'active' => ['health.measurements']],
         ],
     ],
     'vehicles' => [

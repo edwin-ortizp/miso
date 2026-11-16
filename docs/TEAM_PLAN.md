@@ -125,7 +125,7 @@ _Última actualización: 2026-11-16_
 | CHG-119 | S | Objetivos: alinear fecha límite si el inicio la supera | in-progress | En verificación | 1/1 |
 | CHG-120 | M | Modo oscuro de la app | in-progress | En verificación | 4/4 |
 | CHG-121 | S | Objetivos: crear un KPI más intuitivo | in-progress | En verificación | 2/2 |
-| CHG-122 | M | Salud: base de mediciones y presión arterial | to-do | Aprobado | 0/3 |
+| CHG-122 | M | Salud: base de mediciones y presión arterial | in-progress | En verificación | 3/3 |
 | CHG-123 | S | Salud: glucosa en sangre | to-do | Borrador | 0/0 |
 | CHG-124 | S | Salud: creatinina y laboratorios | to-do | Borrador | 0/0 |
 | CHG-125 | M | Salud: seguimiento del sueño | to-do | Borrador | 0/0 |
