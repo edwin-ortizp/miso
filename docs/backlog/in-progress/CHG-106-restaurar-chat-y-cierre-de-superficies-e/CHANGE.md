@@ -1,9 +1,9 @@
 # CHG-106 · Restaurar chat y cierre de superficies en Android
-**Estado:** Borrador
+**Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-14 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-14 · **Aprobado:** 2026-11-16 · **Cerrado:** —
 **Relacionado:** CHG-098, CHG-100, CHG-101; coordinación con CHG-105 y CHG-109
 
 ## 0. En palabras simples
@@ -81,7 +81,8 @@ Actualizar docs/companion-chat.md si cambia ciclo de vida, docs/design-system.md
 - [ ] T4 · Documentar compatibilidad y recuperación — Resp: tech-writer — Archivos: docs/companion-chat.md, docs/design-system.md, Android/README.md, CHANGE.md — Hecho cuando: contratos y evidencia coinciden con implementación.
 
 ## 8. Bitácora de implementación (developer)
-Sin implementación; completar al desarrollar.
+- 2026-11-16 — Inicio. Revisión estática (sin dispositivo): `resources/js/android.js`, `resources/js/companion-chat.js` y `MainActivity.kt`. No hay ramas específicas de Android en el chat (solo push/atrás en `android.js`); el chat registra un host por módulo y lo mueve a `<body>`, y `MainActivity` aplica `safeDrawingPadding().imePadding()` sobre el WebView. Ninguno de esos puntos demuestra una causa.
+- **T1 bloqueada:** exige reproducir en APK/Android físico o emulador con System WebView identificado y comparar con Chrome/PWA (consola, hit target, capas). El entorno cloud no tiene Android ni dispositivo, y el CHG prohíbe corregir sin causa demostrada. No se modificó código. Se necesita del usuario: versión de APK, Android/WebView, consola (`chrome://inspect`) y qué toque falla.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-14 — Creado en to-do/ (Borrador, nivel M) mediante team new.
@@ -93,3 +94,5 @@ Sin implementación; completar al desarrollar.
 - LECCIÓN: ninguna nueva antes de reproducir/corregir.
 - 2026-11-14 — Línea base local: PHP filtrado PanelFocusSessionTest/PomodoroTimerTest/CompanionChatTest/TaskEditorDraftTest: 43 pruebas, 304 aserciones, todas pasan; JS pomodoro-timer/dialog-viewport/navigation-guard/companion-chat: 27 pruebas, todas pasan. No reproduce ni certifica los reportes físicos.
 - Perfil estandar sin proveedor configurado en docs/TEAM_MODELS.md; no elegir proveedor externo implícitamente. Bocetos y causa están pendientes de revisión/validación según las tareas, no de redacción.
+- 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)

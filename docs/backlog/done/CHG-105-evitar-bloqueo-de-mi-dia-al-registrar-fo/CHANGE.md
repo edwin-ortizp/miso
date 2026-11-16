@@ -1,9 +1,9 @@
 # CHG-105 · Evitar bloqueo de Mi día al registrar foco en PWA móvil
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-14 · **Aprobado:** 2026-11-14 · **Cerrado:** —
+**Creado:** 2026-11-14 · **Aprobado:** 2026-11-14 · **Cerrado:** 2026-11-16
 **Relacionado:** CHG-086, CHG-101; coordinación con CHG-106
 
 ## 0. En palabras simples
@@ -72,8 +72,8 @@ No aplica — conservar título, campos, errores y confirmación de descarte exi
 ## 7. Tareas
 - [x] T1 · Reproducir el bloqueo desde Mi día — Resp: developer — Modelo: estandar — Archivos: tests/Browser/personal-experience.interaction.spec.js, tests/Browser/support/personal-experience-fixture.php, CHANGE.md — Hecho cuando: existe regresión fallida previa al arreglo o reproducción física documentada con build y causa acotada.
 - [x] T2 · Recuperar uso normal después de guardar/cerrar — Resp: developer — Modelo: estandar — Archivos: app/Livewire/Home/Panel/FocusTimer.php, app/Livewire/Pomodoro/PomodoroTimer.php, resources/views/livewire/home/panel/focus-timer.blade.php, resources/js/ui-surfaces.js, resources/js/navigation-guard.js, resources/js/dialog-viewport.js, resources/views/components/ui/form-dialog.blade.php, pruebas afectadas — Hecho cuando: CA1–CA5 pasan en entorno reproducido cambiando solo las piezas justificadas por T1.
-- [ ] T3 · Verificar PWA y escritorio — Resp: qa-tester — Archivos: CHANGE.md, evidencias en storage/framework/testing — Hecho cuando: matriz §5 ejecutada, teléfono distinguido de emulación y pendientes explícitos.
-- [ ] T4 · Documentar causa y recuperación — Resp: tech-writer — Archivos: CHANGE.md, docs/design-system.md y docs/DEPLOY.md solo si cambia contrato — Hecho cuando: referencias y resultados coinciden con implementación.
+- [x] T3 · Verificar PWA y escritorio — Resp: qa-tester — Archivos: CHANGE.md, evidencias en storage/framework/testing — Hecho cuando: matriz §5 ejecutada, teléfono distinguido de emulación y pendientes explícitos. (cerrada por el usuario sin verificar)
+- [x] T4 · Documentar causa y recuperación — Resp: tech-writer — Archivos: CHANGE.md, docs/design-system.md y docs/DEPLOY.md solo si cambia contrato — Hecho cuando: referencias y resultados coinciden con implementación. (cerrada por el usuario sin verificar)
 
 ## 8. Bitácora de implementación (developer)
 Inicio local 2026-11-14 con especificación aprobada. Rama main con cambios ajenos previos conservados; sin commits, despliegues ni migraciones reales.
@@ -105,3 +105,4 @@ Inicio local 2026-11-14 con especificación aprobada. Rama main con cambios ajen
 - T3 permanece pendiente: pruebas locales completas, pero no hay evidencia de PWA instalada en teléfono físico, teclado real ni suspensión/reanudación. T4: documentación contractual entregada por developer; pendiente revisión por tech-writer. No se registran tareas en nombre de otro rol.
 - LECCIÓN(developer): las directivas Alpine con efectos externos deben omitir clones especulativos del morph — evidencia: tres locks y una liberación antes del fix frente a recorridos verdes después · destino sugerido: docs/ARCHITECTURE.md. Propuesta sin incorporación automática.
 - 2026-11-14 — Implementación terminada → En verificación
+- 2026-11-16 — Cerrado por el usuario sin verificación (pendientes: T3, T4): ya lo probé → done/
