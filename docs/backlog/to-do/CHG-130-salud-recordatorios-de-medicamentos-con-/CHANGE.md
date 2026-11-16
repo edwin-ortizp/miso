@@ -28,12 +28,12 @@ Agrega recordatorios a los medicamentos de CHG-129 reutilizando el sistema de no
   - CA2. Dado que `notifications:generate` corre dos o más veces, cuando se evalúa la misma toma, entonces existe una sola notificación (idempotencia).
   - CA3. Dado que la toma se registró como tomada u omitida, cuando llega o pasa la hora, entonces no hay aviso; si ya existía uno sin leer, queda cancelado.
   - CA4. Dado que el cron se retrasó más de 60 minutos, cuando corre, entonces se crea la notificación en la campana pero no se envía por push.
-  - CA5. Dado que el usuario apagó «Medicamentos», cuando llega la hora, entonces no recibe push; el aviso en la campana sigue la preferencia general del módulo (a confirmar en §9).
+  - CA5. Dado que el usuario apagó «Medicamentos», cuando llega la hora, entonces no recibe push, pero el aviso sigue apareciendo en la campana.
   - CA6. Dado otro usuario, cuando llega la hora, entonces solo recibe aviso quien tiene el medicamento.
   - CA7. Dado un medicamento finalizado o con fecha de fin pasada, cuando corre el cron, entonces no genera avisos.
   - CA8. Dado un aviso con botón «Tomado», cuando lo toco, entonces la toma queda registrada como tomada con la hora actual, igual que desde la app (misma Action `LogMedicationIntake`) y el aviso se marca como atendido.
   - CA9. Dado que repito la acción «Tomado» (doble toque, reenvío), cuando se procesa, entonces no se crea una segunda toma y la respuesta es «ya registrada».
-  - CA10. Dado un enlace de acción vencido, manipulado o de otro usuario, cuando se usa, entonces se rechaza y no registra nada.
+  - CA10. Dado un enlace de acción vencido (pasado el fin del día de la toma), manipulado o de otro usuario, cuando se usa, entonces se rechaza y no registra nada.
 
 ## 3. UX/UI
 <!-- Sin pantallas: escribe "No aplica — motivo" en cada parte. Con UI, approve exige un boceto ASCII en un bloque de código. Si hay flujo, agrega un diagrama en un bloque mermaid. -->
@@ -62,9 +62,9 @@ flowchart LR
 - Archivos a crear / modificar:
   - `app/Services/Notifications/GenerateNotifications.php`: rama o servicio nuevo (`GenerateMedicationReminders`) invocado desde `notifications:generate`. Usa `MedicationSchedule` de CHG-129 para calcular las tomas del día y `CreateNotification::create` (`app/Services/Notifications/CreateNotification.php:12-25`) con tipo `medication_due`, origen el medicamento y `occurrence_key = "{Y-m-d}:{HH:MM}"`. La clave única existente `notifications_occurrence_unique` garantiza una sola notificación por (usuario, medicamento, toma).
   - Recuperación tras un cron caído: recorrer las tomas del día cuya hora ya llegó; las de más de 60 min se crean sin push.
-  - `NotificationPreferences::DEFAULTS` (líneas 11-19): `medications` y `push_medication` en `true`. Interruptor en `resources/views/livewire/notifications/settings.blade.php` y regla `boolean` en `NotificationSettings`.
+  - `NotificationPreferences::DEFAULTS` (líneas 11-19): `push_medication` en `true` (solo controla el push; la campana siempre muestra el aviso). Interruptor en `resources/views/livewire/notifications/settings.blade.php` y regla `boolean` en `NotificationSettings`.
   - Despacho: `notifications:dispatch` ya envía por push y marca `push_sent_at`; agregar la ventana corta de vigencia para `medication_due` (el máximo general es 12 h, `config/game.php`).
-  - Acción «Tomado»: `actions()` de `NotificationDispatcher` (`app/Services/Notifications/Push/NotificationDispatcher.php:101`) devuelve, para `medication_due`, `[['action' => 'quick-medication', 'title' => 'Tomado'], ['action' => 'open', 'title' => 'Abrir']]` y `quick_url` con `URL::temporarySignedRoute('push.quick-medication', …)`. Nuevo `app/Http/Controllers/Push/QuickMedicationController.php`, copia del patrón de `QuickWaterController`: reclama `action_done_at` con UPDATE condicional (repetir devuelve `already-done`), fija el usuario dueño de la notificación y llama a `LogMedicationIntake` con la toma esperada (`scheduled_for`). Ruta junto a `push.quick-water`. El service worker debe manejar la acción `quick-medication` como maneja `quick-water`. Vigencia del enlace: la de la toma (a decidir en §9; el de agua dura 12 h).
+  - Acción «Tomado»: `actions()` de `NotificationDispatcher` (`app/Services/Notifications/Push/NotificationDispatcher.php:101`) devuelve, para `medication_due`, `[['action' => 'quick-medication', 'title' => 'Tomado'], ['action' => 'open', 'title' => 'Abrir']]` y `quick_url` con `URL::temporarySignedRoute('push.quick-medication', …)`. Nuevo `app/Http/Controllers/Push/QuickMedicationController.php`, copia del patrón de `QuickWaterController`: reclama `action_done_at` con UPDATE condicional (repetir devuelve `already-done`), fija el usuario dueño de la notificación y llama a `LogMedicationIntake` con la toma esperada (`scheduled_for`). Ruta junto a `push.quick-water`. El service worker debe manejar la acción `quick-medication` como maneja `quick-water`. El enlace vence al final del día local (`America/Bogota`) de la toma, a diferencia del de agua (12 h); pasado ese momento responde que ya no está disponible y la toma se registra desde la app.
   - Cancelación: al registrar una toma o finalizar un medicamento, cancelar la notificación pendiente (`cancelled_at`), siguiendo `NotificationSourceObserver`. Registrar `medication` en el morph map si aún no lo está.
 - Enfoque y patrones a seguir: `WeeklyInsights::notify()` (`firstOrCreate` por clave de ocurrencia) y las pruebas de doble corrida (`WeeklyInsightsTest.php:88-98`, `GuardianNudgesTest.php:60`).
 - Riesgos y mitigación:
@@ -106,8 +106,8 @@ flowchart LR
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M). Decisión del usuario: incluir recordatorios usando el cron existente. Se separa de CHG-129 para mantener cada CHG en nivel M.
 - Decidido: sin cron ni proceso nuevo; se reutiliza `notifications:generate` y `notifications:dispatch`.
 - Decidido 2026-11-16: el usuario considera muy útil el botón de acción en la notificación; «Tomado» entra en este CHG con el patrón de CHG-069.
-- Abierta: vigencia del enlace firmado de «Tomado» (agua usa 12 h). Propuesta: igual que la toma, hasta el fin del día local.
-- Abierta: ¿botón «Omitir» en el aviso? Propuesta: solo «Tomado» y «Abrir».
-- Abierta: ¿el interruptor apaga solo el push o también el aviso en la campana (CA5)?
+- Decidido 2026-11-16: el enlace de «Tomado» vale hasta el fin del día local de la toma.
+- Decidido 2026-11-16: el aviso solo tiene «Tomado» y «Abrir»; omitir se hace desde la app.
+- Decidido 2026-11-16: el interruptor «Medicamentos» apaga solo el push; la campana siempre muestra el aviso.
 - Abierta: zona horaria por usuario (hoy fija en `America/Bogota`). Propuesta: no tocarla en este CHG.
 - Abierta: ventana de vigencia de 60 min; ¿otro valor?
