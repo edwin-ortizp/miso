@@ -36,7 +36,7 @@ La amplitud de módulos debe servir a ese propósito. La existencia de una capac
 | Tareas | Organizar acciones mediante lista, calendario, kanban y otras vistas |
 | Pomodoro | Registrar sesiones de concentración |
 | Diario, ánimo y energía | Conservar experiencias y registros personales |
-| Hidratación, ejercicio y salud | Registrar actividad, consumo y acontecimientos de salud |
+| Hidratación, ejercicio y salud | Registrar actividad, consumo, acontecimientos de salud y mediciones personales (presión arterial, glucosa, creatinina, peso, frecuencia cardiaca, saturación, temperatura, sueño, ciclo menstrual y medicamentos) |
 | Alimentación | Gestionar planificación, recetas, preparaciones, compras e inventario |
 | Relaciones y planes | Organizar personas, eventos, actividades y visitas |
 | Vehículos | Registrar consumo, mantenimiento y gastos |
@@ -51,6 +51,7 @@ La amplitud de módulos debe servir a ese propósito. La existencia de una capac
 - Hábitos y objetivos guían la priorización del producto.
 - La IA complementa la experiencia; no es un requisito para su valor principal.
 - La gamificación reconoce avances. Según la documentación vigente del juego, descansar o ausentarse no debe quitar recompensas obtenidas.
+- Las mediciones de salud son un registro y una vista de tendencias para la persona. MiSo no es un dispositivo médico, no diagnostica ni recomienda tratamientos: ante valores fuera del rango de referencia informa de forma neutra y remite al profesional de salud. Los datos del ciclo menstrual son los más íntimos: se guardan como sensibles por defecto (el asistente solo los consulta si se lo piden expresamente), con notas y síntomas cifrados, sin recordatorios y con una estimación que no es un método anticonceptivo ni un diagnóstico. Se justifican por su relación con hábitos y objetivos (sueño, hidratación, ejercicio), no como módulo clínico independiente.
 - La presencia de registro de cuentas en el código no demuestra que el producto esté preparado para un lanzamiento público.
 
 ## Métricas de éxito

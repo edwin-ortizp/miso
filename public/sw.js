@@ -206,6 +206,27 @@ self.addEventListener('notificationclick', (event) => {
         return;
     }
 
+    // CHG-134: «Tomado» registra la toma del medicamento con la URL firmada; si falla, abre Medicamentos.
+    if (event.action === 'quick-medication' && data.quickUrl) {
+        event.waitUntil(
+            fetch(data.quickUrl, { method: 'POST', headers: { Accept: 'application/json' } })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('quick-medication');
+                    }
+                    return response.json();
+                })
+                .then((result) => {
+                    if (result && result.status === 'unavailable') {
+                        return self.clients.openWindow('/health/medications?via=push');
+                    }
+                })
+                .catch(() => self.clients.openWindow('/health/medications?via=push'))
+        );
+
+        return;
+    }
+
     const destination = event.action === 'checkin' && data.checkinUrl ? data.checkinUrl : (data.url || '/');
     const target = new URL(destination, self.location.origin);
 

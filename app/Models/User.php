@@ -26,6 +26,7 @@ class User extends Authenticatable
         'activity_level',
         'daily_water_goal',
         'daily_exercise_minutes',
+        'daily_sleep_hours',
         'theme_preference',
         'username',
     ];
@@ -52,6 +53,7 @@ class User extends Authenticatable
             'birth_date' => 'date',
             'daily_water_goal' => 'integer',
             'daily_exercise_minutes' => 'integer',
+            'daily_sleep_hours' => 'float',
         ];
     }
 
@@ -228,6 +230,36 @@ class User extends Authenticatable
     public function healthEvents()
     {
         return $this->hasMany(HealthEvent::class);
+    }
+
+    public function menstrualCycles()
+    {
+        return $this->hasMany(MenstrualCycle::class);
+    }
+
+    public function cycleDayLogs()
+    {
+        return $this->hasMany(CycleDayLog::class);
+    }
+
+    public function sleepLogs()
+    {
+        return $this->hasMany(SleepLog::class);
+    }
+
+    public function medications()
+    {
+        return $this->hasMany(Medication::class);
+    }
+
+    public function medicationIntakes()
+    {
+        return $this->hasMany(MedicationIntake::class);
+    }
+
+    public function healthMeasurements()
+    {
+        return $this->hasMany(HealthMeasurement::class);
     }
 
     public function healthLogs()

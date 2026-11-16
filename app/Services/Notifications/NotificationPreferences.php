@@ -18,6 +18,8 @@ class NotificationPreferences
         'push_weekly_insights' => true,
         // CHG-125: avisos de amistad en la campana (activos) y qué llega también al celular.
         'friend_notices' => true, 'push_friend_request' => false, 'push_friend_accepted' => false, 'push_shared_streak' => false,
+        // CHG-134: el aviso de cada toma de medicamento llega al celular por defecto (la campana siempre lo muestra).
+        'push_medication_due' => true,
     ];
 
     /** ¿Este tipo de notificación debe salir por push para este usuario? */

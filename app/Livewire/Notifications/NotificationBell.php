@@ -30,7 +30,7 @@ class NotificationBell extends Component
 
     public string $draftType = '';
 
-    public const TYPES = ['birthday' => 'Cumpleaños', 'task_due' => 'Tareas', 'plan_due' => 'Planes', 'reminder' => 'Recordatorios', 'guardian_nudge' => 'Guardián', 'weekly_insights' => 'Resumen semanal', 'game_ball' => 'Balls', 'friend_request' => 'Solicitudes de amistad', 'friend_accepted' => 'Amistades', 'shared_streak' => 'Racha compartida'];
+    public const TYPES = ['birthday' => 'Cumpleaños', 'task_due' => 'Tareas', 'plan_due' => 'Planes', 'reminder' => 'Recordatorios', 'guardian_nudge' => 'Guardián', 'weekly_insights' => 'Resumen semanal', 'game_ball' => 'Balls', 'friend_request' => 'Solicitudes de amistad', 'friend_accepted' => 'Amistades', 'shared_streak' => 'Racha compartida', 'medication_due' => 'Medicamentos'];
 
     public const READING = ['all' => 'Todas', 'unread' => 'Sin leer', 'read' => 'Leídas'];
 

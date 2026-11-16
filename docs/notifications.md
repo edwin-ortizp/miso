@@ -96,6 +96,14 @@ La copia recuperable previa está en `storage/framework/testing/notifications-be
 - `miso:weekly-insights` corre los domingos de 14 a 21 h (Bogotá) desde `schedule:run`. Calcula `weekly_insights` (único usuario + semana) y, si hay hallazgos, crea la notificación `weekly_insights` (origen `insights`, ocurrencia = lunes de la semana). Correrlo de más no repite nada.
 - Push activado por defecto (`push_weekly_insights`); lleva a Estadísticas › Lo que dicen tus datos.
 
+### Recordatorios de medicamentos (CHG-134)
+
+- `notifications:generate` llama a `GenerateMedicationReminders`: por cada medicamento activo y cada toma de **hoy** cuya hora ya llegó y no tiene registro, crea una notificación `medication_due` (origen `medication`, ocurrencia `{Y-m-d}:{HH:MM}` en hora de Bogotá, `scheduled_for` en UTC). No pasa por la compuerta de las 9:00 ni depende de las preferencias de creación de los demás avisos: la campana siempre lo muestra. No reconstruye días anteriores.
+- Título «Es hora de tu {nombre} {dosis}» y cuerpo «Toma programada a las {HH:MM}.». Si el medicamento es sensible: «Es hora de una toma programada», sin nombre ni dosis.
+- Push: preferencia `push_medication_due` (activada por defecto; interruptor «Medicamentos» en Ajustes › Notificaciones). Solo sale dentro de 60 minutos desde la hora de la toma (web y Android); pasada la ventana queda solo en la campana.
+- Botón «Tomado» (patrón de CHG-069): `quick_url` firmada que vence al terminar el día local de la toma, a `POST /api/push/quick-medication/{notificación}`. Reclama `action_done_at` con un UPDATE condicional y lo libera si no pudo registrar; registra la toma con `LogMedicationIntake::take` (origen `push`). Respuestas: `logged`, `already-done` y `unavailable` (medicamento finalizado o eliminado). iPhone no muestra botones: el aviso abre la app.
+- Cancelación: registrar una toma cancela solo el aviso de esa toma; finalizar, eliminar o cambiar la programación de un medicamento cancela los avisos de hoy (`MedicationReminderObserver`).
+- Pruebas: `php artisan test --filter='MedicationReminder|QuickMedication'`.
 
 ## Avisos de amistad (CHG-125)
 

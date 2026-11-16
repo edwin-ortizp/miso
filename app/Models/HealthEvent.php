@@ -100,7 +100,12 @@ class HealthEvent extends Model
 
     protected static function booted(): void
     {
-        static::deleting(fn (self $event) => $event->taskAssociations()->delete());
+        static::deleting(function (self $event) {
+            $event->taskAssociations()->delete();
+            // CHG-128: las mediciones enlazadas a este examen conservan su valor y pierden el enlace.
+            HealthMeasurement::withoutGlobalScopes()->where('user_id', $event->user_id)
+                ->where('health_event_id', $event->id)->update(['health_event_id' => null]);
+        });
     }
 
     public function taskAssociations(): MorphMany

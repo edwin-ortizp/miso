@@ -129,6 +129,15 @@ _Última actualización: 2026-11-16_
 | CHG-123 | M | Social B: racha compartida sin castigo entre amigos | in-progress | En desarrollo | 5/5 |
 | CHG-124 | M | Social C: tabla semanal de amigos con doble opt-in | in-progress | En desarrollo | 5/5 |
 | CHG-125 | M | Social D: notificaciones de amistad y racha compartida | in-progress | En desarrollo | 4/4 |
+| CHG-126 | M | Salud: base de mediciones y presión arterial | in-progress | En verificación | 3/3 |
+| CHG-127 | S | Salud: glucosa en sangre | in-progress | En verificación | 2/2 |
+| CHG-128 | S | Salud: creatinina y laboratorios | in-progress | En verificación | 2/2 |
+| CHG-129 | M | Salud: seguimiento del sueño | in-progress | En verificación | 4/4 |
+| CHG-130 | L | Salud: ciclo menstrual | in-progress | En verificación | 6/6 |
+| CHG-131 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | in-progress | En verificación | 2/2 |
+| CHG-132 | M | Salud: tendencias y contexto de mediciones | in-progress | En verificación | 4/4 |
+| CHG-133 | M | Salud: medicamentos tomados y por tomar (con MCP) | in-progress | En verificación | 4/4 |
+| CHG-134 | M | Salud: recordatorios de medicamentos con el cron existente | in-progress | En verificación | 4/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

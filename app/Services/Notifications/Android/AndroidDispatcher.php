@@ -34,6 +34,9 @@ class AndroidDispatcher
                 ->whereNull('read_at')->whereNull('cancelled_at')->where('scheduled_for', '<=', now('UTC'))
                 ->where('scheduled_for', '>=', $device->activated_at)
                 ->where('scheduled_for', '>=', now('UTC')->subHours(config('game.nudges.max_age_hours', 12)))
+                // CHG-134: una toma de medicamento solo se avisa dentro de su ventana corta.
+                ->where(fn ($q) => $q->where('type', '!=', \App\Services\Notifications\GenerateMedicationReminders::TYPE)
+                    ->orWhere('scheduled_for', '>=', now('UTC')->subMinutes(\App\Services\Notifications\GenerateMedicationReminders::PUSH_WINDOW_MINUTES)))
                 ->whereNotExists(function ($q) use ($device) {
                     $q->selectRaw('1')->from('android_deliveries')->whereColumn('android_deliveries.notification_id', 'notifications.id')
                         ->where('installation_id', $device->id)->where('binding', $device->binding)

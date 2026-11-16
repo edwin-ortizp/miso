@@ -20,3 +20,9 @@ Route::post('/push/quick-water/{notification}', \App\Http\Controllers\Push\Quick
     ->middleware(['signed', 'throttle:30,1'])
     ->whereUuid('notification')
     ->name('push.quick-water');
+
+// CHG-134: acción «Tomado» del aviso de un medicamento. También la autoriza la firma temporal.
+Route::post('/push/quick-medication/{notification}', \App\Http\Controllers\Push\QuickMedicationController::class)
+    ->middleware(['signed', 'throttle:30,1'])
+    ->whereUuid('notification')
+    ->name('push.quick-medication');

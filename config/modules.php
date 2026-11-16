@@ -81,6 +81,11 @@ return [
         'tabs' => [
             ['label' => 'Registro', 'route' => 'health', 'icon' => 'bi-clock-history', 'active' => ['health']],
             ['label' => 'Vista del cuerpo', 'route' => 'health.body', 'archetype' => 'detail', 'icon' => 'bi-person-standing', 'active' => ['health.body']],
+            ['label' => 'Mediciones', 'route' => 'health.measurements', 'icon' => 'bi-activity', 'active' => ['health.measurements']],
+            ['label' => 'Medicamentos', 'route' => 'health.medications', 'icon' => 'bi-capsule', 'active' => ['health.medications']],
+            ['label' => 'Sueño', 'route' => 'health.sleep', 'icon' => 'bi-moon-stars', 'active' => ['health.sleep']],
+            ['label' => 'Ciclo', 'route' => 'health.cycle', 'icon' => 'bi-droplet', 'active' => ['health.cycle']],
+            ['label' => 'Tendencias', 'route' => 'health.trends', 'icon' => 'bi-graph-up', 'active' => ['health.trends']],
         ],
     ],
     'vehicles' => [

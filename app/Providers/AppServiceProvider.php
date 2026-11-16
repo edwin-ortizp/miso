@@ -86,6 +86,7 @@ class AppServiceProvider extends ServiceProvider
                 app(\App\Support\RequestMemo::class)->flush();
             }
         };
+        \App\Models\Medication::observe(\App\Observers\MedicationReminderObserver::class);
         foreach ([Task::class, \App\Models\TaskCategory::class] as $catalogSource) {
             $catalogSource::saved($forgetTaskCatalog);
             $catalogSource::deleted($forgetTaskCatalog);
@@ -136,6 +137,12 @@ class AppServiceProvider extends ServiceProvider
             'goal' => Goal::class,
             'relationship' => Relationship::class,
             'health-event' => HealthEvent::class,
+            'health-measurement' => \App\Models\HealthMeasurement::class,
+            'medication' => \App\Models\Medication::class,
+            'sleep-log' => \App\Models\SleepLog::class,
+            'menstrual-cycle' => \App\Models\MenstrualCycle::class,
+            'cycle-day-log' => \App\Models\CycleDayLog::class,
+            'medication-intake' => \App\Models\MedicationIntake::class,
             'task' => Task::class,
             'habit-completion' => \App\Models\HabitCompletion::class,
             'pomodoro-session' => \App\Models\PomodoroSession::class,
