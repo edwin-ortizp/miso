@@ -326,6 +326,15 @@ Entre dos amigos de MiSo (CHG-121). Un día cuenta cuando **ambos** cumplieron s
 - **Dónde se ve:** tarjeta `x-social.shared-streak` en cada amigo de `/amigos`.
 - **Límite:** día de America/Bogota para ambos.
 
+## Tabla semanal de amigos (CHG-123)
+
+Pestaña **Semana** del módulo Amigos (`/amigos/semana`). Muestra cuántas acciones del juego hizo cada amigo en la semana (lunes a domingo, America/Bogota, como `WeekPlanner`); empieza en cero cada lunes, sin arrastre.
+
+- **Doble opt-in:** aparece quien activó «Visible para mis amigos» y «Mostrar mi semana» (ambos apagados por defecto). Sin los dos propios, no ves a nadie.
+- **Qué se comparte:** un número por persona (eventos `activity` de `game_events`); nunca el origen ni el contenido. No aplica el antifarmeo de tareas del mismo día de la racha.
+- **Presentación:** orden por acciones con tu fila resaltada («Tú»), sin posiciones ni «último lugar». Tope de 100 personas.
+- **Servicio:** `FriendSnapshot::weekly()`; ajustes en `module_settings` (módulo `social`: `social_visible`, `social_leaderboard`).
+
 ## Cierre del día (CHG-070)
 
 Ritual nocturno sin recompensa ni culpa: ver cómo fue el día y dejar mañana listo.

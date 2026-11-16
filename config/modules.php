@@ -196,6 +196,10 @@ return [
         'archetype' => 'list',
         'title' => 'Amigos', 'subtitle' => 'Personas de MiSo con las que compartes constancia.', 'icon' => 'bi-person-hearts',
         'patterns' => ['social*'], 'preserve' => [],
+        'tabs' => [
+            ['label' => 'Amigos', 'route' => 'social.friends', 'icon' => 'bi-people', 'active' => ['social.friends']],
+            ['label' => 'Semana', 'route' => 'social.week', 'icon' => 'bi-calendar-week', 'active' => ['social.week']],
+        ],
     ],
     'relationships' => [
         'archetype' => 'list',

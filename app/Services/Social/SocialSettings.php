@@ -14,11 +14,28 @@ class SocialSettings
         return (bool) ($this->read($userId)['social_visible'] ?? false);
     }
 
+    /** Tabla semanal (CHG-123): segundo opt-in, solo útil si la persona también es visible. */
+    public function leaderboard(int $userId): bool
+    {
+        return (bool) ($this->read($userId)['social_leaderboard'] ?? false);
+    }
+
     public function setVisible(int $userId, bool $visible): void
+    {
+        $this->save($userId, ['social_visible' => $visible]);
+    }
+
+    public function setLeaderboard(int $userId, bool $enabled): void
+    {
+        $this->save($userId, ['social_leaderboard' => $enabled]);
+    }
+
+    /** @param array<string, mixed> $values */
+    private function save(int $userId, array $values): void
     {
         $setting = ModuleSetting::withoutGlobalScopes()->firstOrNew(['user_id' => $userId, 'module' => self::MODULE]);
         $setting->user_id = $userId;
-        $setting->settings = array_replace($setting->settings ?? [], ['social_visible' => $visible]);
+        $setting->settings = array_replace($setting->settings ?? [], $values);
         $setting->save();
     }
 

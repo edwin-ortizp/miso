@@ -1,5 +1,5 @@
 # CHG-123 · Social C: tabla semanal de amigos con doble opt-in
-**Estado:** Aprobado
+**Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -81,15 +81,19 @@ flowchart LR
 - Docs a actualizar: `docs/game.md`, `docs/PRODUCT.md`, `docs/UX-WRITING.md`.
 
 ## 7. Tareas
-- [ ] T1 · Puedo decidir si muestro mi semana — Resp: developer — Modelo: estandar — Archivos: ajustes del módulo `social` — Hecho cuando: el interruptor se guarda y por defecto está apagado.
-- [ ] T2 · Veo cuántas acciones hizo cada amigo esta semana — Resp: developer — Modelo: estandar — Archivos: `FriendSnapshot::weekly()`, `WeeklyBoard` — Hecho cuando: las pruebas de doble opt-in, conteo y semana nueva pasan.
-- [ ] T3 · Nadie ve mi semana si no lo permito o si ya no somos amigos — Resp: developer — Modelo: estandar — Archivos: pruebas de privacidad — Hecho cuando: las pruebas pasan.
-- [ ] T4 · La pestaña se ve bien en móvil y escritorio — Resp: developer — Modelo: estandar — Archivos: vista y `config/modules.php` — Hecho cuando: `php artisan ui:conformance` pasa.
-- [ ] T5 · Documentación actualizada — Resp: developer — Modelo: estandar — Archivos: `docs/game.md`, `docs/PRODUCT.md`, `docs/UX-WRITING.md` — Hecho cuando: `git diff --check` pasa.
+- [x] T1 · Puedo decidir si muestro mi semana — Resp: developer — Modelo: estandar — Archivos: ajustes del módulo `social` — Hecho cuando: el interruptor se guarda y por defecto está apagado.
+- [x] T2 · Veo cuántas acciones hizo cada amigo esta semana — Resp: developer — Modelo: estandar — Archivos: `FriendSnapshot::weekly()`, `WeeklyBoard` — Hecho cuando: las pruebas de doble opt-in, conteo y semana nueva pasan.
+- [x] T3 · Nadie ve mi semana si no lo permito o si ya no somos amigos — Resp: developer — Modelo: estandar — Archivos: pruebas de privacidad — Hecho cuando: las pruebas pasan.
+- [x] T4 · La pestaña se ve bien en móvil y escritorio — Resp: developer — Modelo: estandar — Archivos: vista y `config/modules.php` — Hecho cuando: `php artisan ui:conformance` pasa.
+- [x] T5 · Documentación actualizada — Resp: developer — Modelo: estandar — Archivos: `docs/game.md`, `docs/PRODUCT.md`, `docs/UX-WRITING.md` — Hecho cuando: `git diff --check` pasa.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — Implementado: `SocialSettings::leaderboard()/setLeaderboard()`, `FriendSnapshot::weekly()`, `WeeklyBoard` (`/amigos/semana`, `social.week`), pestañas Amigos y Semana en `config/modules.php`, pruebas `WeeklyBoardTest` y `WeeklyBoardPrivacyTest`, docs.
+- Ajustes: `FriendSnapshot::for()` no cambia (un test fija sus claves). El conteo es un `COUNT` agrupado de `activity` sin el antifarmeo de la racha. «Mostrar mi semana» exige «Visible para mis amigos» (el interruptor se deshabilita sin él).
+- **BLOQUEADO — no verificado:** sin PHP 8.4, solo `php -l`. Pendiente: `php artisan test --filter=WeeklyBoard`, `--filter=Social`, `php artisan ui:conformance`, `npm run build`, revisión móvil/escritorio con 1 y 100 filas.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-16 — Decisión: máximo 100 filas y solo conteo de acciones. Requiere CHG-121.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-16 — Movido a in-progress/ (En desarrollo)
