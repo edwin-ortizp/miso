@@ -129,4 +129,69 @@ class HealthMeasurementsTest extends TestCase
             ->assertDontSee('111/71')
             ->assertSee('122/82');
     }
+
+    // --- CHG-123: glucosa ---------------------------------------------------------------
+
+    public function test_saves_glucose_with_its_moment_and_flags_it_against_that_moment(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')
+            ->set('type', 'glucose')
+            ->set('value', '92')
+            ->set('context', 'fasting')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertSee('92 mg/dL')
+            ->assertSee('En ayunas')
+            ->assertSee('En rango');
+
+        // 120 está dentro del rango después de comer (70–140) pero fuera del de ayunas (70–99).
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')->set('type', 'glucose')->set('value', '120')->set('context', 'after_meal')->call('save')->assertHasNoErrors();
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')->set('type', 'glucose')->set('value', '120')->set('context', 'fasting')->call('save')->assertHasNoErrors()
+            ->assertSee('Fuera de rango')
+            ->assertSee('70–99 mg/dL');
+
+        $this->assertSame(1, HealthMeasurement::where('context', 'fasting')->get()->filter->isOutOfRange()->count());
+        $this->assertSame(0, HealthMeasurement::where('context', 'after_meal')->get()->filter->isOutOfRange()->count());
+    }
+
+    public function test_glucose_rejects_impossible_values_and_unknown_moments(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')->set('type', 'glucose')
+            ->set('value', '5')->call('save')->assertHasErrors(['value'])
+            ->set('value', '700')->call('save')->assertHasErrors(['value'])
+            ->set('value', '95')->set('context', 'siempre')->call('save')->assertHasErrors(['context']);
+
+        $this->assertSame(0, HealthMeasurement::count());
+    }
+
+    public function test_changing_type_clears_fields_that_the_new_type_does_not_use(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->call('openForm')
+            ->set('value2', '80')->set('pulse', '70')
+            ->set('type', 'glucose')
+            ->assertSet('value2', '')->assertSet('pulse', '')
+            ->assertDontSee('Diastólica');
+    }
+
+    public function test_latest_measurement_shows_a_card_per_type(): void
+    {
+        $user = User::factory()->create();
+        $this->measurement($user, 128, 84);
+        $user->healthMeasurements()->create(['type' => 'glucose', 'value' => 92, 'unit' => 'mg/dL', 'context' => 'fasting', 'measured_at' => now()]);
+
+        Livewire::actingAs($user)->test(HealthMeasurements::class)
+            ->assertSee('Presión arterial')->assertSee('128/84 mmHg')
+            ->assertSee('Glucosa en sangre')->assertSee('92 mg/dL');
+    }
 }

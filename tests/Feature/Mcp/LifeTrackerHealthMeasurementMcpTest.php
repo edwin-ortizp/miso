@@ -98,4 +98,43 @@ class LifeTrackerHealthMeasurementMcpTest extends TestCase
 
         $this->assertSame(0, HealthMeasurement::count());
     }
+
+    public function test_log_tool_records_glucose_with_a_moment_and_uses_its_reference(): void
+    {
+        $user = User::factory()->create();
+        $server = LifeTrackerServer::actingAs($user);
+
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'glucose', 'value' => 92, 'context' => 'fasting'])
+            ->assertOk()->assertSee('92 mg/dL')->assertSee('En ayunas')->assertDontSee('Fuera del rango');
+
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'glucose', 'value' => 180, 'context' => 'after_meal'])
+            ->assertOk()->assertSee('Fuera del rango de referencia general (70–140 mg/dL)')->assertSee('profesional de salud');
+
+        $m = HealthMeasurement::where('context', 'fasting')->firstOrFail();
+        $this->assertNull($m->value2);
+        $this->assertNull($m->pulse);
+    }
+
+    public function test_glucose_rejects_bad_input_and_a_moment_on_a_type_that_has_none(): void
+    {
+        $user = User::factory()->create();
+        $server = LifeTrackerServer::actingAs($user);
+
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'glucose', 'value' => 5])->assertHasErrors();
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'glucose', 'value' => 95, 'context' => 'nunca'])->assertHasErrors();
+        $server->tool(LogHealthMeasurementTool::class, ['type' => 'blood_pressure', 'value' => 120, 'value2' => 80, 'context' => 'fasting'])->assertHasErrors();
+
+        $this->assertSame(0, HealthMeasurement::count());
+    }
+
+    public function test_list_tool_summarises_glucose_by_type(): void
+    {
+        $user = User::factory()->create();
+        $user->healthMeasurements()->create(['type' => 'glucose', 'value' => 90, 'unit' => 'mg/dL', 'context' => 'fasting', 'measured_at' => now()]);
+        $user->healthMeasurements()->create(['type' => 'glucose', 'value' => 110, 'unit' => 'mg/dL', 'context' => 'fasting', 'measured_at' => now()]);
+
+        LifeTrackerServer::actingAs($user)
+            ->tool(ListHealthMeasurementsTool::class, ['type' => 'glucose'])
+            ->assertOk()->assertSee('Glucosa en sangre')->assertSee('100')->assertSee('"out_of_range"');
+    }
 }

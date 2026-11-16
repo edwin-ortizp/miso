@@ -15,23 +15,28 @@
         MiSo registra tus mediciones y muestra su evolución. No es un dispositivo médico ni reemplaza a tu profesional de salud.
     </p>
 
-    @if ($latest)
+    @if ($latestByType->isNotEmpty())
         <x-ui.section title="Última medición" :level="2" id="health-latest-measurement">
-            <p class="md-title-large mb-0">
-                <i class="bi {{ \App\Models\HealthMeasurement::TYPES[$latest->type]['icon'] ?? 'bi-heart-pulse' }}" aria-hidden="true"></i>
-                {{ $latest->typeLabel() }}
-                <strong>{{ $latest->displayValue() }} {{ $latest->unit }}</strong>
-            </p>
-            <p class="md-body-medium mb-0">
-                {{ $latest->measured_at->isToday() ? 'Hoy' : $latest->measured_at->translatedFormat('j M Y') }} · {{ $latest->measured_at->format('H:i') }}
-                @if ($latest->pulse) · Pulso {{ $latest->pulse }} lpm @endif
-            </p>
-            @if ($latest->isOutOfRange())
-                <p class="md-body-medium mb-0" role="status">
-                    <i class="bi bi-info-circle" aria-hidden="true"></i>
-                    Fuera del rango de referencia general ({{ $latest->referenceText() }}). Si te preocupa, consúltalo con tu profesional de salud.
-                </p>
-            @endif
+            @foreach ($latestByType as $latest)
+                <div wire:key="latest-{{ $latest->type }}">
+                    <p class="md-title-large mb-0">
+                        <i class="bi {{ \App\Models\HealthMeasurement::TYPES[$latest->type]['icon'] ?? 'bi-heart-pulse' }}" aria-hidden="true"></i>
+                        {{ $latest->typeLabel() }}
+                        <strong>{{ $latest->displayValue() }} {{ $latest->unit }}</strong>
+                    </p>
+                    <p class="md-body-medium mb-0">
+                        {{ $latest->measured_at->isToday() ? 'Hoy' : $latest->measured_at->translatedFormat('j M Y') }} · {{ $latest->measured_at->format('H:i') }}
+                        @if ($latest->contextLabel()) · {{ $latest->contextLabel() }} @endif
+                        @if ($latest->pulse) · Pulso {{ $latest->pulse }} lpm @endif
+                    </p>
+                    @if ($latest->isOutOfRange())
+                        <p class="md-body-medium mb-0" role="status">
+                            <i class="bi bi-info-circle" aria-hidden="true"></i>
+                            Fuera del rango de referencia general ({{ $latest->referenceText() }}). Si te preocupa, consúltalo con tu profesional de salud.
+                        </p>
+                    @endif
+                </div>
+            @endforeach
         </x-ui.section>
     @endif
 
@@ -72,7 +77,7 @@
                         <tr wire:key="measurement-{{ $measurement->id }}">
                             <td class="md-table__date">{{ $measurement->measured_at->isToday() ? 'Hoy' : $measurement->measured_at->translatedFormat('j M Y') }}</td>
                             <td class="md-table__date">{{ $measurement->measured_at->format('H:i') }}</td>
-                            <td class="md-table__title">{{ $measurement->typeLabel() }}</td>
+                            <td class="md-table__title">{{ $measurement->typeLabel() }}@if ($measurement->contextLabel()) <span class="md-body-small">· {{ $measurement->contextLabel() }}</span>@endif</td>
                             <td class="md-table__nowrap">
                                 {{ $measurement->displayValue() }} {{ $measurement->unit }}
                                 @if ($measurement->pulse) <span class="md-body-small">· {{ $measurement->pulse }} lpm</span> @endif
@@ -110,16 +115,23 @@
             <x-ui.form-dialog :open="$showForm" close="closeForm"
                               title="{{ $editingId ? 'Editar medición' : 'Registrar medición' }}"
                               submit-action="save" id="health-measurement-form">
-                <p class="md-body-small">{{ $definition['label'] }}</p>
+                <x-ui.select name="type" label="Tipo" :options="$typeOptions" :selected="$type" wire:model.live="type" />
                 <x-ui.field name="value" :label="$definition['value_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
-                            step="1" wire:model="value" />
-                <x-ui.field name="value2" :label="$definition['value2_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
-                            step="1" wire:model="value2" />
+                            step="any" wire:model="value" />
+                @isset($definition['value2_label'])
+                    <x-ui.field name="value2" :label="$definition['value2_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
+                                step="any" wire:model="value2" />
+                @endisset
+                @if ($contextOptions !== [])
+                    <x-ui.select name="context" label="Momento" placeholder="Sin indicar" :options="$contextOptions" :selected="$context" wire:model="context" />
+                @endif
                 <x-ui.field name="measuredAt" label="Fecha y hora" type="datetime-local" wire:model="measuredAt" />
 
                 <details>
                     <summary>Más detalle</summary>
-                    <x-ui.field name="pulse" label="Pulso (lpm)" type="number" inputmode="numeric" step="1" wire:model="pulse" />
+                    @isset($definition['limits']['pulse'])
+                        <x-ui.field name="pulse" label="Pulso (lpm)" type="number" inputmode="numeric" step="1" wire:model="pulse" />
+                    @endisset
                     <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
                     <x-ui.switch name="isSensitive" label="Mantener oculta al asistente"
                                  help="Las consultas amplias del asistente no la incluirán."

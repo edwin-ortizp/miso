@@ -28,7 +28,25 @@ class HealthMeasurement extends Model
             'value2_label' => 'Diastólica',
             'limits' => ['value' => [60, 260], 'value2' => [30, 160], 'pulse' => [30, 220]],
             'reference' => ['value' => [90, 120], 'value2' => [60, 80]],
+            'article' => 'La',
             'icon' => 'bi-heart-pulse',
+        ],
+        // CHG-123: referencias generales y aproximadas por momento; no son un diagnóstico.
+        'glucose' => [
+            'label' => 'Glucosa en sangre',
+            'unit' => 'mg/dL',
+            'value_label' => 'Glucosa',
+            'limits' => ['value' => [20, 600]],
+            'reference' => ['value' => [70, 140]],
+            'contexts' => [
+                'fasting' => ['label' => 'En ayunas', 'reference' => ['value' => [70, 99]]],
+                'before_meal' => ['label' => 'Antes de comer', 'reference' => ['value' => [70, 130]]],
+                'after_meal' => ['label' => 'Después de comer', 'reference' => ['value' => [70, 140]]],
+                'bedtime' => ['label' => 'Al acostarse', 'reference' => ['value' => [90, 150]]],
+                'other' => ['label' => 'Otro momento', 'reference' => ['value' => [70, 140]]],
+            ],
+            'article' => 'La',
+            'icon' => 'bi-droplet',
         ],
     ];
 
@@ -63,10 +81,24 @@ class HealthMeasurement extends Model
             : $format($this->value);
     }
 
+    /** Rango de referencia que aplica a esta medición: el del momento si el tipo lo define; si no, el general. */
+    public function reference(): ?array
+    {
+        $type = self::TYPES[$this->type] ?? null;
+
+        return ($this->context ? ($type['contexts'][$this->context]['reference'] ?? null) : null) ?? ($type['reference'] ?? null);
+    }
+
+    /** Etiqueta del momento («En ayunas») o null. */
+    public function contextLabel(): ?string
+    {
+        return $this->context ? (self::TYPES[$this->type]['contexts'][$this->context]['label'] ?? null) : null;
+    }
+
     /** True si algún valor sale del rango de referencia general del tipo. */
     public function isOutOfRange(): bool
     {
-        $reference = self::TYPES[$this->type]['reference'] ?? null;
+        $reference = $this->reference();
         if ($reference === null) {
             return false;
         }
@@ -88,11 +120,12 @@ class HealthMeasurement extends Model
     public function referenceText(): ?string
     {
         $type = self::TYPES[$this->type] ?? null;
-        if (! $type || ! isset($type['reference'])) {
+        $reference = $this->reference();
+        if (! $type || $reference === null) {
             return null;
         }
 
-        $parts = array_map(fn (array $range) => $range[0].'–'.$range[1], array_values($type['reference']));
+        $parts = array_map(fn (array $range) => $range[0].'–'.$range[1], array_values($reference));
 
         return implode(' / ', $parts).' '.$type['unit'];
     }

@@ -33,12 +33,15 @@ class LogHealthMeasurement
             'value' => ['required', 'numeric'],
             'value2' => ['nullable', 'numeric'],
             'pulse' => ['nullable', 'integer'],
+            'context' => ['nullable', 'string', isset($definition['contexts']) ? 'in:'.implode(',', array_keys($definition['contexts'])) : 'prohibited'],
             'notes' => ['nullable', 'string', 'max:1000'],
             'is_sensitive' => ['nullable', 'boolean'],
         ], [
             'type.in' => 'Elige un tipo de medición válido.',
             'value.required' => 'Indica el valor de la medición.',
             'value.numeric' => 'El valor debe ser un número.',
+            'context.in' => 'Elige un momento válido.',
+            'context.prohibited' => 'Esta medición no usa un momento.',
             'value2.numeric' => 'El valor debe ser un número.',
             'pulse.integer' => 'El pulso debe ser un número entero.',
         ]);
@@ -57,7 +60,8 @@ class LogHealthMeasurement
                 [$min, $max] = $definition['limits'][$field];
                 if ($number < $min || $number > $max) {
                     $label = mb_strtolower($definition[$labelKey] ?? 'valor');
-                    $validator->errors()->add($field, "La {$label} debe estar entre {$min} y {$max} {$unit}.");
+                    $article = $definition['article'] ?? 'El';
+                    $validator->errors()->add($field, "{$article} {$label} debe estar entre {$min} y {$max} {$unit}.");
                 }
             }
 
@@ -65,7 +69,7 @@ class LogHealthMeasurement
                 $validator->errors()->add('value2', 'Indica la '.mb_strtolower($definition['value2_label']).'.');
             }
 
-            if (isset($data['value'], $data['value2']) && is_numeric($data['value']) && is_numeric($data['value2'])
+            if (isset($definition['value2_label'], $data['value'], $data['value2']) && is_numeric($data['value']) && is_numeric($data['value2'])
                 && (float) $data['value2'] >= (float) $data['value']) {
                 $validator->errors()->add('value2', 'La diastólica debe ser menor que la sistólica.');
             }
@@ -118,7 +122,8 @@ class LogHealthMeasurement
             'type' => $data['type'],
             'value' => $data['value'],
             'value2' => isset($definition['value2_label']) ? ($data['value2'] ?? null) : null,
-            'pulse' => filled($data['pulse'] ?? null) ? (int) $data['pulse'] : null,
+            'pulse' => isset($definition['limits']['pulse']) && filled($data['pulse'] ?? null) ? (int) $data['pulse'] : null,
+            'context' => isset($definition['contexts']) && filled($data['context'] ?? null) ? $data['context'] : null,
             'unit' => $definition['unit'],
             'notes' => filled($data['notes'] ?? null) ? $data['notes'] : null,
             'is_sensitive' => (bool) ($data['is_sensitive'] ?? false),

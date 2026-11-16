@@ -47,9 +47,19 @@ class HealthMeasurements extends Component
     public string $value = '';
     public string $value2 = '';
     public string $pulse = '';
+    public string $context = '';
     public string $measuredAt = '';
     public string $notes = '';
     public bool $isSensitive = false;
+
+    /** Cambiar de tipo conserva el valor principal y descarta lo que el nuevo tipo no usa. */
+    public function updatedType(): void
+    {
+        $this->value2 = '';
+        $this->pulse = '';
+        $this->context = '';
+        $this->resetErrorBag();
+    }
 
     public function updatedPeriod(): void
     {
@@ -101,6 +111,7 @@ class HealthMeasurements extends Component
         $this->value = $this->plain($measurement->value);
         $this->value2 = $measurement->value2 !== null ? $this->plain($measurement->value2) : '';
         $this->pulse = $measurement->pulse !== null ? (string) $measurement->pulse : '';
+        $this->context = (string) $measurement->context;
         $this->measuredAt = $measurement->measured_at->format('Y-m-d\TH:i');
         $this->notes = (string) $measurement->notes;
         $this->isSensitive = $measurement->is_sensitive;
@@ -125,6 +136,7 @@ class HealthMeasurements extends Component
             'value' => $this->value === '' ? null : str_replace(',', '.', $this->value),
             'value2' => $this->value2 === '' ? null : str_replace(',', '.', $this->value2),
             'pulse' => $this->pulse === '' ? null : $this->pulse,
+            'context' => $this->context === '' ? null : $this->context,
             'notes' => $this->notes === '' ? null : $this->notes,
             'is_sensitive' => $this->isSensitive,
         ]);
@@ -154,6 +166,7 @@ class HealthMeasurements extends Component
         $this->value = '';
         $this->value2 = '';
         $this->pulse = '';
+        $this->context = '';
         $this->measuredAt = '';
         $this->notes = '';
         $this->isSensitive = false;
@@ -168,7 +181,10 @@ class HealthMeasurements extends Component
     {
         $base = HealthMeasurement::query();
         $totalMeasurements = (clone $base)->count();
-        $latest = (clone $base)->orderByDesc('measured_at')->first();
+        // Una tarjeta por cada tipo que tiene datos, en el orden del catálogo.
+        $latestByType = collect(array_keys(HealthMeasurement::TYPES))
+            ->map(fn (string $type) => (clone $base)->where('type', $type)->orderByDesc('measured_at')->first())
+            ->filter()->values();
 
         $filtered = (clone $base)
             ->when($this->period !== 'all', fn ($q) => $q->where('measured_at', '>=', now()->subDays((int) $this->period)->startOfDay()));
@@ -177,16 +193,20 @@ class HealthMeasurements extends Component
             ->orderBy('measured_at', $this->sort === 'oldest' ? 'asc' : 'desc')
             ->paginate($this->perPage());
 
+        $definition = HealthMeasurement::TYPES[$this->type] ?? HealthMeasurement::TYPES['blood_pressure'];
+
         return view('livewire.health.health-measurements', [
             'measurements' => $measurements,
             'totalMeasurements' => $totalMeasurements,
-            'latest' => $latest,
+            'latestByType' => $latestByType,
+            'typeOptions' => collect(HealthMeasurement::TYPES)->map(fn (array $t) => $t['label'])->all(),
+            'contextOptions' => collect($definition['contexts'] ?? [])->map(fn (array $c) => $c['label'])->all(),
             'activeFilters' => $this->period !== 'all'
                 ? [['key' => 'period', 'value' => null, 'label' => 'Periodo: '.self::PERIODS[$this->period], 'icon' => 'bi-calendar-event']]
                 : [],
             'periods' => self::PERIODS,
             'sorts' => self::SORTS,
-            'definition' => HealthMeasurement::TYPES[$this->type] ?? HealthMeasurement::TYPES['blood_pressure'],
+            'definition' => $definition,
         ]);
     }
 }
