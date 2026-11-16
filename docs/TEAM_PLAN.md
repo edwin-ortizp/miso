@@ -122,6 +122,7 @@ _Última actualización: 2026-11-16_
 | CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | done | Cerrado | 4/4 |
 | CHG-117 | S | Aviso de ball en la campanita del header | done | Cerrado | 3/3 |
 | CHG-118 | S | Mover fecha de fin al cambiar la de inicio de una tarea | in-progress | En verificación | 1/1 |
+| CHG-119 | S | Objetivos: alinear fecha límite si el inicio la supera | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

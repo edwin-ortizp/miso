@@ -19,6 +19,7 @@ use Livewire\Component;
 #[Title('Detalle del objetivo')]
 class GoalDetail extends Component
 {
+    use \App\Livewire\Concerns\AlignsGoalDates;
     use \App\Livewire\Concerns\HasReminderDraft;
     #[\Livewire\Attributes\Locked]
     public string $goalId;
