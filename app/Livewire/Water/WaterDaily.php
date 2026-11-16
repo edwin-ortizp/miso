@@ -321,7 +321,8 @@ class WaterDaily extends Component
     {
         $dayLogs = DrinkLog::whereDate('date', $this->selectedDate);
         $search = trim($this->search);
-        $logs = $this->applyDateScope(DrinkLog::query())
+        // CHG-135: el ícono de cada fila sale de su tipo de bebida; se carga junto con la página.
+        $logs = $this->applyDateScope(DrinkLog::with('drinkType'))
             ->when($search !== '', fn ($q) => $q->where('drink_type', 'like', '%'.$search.'%'))
             ->when($this->drinkFilter !== '', fn ($q) => $q->where('drink_type_id', $this->drinkFilter))
             ->when(in_array($this->sort, ['amount', 'hydration'], true),

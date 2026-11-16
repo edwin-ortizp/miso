@@ -4,7 +4,7 @@ namespace App\Mcp\Tools\Focus;
 
 use App\Mcp\Support\DateWindow;
 use App\Mcp\Support\McpOutput;
-use App\Models\ModuleSetting;
+use App\Support\PomodoroSettings;
 use App\Models\PomodoroSession;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Carbon;
@@ -27,9 +27,9 @@ class ListFocusSessionsTool extends Tool
         ]);
 
         $window = DateWindow::fromInput($data, $data['days'] ?? 7);
-        $settings = ModuleSetting::where('module', 'pomodoro')->value('settings') ?? [];
-        $weekdayGoal = (int) ($settings['weekday_goal_minutes'] ?? 300);
-        $weekendGoal = (int) ($settings['weekend_goal_minutes'] ?? 120);
+        $settings = app(PomodoroSettings::class)->for();
+        $weekdayGoal = $settings['weekday_goal_minutes'];
+        $weekendGoal = $settings['weekend_goal_minutes'];
         $timezone = config('app.timezone');
 
         $sessions = Auth::user()->pomodoroSessions()

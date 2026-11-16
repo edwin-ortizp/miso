@@ -140,3 +140,46 @@ Analizado y no cambiado a propósito:
 - **`CACHE_STORE=database` y `SESSION_DRIVER=database`.** Suman 3–4 consultas a cada petición (sesión leída dos veces y escrita, y el `Cache::add` de `TrackActiveDay`). Es configuración de entorno: en producción conviene `CACHE_STORE=file` y, si el hosting lo permite, `SESSION_DRIVER=file`.
 - **Escrituras del juego en GET** (hitos de racha, reto diario): idempotentes y por diseño.
 - **Shell (16 consultas fijas).** Quedan como siguientes candidatos los ajustes de Pomodoro leídos dos veces (barra de estado y guardián) y los contadores del menú.
+
+## Auditoría integral (CHG-135, 16 de noviembre de 2026)
+
+Medición local en SQLite desechable con un usuario sintético (180 tareas, 12 hábitos con 60 días, 300 registros de agua, 30 recetas, 42 comidas planificadas, 60 eventos de salud, 40 contactos, 2 vehículos). Cada ruta GET protegida se pidió dos veces dentro de una transacción revertida y se contó la segunda: consultas, consultas idénticas repetidas y tamaño del HTML. No son tiempos del hosting de producción.
+
+| Ruta | Antes | Después | Causa corregida |
+|---|---:|---:|---|
+| `/meals/shopping` | 87 | 25 | N+1: receta, ingredientes y productos consultados por cada comida planificada → se cargan con la vista previa |
+| `/vehicles/maintenance-catalog` | 23 | 12 | el catálogo de categorías se leía 11 veces (una por fila y selector) |
+| `/exercise/settings` | 20 | 14 | mismo catálogo leído 6 veces |
+| `/relationships/{id}/history` | 20 | 16 | mismo catálogo leído 4 veces |
+| `/meals/ingredients` | 25 | 19 | opciones de ubicación pedidas por la vista, los chips y la validación |
+| `/water/daily` | 23 | 18 | tipo de bebida consultado por cada fila |
+| `/` | 92 | 90 | ajustes de Pomodoro leídos tres veces |
+| resto (≈80 rutas) | n | n − 1 | ajustes de Pomodoro leídos por la barra de estado y por el temporizador global |
+
+Cómo quedó:
+
+1. **Ajustes de Pomodoro en un solo lugar.** `App\Support\PomodoroSettings` (`scoped`) conoce las claves y sus valores por defecto, que estaban copiados en siete archivos. Se vacía con los eventos de `ModuleSetting`, igual que `GameSettings`. Siempre filtra por usuario: antes, sin sesión, la lectura no tenía dueño.
+2. **Catálogo de categorías.** `CategoryCatalog::options` usa `RequestMemo`; se olvida al guardar o borrar una `UserCategory` y dentro de `seedFor`, que inserta sin Eloquent.
+3. **Compras.** `MealNeeds::preview` carga `items.recipe.recipeIngredients.shoppingItem`; `MealInventory::entryIngredients` usa la receta ya cargada (comprobando que sea del usuario) y solo consulta cuando quien llama no la trae.
+
+Presupuestos nuevos en `tests/Feature/BackendQueryBudgetTest.php`.
+
+### Suite de pruebas
+
+- `tests/Feature/Social/FriendMilestonesCommandTest.php` declaraba un método `count()`, que es `final` en `PHPUnit\Framework\TestCase`: error fatal de PHP al cargar el archivo, así que **no se podía ejecutar ninguna prueba** desde el merge de las funciones sociales. Renombrado.
+- El idioma por defecto era inglés (`config/app.php` y `.env.example`): una instalación sin `APP_LOCALE` mostraba «Monday 16 de November» y 8 pruebas que esperan español fallaban. Ahora el defecto es `es` y `phpunit.xml` lo fija. Doce fechas de vistas usaban `format()` con mes abreviado y salían en inglés aun con el idioma correcto; ahora usan `translatedFormat()`.
+- Suite sin la carpeta Browser: de 46 fallos a 38, ninguno nuevo (1.799 pruebas). La lista de los 38 es la misma antes y después de los cambios de backend.
+
+### Fallos que siguen y por qué no se tocaron
+
+- **≈10 pruebas de aislamiento** (`EditorPerformanceTest`, `GuidedReflectionTest`, `Relationship*Test`, `PlanModuleTest`, `HealthModuleTest`) esperan una `ModelNotFoundException` desde `Livewire::test(...)->call(...)`. Se comprobó a mano que el registro ajeno **no** se carga (el scope por usuario devuelve 0 filas y el editor queda vacío): la versión instalada de Livewire convierte la excepción en respuesta 404. Hay que reescribir esas aserciones una por una (estado 404 y datos intactos); se dejó fuera para no debilitar pruebas de seguridad en un cambio de rendimiento.
+- **Fechas fijas** (`2026-09` en calendarios de Agua y Ejercicio), **contratos de UI** (deuda visual de `_game.css`, catálogo sin `catalog-chip`, rutas de `log-viewer`) y **`StaticAssetsTest`**: ajenos a este cambio.
+- La carpeta `tests/Browser` necesita un navegador gestionado por Pest; aquí se colgaba y no se ejecutó.
+
+### Analizado y no cambiado a propósito
+
+- **Editores montados en Inicio** (tarea, compra, hábito y plan: ~20 consultas para diálogos cerrados, entre ellas la lista completa de contactos). Cargarlos al abrir exige otra petición o mover las opciones al cliente; necesita su propia traza y pruebas de guardado.
+- **HTML de Tareas** (Kanban ≈ 720 KB, Flujo ≈ 540 KB con 180 tareas): cada tarjeta trae su menú completo. Paginar o diferir columnas cambia la interacción; es una decisión de UX.
+- **Proyección de uso de vehículos** (6 consultas por vehículo): son extremos ascendente y descendente, no duplicados.
+- **Mediciones de salud** (7 consultas, una por tipo): acotado por el número de tipos, no crece con los datos.
+- **Estados como cadenas sueltas.** Planes (`pending`/`scheduled`/`done`/`archived`), comidas (`planned`/`consumed`/`outside`), objetivos y tomas de medicamentos comparan literales en decenas de archivos (`'scheduled'` aparece en 16, `'archived'` en 15), incluidas herramientas MCP. Son máquinas de estado implícitas: las transiciones válidas no están escritas en ningún sitio. Llevarlas a un enum con transiciones explícitas es valioso, pero toca contratos MCP y no tiene un defecto medido detrás; se propone como cambio aparte, empezando por Planes.

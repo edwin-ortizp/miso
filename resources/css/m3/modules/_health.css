@@ -111,6 +111,11 @@
     .health-event-summary { gap: 10px; padding: 10px 12px; }
     .health-event-icon { width: 36px; height: 36px; font-size: 1rem; }
     .health-event-status small { display: none; }
+    /* CHG-135: el estado baja a una segunda línea para que el título no se corte a pocas letras. */
+    .health-event-summary { flex-wrap: wrap; row-gap: 6px; }
+    .health-event-heading { flex: 1 1 0; }
+    .health-summary-chevron { order: 2; }
+    .health-event-status { order: 3; flex-basis: 100%; justify-items: start; padding-left: 46px; text-align: left; }
     .health-evolution { grid-template-columns: minmax(0, 1fr); }
 }
 

@@ -183,7 +183,7 @@
     </x-ui.management-card>
 
     <x-ui.section class="pomodoro-week-summary" title="Esta semana"
-                  description="{{ $weekStart->format('d M') }} – {{ $weekStart->copy()->endOfWeek()->format('d M') }}"
+                  description="{{ $weekStart->translatedFormat('d M') }} – {{ $weekStart->copy()->endOfWeek()->translatedFormat('d M') }}"
                   :level="3">
         <x-ui.card variant="elevated">
             <div class="pomodoro-week" role="table" aria-label="Enfoque de la semana">

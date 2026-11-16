@@ -74,3 +74,23 @@ Patrón de fondo: los módulos de registro diario se diseñaron como «tabla + p
 - **Tamaño:** M
 - **CHG relacionado:** — (CHG-095 redujo su costo de render)
 - **Historial:** 2026-11-12 — Hallazgo.
+
+### UX-008 · Tareas: la descripción muestra el Markdown sin interpretar
+- **Prioridad:** P3
+- **Tipo:** Objetivo
+- **Estado:** Propuesto
+- **Evidencia:** `resources/views/livewire/task/task-list.blade.php` imprime `$task->description` tal cual en la línea de apoyo: una descripción «**Importante**» se lee con los asteriscos (captura a 390 y 1440 px, auditoría CHG-135).
+- **Propuesta:** mostrar la primera línea como texto plano (sin marcas) en la lista; el diálogo ya la interpreta.
+- **Tamaño:** S
+- **CHG relacionado:** —
+- **Historial:** 2026-11-16 — Hallazgo.
+
+### UX-009 · Racha: «162 de 3 acciones»
+- **Prioridad:** P3
+- **Tipo:** Objetivo
+- **Estado:** Propuesto
+- **Evidencia:** tarjeta de racha en Mi día: cuando las acciones del día superan el umbral, el texto sigue comparando contra el mínimo («Hoy ya está: 162 de 3 acciones»).
+- **Propuesta:** al cumplir el umbral, decir solo que el día ya cuenta y mostrar el total sin el «de 3».
+- **Tamaño:** S
+- **CHG relacionado:** —
+- **Historial:** 2026-11-16 — Hallazgo.

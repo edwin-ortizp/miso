@@ -61,12 +61,12 @@
 
                         <div class="goal-card__meta">
                             @if ($goal->start_date)
-                                <x-ui.chip variant="tonal" icon="bi-calendar">{{ $goal->start_date->format('d M Y') }}</x-ui.chip>
+                                <x-ui.chip variant="tonal" icon="bi-calendar">{{ $goal->start_date->translatedFormat('d M Y') }}</x-ui.chip>
                             @endif
                             @if ($goal->due_date)
                                 <x-ui.chip variant="tonal" icon="bi-calendar-event"
                                            :tone="$goal->due_date->isPast() && $goal->status === 'active' ? 'danger' : 'neutral'">
-                                    {{ $goal->due_date->format('d M Y') }}
+                                    {{ $goal->due_date->translatedFormat('d M Y') }}
                                 </x-ui.chip>
                             @endif
                         </div>

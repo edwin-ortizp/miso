@@ -5,7 +5,6 @@ namespace App\Livewire\Pomodoro;
 use App\Livewire\Concerns\HasUrlDate;
 use App\Livewire\Concerns\WithDefaultDateFilter;
 use App\Livewire\Concerns\WithManagementCard;
-use App\Models\ModuleSetting;
 use App\Models\PomodoroSession;
 use App\Models\Task;
 use App\Support\GoalCalendar;
@@ -84,13 +83,13 @@ class PomodoroTimer extends Component
         $this->setDateScope($this->dateScope);
         $this->calendarMonth = $this->normalizeCalendarMonth($this->calendarMonth);
 
-        $settings = ModuleSetting::where('module', 'pomodoro')->value('settings') ?? [];
+        $settings = app(\App\Support\PomodoroSettings::class)->for();
 
-        $this->workDuration = (int) ($settings['work_duration_minutes'] ?? 25);
-        $this->shortBreak = (int) ($settings['short_break_minutes'] ?? 5);
-        $this->longBreak = (int) ($settings['long_break_minutes'] ?? 15);
-        $this->weekdayGoal = (int) ($settings['weekday_goal_minutes'] ?? 300);
-        $this->weekendGoal = (int) ($settings['weekend_goal_minutes'] ?? 120);
+        $this->workDuration = $settings['work_duration_minutes'];
+        $this->shortBreak = $settings['short_break_minutes'];
+        $this->longBreak = $settings['long_break_minutes'];
+        $this->weekdayGoal = $settings['weekday_goal_minutes'];
+        $this->weekendGoal = $settings['weekend_goal_minutes'];
         $this->focusCompanion = app(\App\Services\Game\ModuleGuardian::class)->pick((int) auth()->id(), 'pomodoro');
         if ($this->focusCompanion) {
             $this->focusCompanion['cry'] = \App\Support\Game\SpeciesCry::for($this->focusCompanion['name']);

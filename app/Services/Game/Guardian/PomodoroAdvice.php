@@ -2,9 +2,9 @@
 
 namespace App\Services\Game\Guardian;
 
-use App\Models\ModuleSetting;
 use App\Models\PomodoroSession;
 use App\Models\Task;
+use App\Support\PomodoroSettings;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 
@@ -16,11 +16,7 @@ class PomodoroAdvice
     /** Meta diaria en minutos, igual que el temporizador (entre semana / fin de semana). */
     public static function goalFor(CarbonInterface $date): int
     {
-        $settings = ModuleSetting::where('module', 'pomodoro')->value('settings') ?? [];
-
-        return $date->isWeekend()
-            ? (int) ($settings['weekend_goal_minutes'] ?? 120)
-            : (int) ($settings['weekday_goal_minutes'] ?? 300);
+        return app(PomodoroSettings::class)->goalFor($date);
     }
 
     /** @return list<array{key: string, html: string, weight: int}> */

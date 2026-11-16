@@ -14,6 +14,6 @@
     </div>
     <section class="md-card-elevated water-range-chart" aria-label="Serie de hidratación">
         @php $max = max($rangeData['series']->max('total') ?? 1, $goal); @endphp
-        @foreach ($rangeData['series'] as $day)<i style="height: {{ max(2, ($day['total'] / $max) * 100) }}%" title="{{ $day['date']->format('d M') }}: {{ $day['total'] }} ml"></i>@endforeach
+        @foreach ($rangeData['series'] as $day)<i style="height: {{ max(2, ($day['total'] / $max) * 100) }}%" title="{{ $day['date']->translatedFormat('d M') }}: {{ $day['total'] }} ml"></i>@endforeach
     </section>
 </x-module-shell>

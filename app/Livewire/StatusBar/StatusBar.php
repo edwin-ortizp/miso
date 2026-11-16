@@ -3,7 +3,6 @@
 namespace App\Livewire\StatusBar;
 
 use App\Livewire\Pomodoro\PomodoroTimer;
-use App\Models\ModuleSetting;
 use App\Models\PomodoroSession;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -27,13 +26,13 @@ class StatusBar extends Component
 
     public function mount(): void
     {
-        $settings = ModuleSetting::where('module', 'pomodoro')->value('settings') ?? [];
+        $settings = app(\App\Support\PomodoroSettings::class)->for();
 
-        $this->workDuration = (int) ($settings['work_duration_minutes'] ?? 25);
-        $this->shortBreak = (int) ($settings['short_break_minutes'] ?? 5);
-        $this->longBreak = (int) ($settings['long_break_minutes'] ?? 15);
-        $this->weekdayGoal = (int) ($settings['weekday_goal_minutes'] ?? 300);
-        $this->weekendGoal = (int) ($settings['weekend_goal_minutes'] ?? 120);
+        $this->workDuration = $settings['work_duration_minutes'];
+        $this->shortBreak = $settings['short_break_minutes'];
+        $this->longBreak = $settings['long_break_minutes'];
+        $this->weekdayGoal = $settings['weekday_goal_minutes'];
+        $this->weekendGoal = $settings['weekend_goal_minutes'];
     }
 
     public function saveSession(int $startedAt, int $endedAt, string $description, string $clientToken, ?string $taskId = null): void

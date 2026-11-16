@@ -1,7 +1,7 @@
 <x-module-shell module="habits">
     <x-slot:controls>
         <x-date-navigator previous="previousWeek" next="nextWeek" today="thisWeek" previous-label="Semana anterior" next-label="Semana siguiente" today-label="Esta semana"
-                          nav-label="Navegación por semana" :label="$weekStart->format('d M').' – '.$weekStart->copy()->endOfWeek()->format('d M')" />
+                          nav-label="Navegación por semana" :label="$weekStart->translatedFormat('d M').' – '.$weekStart->copy()->endOfWeek()->translatedFormat('d M')" />
     </x-slot:controls>
 
     <section class="habit-weekly-hero mb-3" aria-label="Resumen de progreso semanal">

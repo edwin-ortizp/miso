@@ -65,6 +65,8 @@ class CategoryCatalog
                 ]);
             }
         }
+        // Estas inserciones no pasan por Eloquent: se olvida a mano lo memorizado en la petición.
+        app(RequestMemo::class)->flush();
     }
 
     public static function options(string $domain, ?int $userId = null): array
@@ -73,7 +75,10 @@ class CategoryCatalog
         if (! $userId) {
             return [];
         }
-        return UserCategory::hierarchyOptions($userId, 'key', $domain);
+        // CHG-135: una pantalla pide el mismo catálogo por cada fila y selector; se lee una vez por petición.
+        // AppServiceProvider vacía la memoria al guardar o borrar una UserCategory.
+        return app(RequestMemo::class)->remember("category-catalog:options:{$userId}:{$domain}",
+            fn () => UserCategory::hierarchyOptions($userId, 'key', $domain));
     }
 
     public static function expand(string $domain, array $keys, ?int $userId = null): array

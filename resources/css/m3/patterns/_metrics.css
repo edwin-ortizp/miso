@@ -94,7 +94,13 @@
 }
 
 @media (max-width: 599.98px) {
+  /* CHG-135: en el celular el resumen va de dos en dos para que la lista quede en la primera pantalla. */
   .md-metric-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--md-sys-space-sm);
+  }
+
+  .md-metric-grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 }

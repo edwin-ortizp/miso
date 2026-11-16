@@ -243,7 +243,11 @@ class MealInventory
                 continue;
             }
             if ($item->recipe_id) {
-                $recipe = Recipe::where('user_id', $userId)->find($item->recipe_id) ?? $this->fail('Receta no disponible.');
+                // CHG-135: si quien llama ya cargó la receta (vista previa de compras), no se consulta una por comida.
+                $recipe = $item->relationLoaded('recipe')
+                    ? ($item->recipe && (int) $item->recipe->user_id === $userId ? $item->recipe : null)
+                    : Recipe::where('user_id', $userId)->find($item->recipe_id);
+                $recipe ??= $this->fail('Receta no disponible.');
                 $rows = array_merge($rows, $this->recipeIngredients($userId, $recipe, (float) $item->portions, $strict));
             } else {
                 foreach ($item->ingredients ?? [] as $row) {

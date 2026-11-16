@@ -1,7 +1,7 @@
 <x-module-shell module="negative-habits">
     <x-slot:controls>
         <x-date-navigator previous="previousWeek" next="nextWeek" today="thisWeek" previous-label="Semana anterior" next-label="Semana siguiente" today-label="Esta semana"
-                          nav-label="Navegación por semana" :label="$weekStart->format('d M').' – '.$weekEnd->format('d M')" />
+                          nav-label="Navegación por semana" :label="$weekStart->translatedFormat('d M').' – '.$weekEnd->translatedFormat('d M')" />
     </x-slot:controls>
 
     <livewire:game.guardian-card module="negative-habits" variant="top" />

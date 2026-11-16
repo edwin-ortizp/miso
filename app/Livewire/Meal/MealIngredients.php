@@ -601,13 +601,17 @@ class MealIngredients extends Component
     {
         $current = $this->editingId ? ShoppingItem::whereKey($this->editingId)->value('storage_location_id') : null;
 
-        return StorageLocation::options(include: [$current]);
+        return $this->locationOptions['form:'.$current] ??= StorageLocation::options(include: [$current]);
     }
 
     public function locationFilterOptions(): array
     {
-        return [StorageLocation::NONE => 'Sin ubicación'] + StorageLocation::options(include: StorageLocation::where('user_id', auth()->id())->pluck('id')->all());
+        return $this->locationOptions['filter'] ??= [StorageLocation::NONE => 'Sin ubicación']
+            + StorageLocation::options(include: StorageLocation::where('user_id', auth()->id())->pluck('id')->all());
     }
+
+    /** CHG-135: la vista, los chips y la validación piden las mismas opciones; se resuelven una vez por petición. @var array<string, array<string, string>> */
+    private array $locationOptions = [];
 
     private function defaultContentUnit(): string
     {

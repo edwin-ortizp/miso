@@ -19,7 +19,7 @@
                         {{ $goal->status === 'completed' ? 'Completado' : ($goal->status === 'abandoned' ? 'Abandonado' : 'Activo') }}
                     </span>
                     @if ($goal->start_date && $goal->due_date)
-                        <span class="goal-hero__date">{{ $goal->start_date->format('d M') }} — {{ $goal->due_date->format('d M Y') }}</span>
+                        <span class="goal-hero__date">{{ $goal->start_date->translatedFormat('d M') }} — {{ $goal->due_date->translatedFormat('d M Y') }}</span>
                     @endif
                 </div>
                 <h2>{{ $goal->title }}</h2>
@@ -71,7 +71,7 @@
                             @forelse ($goal->goalNumericEntries as $entry)
                                 <div class="goal-history__row" wire:key="numeric-{{ $entry->id }}">
                                     <div><strong>{{ number_format($entry->value, 2, ',', '.') }} {{ $kpi['unit'] }}</strong><span>{{ $entry->note ?: 'Sin nota' }}</span></div>
-                                    <time>{{ $entry->date->format('d M Y') }}</time>
+                                    <time>{{ $entry->date->translatedFormat('d M Y') }}</time>
                                     <div class="goal-history__actions"><button wire:click="openNumericForm('{{ $entry->id }}')" class="md-btn-icon" aria-label="Editar medición"><i class="bi bi-pencil"></i></button><button wire:click="deleteNumericEntry('{{ $entry->id }}')" wire:confirm="¿Eliminar esta medición?" class="md-btn-icon" aria-label="Eliminar medición"><i class="bi bi-trash"></i></button></div>
                                 </div>
                             @empty
@@ -135,7 +135,7 @@
             </div>
 
             <aside class="goal-detail__rail">
-                <section class="md-context-widget"><div class="md-context-widget__header"><span class="md-context-widget__icon"><i class="bi bi-clipboard-data"></i></span><h2>Panorama</h2></div><div class="md-context-widget__content"><dl class="md-context-list"><div><dt>Tareas</dt><dd>{{ $goal->tasks->where('completed', true)->count() }}/{{ $goal->tasks->count() }}</dd></div><div><dt>Avances</dt><dd>{{ $goal->goalEntries->count() }}</dd></div><div><dt>Hitos</dt><dd>{{ $goal->goalEntries->where('is_milestone', true)->count() }}</dd></div>@if($goal->due_date)<div><dt>Fecha límite</dt><dd>{{ $goal->due_date->format('d M Y') }}</dd></div>@endif</dl></div></section>
+                <section class="md-context-widget"><div class="md-context-widget__header"><span class="md-context-widget__icon"><i class="bi bi-clipboard-data"></i></span><h2>Panorama</h2></div><div class="md-context-widget__content"><dl class="md-context-list"><div><dt>Tareas</dt><dd>{{ $goal->tasks->where('completed', true)->count() }}/{{ $goal->tasks->count() }}</dd></div><div><dt>Avances</dt><dd>{{ $goal->goalEntries->count() }}</dd></div><div><dt>Hitos</dt><dd>{{ $goal->goalEntries->where('is_milestone', true)->count() }}</dd></div>@if($goal->due_date)<div><dt>Fecha límite</dt><dd>{{ $goal->due_date->translatedFormat('d M Y') }}</dd></div>@endif</dl></div></section>
                 <section class="md-context-widget goal-motivation"><div class="md-context-widget__header"><span class="md-context-widget__icon"><i class="bi bi-lightning-charge"></i></span><h2>Motivación</h2></div><div class="md-context-widget__content"><p>Marca cómo te está haciendo sentir este objetivo.</p><div><button wire:click="incrementMotivation('positive')" class="md-btn-outlined"><i class="bi bi-hand-thumbs-up"></i> {{ $goal->positive_count }}</button><button wire:click="incrementMotivation('negative')" class="md-btn-outlined"><i class="bi bi-hand-thumbs-down"></i> {{ $goal->negative_count }}</button></div></div></section>
             </aside>
         </div>

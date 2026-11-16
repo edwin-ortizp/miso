@@ -48,7 +48,7 @@ class MealNeeds
         $rows = [];
         $warnings = [];
         $entries = MealPlanEntry::where('user_id', $userId)->where('status', 'planned')->whereDate('date', '>=', $since)->whereDate('date', '<=', $until)
-            ->with(['items.recipe' => fn ($query) => $query->withCount('recipeIngredients'), 'items.preparation'])->get();
+            ->with(['items.recipe' => fn ($query) => $query->withCount('recipeIngredients')->with('recipeIngredients.shoppingItem'), 'items.preparation'])->get();
         foreach ($entries as $entry) {
             $rows = array_merge($rows, $inventory->entryIngredients($userId, $entry, false));
             foreach ($entry->items as $item) {

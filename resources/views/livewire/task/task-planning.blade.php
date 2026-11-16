@@ -26,7 +26,7 @@
                                 <span class="md-planning-card-meta">
                                     @if ($task->category)<x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="accent" :icon="$this->categoryIcon($task->category)">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>@endif
                                     @if ($task->priority)<span class="md-planning-priority {{ $task->priority }}"></span>@endif
-                                    @if ($scheduledDate)<span><i class="bi bi-calendar3"></i> {{ $scheduledDate->format('d M, H:i') }}</span>@endif
+                                    @if ($scheduledDate)<span><i class="bi bi-calendar3"></i> {{ $scheduledDate->translatedFormat('d M, H:i') }}</span>@endif
                                     @if ($task->estimated_time)<span><i class="bi bi-clock"></i> {{ $task->estimated_time_label }}</span>@endif
                                 </span>
                             </button>

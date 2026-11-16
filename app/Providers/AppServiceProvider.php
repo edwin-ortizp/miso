@@ -45,6 +45,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->scoped(\App\Services\Game\ModuleGuardian::class);
         $this->app->scoped(\App\Services\Game\FavoriteCompanion::class);
         $this->app->scoped(\App\Support\RequestMemo::class);
+        // CHG-135: ajustes de Pomodoro leídos una vez por petición (barra de estado, temporizador global y guardián).
+        $this->app->scoped(\App\Support\PomodoroSettings::class);
         $this->app->singleton(
             HabitActionRegistry::class,
             fn (): HabitActionRegistry => new HabitActionRegistry(config('habit_actions.actions', [])),
@@ -69,7 +71,7 @@ class AppServiceProvider extends ServiceProvider
         }
         // CHG-095: lo memorizado en la petición se olvida en cuanto cambia su origen.
         $forgetGameReads = static function (): void {
-            foreach ([\App\Services\Game\GameSettings::class, \App\Services\Game\ModuleGuardian::class, \App\Services\Game\FavoriteCompanion::class] as $service) {
+            foreach ([\App\Services\Game\GameSettings::class, \App\Services\Game\ModuleGuardian::class, \App\Services\Game\FavoriteCompanion::class, \App\Support\PomodoroSettings::class] as $service) {
                 if (app()->resolved($service)) {
                     app($service)->flush();
                 }
@@ -87,7 +89,7 @@ class AppServiceProvider extends ServiceProvider
             }
         };
         \App\Models\Medication::observe(\App\Observers\MedicationReminderObserver::class);
-        foreach ([Task::class, \App\Models\TaskCategory::class] as $catalogSource) {
+        foreach ([Task::class, \App\Models\TaskCategory::class, \App\Models\UserCategory::class] as $catalogSource) {
             $catalogSource::saved($forgetTaskCatalog);
             $catalogSource::deleted($forgetTaskCatalog);
         }

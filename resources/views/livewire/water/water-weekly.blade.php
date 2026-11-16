@@ -1,7 +1,7 @@
 <x-module-shell module="water">
     <x-slot:controls>
         <x-date-navigator previous="previousWeek" next="nextWeek" previous-label="Semana anterior" next-label="Semana siguiente" today-label="Esta semana"
-                          nav-label="Navegación por semana" :label="$weekData['start']->format('d M').' – '.$weekData['end']->format('d M')" />
+                          nav-label="Navegación por semana" :label="$weekData['start']->translatedFormat('d M').' – '.$weekData['end']->translatedFormat('d M')" />
     </x-slot:controls>
     <div class="row g-3 mb-3">
         <div class="col-md-4"><div class="md-card-filled h-100"><span class="md-label-small">PROMEDIO</span><div class="md-headline-small mt-2">{{ number_format($weekData['average']) }} ml</div></div></div>

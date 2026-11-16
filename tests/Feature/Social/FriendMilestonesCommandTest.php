@@ -45,7 +45,7 @@ class FriendMilestonesCommandTest extends FriendTestCase
         }
     }
 
-    private function count(): int
+    private function notices(): int
     {
         return UserNotification::withoutGlobalScopes()->where('type', FriendNotices::STREAK)->count();
     }
@@ -60,7 +60,7 @@ class FriendMilestonesCommandTest extends FriendTestCase
         Artisan::call('miso:friend-milestones');
         Artisan::call('miso:friend-milestones');
 
-        $this->assertSame(2, $this->count());
+        $this->assertSame(2, $this->notices());
     }
 
     public function test_dry_run_writes_nothing(): void
@@ -72,7 +72,7 @@ class FriendMilestonesCommandTest extends FriendTestCase
 
         Artisan::call('miso:friend-milestones', ['--dry-run' => true]);
 
-        $this->assertSame(0, $this->count());
+        $this->assertSame(0, $this->notices());
         $this->assertStringContainsString('en un hito: 1', Artisan::output());
     }
 
@@ -90,6 +90,6 @@ class FriendMilestonesCommandTest extends FriendTestCase
 
         Artisan::call('miso:friend-milestones');
 
-        $this->assertSame(0, $this->count());
+        $this->assertSame(0, $this->notices());
     }
 }

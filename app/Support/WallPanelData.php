@@ -10,7 +10,6 @@ use App\Models\Goal;
 use App\Models\HabitCompletion;
 use App\Models\HabitDefinition;
 use App\Models\MealPlanEntry;
-use App\Models\ModuleSetting;
 use App\Models\MoodEntry;
 use App\Models\NegativeHabitDefinition;
 use App\Models\NegativeHabitLog;
@@ -99,7 +98,6 @@ class WallPanelData
                 $timeline->push($this->row('habit', (string) $habit->id, $habit->name, substr($habit->base_time, 0, 5), in_array($habit->id, $completions)));
             }
         }
-        $settings = ModuleSetting::where('module', 'pomodoro')->value('settings') ?? [];
         $negativeHabits = NegativeHabitDefinition::orderBy('name')->get();
         $lastRelapses = NegativeHabitLog::selectRaw('habit_id, MAX(timestamp) as last_at')->groupBy('habit_id')->pluck('last_at', 'habit_id');
         $moods = MoodEntry::with('moodState')->whereDate('date', '>=', $today->copy()->subDays(6)->toDateString())->whereDate('date', '<=', $today->toDateString())->orderBy('timestamp')->get();
@@ -121,7 +119,7 @@ class WallPanelData
             'waterGoal' => WaterGoal::forUser(auth()->user()),
             'drinkTypes' => DrinkType::orderBy('name')->get(),
             'focusMinutes' => (int) floor(PomodoroSession::whereDate('date', $today)->where('completed', true)->sum('duration') / 60),
-            'focusGoal' => (int) ($settings[$today->isWeekend() ? 'weekend_goal_minutes' : 'weekday_goal_minutes'] ?? ($today->isWeekend() ? 120 : 300)),
+            'focusGoal' => app(PomodoroSettings::class)->goalFor($today),
             'goals' => Goal::where('status', 'active')->orderBy('due_date')->get(),
             'shopping' => ShoppingItem::where('next_purchase', true)->orderBy('name')->get(),
         ];

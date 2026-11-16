@@ -185,4 +185,92 @@ class BackendQueryBudgetTest extends TestCase
         $this->assertSame($revision + 1, (int) $task->fresh()->caldav_revision);
         $this->assertSame('Editada', $task->fresh()->title);
     }
+
+    /** CHG-135: la vista previa de compras carga las recetas planificadas por lotes. */
+    public function test_shopping_preview_does_not_query_more_as_planned_meals_grow(): void
+    {
+        $plan = function (int $i): void {
+            $recipe = Recipe::create(['name' => "Plato {$i}", 'meal_type' => 'almuerzo', 'servings' => 1]);
+            $product = ShoppingItem::create(['name' => "Insumo {$i}", 'base_unit' => 'g', 'status' => 'available', 'stock' => 0, 'to_buy' => 0]);
+            \App\Models\RecipeIngredient::create(['recipe_id' => $recipe->id, 'shopping_item_id' => $product->id, 'quantity' => 100, 'unit' => 'g']);
+            $entry = \App\Models\MealPlanEntry::create(['date' => today()->toDateString(), 'meal_type' => 'almuerzo', 'status' => 'planned']);
+            $entry->items()->create(['recipe_id' => $recipe->id, 'name' => $recipe->name, 'portions' => 2, 'position' => 0]);
+        };
+        $preview = fn (): array => app(MealNeeds::class)->preview($this->user->id, today()->toDateString(), today()->toDateString());
+
+        $plan(1);
+        $before = count($this->queries($preview));
+        foreach (range(2, 7) as $i) {
+            $plan($i);
+        }
+        $result = null;
+        $after = count($this->queries(function () use ($preview, &$result) {
+            $result = $preview();
+        }));
+
+        $this->assertSame($before, $after, "La vista previa pasó de {$before} a {$after} consultas al planificar 6 comidas más.");
+        $this->assertCount(7, $result['needs']);
+        $this->assertSame(200.0, (float) $result['needs'][0]['quantity']);
+        $this->assertSame([], $result['warnings']);
+    }
+
+    /** CHG-135: barra de estado, temporizador global y guardián comparten una lectura de los ajustes de Pomodoro. */
+    public function test_pomodoro_settings_are_read_once_per_request_and_never_stale(): void
+    {
+        $settings = app(\App\Support\PomodoroSettings::class);
+        $this->assertSame(\App\Support\PomodoroSettings::DEFAULTS, $settings->for());
+
+        $queries = $this->queries(function () use ($settings) {
+            $settings->for();
+            app(\App\Support\PomodoroSettings::class)->goalFor(today());
+        });
+        $this->assertSame([], $queries);
+
+        Livewire::test(\App\Livewire\Pomodoro\PomodoroSettings::class)
+            ->set('weekdayGoal', 90)->set('weekendGoal', 45)->call('save')->assertHasNoErrors();
+
+        $this->assertSame(90, $settings->for()['weekday_goal_minutes']);
+        $this->assertSame(45, $settings->goalFor(now()->next('Saturday')));
+        $this->assertSame(25, $settings->for()['work_duration_minutes']);
+
+        $other = User::factory()->create();
+        $this->assertSame(300, $settings->for($other->id)['weekday_goal_minutes'], 'Los ajustes de una persona no se mezclan con los de otra.');
+    }
+
+    /** CHG-135: un catálogo de categorías se lee una vez por pantalla y se actualiza al cambiar. */
+    public function test_a_category_catalog_is_read_once_and_refreshed_after_a_change(): void
+    {
+        \App\Support\CategoryCatalog::seedFor($this->user->id);
+        $first = \App\Support\CategoryCatalog::options('drinks');
+        $this->assertNotEmpty($first);
+
+        $this->assertSame([], $this->queries(fn () => $this->assertSame($first, \App\Support\CategoryCatalog::options('drinks'))));
+
+        $category = \App\Models\UserCategory::create(['user_id' => $this->user->id, 'domain' => 'drinks', 'key' => 'kombucha', 'name' => 'Kombucha', 'normalized_name' => 'kombucha']);
+        $this->assertSame('Kombucha', \App\Support\CategoryCatalog::options('drinks')['kombucha'] ?? null);
+
+        $category->delete();
+        $this->assertArrayNotHasKey('kombucha', \App\Support\CategoryCatalog::options('drinks'));
+    }
+
+    /** CHG-135: el ícono de cada fila de Hidratación no cuesta una consulta por registro. */
+    public function test_water_daily_does_not_query_the_drink_type_per_row(): void
+    {
+        $types = collect(['Agua', 'Café', 'Té'])->map(fn (string $name) => \App\Models\DrinkType::create(['name' => $name, 'hydration_factor' => 1, 'icon' => '💧']));
+        $log = function (int $i) use ($types): void {
+            $type = $types[$i % 3];
+            \App\Models\DrinkLog::create(['date' => today()->toDateString(), 'drink_type' => $type->name, 'drink_type_id' => $type->id,
+                'amount' => 250, 'hydration_value' => 250, 'time' => '08:00', 'timestamp' => now()->timestamp + $i]);
+        };
+        $render = fn (): int => count($this->queries(fn () => Livewire::test(\App\Livewire\Water\WaterDaily::class)->assertSee('Agua')));
+
+        $log(0);
+        $render(); // la primera visita prepara catálogos por defecto
+        $before = $render();
+        foreach (range(1, 5) as $i) {
+            $log($i);
+        }
+
+        $this->assertSame($before, $render(), 'Más registros con tipos distintos no deben sumar consultas en Hidratación.');
+    }
 }

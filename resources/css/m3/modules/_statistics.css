@@ -5,6 +5,8 @@
   align-items: flex-end;
   gap: var(--md-sys-space-3xs);
   height: 100px;
+  /* CHG-135: 30 columnas no deben ensanchar la página; la serie se ajusta al ancho que le dan. */
+  contain: inline-size;
 }
 
 .stat-series--compact {
@@ -33,6 +35,14 @@
 
 .stat-series__label {
   color: var(--md-sys-color-on-surface-variant);
+  white-space: nowrap;
+}
+
+/* En el celular, una serie larga rotula una de cada cinco columnas; cada barra conserva su nombre accesible. */
+@media (max-width: 599.98px) {
+  .stat-series:has(> :nth-child(15)) .stat-series__column:not(:nth-child(5n + 1)) .stat-series__label {
+    visibility: hidden;
+  }
 }
 
 .stat-series--water .stat-series__bar { background: var(--md-sys-color-primary); }

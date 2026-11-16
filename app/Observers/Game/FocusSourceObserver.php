@@ -2,7 +2,7 @@
 
 namespace App\Observers\Game;
 
-use App\Models\ModuleSetting;
+use App\Support\PomodoroSettings;
 use App\Models\PomodoroSession;
 use App\Services\Game\RewardGranter;
 use Illuminate\Support\Facades\DB;
@@ -22,10 +22,7 @@ class FocusSourceObserver
         DB::afterCommit(function () use ($session): void {
             $userId = (int) $session->user_id;
             $date = $session->date->toDateString();
-            $settings = ModuleSetting::withoutGlobalScopes()->where('user_id', $userId)->where('module', 'pomodoro')->first()?->settings ?? [];
-            $goal = (int) ($session->date->isWeekend()
-                ? ($settings['weekend_goal_minutes'] ?? 120)
-                : ($settings['weekday_goal_minutes'] ?? 300));
+            $goal = app(PomodoroSettings::class)->goalFor($session->date, $userId);
             if ($goal <= 0) {
                 return;
             }
