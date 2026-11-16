@@ -14,13 +14,13 @@ class SocialSettings
         return (bool) ($this->read($userId)['social_visible'] ?? false);
     }
 
-    /** Tabla semanal (CHG-123): segundo opt-in, solo útil si la persona también es visible. */
+    /** Tabla semanal (CHG-124): segundo opt-in, solo útil si la persona también es visible. */
     public function leaderboard(int $userId): bool
     {
         return (bool) ($this->read($userId)['social_leaderboard'] ?? false);
     }
 
-    /** ¿Ya se le ofreció elegir su @usuario al abrir Amigos por primera vez? (CHG-121) */
+    /** ¿Ya se le ofreció elegir su @usuario al abrir Amigos por primera vez? (CHG-122) */
     public function usernamePrompted(int $userId): bool
     {
         return (bool) ($this->read($userId)['username_prompted'] ?? false);

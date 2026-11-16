@@ -9,7 +9,7 @@ use App\Services\Game\WeekPlanner;
 use Carbon\CarbonImmutable;
 
 /**
- * Lo único que un amigo puede ver de otra cuenta (CHG-121): usuario, nombre visible y avatar.
+ * Lo único que un amigo puede ver de otra cuenta (CHG-122): usuario, nombre visible y avatar.
  * Nunca consulta tareas, hábitos, diario, salud ni Relaciones.
  */
 class FriendSnapshot
@@ -42,7 +42,7 @@ class FriendSnapshot
     }
 
     /**
-     * Tabla semanal (CHG-123): yo y los amigos aceptados que activaron «visible» y «mostrar mi semana».
+     * Tabla semanal (CHG-124): yo y los amigos aceptados que activaron «visible» y «mostrar mi semana».
      * Solo sale un número por persona; nunca el origen ni el contenido de las acciones.
      *
      * @return array<int, array{id: int, name: string, username: ?string, avatar_url: ?string, actions: int, me: bool}>

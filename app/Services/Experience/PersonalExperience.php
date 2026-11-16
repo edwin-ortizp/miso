@@ -12,7 +12,7 @@ class PersonalExperience
 {
     public const KEY = 'personal-experience';
 
-    /** Módulos que nunca se ocultan ni se ofrecen como opcionales; «social» solo muestra un código y ajustes opt-in (CHG-121). */
+    /** Módulos que nunca se ocultan ni se ofrecen como opcionales; «social» solo muestra un código y ajustes opt-in (CHG-122). */
     public const ALWAYS_VISIBLE = ['home', 'settings', 'social'];
 
     private array $states = [];

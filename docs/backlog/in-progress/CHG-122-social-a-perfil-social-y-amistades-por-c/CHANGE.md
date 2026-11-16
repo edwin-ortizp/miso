@@ -1,17 +1,17 @@
-# CHG-121 · Social A: perfil social y amistades por código o usuario
+# CHG-122 · Social A: perfil social y amistades por código o usuario
 **Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-122, CHG-123, CHG-124
+**Relacionado:** CHG-123, CHG-124, CHG-125
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: una pantalla «Amigos» donde compartes tu código o enlace, agregas a otra persona de MiSo y aceptas o rechazas solicitudes. Puedes enlazar a un amigo con una ficha de tu módulo Personas.
 - Cómo comprobarlo tú: con dos cuentas, comparte el código de una, agrégala desde la otra, acepta la solicitud y mira que ambas se vean en su lista de amigos. Tus datos siguen siendo solo tuyos.
 
 ## 1. Resumen
-Hoy MiSo no tiene ninguna relación entre cuentas. Se agrega un nombre de usuario y un código de invitación por cuenta, y una tabla de amistades con estados (pendiente, aceptada, bloqueada). Un amigo solo ve el nombre visible y el avatar; ningún dato de hábitos, tareas, diario, salud ni contactos. Es la base de las rachas compartidas (CHG-122), la tabla semanal (CHG-123) y los avisos (CHG-124).
+Hoy MiSo no tiene ninguna relación entre cuentas. Se agrega un nombre de usuario y un código de invitación por cuenta, y una tabla de amistades con estados (pendiente, aceptada, bloqueada). Un amigo solo ve el nombre visible y el avatar; ningún dato de hábitos, tareas, diario, salud ni contactos. Es la base de las rachas compartidas (CHG-123), la tabla semanal (CHG-124) y los avisos (CHG-125).
 
 ## 2. Producto (product-manager)
 - Problema / usuario: quien usa MiSo quiere constancia acompañada, estilo Duolingo, con personas que ya usan la app, sin exponer su vida privada.
@@ -21,7 +21,7 @@ Hoy MiSo no tiene ninguna relación entre cuentas. Se agrega un nombre de usuari
   - Vínculo opcional amigo ↔ ficha de Personas (`relationships.friend_user_id`).
   - Ajuste «Visible para mis amigos» (`social_visible`, apagado por defecto).
   - Máximo 100 amigos por cuenta.
-- No incluye: buscador o listado público, racha compartida (CHG-122), tabla semanal (CHG-123), notificaciones (CHG-124), chat, exposición por MCP ni cambios al Director del juego.
+- No incluye: buscador o listado público, racha compartida (CHG-123), tabla semanal (CHG-124), notificaciones (CHG-125), chat, exposición por MCP ni cambios al Director del juego.
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - Dado un código válido, cuando lo uso, entonces se crea una solicitud pendiente; si ya existía una (incluso cruzada), no se duplica.
   - Dado un código o usuario inexistente, cuando lo uso, entonces recibo exactamente la misma respuesta que con uno válido que no puedo agregar (sin revelar si la cuenta existe).

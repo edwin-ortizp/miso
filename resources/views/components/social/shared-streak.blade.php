@@ -1,4 +1,4 @@
-{{-- Racha compartida con un amigo (CHG-122): días en que los dos cumplieron su racha personal. --}}
+{{-- Racha compartida con un amigo (CHG-123): días en que los dos cumplieron su racha personal. --}}
 @props(['streak', 'name'])
 @php
     $daysLabel = $streak['days'] === 1 ? '1 día' : $streak['days'].' días';

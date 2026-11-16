@@ -11,7 +11,7 @@ use Ramsey\Uuid\Uuid;
 use Throwable;
 
 /**
- * Avisos de amistad en la campanita (CHG-124): solicitud recibida, solicitud aceptada y hito de
+ * Avisos de amistad en la campanita (CHG-125): solicitud recibida, solicitud aceptada y hito de
  * racha compartida. Idempotentes por el índice único (usuario, origen, tipo, ocurrencia) y con el
  * par de cuentas normalizado, así que reenviar una solicitud no duplica el aviso. Nunca lanzan.
  * Sin scheduler: se crean al ocurrir el hecho.

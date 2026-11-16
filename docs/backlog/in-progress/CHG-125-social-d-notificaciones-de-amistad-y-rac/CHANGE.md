@@ -1,10 +1,10 @@
-# CHG-124 · Social D: notificaciones de amistad y racha compartida
+# CHG-125 · Social D: notificaciones de amistad y racha compartida
 **Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-121
+**Relacionado:** CHG-122
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: un aviso en la campana (y push si lo tienes activo) cuando alguien te envía una solicitud, la acepta o llegan a un hito de racha compartida.
@@ -88,12 +88,12 @@ flowchart LR
 
 ## 8. Bitácora de implementación (developer)
 - 2026-11-16 — Implementado: `FriendNotices`, enganches en `Friends` (solicitud, aceptación, cruzada), hito de pareja al abrir `/amigos`, registro en `UserNotification::destination()`, `NotificationPresentation`, `NotificationBell`, `NotificationPreferences`, pantalla de ajustes y `NotificationDispatcher::actions()`, `docs/notifications.md`, `FriendNotificationTest`.
-- Ajustes: `source_id` es uuid y `friendships.id` numérico, así que se usa un uuid v5 del par; la preferencia de campana (`friend_notices`) vive fuera del bloque «solo con dispositivos» de ajustes porque la campana no depende de un dispositivo; el hito de racha se avisa solo por la campana (CHG-122); no se tocó `docs/DEPLOY.md` (sin scheduler nuevo).
+- Ajustes: `source_id` es uuid y `friendships.id` numérico, así que se usa un uuid v5 del par; la preferencia de campana (`friend_notices`) vive fuera del bloque «solo con dispositivos» de ajustes porque la campana no depende de un dispositivo; el hito de racha se avisa solo por la campana (CHG-123); no se tocó `docs/DEPLOY.md` (sin scheduler nuevo).
 - 2026-11-16 — Scheduler añadido: `miso:friend-milestones` (cada hora, `--dry-run`, cursor en caché y tope de 40 s) para avisar los hitos sin abrir `/amigos`; documentado en `docs/DEPLOY.md` (cinco tareas) y `docs/notifications.md`; `FriendMilestonesCommandTest` ejecuta dos veces y comprueba un solo aviso. Corrige el ajuste anterior «sin scheduler nuevo».
 - **BLOQUEADO — no verificado:** sin PHP 8.4, solo `php -l`. Pendiente: `php artisan test --filter=FriendNotification`, `--filter=Notification`, `--filter=Social`, `php artisan ui:conformance`, `npm run build`.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
-- 2026-11-16 — Decisión: sin MCP ni cambios al Director; sin scheduler nuevo. Requiere CHG-121 y CHG-122.
+- 2026-11-16 — Decisión: sin MCP ni cambios al Director; sin scheduler nuevo. Requiere CHG-122 y CHG-123.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)

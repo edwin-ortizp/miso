@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Amistad entre dos cuentas (CHG-121). La fila pertenece a ambas, por eso no usa BelongsToUser:
+ * Amistad entre dos cuentas (CHG-122). La fila pertenece a ambas, por eso no usa BelongsToUser:
  * toda lectura va por scopeForUser y por App\Services\Social.
  */
 class Friendship extends Model

@@ -10,7 +10,7 @@ use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Racha de dos amigos (CHG-122): un día cuenta cuando AMBOS cumplieron su racha personal.
+ * Racha de dos amigos (CHG-123): un día cuenta cuando AMBOS cumplieron su racha personal.
  * Solo lee: no usa Streak::summary() (escribe filas ajenas y depende de los ajustes del amigo)
  * y nunca resta, igual que la racha personal (CHG-076).
  */
@@ -88,7 +88,7 @@ class SharedStreak
         ];
     }
 
-    /** Mayor hito de pareja alcanzado con esos días (o null). Los avisos los crea CHG-124. */
+    /** Mayor hito de pareja alcanzado con esos días (o null). Los avisos los crea CHG-125. */
     public function milestoneReached(int $days): ?int
     {
         $reached = array_filter((array) config('game.streak.shared_milestones', [7, 30, 100]), fn ($n) => $days >= $n);

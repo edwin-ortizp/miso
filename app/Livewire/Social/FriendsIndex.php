@@ -13,7 +13,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 
-/** Amigos (CHG-121): mi código, solicitudes y lista de amigos. */
+/** Amigos (CHG-122): mi código, solicitudes y lista de amigos. */
 #[Layout('layouts.app')]
 class FriendsIndex extends Component
 {
@@ -140,7 +140,7 @@ class FriendsIndex extends Component
         /** @var User $me */
         $me = auth()->user();
         $friendList = $friends->friends($me)->map(fn (array $row) => $row + ['streak' => $shared->for($me, $row['id'])]);
-        // Hito de pareja alcanzado: aviso en la campana, idempotente por par y hito (CHG-124).
+        // Hito de pareja alcanzado: aviso en la campana, idempotente por par y hito (CHG-125).
         foreach ($friendList as $row) {
             if ($row['streak'] && ($milestone = $shared->milestoneReached($row['streak']['days']))) {
                 $notices->sharedStreak($me, $row['id'], $milestone);

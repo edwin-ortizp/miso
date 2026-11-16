@@ -40,7 +40,7 @@ La amplitud de módulos debe servir a ese propósito. La existencia de una capac
 | Alimentación | Gestionar planificación, recetas, preparaciones, compras e inventario |
 | Relaciones y planes | Organizar personas, eventos, actividades y visitas |
 | Vehículos | Registrar consumo, mantenimiento y gastos |
-| Amigos | Conectar con otras cuentas de MiSo mediante un código o @usuario; cada persona decide si es visible (nombre y avatar, CHG-121), si comparte una racha de pareja (CHG-122) y si muestra su conteo semanal de acciones (CHG-123) |
+| Amigos | Conectar con otras cuentas de MiSo mediante un código o @usuario; cada persona decide si es visible (nombre y avatar, CHG-122), si comparte una racha de pareja (CHG-123) y si muestra su conteo semanal de acciones (CHG-124) |
 | Colección | Reconocer acciones y avances mediante recompensas de juego |
 | Estadísticas e integraciones | Consultar información agregada y conectar herramientas externas, incluido MCP |
 

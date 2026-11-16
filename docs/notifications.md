@@ -97,7 +97,7 @@ La copia recuperable previa está en `storage/framework/testing/notifications-be
 - Push activado por defecto (`push_weekly_insights`); lleva a Estadísticas › Lo que dicen tus datos.
 
 
-## Avisos de amistad (CHG-124)
+## Avisos de amistad (CHG-125)
 
 Tres tipos en la campana, con origen `friendship` (`App\Services\Social\FriendNotices`): `friend_request` (solicitud recibida), `friend_accepted` (solicitud aceptada) y `shared_streak` (hito de racha compartida: 7, 30 y 100 días, `game.streak.shared_milestones`).
 

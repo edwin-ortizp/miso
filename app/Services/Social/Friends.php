@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 
-/** Solicitudes y amistades entre cuentas (CHG-121). Respuestas uniformes: no revelan qué cuentas existen. */
+/** Solicitudes y amistades entre cuentas (CHG-122). Respuestas uniformes: no revelan qué cuentas existen. */
 class Friends
 {
     public const LIMIT = 100;

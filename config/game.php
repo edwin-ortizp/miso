@@ -58,7 +58,7 @@ return [
         'grace_days_per_month' => 2,
         'milestones' => [3, 7, 14, 30, 60, 100, 180, 365],
         'history_days' => 400,
-        // Hitos de la racha compartida entre amigos (CHG-122); solo se avisan, sin ball.
+        // Hitos de la racha compartida entre amigos (CHG-123); solo se avisan, sin ball.
         'shared_milestones' => [7, 30, 100],
     ],
 

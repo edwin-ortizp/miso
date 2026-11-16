@@ -1,10 +1,10 @@
-# CHG-123 · Social C: tabla semanal de amigos con doble opt-in
+# CHG-124 · Social C: tabla semanal de amigos con doble opt-in
 **Estado:** En desarrollo
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
-**Relacionado:** CHG-121
+**Relacionado:** CHG-122
 
 ## 0. En palabras simples
 - Qué vas a ver distinto: una tabla suave de la semana con cuántas acciones hizo cada amigo, solo entre quienes activaron la opción.
@@ -94,6 +94,6 @@ flowchart LR
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
-- 2026-11-16 — Decisión: máximo 100 filas y solo conteo de acciones. Requiere CHG-121.
+- 2026-11-16 — Decisión: máximo 100 filas y solo conteo de acciones. Requiere CHG-122.
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)

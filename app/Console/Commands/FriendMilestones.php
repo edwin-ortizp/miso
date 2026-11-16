@@ -10,7 +10,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
 /**
- * CHG-124: avisa los hitos de racha compartida (7, 30, 100 días) aunque nadie abra /amigos.
+ * CHG-125: avisa los hitos de racha compartida (7, 30, 100 días) aunque nadie abra /amigos.
  * Idempotente: el aviso es único por (usuario, par, hito) en el índice de `notifications`.
  */
 class FriendMilestones extends Command

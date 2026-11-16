@@ -70,7 +70,7 @@ class User extends Authenticatable
         return $code;
     }
 
-    /** Cuentas anteriores a CHG-121 no tienen código: se crea la primera vez que se pide. */
+    /** Cuentas anteriores a CHG-122 no tienen código: se crea la primera vez que se pide. */
     public function ensureFriendCode(): string
     {
         return $this->friend_code ?? $this->regenerateFriendCode();

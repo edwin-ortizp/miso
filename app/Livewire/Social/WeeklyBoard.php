@@ -7,7 +7,7 @@ use App\Services\Social\SocialSettings;
 use Livewire\Attributes\Layout;
 use Livewire\Component;
 
-/** Tabla semanal de amigos (CHG-123): solo quien activó «visible» y «mostrar mi semana». */
+/** Tabla semanal de amigos (CHG-124): solo quien activó «visible» y «mostrar mi semana». */
 #[Layout('layouts.app')]
 class WeeklyBoard extends Component
 {
