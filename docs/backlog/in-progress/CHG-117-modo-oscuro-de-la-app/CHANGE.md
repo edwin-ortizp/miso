@@ -1,5 +1,5 @@
 # CHG-117 · Modo oscuro de la app
-**Estado:** En desarrollo
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -91,13 +91,18 @@ Ajustes → Perfil                         Menú del avatar
 
 ## 7. Tareas
 <!-- Primero lo que cambia para el usuario; el detalle técnico después. Formato:
-- [ ] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … -->
-- [ ] T1 · Tu preferencia de apariencia se guarda en tu cuenta — Resp: developer — Archivos: migración users, `app/Models/User.php`, ruta/acción, `tests/Feature/ThemePreferenceTest.php` — Hecho cuando: guarda/valida/aísla por usuario y las pruebas pasan.
-- [ ] T2 · La app se ve oscura sin parpadeo — Resp: developer — Archivos: `resources/css/m3/tokens/_tokens.css`, layouts, `resources/js/app.js`, barrido de colores fijos — Hecho cuando: todos los módulos legibles en oscuro (AA) y `system` sigue al dispositivo.
-- [ ] T3 · Puedes elegir la apariencia en Ajustes → Perfil y en el menú del avatar — Resp: developer — Archivos: `SettingsPage.php`, `partials/profile.blade.php`, `account-menu.blade.php` — Hecho cuando: ambos selectores sincronizados, accesibles por teclado y con los textos aprobados.
-- [ ] T4 · Documentación del tema — Resp: tech-writer — Archivos: `docs/design-system.md` — Hecho cuando: tokens y reglas documentados.
+- [x] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … -->
+- [x] T1 · Tu preferencia de apariencia se guarda en tu cuenta — Resp: developer — Archivos: migración users, `app/Models/User.php`, ruta/acción, `tests/Feature/ThemePreferenceTest.php` — Hecho cuando: guarda/valida/aísla por usuario y las pruebas pasan.
+- [x] T2 · La app se ve oscura sin parpadeo — Resp: developer — Archivos: `resources/css/m3/tokens/_tokens.css`, layouts, `resources/js/app.js`, barrido de colores fijos — Hecho cuando: todos los módulos legibles en oscuro (AA) y `system` sigue al dispositivo.
+- [x] T3 · Puedes elegir la apariencia en Ajustes → Perfil y en el menú del avatar — Resp: developer — Archivos: `SettingsPage.php`, `partials/profile.blade.php`, `account-menu.blade.php` — Hecho cuando: ambos selectores sincronizados, accesibles por teclado y con los textos aprobados.
+- [x] T4 · Documentación del tema — Resp: tech-writer — Archivos: `docs/design-system.md` — Hecho cuando: tokens y reglas documentados.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-16 — Implementado: migración `users.theme_preference` (default `system`), `AppearanceController` (`PATCH /appearance`, JSON también en errores vía `bootstrap/app.php`), `partials/theme-init` (fija `data-theme` antes del primer pintado), `resources/js/theme.js` (aplica, sigue al dispositivo, `theme-color` desde el token, repinta gráficos en `miso:theme`), `x-theme-picker` en Ajustes → Perfil (debajo de Perfil público) y en el menú del avatar, tokens oscuros en `_tokens.css`, ajuste de la burbuja del check-in (siempre clara) en `_game.css`.
+- 2026-11-16 — Pruebas: `ThemePreferenceTest` (7) + `AppShellTest` + `tests/Feature/Auth` = 29 pasan. `npm run build` pasa. `ui:conformance`: sin violaciones en archivos nuevos (las existentes en task-list y otros son preexistentes).
+- 2026-11-16 — Playwright (SQLite temporal): ambos selectores se sincronizan, persiste tras recargar, «Sistema» sigue al dispositivo en vivo, sin errores JS, sin desbordamiento a 320 px; capturas revisadas de Ajustes, Mi día, Tareas y Ánimo en oscuro. Hallazgo corregido: botón «Check-in» ilegible sobre la burbuja blanca.
+- 2026-11-16 — Entorno: PHP 8.3 no ejecuta las dependencias bloqueadas (requieren 8.4); se probó con `composer update` temporal y `composer.lock` restaurado, sin incluirlo en el cambio.
+- 2026-11-16 — Pendiente de revisión humana: barrido visual del resto de módulos (Salud, Comidas, Juego/Colección, chat del compañero, modales) en oscuro; `_game.css` y `_companion-chat.css` tienen colores fijos propios que no se auditaron uno a uno. Login/registro conservan su oscuro propio por `prefers-color-scheme` (no siguen la preferencia guardada).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-16 — Creado en to-do/ (Borrador, nivel M)
@@ -105,3 +110,4 @@ Ajustes → Perfil                         Menú del avatar
 - 2026-11-16 — Usuario aprueba el alcance; valor por defecto: «Igual que mi dispositivo» (`system`).
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
+- 2026-11-16 — Implementación terminada → En verificación

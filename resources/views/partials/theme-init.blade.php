@@ -8,7 +8,5 @@
         var root = document.documentElement;
         root.dataset.themePreference = pref;
         root.dataset.theme = dark ? 'dark' : 'light';
-        var meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.setAttribute('content', dark ? '#10141A' : '#2B5BB5');
     })();
 </script>

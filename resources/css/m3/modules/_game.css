@@ -1608,6 +1608,9 @@ button.game-guardian__art:hover img { transform: translateY(-2px) scale(1.04); t
     border-radius: 999px;
     background: rgb(255 255 255 / 0.94);
     color: #1f1f1f;
+    /* La burbuja es clara en ambos temas: sus botones conservan los colores del tema claro. */
+    --md-sys-color-primary: #0D6BC4;
+    --md-sys-color-on-primary: #FFFFFF;
     font-family: inherit; font-size: var(--md-sys-typescale-body-medium-size); line-height: var(--md-sys-typescale-body-medium-line-height); font-weight: var(--md-sys-typescale-body-medium-weight);
 }
 .game-buddy-hero__bubble::before {

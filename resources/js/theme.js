@@ -5,9 +5,6 @@
  * lo mantiene al cambiar la preferencia, al cambiar el modo del dispositivo y
  * tras cada navegación, y guarda la elección en la cuenta.
  */
-const LIGHT_COLOR = '#2B5BB5';
-const DARK_COLOR = '#10141A';
-
 export function resolveTheme(preference) {
     if (preference === 'system') {
         return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -23,13 +20,24 @@ export function applyTheme(preference) {
 
     root.dataset.themePreference = preference;
     root.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? DARK_COLOR : LIGHT_COLOR);
+    syncThemeColor(theme);
     window.dispatchEvent(new CustomEvent('miso:theme', { detail: { preference, theme, changed } }));
+}
+
+// La barra del navegador conserva el color del manifest en claro y usa la superficie en oscuro.
+function syncThemeColor(theme) {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) return;
+
+    meta.dataset.light ||= meta.getAttribute('content');
+    const surface = getComputedStyle(document.documentElement).getPropertyValue('--md-sys-color-surface').trim();
+    meta.setAttribute('content', theme === 'dark' && surface ? surface : meta.dataset.light);
 }
 
 const currentPreference = () => document.documentElement.dataset.themePreference || 'system';
 
 export function registerTheme(Alpine) {
+    syncThemeColor(document.documentElement.dataset.theme);
     window.matchMedia?.('(prefers-color-scheme: dark)').addEventListener('change', () => {
         if (currentPreference() === 'system') applyTheme('system');
     });
