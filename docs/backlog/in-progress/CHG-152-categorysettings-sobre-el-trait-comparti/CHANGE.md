@@ -1,9 +1,9 @@
 # CHG-152 · CategorySettings sobre el trait compartido de categorias
-**Estado:** Borrador
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-148, CHG-149, CHG-150
 
 ## 0. En palabras simples
@@ -66,11 +66,16 @@ Categorías · Bebidas
 - Docs a actualizar: `docs/category-catalogs.md`.
 
 ## 7. Tareas
-- [ ] T1 · `CategorySettings` sobre trait y parcial — Resp: developer — Modelo: estandar — Archivos: componente y vista — Hecho cuando: sin lógica duplicada.
-- [ ] T2 · Ajustar pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests.
+- [x] T1 · `CategorySettings` sobre trait y parcial — Resp: developer — Modelo: estandar — Archivos: componente y vista — Hecho cuando: sin lógica duplicada.
+- [x] T2 · Ajustar pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: `Category\CategorySettings` usa el trait `ManagesUserCategories` y el parcial de categorías (su vista propia quedó en un envoltorio de shell, FAB y navegación entre catálogos del módulo); la ruta `categories.settings` se conserva. `CategoryHierarchyTest` se reescribió con `openCategoryForm`, `saveCategory`, `deleteCategory`, `categoryName` y `categoryParentId`.
+- Verificación local: `CategoryHierarchyTest`, `LearningModuleTest`, `LearningSettingsSectionsTest` y `ModuleCategorySettingsTest` (32 pruebas) en verde.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Parte del plan «arquitectura común» aceptado en la conversación (inventario de duplicación previo).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

@@ -132,11 +132,11 @@ class CategoryHierarchyTest extends TestCase
         foreach (array_keys(CategoryCatalog::DOMAINS) as $domain) {
             $this->get(route('categories.settings', $domain))->assertOk();
             $component = Livewire::test(CategorySettings::class, ['domain' => $domain])
-                ->call('openForm')->set('name', 'New root')->call('save')->assertHasNoErrors();
+                ->call('openCategoryForm')->set('categoryName', 'New root')->call('saveCategory')->assertHasNoErrors();
             $root = UserCategory::where('domain', $domain)->where('name', 'New root')->firstOrFail();
-            $component->call('openForm')->set('name', 'New child')->set('parent_id', $root->id)->call('save')->assertHasNoErrors()
-                ->call('delete', $root->id)->assertSee('Mueve primero');
-            $component->call('openForm')->set('name', 'new ROOT')->call('save')->assertHasErrors('name');
+            $component->call('openCategoryForm')->set('categoryName', 'New child')->set('categoryParentId', $root->id)->call('saveCategory')->assertHasNoErrors()
+                ->call('deleteCategory', $root->id)->assertSee('Mueve primero');
+            $component->call('openCategoryForm')->set('categoryName', 'new ROOT')->call('saveCategory')->assertHasErrors('categoryName');
         }
     }
 

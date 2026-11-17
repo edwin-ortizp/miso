@@ -24,3 +24,5 @@ Los mockups contienen catálogos de demostración independientes por dominio y c
 
 ## Gestión desde los ajustes del módulo (CHG-148)
 Las categorías de un catálogo se gestionan dentro de **Ajustes del módulo**, en una sección «Categorías» con barra lateral, y no con un botón suelto que sale a `/categories/{dominio}`. El CRUD es el trait `App\Livewire\Concerns\ManagesUserCategories` (propiedades con prefijo `category*`, acciones `openCategoryForm`, `saveCategory` y `deleteCategory`) y el parcial `livewire/category/partials/section.blade.php`; la navegación lateral es `x-settings-sections` con las clases `module-settings-*` de `_settings.css`. Bebidas ya lo usa (`/water/settings/categories`). La ruta `categories.settings` se mantiene para el resto de dominios y los enlaces antiguos.
+
+`Category\CategorySettings` (ruta `categories.settings`) ya no tiene lógica propia: usa `ManagesUserCategories` y el parcial `livewire/category/partials/section`, igual que las secciones «Categorías» de los ajustes de cada módulo. Se conserva la ruta por compatibilidad con enlaces antiguos (CHG-152).
