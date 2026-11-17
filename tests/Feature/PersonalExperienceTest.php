@@ -242,6 +242,94 @@ class PersonalExperienceTest extends TestCase
         $this->assertDatabaseMissing('module_settings', ['user_id' => $b->id]);
     }
 
+    public function test_every_feature_is_on_by_default_and_hidden_ones_leave_the_tabs(): void
+    {
+        $a = User::factory()->create();
+        $b = User::factory()->create();
+        $this->actingAs($a);
+        $tabs = config('modules.health.tabs');
+
+        $this->assertTrue($this->experience()->featureVisible('health', 'cycle', $a->id));
+        $this->assertCount(count($tabs), $this->experience()->tabs('health', $tabs, $a->id));
+
+        $this->experience()->saveFeatures($a->id, ['health.cycle']);
+
+        $this->assertFalse($this->experience()->featureVisible('health', 'cycle', $a->id));
+        $this->assertTrue($this->experience()->featureVisible('health', 'cycle', $b->id));
+        $labels = array_column($this->experience()->tabs('health', $tabs, $a->id), 'label');
+        $this->assertNotContains('Ciclo', $labels);
+        $this->assertContains('Sueño', $labels);
+        $this->assertContains('Ciclo', array_column($this->experience()->tabs('health', $tabs, $b->id), 'label'));
+        $this->get(route('health.cycle'))->assertOk();
+    }
+
+    public function test_turning_a_feature_off_cascades_to_its_dependents_and_turning_it_on_restores_requirements(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $this->assertEqualsCanonicalizing(['meals.preparations', 'meals.suggestions'], $this->experience()->dependentsOf('meals.recipes', []));
+        $this->assertEqualsCanonicalizing(['meals.purchases'], $this->experience()->dependentsOf('meals.shopping', []));
+
+        $off = $this->experience()->cascadeOff('meals.recipes', []);
+        $this->assertEqualsCanonicalizing(['meals.recipes', 'meals.preparations', 'meals.suggestions'], $off);
+        $this->assertEqualsCanonicalizing(['meals.suggestions'], $this->experience()->cascadeOn('meals.preparations', $off));
+
+        // Tendencias necesita Mediciones o Sueño: solo se apaga cuando faltan ambas.
+        $this->assertSame([], $this->experience()->dependentsOf('health.sleep', []));
+        $this->assertSame(['health.trends'], $this->experience()->dependentsOf('health.sleep', ['health.measurements']));
+        $restored = $this->experience()->cascadeOn('health.trends', ['health.measurements', 'health.sleep', 'health.trends']);
+        $this->assertNotContains('health.measurements', $restored);
+        $this->assertNotContains('health.trends', $restored);
+        $this->assertContains('health.sleep', $restored);
+    }
+
+    public function test_saving_features_validates_keys_keeps_consistency_and_isolates_users(): void
+    {
+        $a = User::factory()->create();
+        $b = User::factory()->create();
+        $this->actingAs($a);
+
+        $saved = $this->experience()->saveFeatures($a->id, ['meals.recipes']);
+        $this->assertEqualsCanonicalizing(['meals.recipes', 'meals.preparations', 'meals.suggestions'], $saved);
+        $this->assertSame([], $this->experience()->featuresOff($b->id));
+        $this->assertDatabaseMissing('module_settings', ['user_id' => $b->id]);
+
+        Livewire::test(ModulePreferences::class)->set('featuresOff', ['health.invented'])->call('save')->assertHasErrors('features');
+        $this->expectException(\Illuminate\Validation\ValidationException::class);
+        $this->experience()->saveFeatures($a->id, ['health']);
+    }
+
+    public function test_preferences_screen_asks_before_cascading_and_saves_the_choice(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $component = Livewire::test(ModulePreferences::class)
+            ->assertSee('Funciones de cada módulo')
+            ->assertSee('Ciclo menstrual')
+            ->call('toggleFeature', 'health.cycle')
+            ->assertSet('featuresOff', ['health.cycle'])
+            ->assertSet('pendingOff', null)
+            ->call('toggleFeature', 'meals.shopping')
+            ->assertSet('pendingOff', 'meals.shopping')
+            ->assertSet('pendingDependents', ['meals.purchases'])
+            ->assertSee('También se apagará «Historial de compras»')
+            ->call('cancelOff')
+            ->assertSet('pendingOff', null)
+            ->assertSet('featuresOff', ['health.cycle'])
+            ->call('toggleFeature', 'meals.shopping')
+            ->call('confirmOff');
+
+        $this->assertEqualsCanonicalizing(['health.cycle', 'meals.shopping', 'meals.purchases'], $component->get('featuresOff'));
+        $component->call('save')->assertHasNoErrors();
+        $this->assertEqualsCanonicalizing(['health.cycle', 'meals.shopping', 'meals.purchases'], $this->experience()->featuresOff($user->id));
+
+        $component->call('toggleFeature', 'meals.purchases');
+        $this->assertNotContains('meals.shopping', $component->get('featuresOff'));
+        $component->assertSee('también se encendió');
+    }
+
     public function test_optional_shared_goal_and_task_editors_are_idempotent(): void
     {
         $user = User::factory()->create();

@@ -65,7 +65,10 @@ class GenerateNotifications
                 });
 
             // CHG-134: los avisos de medicamentos no dependen de las preferencias ni de la hora de las 9:00.
-            $created += app(GenerateMedicationReminders::class)->run($user);
+            // CHG-139: si la persona apagó Medicamentos, no se generan sus avisos (los datos se conservan).
+            if (app(\App\Services\Experience\PersonalExperience::class)->featureVisible('health', 'medications', $user->id)) {
+                $created += app(GenerateMedicationReminders::class)->run($user);
+            }
 
             return ['created' => $created, 'date' => $today->toDateString(), 'timezone' => NotificationSource::TIMEZONE];
         }, 3);

@@ -25,7 +25,8 @@
     $showRail = ($definition['rail'] ?? false) && (! isset($definition['rail_routes']) || \Illuminate\Support\Str::is($definition['rail_routes'], $routeName));
     // Un detalle declara sus propias pestañas; reemplazan a las del módulo en esa pantalla.
     $isDetail = ! empty($tabs);
-    $navigationTabs = $isDetail ? $tabs : ($definition['tabs'] ?? []);
+    // CHG-139: las funciones que la persona apagó no aparecen como pestañas.
+    $navigationTabs = $isDetail ? $tabs : app(\App\Services\Experience\PersonalExperience::class)->tabs($moduleKey, $definition['tabs'] ?? []);
 @endphp
 
 <section {{ $attributes->class(['md-module-shell', 'md-archetype--'.$screenArchetype]) }}

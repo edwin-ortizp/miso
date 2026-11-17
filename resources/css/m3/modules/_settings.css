@@ -106,3 +106,61 @@
 .theme-picker__option.md-btn-text { justify-content: flex-start; }
 .theme-picker__option > span:not(.md-btn__spinner) { display: inline-flex; align-items: center; gap: 8px; flex: 1; }
 .theme-picker--menu .theme-picker__option > span:not(.md-btn__spinner) { width: 100%; }
+
+/* CHG-139: funciones de cada módulo dentro de «Personalizar módulos». */
+.md-module-features {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.md-module-features__group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 16px;
+  min-width: 0;
+}
+
+.md-module-features__group legend {
+  float: none;
+  width: auto;
+  padding: 0 4px;
+}
+
+.md-module-features__confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-color: var(--md-sys-color-primary);
+}
+
+.md-module-features__confirm p {
+  margin: 0;
+}
+
+.md-module-features__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.md-module-features .md-switch__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.md-module-features .md-switch__text .md-body-medium {
+  color: var(--md-sys-color-on-surface);
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.md-module-features .md-switch__text .md-supporting-text {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.875rem;
+}

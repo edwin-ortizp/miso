@@ -98,12 +98,12 @@
             ['module' => 'tasks', 'label' => 'Crear tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']],
             ['module' => 'plans', 'label' => 'Agregar plan', 'icon' => 'bi-map', 'event' => 'panel-plan'],
             ['module' => 'pomodoro', 'label' => 'Registrar sesión de enfoque', 'icon' => 'bi-stopwatch', 'event' => 'panel-focus-manual'],
-            ['module' => 'meals', 'label' => 'Agregar compra', 'icon' => 'bi-cart-plus', 'event' => 'panel-shopping'],
+            ['module' => 'meals', 'feature' => 'shopping', 'label' => 'Agregar compra', 'icon' => 'bi-cart-plus', 'event' => 'panel-shopping'],
             ['module' => 'water', 'label' => 'Registrar bebida', 'icon' => 'bi-droplet', 'event' => 'panel-quick', 'detail' => ['kind' => 'water']],
             ['module' => 'mood', 'label' => 'Registrar ánimo', 'icon' => 'bi-emoji-smile', 'event' => 'panel-quick', 'detail' => ['kind' => 'mood']],
             ['module' => 'journal', 'label' => 'Escribir diario', 'icon' => 'bi-journal-text', 'event' => 'panel-quick', 'detail' => ['kind' => 'journal']],
             ['module' => 'habits', 'label' => 'Agregar hábito', 'icon' => 'bi-check2-square', 'event' => 'panel-habit'],
-        ])->filter(fn ($item) => $showModule($item['module']))->values();
+        ])->filter(fn ($item) => $showModule($item['module']) && (empty($item['feature']) || $experience->featureVisible($item['module'], $item['feature'])))->values();
         $primaryCreate = $createActions->first();
     @endphp
     @if ($showModule('goals'))

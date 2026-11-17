@@ -71,6 +71,18 @@ class MedicationReminderTest extends TestCase
         $this->assertSame(route('health.medications'), $notice->destination());
     }
 
+    public function test_no_notice_is_created_when_the_user_turned_medications_off(): void
+    {
+        $this->medication();
+        app(\App\Services\Experience\PersonalExperience::class)->saveFeatures($this->user->id, ['health.medications']);
+
+        $created = app(GenerateNotifications::class)->run($this->user)['created'];
+
+        $this->assertSame(0, $created);
+        $this->assertSame(0, $this->notices()->count());
+        $this->assertSame(1, Medication::withoutGlobalScopes()->where('user_id', $this->user->id)->count());
+    }
+
     public function test_running_twice_keeps_a_single_notice(): void
     {
         $this->medication();

@@ -62,6 +62,152 @@ class PersonalExperience
         return $sections;
     }
 
+    /**
+     * CHG-139: funciones opcionales de un módulo (`config('modules.<módulo>.features')`).
+     * Todas están activas salvo las que la persona apagó (`features_off`, claves `módulo.función`).
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public function features(string $module): array
+    {
+        return (array) config("modules.{$module}.features", []);
+    }
+
+    /** @return array<string, array<string, mixed>> Todas las funciones, con clave `módulo.función`. */
+    public function featureCatalog(): array
+    {
+        $all = [];
+        foreach (array_keys($this->catalog()) as $module) {
+            foreach ($this->features($module) as $feature => $definition) {
+                $all["{$module}.{$feature}"] = $definition + ['module' => $module, 'feature' => $feature];
+            }
+        }
+
+        return $all;
+    }
+
+    /** @return list<string> Claves `módulo.función` apagadas por la persona. */
+    public function featuresOff(?int $userId = null): array
+    {
+        $userId ??= (int) auth()->id();
+        if ($userId === 0) {
+            return [];
+        }
+        $off = $this->state($userId)['features_off'] ?? [];
+
+        return array_values(array_filter((array) $off, 'is_string'));
+    }
+
+    public function featureVisible(string $module, string $feature, ?int $userId = null): bool
+    {
+        if (! isset($this->features($module)[$feature])) {
+            return true;
+        }
+
+        return ! in_array("{$module}.{$feature}", $this->featuresOff($userId), true);
+    }
+
+    /** Pestañas de un módulo sin las funciones apagadas. */
+    public function tabs(string $module, array $tabs, ?int $userId = null): array
+    {
+        $off = $this->featuresOff($userId);
+        if ($off === []) {
+            return $tabs;
+        }
+
+        return array_values(array_filter($tabs, fn ($tab) => empty($tab['feature']) || ! in_array("{$module}.{$tab['feature']}", $off, true)));
+    }
+
+    /**
+     * Apaga `$key` y todo lo que dependa de ella (`requires`: todas; `requires_any`: al menos una).
+     *
+     * @param  list<string>  $off  Claves ya apagadas.
+     * @return list<string> Conjunto apagado resultante.
+     */
+    public function cascadeOff(string $key, array $off): array
+    {
+        $off[] = $key;
+        $catalog = $this->featureCatalog();
+        $changed = true;
+        while ($changed) {
+            $changed = false;
+            foreach ($catalog as $candidate => $definition) {
+                if (in_array($candidate, $off, true)) {
+                    continue;
+                }
+                $module = $definition['module'];
+                $needs = array_map(fn ($f) => "{$module}.{$f}", (array) ($definition['requires'] ?? []));
+                $anyOf = array_map(fn ($f) => "{$module}.{$f}", (array) ($definition['requires_any'] ?? []));
+                $missing = array_intersect($needs, $off) !== [];
+                $noneLeft = $anyOf !== [] && array_diff($anyOf, $off) === [];
+                if ($missing || $noneLeft) {
+                    $off[] = $candidate;
+                    $changed = true;
+                }
+            }
+        }
+
+        return array_values(array_unique($off));
+    }
+
+    /** Funciones que se apagarían además de `$key` (sin incluirla). */
+    public function dependentsOf(string $key, array $off): array
+    {
+        return array_values(array_diff($this->cascadeOff($key, $off), $off, [$key]));
+    }
+
+    /**
+     * Enciende `$key` y lo que necesita: sus `requires` y, si todas las alternativas de `requires_any`
+     * están apagadas, la primera.
+     *
+     * @param  list<string>  $off
+     * @return list<string> Conjunto apagado resultante.
+     */
+    public function cascadeOn(string $key, array $off): array
+    {
+        $catalog = $this->featureCatalog();
+        $pending = [$key];
+        while ($pending) {
+            $current = array_shift($pending);
+            $off = array_values(array_diff($off, [$current]));
+            $definition = $catalog[$current] ?? null;
+            if (! $definition) {
+                continue;
+            }
+            $module = $definition['module'];
+            foreach ((array) ($definition['requires'] ?? []) as $needed) {
+                if (in_array("{$module}.{$needed}", $off, true)) {
+                    $pending[] = "{$module}.{$needed}";
+                }
+            }
+            $anyOf = array_map(fn ($f) => "{$module}.{$f}", (array) ($definition['requires_any'] ?? []));
+            if ($anyOf !== [] && array_diff($anyOf, $off) === []) {
+                $pending[] = $anyOf[0];
+            }
+        }
+
+        return array_values($off);
+    }
+
+    /** Guarda las funciones apagadas. Valida las claves y deja el conjunto coherente con las dependencias. */
+    public function saveFeatures(int $userId, array $off): array
+    {
+        $catalog = $this->featureCatalog();
+        foreach ($off as $key) {
+            if (! is_string($key) || ! array_key_exists($key, $catalog)) {
+                throw ValidationException::withMessages(['features' => 'Elige funciones disponibles.']);
+            }
+        }
+        $normalized = [];
+        foreach (array_values(array_unique($off)) as $key) {
+            $normalized = $this->cascadeOff($key, $normalized);
+        }
+        sort($normalized);
+        $this->change($userId, fn ($state) => array_replace($state, ['features_off' => $normalized]));
+
+        return $normalized;
+    }
+
     public function required(int $userId): bool
     {
         $state = $this->state($userId);

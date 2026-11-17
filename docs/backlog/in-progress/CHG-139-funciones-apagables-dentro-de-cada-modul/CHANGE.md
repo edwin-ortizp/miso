@@ -1,5 +1,5 @@
 # CHG-139 · Funciones apagables dentro de cada módulo
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -100,17 +100,23 @@ flowchart LR
 - Docs a actualizar: `docs/first-experience.md` (funciones por módulo y qué no cambia al apagar), `docs/ARCHITECTURE.md` si se documenta el catálogo de funciones.
 
 ## 7. Tareas
-- [ ] T1 · Catálogo de funciones y reglas de dependencia en config — Resp: developer — Modelo: estandar — Archivos: `config/modules.php` — Hecho cuando: cada función declara etiqueta, descripción y `requires`.
-- [ ] T2 · Guardar y consultar funciones apagadas con cascada — Resp: developer — Modelo: estandar — Archivos: `PersonalExperience.php` — Hecho cuando: pasan los tests de cascada, validación y aislamiento.
-- [ ] T3 · Ocultar pestañas y accesos de funciones apagadas — Resp: developer — Modelo: estandar — Archivos: `module-tabs`, `module-shell`, `dashboard` — Hecho cuando: lo apagado no aparece y las rutas siguen abriendo.
-- [ ] T4 · Detener recordatorios de medicamentos apagados — Resp: developer — Modelo: estandar — Archivos: `GenerateNotifications.php`, `GenerateMedicationReminders.php` — Hecho cuando: no se crean recordatorios.
-- [ ] T5 · Interruptores y aviso de cascada en Personalizar módulos — Resp: developer — Modelo: estandar — Archivos: `ModulePreferences.php`, su vista — Hecho cuando: se cumple el boceto y los textos finales.
-- [ ] T6 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, `docs/first-experience.md` — Hecho cuando: la verificación de la sección 5 pasa.
+- [x] T1 · Catálogo de funciones y reglas de dependencia en config — Resp: developer — Modelo: estandar — Archivos: `config/modules.php` — Hecho cuando: cada función declara etiqueta, descripción y `requires`.
+- [x] T2 · Guardar y consultar funciones apagadas con cascada — Resp: developer — Modelo: estandar — Archivos: `PersonalExperience.php` — Hecho cuando: pasan los tests de cascada, validación y aislamiento.
+- [x] T3 · Ocultar pestañas y accesos de funciones apagadas — Resp: developer — Modelo: estandar — Archivos: `module-tabs`, `module-shell`, `dashboard` — Hecho cuando: lo apagado no aparece y las rutas siguen abriendo.
+- [x] T4 · Detener recordatorios de medicamentos apagados — Resp: developer — Modelo: estandar — Archivos: `GenerateNotifications.php`, `GenerateMedicationReminders.php` — Hecho cuando: no se crean recordatorios.
+- [x] T5 · Interruptores y aviso de cascada en Personalizar módulos — Resp: developer — Modelo: estandar — Archivos: `ModulePreferences.php`, su vista — Hecho cuando: se cumple el boceto y los textos finales.
+- [x] T6 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, `docs/first-experience.md` — Hecho cuando: la verificación de la sección 5 pasa.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado sin migración: `features` en `config/modules.php` (Salud, Comidas, Tareas; cada pestaña referencia su función), `PersonalExperience` (`features`, `featureVisible`, `tabs`, `cascadeOff`, `cascadeOn`, `dependentsOf`, `saveFeatures`, lista `features_off`), filtrado de pestañas en `module-shell`, acción «Agregar compra» de Mi día, omisión de `GenerateMedicationReminders` si Medicamentos está apagado, y UI en Personalizar módulos con interruptores y confirmación de cascada (bloque inline accesible `role="alertdialog"` en lugar de un diálogo modal).
+- Decisión: dependencias declaradas — Comidas: Preparaciones y Qué cocinar requieren Recetas; Historial de compras requiere Compras. Salud: Tendencias requiere Mediciones o Sueño (`requires_any`). Bases que no se apagan: Registro, Ingredientes, Planificación (Comidas), Lista y Ajustes (Tareas).
+- Verificación local (PHP 8.4 en chroot): `PersonalExperienceTest` (4 pruebas nuevas), `MedicationReminderTest` (1 nueva), Health*, Ui*, ModuleExperience, AppShell, HomeDashboard, NotificationGeneration en verde salvo 11 fallos preexistentes idénticos en la rama base. Captura a 390 px revisada. `npm run build` correcto.
+- Pendiente: la guardia de Android/MCP no cambia (por decisión); prueba de navegador específica de cascada no escrita (cubierta con Livewire).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Decisión del usuario: apagar = ocultar y detener avisos (rutas y MCP siguen igual); dependencias = aviso de confirmación con cascada.
 - 2026-11-17 — Decisión del usuario: Compras no es función base y se puede apagar. Las bases de Comidas quedan en Ingredientes y Planificación. Apagar Compras arrastra Historial de compras (comparten tablas de compras y tiendas).
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

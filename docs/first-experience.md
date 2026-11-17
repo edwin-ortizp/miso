@@ -22,6 +22,10 @@ Las cuentas nuevas siguen sin recibir una rutina personal copiada. Los reintento
 
 Ajustes → Personalizar módulos conserva Mi día, Ajustes, perfil y personalización. La selección se aplica al menú lateral, navegación inferior, búsqueda de módulos y tarjetas/acciones del Inicio. Ocultar no elimina datos, bloquea enlaces directos ni detiene recordatorios, procesos, APIs o MCP. Los grupos vacíos desaparecen. El resumen semanal combinado solo aparece con todos los módulos visibles; la tendencia combinada exige Hábitos e Hidratación. No se cambian reglas de juego ni preferencias de avisos.
 
+### Funciones de cada módulo (CHG-139)
+
+Salud, Comidas y Tareas declaran `features` en `config/modules.php`. Cada persona puede apagar una función (por ejemplo, Ciclo menstrual, Compras o Gantt) en Ajustes → Personalizar módulos; todas parten activas. Se guardan como lista de funciones **apagadas** (`features_off`, claves `módulo.función`) en la misma fila `personal-experience`, sin migración. Apagar oculta su pestaña y los accesos de Mi día y detiene sus recordatorios (Medicamentos); no borra datos, no cierra rutas directas ni cambia las herramientas MCP. Las dependencias (`requires`, `requires_any`) se aplican en cascada: apagar una función con dependientes pide confirmación y las apaga juntas; encender una reactiva lo que necesita. «Registro», Ingredientes, Planificación (Comidas) y Lista/Ajustes (Tareas) son base y no se apagan.
+
 Datos y progreso se guardan en `module_settings`, clave `personal-experience`, siempre con usuario explícito. Sin nuevas migraciones. El bloqueo por usuario serializa confirmaciones y reintentos. Los eventos solo guardan nombres técnicos y fechas; contexto e intención son preferencias del usuario, no se copian al informe agregado.
 
 ## Medición local
