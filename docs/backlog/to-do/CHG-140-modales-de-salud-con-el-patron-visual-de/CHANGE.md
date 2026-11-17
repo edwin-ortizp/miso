@@ -20,7 +20,7 @@ La auditoría mostró que los cuatro modales usan `x-ui.form-dialog` solo como c
   - Componente `x-ui.*` de selector de opciones (chips con `aria-pressed`, mínimo 44 px) usado para días y síntomas, publicado en `/ui-catalog`.
   - Interruptor de privacidad visible (sección, no escondido).
   - Botones «Tomado/Omitir/Deshacer» de Medicamentos y días del calendario de Ciclo a 44 px.
-  - Horarios de Medicamentos: ver pregunta abierta.
+  - Horarios de Medicamentos con selectores de hora (`<input type="time">` por horario, «＋ hora» y quitar), en lugar de texto libre; la calidad del sueño como peldaños de 1 a 5.
 - No incluye: cambios de reglas de negocio, validaciones, textos médicos o avisos fijos; el editor de eventos de salud (ya sigue el patrón, salvo la indentación de `health-editor.blade.php` L84-86); nuevas funciones (campo «evento de salud» en Medicamentos); funciones apagables (CHG-139).
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - Dado cualquiera de los cuatro modales, cuando se abre en 360, 390 y 1440 px, entonces muestra ícono, secciones (franja en móvil, panel en escritorio) y campos con separación uniforme.
@@ -72,9 +72,9 @@ La auditoría mostró que los cuatro modales usan `x-ui.form-dialog` solo como c
   - Crear `resources/views/components/ui/choice-chips.blade.php` (nombre a confirmar), su entrada en `app/Support/Ui/ComponentCatalog.php` y `resources/views/ui/catalog/entries/`, y CSS `md-*` en `resources/css/m3/` (capa y contrato `CssLayerContractTest`).
   - Modificar las vistas: `livewire/health/medications.blade.php` (L169-225 y L54-59), `cycle.blade.php` (L78, L153-188), `sleep.blade.php` (L117-144), `health-measurements.blade.php` (L116-148).
   - Ajuste menor en `health-editor.blade.php` L84-86.
-- Enfoque y patrones a seguir: `wire:model` sobre los mismos arreglos (`weekdays`, `symptoms`) para no tocar los componentes Livewire ni las acciones; secciones con `error` por sección como `health-editor`; cuidar `wire:key` fijo y `x-dirty-guard` por defecto.
+- Enfoque y patrones a seguir: `wire:model` sobre los mismos arreglos (`weekdays`, `symptoms`); única excepción en Livewire: `app/Livewire/Health/Medications.php` cambia `$timesText` (texto «08:00, 20:00», L54/173/192) por un arreglo `$times` de horas `HH:MM`, que se sigue enviando a `SaveMedication` como `times` (sin tocar la acción, que ya valida formato); secciones con `error` por sección como `health-editor`; cuidar `wire:key` fijo y `x-dirty-guard` por defecto.
 - Riesgos y mitigación: colisión de blades con CHG-137 (guardián en las mismas pestañas) y CHG-139 → tocar solo los bloques de `x-ui.form-dialog`; CHG-108 aún en desarrollo → no cambiar el contrato `sections/state/sectionEvent/focusErrors`; los chips con `wire:model` y arreglos → probar con Livewire y teclado.
-- Qué NO tocar: `app/Actions/*` (`SaveMedication`, `LogCycle`, `LogSleep`, `LogHealthMeasurement`), modelos, migraciones, textos médicos, el servidor MCP.
+- Qué NO tocar (salvo lo anterior): `app/Actions/*` (`SaveMedication`, `LogCycle`, `LogSleep`, `LogHealthMeasurement`), modelos, migraciones, textos médicos, el servidor MCP.
 
 ## 5. Pruebas (qa-tester)
 | Caso | Tipo | Nivel | Test |
@@ -92,14 +92,13 @@ La auditoría mostró que los cuatro modales usan `x-ui.form-dialog` solo como c
 
 ## 7. Tareas
 - [ ] T1 · Selector de opciones tipo chip reutilizable (días, síntomas) — Resp: developer — Modelo: estandar — Archivos: componente, CSS, catálogo — Hecho cuando: ≥44 px, `aria-pressed`, publicado en `/ui-catalog` y `ui:conformance` limpio.
-- [ ] T2 · Modal de Medicamentos con secciones, días en chips y botones de 44 px — Resp: developer — Modelo: estandar — Archivos: `medications.blade.php` — Hecho cuando: cumple el boceto y su test sigue verde.
+- [ ] T2 · Modal de Medicamentos con secciones, días en chips y botones de 44 px — Resp: developer — Modelo: estandar — Archivos: `medications.blade.php` — Hecho cuando: cumple el boceto, los horarios son selectores de hora (sin texto libre, sin duplicados) y su test sigue verde.
 - [ ] T3 · Modal de Ciclo con secciones, síntomas en chips y privacidad visible — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php` — Hecho cuando: días del calendario de 44 px y test verde.
-- [ ] T4 · Modales de Sueño y Mediciones con secciones y pares de campos — Resp: developer — Modelo: estandar — Archivos: `sleep.blade.php`, `health-measurements.blade.php` — Hecho cuando: sin `<details>` nativos y validaciones visibles.
+- [ ] T4 · Modales de Sueño y Mediciones con secciones y pares de campos — Resp: developer — Modelo: estandar — Archivos: `sleep.blade.php`, `health-measurements.blade.php` — Hecho cuando: sin `<details>` nativos, calidad del sueño en peldaños 1-5 y validaciones visibles.
 - [ ] T5 · Pruebas de navegador y documentación — Resp: developer — Modelo: estandar — Archivos: spec nuevo, `docs/design-system.md` — Hecho cuando: pasan la matriz de tamaños, teclado y axe.
 
 ## 8. Bitácora de implementación (developer)
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M) a partir de la auditoría de los modales de Salud.
-- Abierta: los horarios de Medicamentos son hoy texto libre «HH:MM, separados por coma» (CHG-133 bocetó «[08:00] ＋hora»). ¿Los cambiamos a horas individuales con «＋ hora» en este CHG? Recomendado: sí, es la parte más propensa a errores en el móvil.
-- Abierta: ¿se incluye la franja «Sueño: calidad» como peldaños 1-5 en lugar de un selector? Recomendado: sí.
+- 2026-11-17 — Decisión del usuario: los horarios de Medicamentos dejan de ser texto libre y pasan a selectores de hora individuales con «＋ hora» (no se admite escribir cualquier cosa). La calidad del sueño pasa a peldaños de 1 a 5.
