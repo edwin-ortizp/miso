@@ -52,6 +52,7 @@ class Trends extends Component
 
         return view('livewire.health.trends', [
             'charts' => $charts,
+            'guardianContext' => \App\Services\Game\Guardian\HealthContext::trends($charts, $sleep['summary']['count'] > 0 ? $sleep : null, $days),
             'sleep' => $sleep['summary']['count'] > 0 ? $sleep : null,
             'insight' => HealthTrends::sleepEnergy($days),
             'periods' => HealthTrends::PERIODS,

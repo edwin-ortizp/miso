@@ -63,6 +63,7 @@
             {{-- El arquetipo resuelve su propia composición: contenido y contexto en paralelo
                  desde 1200 px y en una sola columna por debajo, sin utilidades externas. --}}
             <div @class(['md-module-workspace', 'md-module-workspace--rail' => $showRail])>
+                @isset($contextBefore){{ $contextBefore }}@endisset
                 <div class="md-module-primary" data-region="content">{{ $slot }}</div>
                 <aside class="md-context-rail" data-region="context" aria-label="Contexto del módulo">{{ $rail }}</aside>
             </div>

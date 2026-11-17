@@ -176,6 +176,7 @@ class Cycle extends Component
 
         return view('livewire.health.cycle', [
             'cycles' => $cycles,
+            'guardianContext' => \App\Services\Game\Guardian\HealthContext::cycle($cycles, $summary, CycleDayLog::orderByDesc('date')->first()),
             'lengths' => $lengths,
             'summary' => $summary,
             'cycleDay' => CycleProgress::cycleDay($cycles, $today),

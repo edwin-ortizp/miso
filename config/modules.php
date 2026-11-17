@@ -22,6 +22,7 @@ return [
             ['label' => 'Tareas', 'route' => 'tasks.list', 'module' => 'tasks', 'icon' => 'bi-list-task', 'active' => ['tasks*']],
             ['label' => 'Pomodoro', 'route' => 'pomodoro', 'module' => 'pomodoro', 'icon' => 'bi-stopwatch', 'active' => ['pomodoro*']],
             ['label' => 'Objetivos', 'route' => 'goals', 'module' => 'goals', 'icon' => 'bi-flag', 'active' => ['goals*']],
+            ['label' => 'Formación', 'route' => 'learning', 'module' => 'learning', 'icon' => 'bi-mortarboard', 'active' => ['learning*']],
             ['label' => 'Colección', 'route' => 'game.balls', 'module' => 'game', 'icon' => 'bi-stars', 'active' => ['game*'], 'counter' => 'App\Support\Game\TabCounters@balls'],
         ]],
         'life' => ['label' => 'Vida personal', 'icon' => 'bi-person-heart', 'items' => [
@@ -232,6 +233,11 @@ return [
             ['label' => 'Historial', 'route' => 'plans.history', 'icon' => 'bi-clock-history', 'active' => ['plans.history'], 'preserve' => ['q','people']],
             ['label' => 'Ajustes', 'route' => 'plans.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['plans.settings'], 'preserve' => []],
         ],
+    ],
+    'learning' => [
+        'title' => 'Formación', 'subtitle' => 'Organiza lo que estudias y avanza paso a paso.', 'icon' => 'bi-mortarboard',
+        'archetype' => 'list', 'patterns' => ['learning*'],
+        'preserve' => ['q', 'type', 'category', 'status'], 'rail' => true,
     ],
     'goals' => [
         'archetype' => 'list',

@@ -1,0 +1,34 @@
+/* One composition for Learning: shortcuts, content, then guardian on narrow screens. */
+.learning-page .md-module-workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.learning-page .learning-shortcuts { min-width: 0; grid-column: 1; grid-row: 1; }
+.learning-page .md-module-primary { min-width: 0; grid-column: 1; grid-row: 2; }
+.learning-page .md-context-rail { grid-column: 1; grid-row: 3; }
+.learning-shortcuts__list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.learning-shortcuts__list li { display: flex; align-items: center; min-width: 0; }
+.learning-shortcuts__list a { flex: 1; min-width: 0; display: grid; gap: 4px; padding: 8px; min-height: 44px; text-decoration: none; overflow-wrap: anywhere; color: var(--md-sys-color-on-surface); }
+.learning-shortcuts__list small { color: var(--md-sys-color-on-surface-variant); }
+.learning-path { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; overflow-wrap: anywhere; }
+.learning-path a { display: inline-flex; align-items: center; min-height: 44px; }
+.learning-summary { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.learning-summary > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+.learning-summary__actions { display: flex; align-items: flex-start; flex: none; }
+.learning-description { margin-top: 12px; white-space: pre-wrap; }
+.learning-table-wrap { overflow-x: auto; max-width: 100%; padding-bottom: 4px; }
+.learning-table-wrap td:first-child { min-width: 160px; overflow-wrap: anywhere; }
+.learning-table-wrap td:first-child a { display: inline-flex; align-items: center; min-height: 44px; }
+.learning-table-wrap .md-table__actions { width: 1%; white-space: nowrap; }
+.learning-fields { display: grid; gap: 20px; }
+.learning-feedback { color: var(--md-sys-color-on-surface-variant); }
+.learning-error { color: var(--md-sys-color-error); }
+@media (min-width: 1200px) {
+    .learning-page .md-module-workspace { grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: min-content 1fr; }
+    .learning-page .md-module-primary { grid-row: 1 / span 2; }
+    .learning-page .learning-shortcuts { grid-column: 2; grid-row: 1; }
+    .learning-page .md-context-rail { grid-column: 2; grid-row: 2; }
+}
+/* This module retains its single guardian below the content on narrow screens. */
+.learning-page .game-guardian--rail { display: grid; }
+/* Tonal active navigation needs the paired foreground for AA in both themes. */
+[data-module='learning'] .md-form-dialog__nav-item[aria-current='true'] { color: var(--md-sys-color-on-primary-container); }
+.learning-page .learning-table-wrap td:first-child a,
+.learning-page .learning-path a { color: var(--md-module-accent); }

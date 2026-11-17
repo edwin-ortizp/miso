@@ -121,3 +121,9 @@ Publicar juntos PHP, vistas y assets compilados. La migración `2026_11_15_00000
 Antes de habilitar el código, aplicar esa migración con el procedimiento de despliegue autorizado y respaldo habitual. El detalle requiere la tabla nueva. La migración se validó en MySQL 8.4 desechable con `php tests/Support/verify-goal-habits-mysql.php`; no se ha aplicado sobre datos personales ni producción. Al probar el script, usar una conexión MySQL de pruebas con permiso de crear una base desechable; solo elimina la base aleatoria que él mismo crea.
 
 Tras desplegar, comprobar filtros móviles, apertura del Pokémon, lista → detalle, creación y vinculación de tareas/hábitos y desvinculación sin eliminar registros. Rollback de aplicación: conservar la tabla y los vínculos; no borrar esa información para apagar la funcionalidad.
+
+## Formación · CHG-138
+
+Después de desplegar el código y compilar assets (`npm run build`), ejecutar `php artisan migrate --force` con el PHP del servidor. La migración `2026_11_16_000020_create_learning_tables` agrega `learning_formations`, `learning_units` y `learning_shortcuts`; no importa datos ficticios ni transforma datos existentes. No agrega cron, jobs ni variables de entorno. Si se utilizan cachés de despliegue, regenerar las rutas y la configuración (`php artisan route:cache` y `php artisan config:cache`) para incluir el módulo nuevo.
+
+Comprobar con una cuenta de prueba: activar Formación en Ajustes → Módulos si la selección está personalizada; abrir `/learning`, crear una carrera, un periodo y una materia; fijar la materia y recargar. Confirmar que el acceso abre la ubicación correcta y que no se puede eliminar un elemento con contenido. No ejecutar rollback tras registrar datos sin una copia: el rollback elimina las tres tablas del módulo.

@@ -8,6 +8,7 @@
 @endphp
 
 <x-module-shell module="health">
+    <livewire:game.guardian-card module="health" variant="top" :section-context="$guardianContext" />
     <x-slot:actions>
         <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
             :secondary="[
@@ -224,4 +225,7 @@
             </x-ui.form-dialog>
         </div>
     @endif
+    <x-slot:rail>
+        @include('livewire.health.partials.guardian-rail')
+    </x-slot:rail>
 </x-module-shell>

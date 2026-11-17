@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 class CategoryCatalog
 {
     public const DOMAINS = [
+        'learning' => ['learning_formations', 'Formación', 'learning'],
         'drinks' => ['drink_types', 'Bebidas', 'water'],
         'exercise' => ['exercise_types', 'Ejercicios', 'exercise'],
         'mood' => ['mood_states', 'Estados de ánimo', 'mood'],

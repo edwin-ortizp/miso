@@ -217,6 +217,7 @@ class HealthMeasurements extends Component
 
         return view('livewire.health.health-measurements', [
             'measurements' => $measurements,
+            'guardianContext' => \App\Services\Game\Guardian\HealthContext::measurements($latestByType),
             'totalMeasurements' => $totalMeasurements,
             'latestByType' => $latestByType,
             'typeOptions' => collect(HealthMeasurement::TYPES)->map(fn (array $t) => $t['label'])->all(),

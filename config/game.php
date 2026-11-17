@@ -100,6 +100,7 @@ return [
         'max_age_hours' => 12,
     ],
     'module_guardians' => [
+        'learning' => ['psiquico', 'normal'],
         'tasks' => ['psiquico', 'acero'],
         'health' => ['hada', 'normal'],
         'habits' => ['fuego', 'planta'],
@@ -128,6 +129,10 @@ return [
         'break' => ['Estira, toma agua y mira lejos.', 'Descansa; el siguiente bloque te espera.'],
     ],
     'guardian_lines' => [
+        'learning' => [
+            'free' => 'Puedes organizar lo que estudias paso a paso. Elige una formación para continuar.',
+            'greet' => 'Elige una formación y organiza el siguiente paso de tu aprendizaje.',
+        ],
         'tasks' => [
             'free' => 'Día libre, disfrútalo.',
             'greet' => 'Hoy empezamos juntos.',

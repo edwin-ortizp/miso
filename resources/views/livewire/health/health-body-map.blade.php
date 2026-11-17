@@ -4,6 +4,7 @@
 @endphp
 
 <x-module-shell module="health" class="health-page">
+    <livewire:game.guardian-card module="health" variant="top" :section-context="$guardianContext" />
     <x-slot:actions>
         <x-module-actions :primary="['label' => 'Registrar evento', 'icon' => 'bi-plus-lg', 'href' => route('health', ['new' => 1])]" :fab-always="true" />
     </x-slot:actions>
@@ -55,7 +56,7 @@
             </div>
         @endif
 
-        <article class="health-card health-body-card" x-data="healthBodyMap" @health-body-locate.window="locate($event.detail.zone)">
+        <article class="health-card health-body-card" x-data="healthBodyMap" x-init="$watch('selected', value => $wire.selectZone(value))" @health-body-locate.window="locate($event.detail.zone)">
             <div data-body-levels-host>
                 <script type="application/json" data-body-levels>@json($mapZones)</script>
             </div>
@@ -101,6 +102,7 @@
     </section>
 
     <x-slot:rail>
+        @include('livewire.health.partials.guardian-rail')
         <section class="health-card health-zones" aria-labelledby="health-zones-title">
             <header class="health-card__head">
                 <i class="bi bi-geo-alt" aria-hidden="true"></i>

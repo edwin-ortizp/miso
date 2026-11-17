@@ -29,6 +29,12 @@ class GuardianCard extends Component
     #[Reactive]
     public ?string $displayDate = null;
 
+    /** Optional section data prepared by the parent; selection still uses the module. */
+    #[Reactive]
+    public ?array $sectionContext = null;
+
+    public string $contextFingerprint = '';
+
     public string $adviceKey = '';
 
     public string $advice = '';
@@ -68,6 +74,17 @@ class GuardianCard extends Component
         if (! $this->guardian || $this->isViewingOtherDate()) {
             return;
         }
+        if ($this->module === 'health' && $this->sectionContext !== null) {
+            $context = $this->sectionContext;
+            $facts = $context['facts'] ?: [$context['empty']];
+            $pool = array_values(array_filter($facts, fn ($fact) => 'section-'.md5($fact) !== $except)) ?: $facts;
+            $text = $pool[random_int(0, count($pool) - 1)];
+            $this->adviceKey = 'section-'.md5($text);
+            $this->advice = e($text);
+            $this->action = null;
+            $this->contextFingerprint = md5(json_encode($context));
+            return;
+        }
         $advice = app(GuardianAdvisor::class)->advise($this->module, now(), $except, $this->progress());
         $this->adviceKey = $advice['key'];
         $this->advice = $advice['html'];
@@ -94,6 +111,10 @@ class GuardianCard extends Component
 
     public function render()
     {
+        if ($this->module === 'health' && $this->sectionContext !== null
+            && $this->contextFingerprint !== md5(json_encode($this->sectionContext))) {
+            $this->advise(null);
+        }
         $isOtherDate = $this->isViewingOtherDate();
         if ($this->guardian && ! $isOtherDate && $this->advice === '') {
             $this->advise(null);

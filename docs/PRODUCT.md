@@ -33,6 +33,7 @@ La amplitud de módulos debe servir a ese propósito. La existencia de una capac
 | Mi día y panel | Consultar una vista diaria y acceder al cierre del día |
 | Hábitos y hábitos a evitar | Registrar cumplimiento y consultar seguimiento |
 | Objetivos | Registrar avances narrativos o numéricos y asociar tareas |
+| Formación | Organizar carreras, posgrados, cursos y rutas personales con contenido jerárquico, categorías y accesos directos (CHG-138; conexiones y reservas pendientes) |
 | Tareas | Organizar acciones mediante lista, calendario, kanban y otras vistas |
 | Pomodoro | Registrar sesiones de concentración |
 | Diario, ánimo y energía | Conservar experiencias y registros personales |
