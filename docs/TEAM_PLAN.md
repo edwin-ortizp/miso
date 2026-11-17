@@ -144,7 +144,8 @@ _Última actualización: 2026-11-17_
 | CHG-138 | M | Formación base en la aplicación real | in-progress | En verificación | 4/4 |
 | CHG-139 | M | Funciones apagables dentro de cada módulo | to-do | Borrador | 0/6 |
 | CHG-140 | M | Modales de Salud con el patrón visual de la app | to-do | Borrador | 0/5 |
-| CHG-141 | M | Vocabulario de Formación según el tipo de estudio | to-do | Borrador | 0/0 |
+| CHG-141 | M | Vocabulario de Formación según el tipo de estudio | to-do | Borrador | 0/4 |
+| CHG-142 | L | Buscar un hueco en la agenda para una tarea | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
