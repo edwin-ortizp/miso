@@ -1,6 +1,6 @@
 # Favoritos y más usados en catálogos (CHG-150)
 
-Cada persona puede marcar elementos de un catálogo como **favoritos** para encontrarlos primero al registrar, sobre todo desde el chat. Hoy lo usan **bebidas** (`drinks`) y **ejercicios** (`exercise`).
+Cada persona puede marcar elementos de un catálogo como **favoritos** para encontrarlos primero al registrar, sobre todo desde el chat. Hoy lo usan **bebidas** (`drinks`), **ejercicios** (`exercise`) y **recetas** (`recipes`, sin «más usados» porque no tiene registros de uso).
 
 ## Conceptos
 - **Favoritos**: los marca y desmarca la persona con la estrella; no dependen de la frecuencia de uso. Son personales (`catalog_favorites`, por usuario) y no modifican el catálogo ni afectan a otros usuarios.
@@ -17,4 +17,4 @@ Cada persona puede marcar elementos de un catálogo como **favoritos** para enco
 2. En su pantalla de ajustes usar el trait `WithCatalogFavorites` y el componente `x-ui.favorite-toggle`.
 3. En los selectores, ordenar con `App\Services\Catalog\CatalogPicker::ordered()` o `quick()`.
 
-`Recipe.favorite`, `MoodState.is_pinned` y los accesos directos de Formación siguen como están; pueden adoptarse más adelante.
+`Recipe.favorite` se migró a `catalog_favorites` (CHG-153): el modelo conserva el atributo `favorite` y el MCP los parámetros `favorite` y `favorites_only`, pero los datos viven en la tabla común; la columna `recipes.favorite` queda sin uso. `MoodState.is_pinned`, `LearningShortcut` y `FavoriteCompanion` no se migran (ver `docs/ARCHITECTURE.md`).

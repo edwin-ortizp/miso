@@ -89,11 +89,7 @@
                 @foreach ($recipes as $recipe)
                     <tr wire:key="recipe-{{ $recipe->id }}">
                         <td class="md-table__title">
-                            <button wire:click="toggleFavorite('{{ $recipe->id }}')" class="md-btn-icon md-btn-icon--small"
-                                    title="{{ $recipe->favorite ? 'Quitar de favoritos' : 'Marcar como favorita' }}"
-                                    aria-label="{{ $recipe->favorite ? 'Quitar de favoritos' : 'Marcar como favorita' }}">
-                                <i class="bi bi-heart{{ $recipe->favorite ? '-fill' : '' }}" style="{{ $recipe->favorite ? 'color: var(--md-sys-color-error);' : '' }}"></i>
-                            </button>
+                            <x-ui.favorite-toggle :favorite="$recipe->favorite" :label="$recipe->name" wire:click="toggleFavorite('{{ $recipe->id }}')" />
                             <a href="#" wire:click.prevent="openForm('{{ $recipe->id }}')" class="md-link">{{ $recipe->name }}</a>
                             @if ($recipe->description)<span class="md-table__meta">{{ \Illuminate\Support\Str::limit($recipe->description, 90) }}</span>@endif
                         </td>

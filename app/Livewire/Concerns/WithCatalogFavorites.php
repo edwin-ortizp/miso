@@ -17,14 +17,6 @@ trait WithCatalogFavorites
     /** Orden SQL «favoritos primero» para una consulta del catálogo. */
     protected function favoritesFirst($query, string $domain)
     {
-        $ids = app(CatalogPicker::class)->favoriteIds($domain);
-
-        if ($ids === []) {
-            return $query;
-        }
-
-        $positions = collect($ids)->map(fn ($id, $index) => 'WHEN ? THEN '.(int) $index)->implode(' ');
-
-        return $query->orderByRaw("CASE id {$positions} ELSE ".count($ids).' END', $ids);
+        return app(CatalogPicker::class)->orderFavoritesFirst($query, $domain);
     }
 }

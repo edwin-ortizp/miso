@@ -47,8 +47,8 @@ class ListRecipesTool extends Tool
                     ->orWhereHas('recipeIngredients.shoppingItem', fn ($items) => $items->where('name', 'like', $like)));
             })
             ->when(filled($data['meal_type'] ?? null), fn ($query) => $query->where('meal_type', $data['meal_type']))
-            ->when(! empty($data['favorites_only']), fn ($query) => $query->where('favorite', true))
-            ->orderByDesc('favorite')
+            ->when(! empty($data['favorites_only']), fn ($query) => $query->whereIn('id', app(\App\Services\Catalog\CatalogPicker::class)->favoriteIds('recipes') ?: ['-']))
+            ->tap(fn ($query) => app(\App\Services\Catalog\CatalogPicker::class)->orderFavoritesFirst($query, 'recipes'))
             ->orderBy('name')
             ->limit($data['limit'] ?? 50)
             ->get();

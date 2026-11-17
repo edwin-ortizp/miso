@@ -156,7 +156,7 @@ _Última actualización: 2026-11-17_
 | CHG-150 | M | Favoritos personales y más usados en catálogos de bebidas y ejercicios | done | Cerrado | 4/4 |
 | CHG-151 | M | Ajustes con secciones unificados en Comidas, Tareas y Planes | in-progress | En verificación | 3/3 |
 | CHG-152 | M | CategorySettings sobre el trait compartido de categorias | in-progress | En verificación | 2/2 |
-| CHG-153 | M | Favoritos de recetas en el mecanismo comun de favoritos | to-do | Borrador | 0/3 |
+| CHG-153 | M | Favoritos de recetas en el mecanismo comun de favoritos | in-progress | En verificación | 3/3 |
 | CHG-154 | M | Documentar la arquitectura comun y lo que no se migra | to-do | Borrador | 0/2 |
 <!-- team:table:end -->
 

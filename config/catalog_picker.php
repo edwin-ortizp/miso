@@ -2,6 +2,7 @@
 
 use App\Models\DrinkType;
 use App\Models\ExerciseType;
+use App\Models\Recipe;
 
 /**
  * Catálogos que admiten favoritos personales y «más usados» (CHG-150).
@@ -15,6 +16,7 @@ return [
 
     'domains' => [
         'drinks' => ['model' => DrinkType::class, 'logs' => 'drink_logs', 'foreign_key' => 'drink_type_id', 'noun' => 'bebidas'],
+        'recipes' => ['model' => Recipe::class, 'noun' => 'recetas'],
         'exercise' => ['model' => ExerciseType::class, 'logs' => 'exercise_logs', 'foreign_key' => 'exercise_type_id', 'noun' => 'ejercicios'],
     ],
 ];

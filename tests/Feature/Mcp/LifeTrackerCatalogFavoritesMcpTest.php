@@ -64,4 +64,17 @@ class LifeTrackerCatalogFavoritesMcpTest extends TestCase
 
         $this->assertContains('manage-catalog-favorites-tool', $names);
     }
+
+    public function test_recipe_tools_keep_their_favorite_contract_on_the_shared_table(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        LifeTrackerServer::actingAs($user)->tool(\App\Mcp\Tools\Meal\CreateRecipeTool::class, ['name' => 'Ajiaco', 'meal_type' => 'comida', 'favorite' => true])->assertOk();
+        LifeTrackerServer::actingAs($user)->tool(\App\Mcp\Tools\Meal\CreateRecipeTool::class, ['name' => 'Bandeja', 'meal_type' => 'comida'])->assertOk();
+
+        $this->assertDatabaseHas('catalog_favorites', ['user_id' => $user->id, 'catalog_domain' => 'recipes']);
+        LifeTrackerServer::actingAs($user)->tool(\App\Mcp\Tools\Meal\ListRecipesTool::class, ['favorites_only' => true])
+            ->assertOk()->assertSee('Ajiaco')->assertDontSee('Bandeja');
+    }
 }

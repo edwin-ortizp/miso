@@ -432,7 +432,7 @@ class MealWeekly extends Component
         $entries = $entries->groupBy(fn ($entry) => $entry->date->format('Y-m-d').'|'.$entry->meal_type);
 
         $recipeOptions = $this->showForm
-            ? Recipe::query()->orderByRaw('CASE WHEN meal_type = ? THEN 0 ELSE 1 END', [$this->formMealType])->orderByDesc('favorite')->orderBy('name')->get(['id', 'name', 'meal_type', 'favorite', 'nutrition'])
+            ? Recipe::query()->orderByRaw('CASE WHEN meal_type = ? THEN 0 ELSE 1 END', [$this->formMealType])->tap(fn ($q) => app(\App\Services\Catalog\CatalogPicker::class)->orderFavoritesFirst($q, 'recipes'))->orderBy('name')->get(['id', 'name', 'meal_type', 'nutrition'])
             : collect();
 
         return view('livewire.meal.meal-weekly', compact('weekDates', 'entries', 'weekStart', 'dailyCalories', 'consumedCalories', 'plannedDays', 'weekCalories', 'todayEntries', 'showToday', 'recipeOptions') + [

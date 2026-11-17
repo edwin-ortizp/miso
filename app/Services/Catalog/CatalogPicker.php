@@ -22,7 +22,7 @@ class CatalogPicker
         return array_key_exists($domain, config('catalog_picker.domains', []));
     }
 
-    /** @return array{model: class-string, logs: string, foreign_key: string, noun: string} */
+    /** @return array{model: class-string, noun: string, logs?: string, foreign_key?: string} */
     private function definition(string $domain): array
     {
         abort_unless(self::supports($domain), 404, 'Catálogo sin favoritos: '.$domain);
@@ -121,8 +121,8 @@ class CatalogPicker
         $userId = $this->userId();
         $definition = $this->definition($domain);
 
-        if (! $userId) {
-            return [];
+        if (! $userId || ! isset($definition['logs'], $definition['foreign_key'])) {
+            return []; // Un catálogo sin registros de uso no ofrece «más usados».
         }
 
         $days = (int) config('catalog_picker.usage_days', 60);
@@ -185,5 +185,19 @@ class CatalogPicker
         return $water($favorites) ?? $favorites->first()
             ?? \App\Models\DrinkType::where('name', 'like', '%agua%')->orderBy('name')->first()
             ?? \App\Models\DrinkType::orderBy('name')->first();
+    }
+
+    /** Orden SQL «favoritos primero» (en su orden) para una consulta del catálogo. */
+    public function orderFavoritesFirst($query, string $domain)
+    {
+        $ids = $this->favoriteIds($domain);
+
+        if ($ids === []) {
+            return $query;
+        }
+
+        $positions = collect($ids)->map(fn ($id, $index) => 'WHEN ? THEN '.(int) $index)->implode(' ');
+
+        return $query->orderByRaw("CASE {$query->getModel()->getTable()}.id {$positions} ELSE ".count($ids).' END', $ids);
     }
 }

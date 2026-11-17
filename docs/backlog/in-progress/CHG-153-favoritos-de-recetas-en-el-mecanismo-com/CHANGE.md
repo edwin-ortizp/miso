@@ -1,9 +1,9 @@
 # CHG-153 · Favoritos de recetas en el mecanismo comun de favoritos
-**Estado:** Borrador
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-148, CHG-149, CHG-150
 
 ## 0. En palabras simples
@@ -66,12 +66,17 @@
 - Docs a actualizar: `docs/catalog-favorites.md`.
 
 ## 7. Tareas
-- [ ] T1 · `CatalogPicker` admite dominios sin registros de uso — Resp: developer — Modelo: estandar — Archivos: servicio, config — Hecho cuando: pruebas en verde.
-- [ ] T2 · Recetas usan favoritos comunes (interfaz y MCP) — Resp: developer — Modelo: estandar — Archivos: componentes, herramientas, migración — Hecho cuando: contrato MCP intacto.
-- [ ] T3 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests.
+- [x] T1 · `CatalogPicker` admite dominios sin registros de uso — Resp: developer — Modelo: estandar — Archivos: servicio, config — Hecho cuando: pruebas en verde.
+- [x] T2 · Recetas usan favoritos comunes (interfaz y MCP) — Resp: developer — Modelo: estandar — Archivos: componentes, herramientas, migración — Hecho cuando: contrato MCP intacto.
+- [x] T3 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: dominio `recipes` en `config/catalog_picker.php`; `CatalogPicker` con `logs`/`foreign_key` opcionales y `orderFavoritesFirst`; `Recipe` expone `favorite` como atributo respaldado por `catalog_favorites` (setter que guarda al persistir, `forget` al borrar); `MealRecipes` (estrella `x-ui.favorite-toggle`, filtro y alternar), `MealWeekly` y `ListRecipesTool` usan la tabla común; `CreateRecipeTool` y `UpdateRecipeTool` siguen aceptando `favorite`. Migración `2026_11_17_000004` copia los favoritos existentes (reversible); la columna `recipes.favorite` queda sin uso.
+- Verificación local: `CatalogFavoritesTest` (15), pruebas MCP de comidas y `MealPlanningTest` en verde (45 y 13 pruebas). La migración solo se probó con SQLite.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Parte del plan «arquitectura común» aceptado en la conversación (inventario de duplicación previo).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

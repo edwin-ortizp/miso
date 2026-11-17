@@ -27,9 +27,33 @@ class Recipe extends Model
     {
         return [
             'nutrition' => 'array',
-            'favorite' => 'boolean',
             'servings' => 'float',
         ];
+    }
+
+    /** Favorito pendiente de guardar: se escribe en `catalog_favorites` al guardar la receta (CHG-153). */
+    private ?bool $pendingFavorite = null;
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $recipe) {
+            if ($recipe->pendingFavorite !== null) {
+                app(\App\Services\Catalog\CatalogPicker::class)->set('recipes', (string) $recipe->id, $recipe->pendingFavorite);
+                $recipe->pendingFavorite = null;
+            }
+        });
+        static::deleted(fn (self $recipe) => app(\App\Services\Catalog\CatalogPicker::class)->forget('recipes', (string) $recipe->id));
+    }
+
+    /** Favorita de la persona autenticada; vive en `catalog_favorites`, no en esta tabla. */
+    public function getFavoriteAttribute(): bool
+    {
+        return $this->pendingFavorite ?? ($this->exists && app(\App\Services\Catalog\CatalogPicker::class)->isFavorite('recipes', (string) $this->id));
+    }
+
+    public function setFavoriteAttribute(mixed $value): void
+    {
+        $this->pendingFavorite = (bool) $value;
     }
 
     public function recipeIngredients()

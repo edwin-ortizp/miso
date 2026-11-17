@@ -240,10 +240,7 @@ class MealRecipes extends Component
 
     public function toggleFavorite(string $id)
     {
-        $recipe = Recipe::find($id);
-        if ($recipe) {
-            $recipe->update(['favorite' => !$recipe->favorite]);
-        }
+        app(\App\Services\Catalog\CatalogPicker::class)->toggle('recipes', $id);
     }
 
     public function delete(string $id)
@@ -266,7 +263,7 @@ class MealRecipes extends Component
             ->when($this->search, fn($q, $s) => $q->where('name', 'like', "%{$s}%"))
             ->when($this->mealTypeFilter, fn($q, $t) => $q->where('meal_type', $t))
             ->when($this->difficultyFilter, fn($q, $d) => $q->where('difficulty', $d))
-            ->when($this->favoriteFilter, fn($q) => $q->where('favorite', true))
+            ->when($this->favoriteFilter, fn($q) => $q->whereIn('id', app(\App\Services\Catalog\CatalogPicker::class)->favoriteIds('recipes') ?: ['-']))
             ->withCount('recipeIngredients')
             ->orderByDesc('updated_at')
             ->paginate($this->perPage());

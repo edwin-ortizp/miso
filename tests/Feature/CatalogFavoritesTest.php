@@ -228,4 +228,52 @@ class CatalogFavoritesTest extends TestCase
         $this->assertTrue($result['ok']);
         $this->assertDatabaseHas('exercise_logs', ['exercise_type_id' => $yoga->id, 'duration' => 30]);
     }
+
+    public function test_recipe_favorites_live_in_the_shared_table_and_keep_the_model_api(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $soup = \App\Models\Recipe::create(['name' => 'Sopa', 'favorite' => true]);
+        $stew = \App\Models\Recipe::create(['name' => 'Estofado']);
+
+        $this->assertTrue($soup->fresh()->favorite);
+        $this->assertFalse($stew->fresh()->favorite);
+        $this->assertDatabaseHas('catalog_favorites', ['user_id' => $user->id, 'catalog_domain' => 'recipes', 'item_id' => $soup->id]);
+
+        $stew->update(['favorite' => true]);
+        $soup->update(['favorite' => false]);
+        $this->assertSame([$stew->id], $this->picker()->favoriteIds('recipes'));
+        $this->assertSame([], $this->picker()->mostUsed('recipes'), 'un catálogo sin registros de uso no sugiere');
+
+        $stew->delete();
+        $this->assertSame(0, CatalogFavorite::count());
+    }
+
+    public function test_recipe_screen_toggles_and_filters_favorites(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $a = \App\Models\Recipe::create(['name' => 'Arepas']);
+        \App\Models\Recipe::create(['name' => 'Bandeja']);
+
+        $page = \Livewire\Livewire::test(\App\Livewire\Meal\MealRecipes::class)->call('toggleFavorite', $a->id)->assertSee('Quitar Arepas de favoritos');
+        $page->set('favoriteFilter', true);
+        $this->assertSame(['Arepas'], $page->viewData('recipes')->getCollection()->pluck('name')->all());
+    }
+
+    public function test_the_migration_moves_existing_recipe_favorites_and_can_be_reverted(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $recipe = \App\Models\Recipe::create(['name' => 'Ajiaco']);
+        \Illuminate\Support\Facades\DB::table('recipes')->where('id', $recipe->id)->update(['favorite' => true]);
+
+        $migration = require database_path('migrations/2026_11_17_000004_move_recipe_favorites_to_catalog_favorites.php');
+        $migration->up();
+        $this->assertDatabaseHas('catalog_favorites', ['catalog_domain' => 'recipes', 'item_id' => $recipe->id, 'user_id' => $user->id]);
+
+        \Illuminate\Support\Facades\DB::table('recipes')->where('id', $recipe->id)->update(['favorite' => false]);
+        $migration->down();
+        $this->assertSame(1, (int) \Illuminate\Support\Facades\DB::table('recipes')->where('id', $recipe->id)->value('favorite'));
+        $this->assertSame(0, CatalogFavorite::withoutGlobalScopes()->count());
+    }
 }
