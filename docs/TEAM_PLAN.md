@@ -149,9 +149,10 @@ _Última actualización: 2026-11-17_
 | CHG-143 | M | Ventana Buscar un hueco y agendar desde las tareas | in-progress | En verificación | 4/4 |
 | CHG-144 | M | Horario fijo en tareas que no se pueden mover | in-progress | En verificación | 5/5 |
 | CHG-145 | M | Huecos y cruces de agenda en el MCP | in-progress | En verificación | 4/4 |
-| CHG-146 | M | Ciclo menstrual con calendario e historial en cards | to-do | Borrador | 0/0 |
-| CHG-147 | M | Formacion: vista de detalle, acciones y ajustes con categorias | to-do | Borrador | 0/0 |
-| CHG-148 | M | Ajustes de Hidratacion con barra lateral de secciones | to-do | Borrador | 0/0 |
+| CHG-146 | M | Ciclo menstrual con calendario e historial en cards | to-do | Borrador | 0/4 |
+| CHG-147 | M | Formación: vista de detalle, acciones y ajustes con categorías | to-do | Borrador | 0/4 |
+| CHG-148 | M | Ajustes de Hidratación con barra lateral de secciones | to-do | Borrador | 0/3 |
+| CHG-149 | L | Ajustes con secciones y categorias en Ejercicio, Animo, Vehiculos, Habitos a evitar y Relaciones | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
