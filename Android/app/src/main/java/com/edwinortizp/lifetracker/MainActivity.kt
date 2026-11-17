@@ -19,6 +19,7 @@ import android.webkit.*
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -67,7 +68,12 @@ class MainActivity : ComponentActivity() {
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // CHG-109: las bandas de las barras del sistema se pintan siempre con el fondo claro del contenedor
+        // (#FBF8FD, ver setContent). El estilo por defecto (auto) pone iconos claros cuando Android está en
+        // modo oscuro, y sobre ese fondo la hora y la batería no se leían. Con `light` los iconos son oscuros
+        // en ambos modos y no se aplica el velo de contraste de la barra de navegación.
+        val lightBars = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT)
+        enableEdgeToEdge(statusBarStyle = lightBars, navigationBarStyle = lightBars)
         pendingDownload = savedInstanceState?.getString("download")
         lastUrl = savedInstanceState?.getString("lastUrl")?.takeIf { policy.destination(it) == UrlPolicy.Destination.INTERNAL }
             ?: BuildConfig.MISO_BASE_URL
@@ -75,6 +81,11 @@ class MainActivity : ComponentActivity() {
             id = android.view.View.generateViewId()
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
+            // CHG-109: viewport móvil estándar. El WebView respeta el <meta name="viewport"> de la web
+            // (width=device-width, initial-scale=1) como Chrome, sin escala inicial fija ni textZoom propio:
+            // el tamaño de letra del sistema sigue mandando.
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
             settings.allowFileAccess = false
             settings.allowContentAccess = false
             settings.mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW

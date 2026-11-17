@@ -12,12 +12,15 @@
     $headingId = 'sheet-'.\Illuminate\Support\Str::slug($title);
 @endphp
 
+{{-- CHG-106: la hoja se teletransporta a <body> como los diálogos. Dentro de <main> quedaba atrapada en su
+     contexto de apilamiento (view-transition-name) y la barra inferior, la superior y el compañero la tapaban. --}}
+@teleport('body')
 @if ($persistent)
-<div x-show="{{ $state }}" x-cloak>
+<div x-show="{{ $state }}" x-cloak data-module="{{ \App\Support\Ui\ModuleContext::current() }}">
 @else
 <template x-if="{{ $state }}">
 @endif
-    <div>
+    <div @unless ($persistent) data-module="{{ \App\Support\Ui\ModuleContext::current() }}" @endunless>
         <div class="md-sheet-scrim" @click="{{ $state }} = false"></div>
         <div {{ $attributes->class(['md-sheet', 'md-sheet--side' => $placement === 'side']) }}
              role="dialog"
@@ -46,3 +49,4 @@
 @else
 </template>
 @endif
+@endteleport

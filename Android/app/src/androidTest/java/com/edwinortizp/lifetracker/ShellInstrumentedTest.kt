@@ -89,6 +89,34 @@ class ShellInstrumentedTest {
         }
     }
 
+    // CHG-109: iconos oscuros sobre las bandas claras en cualquier modo del sistema, y viewport móvil estándar.
+    @Test fun systemBarsStayReadableAndViewportMatchesTheDevice() {
+        ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+            scenario.onActivity { activity ->
+                val browser = requireNotNull(web(activity.window.decorView))
+                val bars = androidx.core.view.WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+                assertTrue("Iconos oscuros en la barra de estado", bars.isAppearanceLightStatusBars)
+                assertTrue("Iconos oscuros en la barra de navegación", bars.isAppearanceLightNavigationBars)
+                assertTrue(browser.settings.useWideViewPort)
+                assertTrue(browser.settings.loadWithOverviewMode)
+                assertEquals("No se fuerza un zoom de texto propio", 100, browser.settings.textZoom)
+                browser.loadDataWithBaseURL(BuildConfig.MISO_BASE_URL,
+                    "<html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, viewport-fit=cover\"></head><body>Viewport fixture</body></html>",
+                    "text/html","UTF-8",BuildConfig.MISO_BASE_URL)
+            }
+            awaitCondition { evaluate(scenario,"document.body?.textContent === 'Viewport fixture'") == "true" }
+            var expectedWidth = 0
+            scenario.onActivity { activity ->
+                val browser = requireNotNull(web(activity.window.decorView))
+                expectedWidth = Math.round(browser.width / activity.resources.displayMetrics.density)
+            }
+            // El ancho CSS coincide con el ancho real del visor en dp (tolerancia de 2 px CSS, CA2) y no hay zoom inicial.
+            val width = evaluate(scenario,"window.innerWidth").toFloat()
+            assertTrue("innerWidth=$width, esperado≈$expectedWidth", Math.abs(width - expectedWidth) <= 2f)
+            assertEquals("1", evaluate(scenario,"String(window.visualViewport ? window.visualViewport.scale : 1)").trim('"'))
+        }
+    }
+
     @Test fun livewireStyleHistorySupportsBack() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             awaitLogin(scenario)

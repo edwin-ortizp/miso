@@ -221,3 +221,24 @@ it('pide confirmar la recurrencia sin anunciar una tarea completada', function (
     $component->assertSet('showRecurringCompletion', true)->assertSet('recurringTaskId', $task->id);
     expect($task->fresh()->completed)->toBeFalse();
 });
+
+// CHG-106: superficies en el contenedor Android.
+
+it('registra el chat como superficie no modal para que Atrás lo cierre primero', function () {
+    chatCompanion($this->user, 'Atras');
+
+    Livewire::test(TaskList::class)
+        ->assertSeeHtml('x-md-surface.nonmodal="open"')
+        ->assertSeeHtml('@md-surface-close.stop="close()"');
+});
+
+it('teletransporta las hojas a body para que la barra inferior y el compañero no las tapen', function () {
+    $html = \Illuminate\Support\Facades\Blade::render('<x-ui.sheet state="abierta" title="Hoja de prueba" persistent>Contenido</x-ui.sheet>');
+    $temporary = \Illuminate\Support\Facades\Blade::render('<x-ui.sheet state="abierta" title="Hoja de prueba">Contenido</x-ui.sheet>');
+
+    foreach ([$html, $temporary] as $rendered) {
+        expect($rendered)->toContain('x-teleport="body"')
+            ->and(strpos($rendered, 'x-teleport="body"'))->toBeLessThan(strpos($rendered, 'md-sheet-scrim'));
+    }
+    expect($html)->toContain('x-show="abierta"')->and($temporary)->toContain('x-if="abierta"');
+});

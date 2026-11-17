@@ -21,11 +21,18 @@ La URL inicial se define en `BuildConfig.MISO_BASE_URL`. Se aceptan únicamente 
 
 ## Navegación y formularios
 
-Atrás oculta primero el teclado; después solicita a la web cerrar la superficie superior, proteger cambios pendientes y finalmente autorizar retroceso/salida. La pila comparte los componentes de diálogo, hoja, menú, filtros y selectores. Solo la superficie superior captura foco y Escape; cerrar un selector anidado no cierra el formulario.
+Atrás oculta primero el teclado; después solicita a la web cerrar la superficie superior (incluido el chat del compañero, CHG-106), proteger cambios pendientes y finalmente autorizar retroceso/salida. La pila comparte los componentes de diálogo, hoja, menú, filtros y selectores. Solo la superficie superior captura foco y Escape; cerrar un selector anidado no cierra el formulario.
 
 Los formularios `x-ui.form-dialog` con guardado explícito comparan los campos en memoria. Una validación fallida no limpia el estado. Guardado exitoso, cierre y nueva apertura reinician la referencia. `protect-changes="false"` permite excluir un formulario con autoguardado; `handles-discard` conserva una confirmación de cierre propia (utilizado por Agua), manteniendo la protección de navegación. Una integración que guarde fuera del submit Livewire debe emitir `miso-form-saved` sobre su formulario tras confirmar éxito.
 
 Los cambios no se guardan como borradores en disco. Al cambiar de aplicación no se recarga la WebView; se conserva su estado mientras la instancia siga viva. No se garantiza recuperar formularios tras destrucción de la actividad/proceso. La sesión y su caducidad siguen siendo de Laravel. Si el puente deja de responder, no se retrocede silenciosamente; se permite reintentar. WebView sin mensajería compatible conserva el fallback y bloquea el retroceso cuando la web informa edición pendiente.
+
+## Barras del sistema y escala · CHG-109
+
+- **Bandas claras, iconos oscuros.** El contenedor pinta `#FBF8FD` bajo las barras de estado y de navegación y pide iconos oscuros siempre (`SystemBarStyle.light`), también con Android en modo oscuro. El estilo automático ponía iconos claros en modo oscuro sobre ese mismo fondo claro: hora y batería ilegibles. El tema de la web es independiente.
+- **Escala estándar.** El WebView respeta el `<meta name="viewport">` de la web (`useWideViewPort` + `loadWithOverviewMode`), sin `setInitialScale` ni `textZoom` propio. El tamaño de letra de Android se respeta: WebView escala el texto con la preferencia del sistema, mientras que Chrome usa su propio ajuste (Configuración › Accesibilidad › Tamaño del texto). Si el teléfono tiene la letra del sistema ampliada, la app se verá más grande que Chrome a propósito; no se reduce para imitarlo.
+- **Para comparar en un teléfono:** con la app en debug, abre `chrome://inspect` y anota `innerWidth`, `devicePixelRatio`, `visualViewport.scale` y el tamaño calculado de un mismo texto en la app y en Chrome al 100 %. `innerWidth` debe coincidir (±2 px); si solo difiere el tamaño del texto, la causa es la letra del sistema.
+- **Sin compilar en la nube:** estos cambios se escribieron sin SDK de Android disponible. Antes de instalar: `./gradlew testDebugUnitTest assembleDebug lintDebug` y, con teléfono o emulador, `connectedDebugAndroidTest` (incluye `systemBarsStayReadableAndViewportMatchesTheDevice`).
 
 ## Puente v1
 

@@ -70,7 +70,12 @@ Android/README.md: política de bandas claras/iconos oscuros, escala estándar, 
 - [ ] T4 · Documentar y generar APK local verificable — Resp: developer — Modelo: estandar — Archivos: Android/README.md, CHANGE.md, Android/app/build/outputs/apk/debug/app-debug.apk (artefacto generado) — Hecho cuando: build/lint documentados, APK identificado sin publicación ni instalación personal.
 
 ## 8. Bitácora de implementación (developer)
-Sin implementación; completar al desarrollar.
+- 2026-11-17 — Implementado sin dispositivo ni SDK de Android (el entorno no puede descargarlo): **no se compiló ni se midió**. El CHG sigue en Aprobado; `start` no se forzó.
+- **Barra de estado (causa por contrato de la API, no medida):** `enableEdgeToEdge()` sin argumentos usa `SystemBarStyle.auto`, que con Android en modo oscuro pide iconos claros; el contenedor pinta siempre `#FBF8FD` bajo las barras, así que quedaban iconos claros sobre fondo claro. Ahora `SystemBarStyle.light(TRANSPARENT, TRANSPARENT)` en ambas barras: iconos oscuros en los dos modos y sin velo de contraste. El fondo ya se pintaba bajo los insets (el `background` va antes de `safeDrawingPadding`).
+- **Escala:** `useWideViewPort = true` y `loadWithOverviewMode = true` como pide §4; sin `setInitialScale` ni `textZoom`. Con el `<meta viewport>` actual el ancho CSS ya debía coincidir con el del dispositivo, así que **no se espera que esto cambie el tamaño percibido**. Hipótesis principal sin medir: WebView aplica al texto el tamaño de letra del sistema y Chrome no (usa su propio ajuste); con letra ampliada en Android la app se ve más grande que Chrome. CA3/CA5 piden conservar esa preferencia, por eso no se toca `textZoom`.
+- **Insets:** sin cambios; `safeDrawingPadding` ya incluye el teclado y la web no recibe insets duplicados porque el WebView queda dentro del área segura.
+- Prueba instrumentada nueva `systemBarsStayReadableAndViewportMatchesTheDevice` (iconos oscuros, ajustes del WebView, `innerWidth` ≈ ancho en dp, escala 1). Sin ejecutar.
+- Pendiente del usuario (T1/T3/T4): compilar (`./gradlew testDebugUnitTest assembleDebug lintDebug connectedDebugAndroidTest`), comprobar la barra en modo claro y oscuro, y comparar con Chrome al 100 % según `Android/README.md`.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-14 — Creado en to-do/ (Borrador, nivel M) mediante team new.

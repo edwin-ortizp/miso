@@ -41,7 +41,9 @@
 
 <div class="lt-chat {{ $companion['type_class'] }}" x-data="companionChat(@js($config))" wire:ignore wire:key="{{ $panelId }}"
      :class="{ 'is-open': open }" data-module="{{ $moduleKey }}"
-     @keydown.escape.window="if (open) close()" @click.outside="close({ restoreFocus: false })">
+     @keydown.escape.window="if (open) close()" @click.outside="close({ restoreFocus: false })"
+     {{-- CHG-106: superficie no modal: el Atrás de Android cierra primero el chat en vez de salir de la pantalla. --}}
+     x-md-surface.nonmodal="open" @md-surface-close.stop="close()">
 
     <section class="lt-chat__panel" id="{{ $panelId }}" x-show="open" x-cloak role="dialog" aria-modal="false"
              aria-label="Chat con {{ $name }}"
