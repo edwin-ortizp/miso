@@ -1,5 +1,5 @@
 # CHG-143 · Ventana Buscar un hueco y agendar desde las tareas
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -100,14 +100,20 @@ flowchart LR
 - Docs a actualizar: `docs/UX-WRITING.md` (término «hueco»), `docs/design-system.md` si hay componente nuevo.
 
 ## 7. Tareas
-- [ ] T1 · Ventana con sugerencias, filtros y línea de tiempo — Resp: developer — Modelo: razonamiento — Archivos: `FindSlot.php`, vista — Hecho cuando: cumple el boceto, estados y accesibilidad.
-- [ ] T2 · Agendar en el hueco con Deshacer y revalidación — Resp: developer — Modelo: estandar — Archivos: `ScheduleTaskInSlot.php` — Hecho cuando: escribe fechas, revalida y refresca el calendario.
-- [ ] T3 · Acceso desde ⋯ (lista y calendario) y desde Programación — Resp: developer — Modelo: estandar — Archivos: `task-list.blade.php`, `task-calendar.blade.php`, `task-calendar.js`, `schedule-fields.blade.php` — Hecho cuando: abre la ventana en todas las superficies.
-- [ ] T4 · Catálogo UI, pruebas de navegador y documentación — Resp: developer — Modelo: estandar — Archivos: catálogo, spec, docs — Hecho cuando: pasa la verificación de la sección 5.
+- [x] T1 · Ventana con sugerencias, filtros y línea de tiempo — Resp: developer — Modelo: razonamiento — Archivos: `FindSlot.php`, vista — Hecho cuando: cumple el boceto, estados y accesibilidad.
+- [x] T2 · Agendar en el hueco con Deshacer y revalidación — Resp: developer — Modelo: estandar — Archivos: `ScheduleTaskInSlot.php` — Hecho cuando: escribe fechas, revalida y refresca el calendario.
+- [x] T3 · Acceso desde ⋯ (lista y calendario) y desde Programación — Resp: developer — Modelo: estandar — Archivos: `task-list.blade.php`, `task-calendar.blade.php`, `task-calendar.js`, `schedule-fields.blade.php` — Hecho cuando: abre la ventana en todas las superficies.
+- [x] T4 · Catálogo UI, pruebas de navegador y documentación — Resp: developer — Modelo: estandar — Archivos: catálogo, spec, docs — Hecho cuando: pasa la verificación de la sección 5.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: `Livewire\Task\FindSlot` (ventana con duración, rango, momento y «Otra duración», horarios sugeridos como botones por día, «Tu día» con lo ocupado y la propuesta, estado vacío con «Ver la próxima semana», revalidación del hueco al agendar y snackbar con «Deshacer»), `Actions\Task\ScheduleTaskInSlot` (agenda y restaura), accesos «Buscar un hueco» en el ⋯ de la lista, en el ⋯ del calendario (JS) y en la sección Programación del editor; la acción no se ofrece en tareas con horario fijo ni completas.
+- Decisiones: la línea de tiempo del día se presenta como lista ordenada («Tu día») —equivalente textual accesible— en lugar de barras posicionadas, así no hizo falta una custom property nueva en `ui-conformance`. Los horarios sugeridos usan un paso de al menos una hora alineado a la media hora (máx. 8 por día) para no ofrecer propuestas casi idénticas; se ajustó `TaskSlotFinder`. `x-ui.choice-chips` gana la prop `live`. Término «hueco» y «horario fijo» añadidos a `docs/UX-WRITING.md`.
+- Verificación local (PHP 8.4 en chroot): `TaskFindSlotTest` (10), `TaskSlotFinderTest` (11), `TaskFixedScheduleTest` (8) en verde; capturas a 390 y 1440 px revisadas con flujo completo (abrir, elegir, agendar, aviso); botones de horario ≥44 px. Regresión Task*/Ui/shell con los mismos fallos preexistentes de la rama base.
+- Pendiente: spec de navegador dedicado (`task-find-slot.interaction.spec.js`) no incluido; la verificación visual se hizo con un script temporal.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado dividiendo el CHG-142 original (Borrador, nivel M).
 - 2026-11-17 — Decisión delegada por el usuario («identifica tú la mejor manera»): diálogo en escritorio y pantalla completa en móvil.
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

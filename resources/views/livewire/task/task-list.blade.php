@@ -120,6 +120,9 @@
                             <x-ui.menu-item icon="bi-check2-circle" tone="success" wire:click="completeTask('{{ $task->id }}')" wire:loading.attr="disabled">Completar</x-ui.menu-item>
                             <x-ui.menu-item icon="bi-calendar-event" wire:click="moveToDay('{{ $task->id }}', 0)" wire:loading.attr="disabled">Mover para hoy</x-ui.menu-item>
                             <x-ui.menu-item icon="bi-calendar-plus" wire:click="moveToDay('{{ $task->id }}', 1)" wire:loading.attr="disabled">Mover para mañana</x-ui.menu-item>
+                            @unless ($task->schedule_locked)
+                                <x-ui.menu-item icon="bi-calendar2-check" x-on:click="$dispatch('task-find-slot', { id: '{{ $task->id }}' })">Buscar un hueco</x-ui.menu-item>
+                            @endunless
                             <x-ui.menu-divider />
                             @if ($focusAvailable)
                                 @php $focusMinutes = $this->focusSuggestionMinutes($task); @endphp
@@ -258,6 +261,7 @@
     </div>
 
     <livewire:task.task-editor :edit-task="$editTask" />
+    <livewire:task.find-slot />
     <livewire:task.task-bulk-editor />
 
     @include('livewire.task.partials.recurring-completion-dialog')

@@ -9,6 +9,7 @@
     'help' => null,
     'error' => null,
     'local' => false,
+    'live' => false,
     'selected' => null,
 ])
 
@@ -28,7 +29,7 @@
 <fieldset {{ $attributes->class(['md-choice-chips', 'md-choice-chips--'.$shape, 'md-error' => $message]) }}
           x-data="{
               multiple: @js((bool) $multiple),
-              selected: @if ($local) @js($selected ?? ($multiple ? [] : '')) @else $wire.entangle('{{ $name }}') @endif,
+              selected: @if ($local) @js($selected ?? ($multiple ? [] : '')) @else $wire.entangle('{{ $name }}'){{ $live ? '.live' : '' }} @endif,
               isOn(value) {
                   return this.multiple ? (this.selected ?? []).map(String).includes(String(value)) : String(this.selected ?? '') === String(value)
               },

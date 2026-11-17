@@ -79,11 +79,11 @@ class TaskSlotFinderTest extends TestCase
         $starts = $this->starts($slots);
 
         $this->assertSame('Tue 08:00', $starts[0]);
-        $this->assertContains('Tue 08:30', $starts);
         $this->assertNotContains('Tue 09:00', $starts, 'Termina a las 10:00 y choca con el margen de 10 min.');
         $this->assertNotContains('Tue 10:00', $starts);
-        $this->assertContains('Tue 11:10', $starts);
-        $this->assertContains('Tue 17:00', $starts);
+        $this->assertContains('Tue 11:10', $starts, 'El primer hueco tras la reunión empieza al terminar el margen.');
+        $this->assertContains('Tue 12:30', $starts, 'Los siguientes se alinean a la media hora.');
+        $this->assertContains('Tue 16:30', $starts);
         $this->assertNotContains('Tue 17:30', $starts, 'No cabe una hora antes de las 18:00.');
         foreach ($slots as $slot) {
             $this->assertEquals(60, $slot['start']->diffInMinutes($slot['end']));
@@ -118,7 +118,7 @@ class TaskSlotFinderTest extends TestCase
         $this->assertNotContains('Tue 12:30', $starts, 'El almuerzo (12:30) ocupa la agenda.');
         $this->assertNotContains('Tue 13:30', $starts, 'Choca con el margen del almuerzo de 12:30 a 13:30.');
         $this->assertNotContains('Tue 14:00', $starts, 'La toma de las 14:00 ocupa la agenda.');
-        $this->assertContains('Tue 15:00', $starts);
+        $this->assertContains('Tue 15:30', $starts);
     }
 
     public function test_no_slots_when_the_day_is_full_or_not_planned(): void

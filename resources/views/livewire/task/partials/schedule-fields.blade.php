@@ -10,8 +10,13 @@
         @endforeach
         @if ($estimatedTime ?? null)<span class="md-chip-tonal"><i class="bi bi-clock"></i> {{ $estimatedTime >= 60 ? intdiv($estimatedTime, 60).' h'.($estimatedTime % 60 ? ' '.($estimatedTime % 60).' min' : '') : $estimatedTime.' min' }}</span>@endif
     </div>
+    @if ($localEditor ?? false)
+        <div>
+            <button type="button" class="md-btn-text" x-show="$wire.editingId && !$wire.scheduleLocked" x-on:click="$dispatch('task-find-slot', { id: $wire.editingId })"><i class="bi bi-calendar2-check" aria-hidden="true"></i> Buscar un hueco</button>
+        </div>
+    @endif
     @isset($lockModel)
         <x-ui.switch name="{{ $lockModel }}" label="Horario fijo" help="No se mueve con los atajos ni al reorganizar." :checked="(bool) ($scheduleLocked ?? false)" wire:model="{{ $lockModel }}" />
-        @error($lockModel)<div class="md-supporting-text" role="alert" style="color: var(--md-sys-color-error);">{{ $message }}</div>@enderror
+        @error($lockModel)<p class="md-field-error" role="alert">{{ $message }}</p>@enderror
     @endisset
 </div>

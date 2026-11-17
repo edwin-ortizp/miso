@@ -56,6 +56,7 @@
     </div>
 
     <livewire:task.task-editor />
+    <livewire:task.find-slot />
 
     @include('livewire.task.partials.recurring-completion-dialog')
 </x-module-shell>

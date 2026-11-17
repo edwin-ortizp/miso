@@ -48,6 +48,7 @@
                 <x-ui.menu-item icon="bi-check2-circle" tone="success" x-show="!actionEvent?.completed" @click="runAction('complete')" x-bind:disabled="actionBusy">Completar</x-ui.menu-item>
                 <x-ui.menu-item icon="bi-calendar-event" x-show="!actionEvent?.completed" @click="runAction('today')" x-bind:disabled="actionBusy">Mover para hoy</x-ui.menu-item>
                 <x-ui.menu-item icon="bi-calendar-plus" x-show="!actionEvent?.completed" @click="runAction('tomorrow')" x-bind:disabled="actionBusy">Mover para mañana</x-ui.menu-item>
+                <x-ui.menu-item icon="bi-calendar2-check" x-show="!actionEvent?.completed && !actionEvent?.locked" @click="runAction('findSlot')" x-bind:disabled="actionBusy">Buscar un hueco</x-ui.menu-item>
                 <x-ui.menu-divider />
                 <x-ui.menu-item icon="bi-pencil" @click="runAction('edit')" x-bind:disabled="actionBusy">Editar</x-ui.menu-item>
                 <x-ui.menu-divider />
@@ -90,6 +91,7 @@
     </div>
 
     <livewire:task.task-editor :edit-task="$editTask" />
+    <livewire:task.find-slot />
 
     @include('livewire.task.partials.recurring-completion-dialog')
 

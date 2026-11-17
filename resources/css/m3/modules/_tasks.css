@@ -420,3 +420,18 @@
 
 /* CHG-144: indicador de horario fijo. */
 .md-calendar-lock, .task-locked-icon { margin-inline-end: 4px; font-size: 0.85em; opacity: 0.85; }
+
+/* CHG-143: ventana «Buscar un hueco». */
+.find-slot { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.find-slot__task { margin: 0; overflow-wrap: anywhere; }
+.find-slot__filters { display: flex; flex-direction: column; gap: 12px; }
+.find-slot__note { margin: 0; color: var(--md-sys-color-on-surface-variant); }
+.find-slot__loading { color: var(--md-sys-color-on-surface-variant); }
+.find-slot__day { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; }
+.find-slot__day h4 { margin: 0; }
+.find-slot__blocks { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.find-slot__block { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 8px; align-items: center; padding: 8px 12px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-medium); }
+.find-slot__block.is-proposal { border-color: transparent; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-weight: 600; }
+.find-slot__time { font-variant-numeric: tabular-nums; }
+.find-slot__title { overflow-wrap: anywhere; }
+@media (max-width: 575.98px) { .find-slot__block { grid-template-columns: minmax(0, 1fr); gap: 2px; } }

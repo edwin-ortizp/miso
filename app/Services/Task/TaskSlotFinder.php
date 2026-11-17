@@ -37,7 +37,7 @@ class TaskSlotFinder
     /**
      * Huecos libres de `$minutes` minutos entre los días de `$from` y `$to` (ambos incluidos).
      *
-     * Opciones: `part` (any|morning|afternoon), `limit`, `exclude_task_id`, `now`.
+     * Opciones: `part` (any|morning|afternoon), `limit`, `per_day`, `exclude_task_id`, `now`.
      *
      * @return list<array{start: Carbon, end: Carbon, minutes: int}>
      */
@@ -50,6 +50,7 @@ class TaskSlotFinder
         $earliest = $now->copy()->second(0)->addMinutes((5 - $now->minute % 5) % 5 ?: 0);
         $part = $options['part'] ?? 'any';
         $limit = max(1, min(100, (int) ($options['limit'] ?? 30)));
+        $perDay = max(1, min(24, (int) ($options['per_day'] ?? 8)));
         $margin = $this->hours->margin($userId);
 
         $busy = $this->mergeIntervals(array_map(
@@ -67,6 +68,7 @@ class TaskSlotFinder
             if ($windowStart->gte($window['end'])) {
                 continue;
             }
+            $today = 0;
             foreach ($this->freeIntervals($windowStart, $window['end'], $busy) as [$freeStart, $freeEnd]) {
                 foreach ($this->candidates($freeStart, $freeEnd, $minutes) as $start) {
                     if (! $this->matchesPart($start, $part)) {
@@ -75,6 +77,9 @@ class TaskSlotFinder
                     $slots[] = ['start' => $start, 'end' => $start->copy()->addMinutes($minutes), 'minutes' => $minutes];
                     if (count($slots) >= $limit) {
                         return $slots;
+                    }
+                    if (++$today >= $perDay) {
+                        break 2;
                     }
                 }
             }
@@ -273,19 +278,23 @@ class TaskSlotFinder
         return $free;
     }
 
-    /** @return list<Carbon> Inicios posibles: el del hueco y los de la cuadrícula que quepan. */
+    /**
+     * Inicios sugeridos dentro de un hueco: el del hueco y, después, uno por cada «paso» alineado a la cuadrícula.
+     * El paso es la duración (mínimo una hora) para no ofrecer propuestas casi iguales unas tras otras.
+     *
+     * @return list<Carbon>
+     */
     private function candidates(Carbon $start, Carbon $end, int $minutes): array
     {
+        $step = max($minutes, 60);
         $starts = [];
-        if ($start->copy()->addMinutes($minutes)->lte($end)) {
-            $starts[] = $start->copy();
-        }
-        $grid = $start->copy()->second(0)->minute(intdiv($start->minute, self::GRID_MINUTES) * self::GRID_MINUTES);
-        while ($grid->lte($start)) {
-            $grid->addMinutes(self::GRID_MINUTES);
-        }
-        for (; $grid->copy()->addMinutes($minutes)->lte($end); $grid->addMinutes(self::GRID_MINUTES)) {
-            $starts[] = $grid->copy();
+        $cursor = $start->copy();
+        while ($cursor->copy()->addMinutes($minutes)->lte($end)) {
+            $starts[] = $cursor->copy();
+            $next = $cursor->copy()->addMinutes($step)->second(0);
+            // Se alinea a la cuadrícula de 30 minutos (hacia arriba) para que los horarios sean «redondos».
+            $remainder = $next->minute % self::GRID_MINUTES;
+            $cursor = $remainder === 0 ? $next : $next->addMinutes(self::GRID_MINUTES - $remainder);
         }
 
         return $starts;

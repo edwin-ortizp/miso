@@ -61,6 +61,8 @@ El entrenador tiene personalidad de compañero: sus reacciones son espontáneas,
 | Racha | Usar cuando corresponda al cálculo real; explicar sus condiciones mediante ayuda contextual |
 | Semana (amigos) | Conteo suave de acciones de la semana; sin «ranking», «último lugar» ni comparaciones negativas |
 | Racha compartida | Días en que los dos amigos cumplieron su racha; al cortarse se habla de «retomar» y de la mejor racha, nunca de «perder» |
+| Hueco | Espacio libre de la agenda donde cabe una tarea; usar «Buscar un hueco» y «horarios sugeridos», nunca «slot» ni «ventana libre» |
+| Horario fijo | Tarea que no se mueve (p. ej. una reunión); aparece con candado y no se reprograma con atajos ni al reorganizar |
 
 Conservar los términos específicos de cada módulo. No alternar sin motivo «objetivo» y «meta» para nombrar la misma entidad.
 

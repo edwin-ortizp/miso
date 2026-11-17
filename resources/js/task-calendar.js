@@ -76,6 +76,11 @@ export function registerTaskCalendar(Alpine) {
                 this.$dispatch('task-editor', { action: 'openForm', id: selected.id, mode: 'edit' });
                 return;
             }
+            if (action === 'findSlot') {
+                this.closeActions();
+                this.$dispatch('task-find-slot', { id: selected.id });
+                return;
+            }
             this.actionBusy = true;
             this.actionError = '';
             try {
