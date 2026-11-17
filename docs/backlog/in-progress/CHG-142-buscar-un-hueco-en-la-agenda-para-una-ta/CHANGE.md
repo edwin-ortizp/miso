@@ -1,5 +1,5 @@
 # CHG-142 · Horario para planificar y cálculo de huecos libres
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -86,12 +86,15 @@ Tareas › Ajustes › Horario para planificar
 - Docs a actualizar: documentación de Tareas (horario para planificar y qué cuenta como ocupado).
 
 ## 7. Tareas
-- [ ] T1 · Horario para planificar con valores por defecto y ajuste por persona — Resp: developer — Modelo: estandar — Archivos: `PlanningHours.php`, config — Hecho cuando: defaults, override por usuario y validación pasan.
-- [ ] T2 · Pantalla «Horario para planificar» en Tareas → Ajustes — Resp: developer — Modelo: estandar — Archivos: `TaskSettings.php`, vista, ruta, `config/modules.php` — Hecho cuando: se cumple el boceto y los textos.
-- [ ] T3 · Servicio de huecos libres y cruces — Resp: developer — Modelo: razonamiento — Archivos: `TaskSlotFinder.php` — Hecho cuando: pasan jornada, ocupación, margen, vacío y cruces, con presupuesto de consultas.
-- [ ] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasa la sección 5.
+- [x] T1 · Horario para planificar con valores por defecto y ajuste por persona — Resp: developer — Modelo: estandar — Archivos: `PlanningHours.php`, config — Hecho cuando: defaults, override por usuario y validación pasan.
+- [x] T2 · Pantalla «Horario para planificar» en Tareas → Ajustes — Resp: developer — Modelo: estandar — Archivos: `TaskSettings.php`, vista, ruta, `config/modules.php` — Hecho cuando: se cumple el boceto y los textos.
+- [x] T3 · Servicio de huecos libres y cruces — Resp: developer — Modelo: razonamiento — Archivos: `TaskSlotFinder.php` — Hecho cuando: pasan jornada, ocupación, margen, vacío y cruces, con presupuesto de consultas.
+- [x] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasa la sección 5.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado sin migración: `PlanningHours` (defaults como constante de clase, no en `config/`; override en `module_settings` módulo `tasks`, clave `planning`; `save`/`reset` conservan las demás claves), `TaskSlotFinder` (`find`, `conflicts`, `busy`; ocupan tareas con hora no completadas, comidas y tomas de medicamentos; citas de salud y planes sin hora no bloquean; rango máximo 14 días; margen y cuadrícula de 30 min), sección «Horario para planificar» en `TaskSettings` (ruta `tasks.settings.planning`).
+- Detalle: `MealSchedule::events()` compara fechas con `<=` y en SQLite pierde las comidas del último día; el buscador amplía un día la consulta y filtra después.
+- Verificación local (PHP 8.4 en chroot): `TaskSlotFinderTest` (11 pruebas) en verde; regresión de Task*, Meal, Ui, ModuleExperience y BackendQueryBudget con los mismos fallos que la rama base (`test_existing_tasks_open_description_preview_on_every_open`, `test_shopping_preview_does_not_query_more_as_planned_meals_grow`, deuda visual de `game/*`, capa CSS, log-viewer, `catalog-chip`). Captura a 390 px revisada. `npm run build` correcto.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador) a partir de la exploración de agenda y menú de tareas.
@@ -99,3 +102,5 @@ Tareas › Ajustes › Horario para planificar
 - 2026-11-17 — Decisión del usuario: dividir el CHG original en varios de nivel M; el MCP debe poder encontrar huecos y cruces; las tareas con agenda bloqueada (reuniones) no se mueven libremente. Dividido en: CHG-143, CHG-144, CHG-145.
 - 2026-11-17 — Citas de salud y planes sin hora no bloquean el día (propuesta por defecto, revisable).
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

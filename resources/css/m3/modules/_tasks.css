@@ -411,3 +411,9 @@
 
 /* CHG-136: el Kanban dibuja 50 tarjetas por columna; el resto se pide con «Ver más». */
 .task-kanban-more { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 0 4px; color: var(--md-sys-color-on-surface-variant); }
+
+/* CHG-142: horario para planificar. */
+.task-planning-hours__row { display: flex; flex-direction: column; gap: 8px; margin: 0; padding: 12px 0; border: 0; border-bottom: 1px solid var(--md-sys-color-outline-variant); min-width: 0; }
+.task-planning-hours__row:last-of-type { border-bottom: 0; }
+.task-planning-hours__times { margin-left: 52px; }
+@media (max-width: 575.98px) { .task-planning-hours__times { margin-left: 0; } }

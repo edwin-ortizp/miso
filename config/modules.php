@@ -222,7 +222,7 @@ return [
             ['label' => 'Kanban', 'feature' => 'kanban', 'route' => 'tasks.kanban', 'archetype' => 'dashboard', 'icon' => 'bi-kanban', 'active' => ['tasks.kanban']],
             ['label' => 'Planificación', 'feature' => 'planning', 'route' => 'tasks.planning', 'archetype' => 'dashboard', 'icon' => 'bi-calendar-week', 'active' => ['tasks.planning']],
             ['label' => 'Progreso', 'feature' => 'progress', 'route' => 'tasks.progress', 'archetype' => 'dashboard', 'icon' => 'bi-trophy', 'active' => ['tasks.progress']],
-            ['label' => 'Ajustes', 'route' => 'tasks.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['tasks.settings', 'tasks.settings.statuses']],
+            ['label' => 'Ajustes', 'route' => 'tasks.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['tasks.settings', 'tasks.settings.statuses', 'tasks.settings.planning']],
         ],
     ],
     'social' => [

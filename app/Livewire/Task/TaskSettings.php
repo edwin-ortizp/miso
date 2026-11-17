@@ -9,6 +9,7 @@ use App\Models\ModuleSetting;
 use App\Models\Task;
 use App\Models\TaskCategory;
 use App\Models\TaskStatus;
+use App\Services\Task\PlanningHours;
 use App\Services\TaskCodeService;
 use App\Support\Ui\CatalogColors;
 use Illuminate\Support\Collection;
@@ -44,7 +45,7 @@ class TaskSettings extends Component
         'bi-car-front' => 'Vehículo', 'bi-airplane' => 'Viaje', 'bi-star' => 'Estrella', 'bi-three-dots' => 'Otros',
     ];
 
-    public const SECTIONS = ['categories', 'statuses'];
+    public const SECTIONS = ['categories', 'statuses', 'planning'];
 
     public string $section = 'categories';
 
@@ -87,11 +88,40 @@ class TaskSettings extends Component
 
     public string $message = '';
 
+    /** @var array<int, array{enabled: bool, start: string, end: string}> CHG-142: horario para planificar por día. */
+    public array $planningDays = [];
+
+    public string $planningMargin = '10';
+
     public function mount(string $section = 'categories'): void
     {
         abort_unless(in_array($section, self::SECTIONS, true), 404);
         $this->section = $section;
         $this->globalCodePrefix = app(TaskCodeService::class)->globalPrefix(auth()->id());
+        $this->loadPlanning();
+    }
+
+    private function loadPlanning(): void
+    {
+        $settings = app(PlanningHours::class)->settings((int) auth()->id());
+        $this->planningDays = $settings['days'];
+        $this->planningMargin = (string) $settings['margin'];
+    }
+
+    public function savePlanning(): void
+    {
+        $this->resetValidation();
+        app(PlanningHours::class)->save((int) auth()->id(), $this->planningDays, $this->planningMargin);
+        $this->loadPlanning();
+        $this->message = 'Horario guardado.';
+    }
+
+    public function restorePlanning(): void
+    {
+        $this->resetValidation();
+        app(PlanningHours::class)->reset((int) auth()->id());
+        $this->loadPlanning();
+        $this->message = 'Se restauraron los valores por defecto.';
     }
 
     public function saveGlobalPrefix(): void

@@ -178,6 +178,7 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/tasks/progress', TaskProgress::class)->name('tasks.progress');
     Route::get('/tasks/settings', TaskSettings::class)->name('tasks.settings');
     Route::get('/tasks/settings/statuses', TaskSettings::class)->defaults('section', 'statuses')->name('tasks.settings.statuses');
+    Route::get('/tasks/settings/planning', TaskSettings::class)->defaults('section', 'planning')->name('tasks.settings.planning');
     Route::get('/amigos', FriendsIndex::class)->name('social.friends');
     Route::get('/amigos/semana', WeeklyBoard::class)->name('social.week');
     Route::get('/relationships', RelationshipIndex::class)->name('relationships');
