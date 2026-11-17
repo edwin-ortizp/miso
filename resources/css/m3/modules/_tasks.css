@@ -435,3 +435,8 @@
 .find-slot__time { font-variant-numeric: tabular-nums; }
 .find-slot__title { overflow-wrap: anywhere; }
 @media (max-width: 575.98px) { .find-slot__block { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+/* Agenda: un título largo se parte en vez de ensanchar la tabla y sacar la elipsis de la tarjeta. */
+.md-task-calendar__surface .fc-list-table { width: 100%; }
+.md-task-calendar__surface .fc-list-event-title { width: 100%; max-width: 0; padding-inline-end: 36px; overflow-wrap: anywhere; }
+.md-task-calendar__surface .fc-list-event-time { white-space: nowrap; }

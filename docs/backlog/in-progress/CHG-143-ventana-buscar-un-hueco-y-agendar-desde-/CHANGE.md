@@ -110,6 +110,7 @@ flowchart LR
 - Decisiones: la línea de tiempo del día se presenta como lista ordenada («Tu día») —equivalente textual accesible— en lugar de barras posicionadas, así no hizo falta una custom property nueva en `ui-conformance`. Los horarios sugeridos usan un paso de al menos una hora alineado a la media hora (máx. 8 por día) para no ofrecer propuestas casi idénticas; se ajustó `TaskSlotFinder`. `x-ui.choice-chips` gana la prop `live`. Término «hueco» y «horario fijo» añadidos a `docs/UX-WRITING.md`.
 - Verificación local (PHP 8.4 en chroot): `TaskFindSlotTest` (10), `TaskSlotFinderTest` (11), `TaskFixedScheduleTest` (8) en verde; capturas a 390 y 1440 px revisadas con flujo completo (abrir, elegir, agendar, aviso); botones de horario ≥44 px. Regresión Task*/Ui/shell con los mismos fallos preexistentes de la rama base.
 - Pendiente: spec de navegador dedicado (`task-find-slot.interaction.spec.js`) no incluido; la verificación visual se hizo con un script temporal.
+- 2026-11-17 — Corrección reportada por la persona usuaria: en la vista Agenda del calendario, un título largo ensanchaba la tabla y la elipsis ⋮ salía de la tarjeta, de modo que el menú se abría fuera de la pantalla. Se parten los títulos largos (`overflow-wrap`) en `.fc-list-event-title` y el menú se acota al área visible (`visualViewport`) en `task-calendar.js`. Verificado con Playwright móvil a 360 px.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado dividiendo el CHG-142 original (Borrador, nivel M).

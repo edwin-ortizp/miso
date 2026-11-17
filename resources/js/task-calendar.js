@@ -52,8 +52,14 @@ export function registerTaskCalendar(Alpine) {
             this.$nextTick(() => {
                 const menu = this.$refs.actionMenu;
                 const rect = trigger.getBoundingClientRect();
-                this.menuLeft = Math.max(8, Math.min(rect.right - menu.offsetWidth, innerWidth - menu.offsetWidth - 8));
-                this.menuTop = Math.max(8, Math.min(rect.bottom + 4, innerHeight - menu.offsetHeight - 8));
+                // Se acota al área realmente visible (en móvil con zoom o desbordes, innerWidth puede ser mayor).
+                const view = window.visualViewport;
+                const viewLeft = view?.offsetLeft ?? 0;
+                const viewTop = view?.offsetTop ?? 0;
+                const viewWidth = Math.min(view?.width ?? innerWidth, document.documentElement.clientWidth || innerWidth);
+                const viewHeight = view?.height ?? innerHeight;
+                this.menuLeft = Math.max(viewLeft + 8, Math.min(rect.right - menu.offsetWidth, viewLeft + viewWidth - menu.offsetWidth - 8));
+                this.menuTop = Math.max(viewTop + 8, Math.min(rect.bottom + 4, viewTop + viewHeight - menu.offsetHeight - 8));
                 menu.style.left = this.menuLeft + 'px';
                 menu.style.top = this.menuTop + 'px';
                 menu.querySelector('[role="menuitem"]')?.focus();
