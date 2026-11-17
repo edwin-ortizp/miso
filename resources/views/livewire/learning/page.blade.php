@@ -1,21 +1,24 @@
 @php
     use App\Models\LearningFormation;
     use App\Models\LearningUnit;
+    $vocab = app(\App\Services\Learning\LearningVocabulary::class);
+    $uid = (int) auth()->id();
+    $ftype = $formation?->type;
     $current = $unit ?? $formation;
     $currentType = $unit ? 'unit' : 'formation';
     $currentPinned = $current && in_array($currentType.':'.$current->id, $pinKeys, true);
     $createActions = [];
     if (!$formation) {
-        foreach (LearningFormation::TYPES as $key => $label) $createActions[] = ['label' => $label, 'action' => "openFormation(null, '$key')", 'icon' => 'bi-mortarboard', 'create' => true];
+        foreach ($vocab->typeLabels() as $key => $label) $createActions[] = ['label' => $label, 'action' => "openFormation(null, '$key')", 'icon' => 'bi-mortarboard', 'create' => true];
         $primary = ['label' => 'Agregar formación', 'action' => 'openFormation', 'icon' => 'bi-plus-lg'];
     } else {
-        foreach ($childKinds as $key) $createActions[] = ['label' => 'Agregar '.mb_strtolower(LearningUnit::KINDS[$key]), 'action' => "openUnit('$key')", 'icon' => 'bi-plus-lg', 'create' => true];
+        foreach ($childKinds as $key) $createActions[] = ['label' => $vocab->addLabel($uid, $ftype, $key), 'action' => "openUnit('$key')", 'icon' => 'bi-plus-lg', 'create' => true];
         $primary = array_shift($createActions);
     }
     $secondary = [...$createActions, ['label' => 'Categorías', 'href' => route('categories.settings', 'learning'), 'icon' => 'bi-tags']];
     $currentEditAction = $unit ? "openUnit('', '$unit->id')" : ($formation ? "openFormation('$formation->id')" : '');
     $currentDeleteAction = $formation ? "deleteRecord('$formation->id', ".($unit ? "'$unit->id'" : 'null').")" : '';
-    $dialogLabel = $editor === 'unit' ? (LearningUnit::KINDS[$editorKind] ?? 'Contenido') : (LearningFormation::TYPES[$draft['type'] ?? ''] ?? 'Formación');
+    $dialogLabel = $editor === 'unit' ? $vocab->singular($uid, $ftype, (string) $editorKind) : $vocab->typeLabel($draft['type'] ?? '');
 @endphp
 <x-module-shell module="learning" class="learning-page" :title="$current?->title" :back="$back" :archetype="$formation ? 'detail' : 'list'">
     @if ($primary)
@@ -63,7 +66,7 @@
         </nav>
         <div class="learning-summary">
             <div>
-                <x-ui.chip variant="tonal">{{ $unit ? LearningUnit::KINDS[$unit->kind] : LearningFormation::TYPES[$formation->type] }}</x-ui.chip>
+                <x-ui.chip variant="tonal">{{ $unit ? $vocab->label($uid, $ftype, $unit->kind) : $vocab->typeLabel($formation->type) }}</x-ui.chip>
                 <x-ui.chip variant="tonal">{{ LearningFormation::STATES[$current->status] }}</x-ui.chip>
                 @if ($current->description)<p class="learning-description">{{ $current->description }}</p>@endif
                 @if (!$unit && $formation->institution)<p>{{ $formation->institution }}</p>@endif
@@ -85,7 +88,7 @@
         <x-ui.management-card id="learning-records" :title="$formation ? 'Contenido' : 'Formaciones'" icon="bi-mortarboard" :count="(string)($paginator?->total() ?? $records->count())" :search="$formation ? null : 'search'" search-placeholder="Buscar formaciones" :paginator="$paginator" noun="formaciones" :portal-filters="true" :active-filters="(int)($typeFilter !== '') + (int)($statusFilter !== '') + (int)($categoryFilter !== '')">
             @unless ($formation)
                 <x-slot:filters>
-                    <x-ui.select label="Tipo de formación" name="typeFilter" wire:model.live="typeFilter" :options="LearningFormation::TYPES" placeholder="Todos los tipos" />
+                    <x-ui.select label="Tipo de formación" name="typeFilter" wire:model.live="typeFilter" :options="$vocab->typeLabels()" placeholder="Todos los tipos" />
                     <x-ui.select label="Estado" name="statusFilter" wire:model.live="statusFilter" :options="LearningFormation::STATES" placeholder="Todos los estados" />
                     <x-ui.select label="Categoría" name="categoryFilter" wire:model.live="categoryFilter" :options="$categories" placeholder="Todas las categorías" />
                 </x-slot:filters>
@@ -109,7 +112,7 @@
                                 @endphp
                                 <tr wire:key="learning-{{ $recordType }}-{{ $record->id }}">
                                     <td><a href="{{ $href }}" wire:navigate>{{ $record->title }}</a></td>
-                                    <td>{{ $isUnit ? LearningUnit::KINDS[$record->kind] : LearningFormation::TYPES[$record->type] }}</td>
+                                    <td>{{ $isUnit ? $vocab->label($uid, $ftype, $record->kind) : $vocab->typeLabel($record->type) }}</td>
                                     <td>{{ LearningFormation::STATES[$record->status] }}</td>
                                     @unless($formation)<td>{{ $categories[$record->category] ?? 'Sin categoría' }}</td>@endunless
                                     <td class="md-table__actions">
@@ -133,11 +136,11 @@
             @elseif (!$formation && ($search !== '' || $typeFilter !== '' || $categoryFilter !== '' || $statusFilter !== ''))
                 <x-ui.state variant="filtered-empty" icon="bi-search" message="No hay formaciones con estos filtros."><x-slot:actions><x-ui.action variant="text" wire:click="clearFilters">Limpiar filtros</x-ui.action></x-slot:actions></x-ui.state>
             @else
-                <x-ui.state variant="empty" icon="bi-mortarboard" :title="$formation ? 'Sin contenido todavía' : 'Aún no tienes formaciones'" :message="$formation ? 'Agrega el contenido que necesitas desde el botón flotante.' : 'Organiza lo que quieres estudiar desde Agregar formación.'" />
+                <x-ui.state variant="empty" icon="bi-mortarboard" :title="$formation ? 'Sin contenido todavía' : 'Aún no tienes formaciones'" :message="$formation ? ($childKinds ? 'Agrega '.$vocab->plurals($uid, $ftype, $childKinds).' desde el botón flotante.' : 'Agrega lo que necesitas desde el botón flotante.') : 'Organiza lo que quieres estudiar desde Agregar formación.'" />
             @endif
         </x-ui.management-card>
     @else
-        <p>Este tema todavía no tiene registros adicionales.</p>
+        <p>{{ $unit ? $vocab->demonstrative($uid, $ftype, $unit->kind) : 'Esta formación' }} todavía no tiene registros adicionales.</p>
     @endif
     @include('livewire.learning.editor')
 </x-module-shell>

@@ -4,7 +4,7 @@
         <x-ui.form-dialog-section name="basic" title="Información básica">
             <div class="learning-fields">
                 @if ($editor === 'formation')
-                    <x-ui.select name="draft.type" label="Tipo de formación" :required="true" :options="\App\Models\LearningFormation::TYPES" placeholder="¿Qué vas a estudiar?" wire:model.live="draft.type" :disabled="$typeLocked" />
+                    <x-ui.select name="draft.type" label="Tipo de formación" :required="true" :options="$vocab->typeLabels()" placeholder="¿Qué vas a estudiar?" wire:model.live="draft.type" :disabled="$typeLocked" />
                     @if ($typeLocked)<p>El tipo se conserva porque esta formación ya tiene contenido organizado.</p>@endif
                 @else
                     <p>Dentro de: {{ $formation->title }}@if($editorParent) / {{ $editorParentLabel }}@endif</p>
@@ -18,7 +18,7 @@
             <div class="learning-fields">
                 @if ($editor === 'formation')
                     <x-ui.category-select name="draft.category" label="Categoría" placeholder="Sin categoría" :options="$categories" wire:model="draft.category" />
-                    <p>La categoría agrupa formaciones. Agrega los periodos y contenidos dentro de cada formación.</p>
+                    <p>La categoría agrupa formaciones. Dentro de cada una agregas {{ $vocab->plurals($uid, $draft['type'] ?? null, \App\Services\Learning\LearningRecords::children(in_array($draft['type'] ?? '', ['course', 'personal'], true) ? $draft['type'] : 'academic')) }}.</p>
                     <x-ui.field name="draft.institution" label="Institución o plataforma" maxlength="255" wire:model="draft.institution" />
                 @endif
                 <div class="md-field-pair">

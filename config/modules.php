@@ -265,6 +265,10 @@ return [
         'title' => 'Formación', 'subtitle' => 'Organiza lo que estudias y avanza paso a paso.', 'icon' => 'bi-mortarboard',
         'archetype' => 'list', 'patterns' => ['learning*'],
         'preserve' => ['q', 'type', 'category', 'status'], 'rail' => true,
+        'tabs' => [
+            ['label' => 'Formaciones', 'route' => 'learning', 'icon' => 'bi-mortarboard', 'active' => ['learning', 'learning.show', 'learning.units.show']],
+            ['label' => 'Ajustes', 'route' => 'learning.settings', 'archetype' => 'settings', 'icon' => 'bi-gear', 'active' => ['learning.settings']],
+        ],
     ],
     'goals' => [
         'archetype' => 'list',

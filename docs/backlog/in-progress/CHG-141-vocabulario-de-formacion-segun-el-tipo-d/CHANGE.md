@@ -1,5 +1,5 @@
 # CHG-141 · Vocabulario de Formación según el tipo de estudio
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -88,15 +88,21 @@ Formación › Ajustes › Vocabulario
 - Docs a actualizar: `docs/learning.md` (vocabulario por tipo), `docs/UX-WRITING.md` (excepción de jerga colombiana en Formación y entradas en la tabla de vocabulario, l.51-63 y «Decisiones y lecciones»).
 
 ## 7. Tareas
-- [ ] T1 · Vocabulario por tipo con defaults colombianos y override por persona — Resp: developer — Modelo: estandar — Archivos: `config/learning.php`, `LearningVocabulary.php` — Hecho cuando: resuelve singular, plural y género con fallback y aislamiento por usuario.
-- [ ] T2 · Aplicar el vocabulario a todos los textos de Formación — Resp: developer — Modelo: estandar — Archivos: `LearningRecords.php`, `LearningPage.php`, `page.blade.php`, `editor.blade.php`, modelos — Hecho cuando: no queda rótulo fijo de unidad y los avisos concuerdan.
-- [ ] T3 · Pestaña «Ajustes» con edición del vocabulario — Resp: developer — Modelo: estandar — Archivos: `config/modules.php`, `routes/web.php`, componente de ajustes — Hecho cuando: se cumple el boceto, con vista previa y restaurar.
-- [ ] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, `docs/learning.md`, `docs/UX-WRITING.md` — Hecho cuando: la verificación de la sección 5 pasa.
+- [x] T1 · Vocabulario por tipo con defaults colombianos y override por persona — Resp: developer — Modelo: estandar — Archivos: `config/learning.php`, `LearningVocabulary.php` — Hecho cuando: resuelve singular, plural y género con fallback y aislamiento por usuario.
+- [x] T2 · Aplicar el vocabulario a todos los textos de Formación — Resp: developer — Modelo: estandar — Archivos: `LearningRecords.php`, `LearningPage.php`, `page.blade.php`, `editor.blade.php`, modelos — Hecho cuando: no queda rótulo fijo de unidad y los avisos concuerdan.
+- [x] T3 · Pestaña «Ajustes» con edición del vocabulario — Resp: developer — Modelo: estandar — Archivos: `config/modules.php`, `routes/web.php`, componente de ajustes — Hecho cuando: se cumple el boceto, con vista previa y restaurar.
+- [x] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, `docs/learning.md`, `docs/UX-WRITING.md` — Hecho cuando: la verificación de la sección 5 pasa.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado sin migración: `config/learning.php` (tipos y términos por familia), `LearningVocabulary` (término, etiqueta, artículo indefinido, demostrativo, plural con artículo, lista «a, b y c», guardado validado de los que difieren del valor por defecto, restaurar; registrado `scoped`), `LearningSettings` (ruta `learning.settings`, pestaña «Ajustes» y pestaña «Formaciones» en `config/modules.php`), y vocabulario aplicado en `page.blade.php` (acciones, chips, tabla, filtros, estados vacíos), `editor.blade.php` (títulos y texto de ayuda), `LearningRecords` (error de créditos y accesos directos). «Carrera universitaria» pasó a «Pregrado» (modelo y config). Los términos propios infieren el género por la terminación (`guessGender`).
+- Decisiones: la personalización es por tipo de formación. Las claves internas no cambian; los mensajes generales de módulo («Formación guardada.», «Elemento eliminado.») se conservan. Documentado en `docs/learning.md` y la excepción de jerga en `docs/UX-WRITING.md`.
+- Verificación local (PHP 8.4 en chroot): `LearningVocabularyTest` (7 pruebas), `LearningModuleTest`, `LearningDomainTest`, `PersonalExperienceTest`, Ui y shell con los mismos fallos preexistentes de la rama base; el spec Playwright `learning.interaction.spec.js` pasa a 375/768/1440 y en la cuenta vacía (se actualizó «Editar pregrado»). Captura de Ajustes a 390 px revisada. `npm run build` correcto.
+- Nota: CHG-138 sigue En verificación; se implementó sobre sus archivos sin conflictos.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M) a partir de la exploración de Formación.
 - 2026-11-17 — Decisión del usuario: en especialización, maestría y doctorado las unidades bajo el semestre se llaman «materia». El doctorado también usa semestres. El tipo «Carrera universitaria» pasa a llamarse «Pregrado».
 - 2026-11-17 — Decisión delegada por el usuario («identifica tú la mejor manera»): el vocabulario se personaliza por tipo de formación.
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

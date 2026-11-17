@@ -92,7 +92,8 @@ class LearningRecords
             $values = $this->fields($data);
             $credits = Validator::make(['credits' => ($data['credits'] ?? '') === '' ? null : $data['credits']], ['credits' => ['nullable', 'numeric', 'between:0,100', 'multiple_of:0.5']])->validate()['credits'];
             if ($kind !== 'subject' && $credits !== null) {
-                throw ValidationException::withMessages(['credits' => 'Solo las materias admiten créditos.']);
+                $vocabulary = app(LearningVocabulary::class);
+                throw ValidationException::withMessages(['credits' => 'Solo '.$vocabulary->definitePlural($userId, $formation->type, 'subject').' admiten créditos.']);
             }
             if (! $record->exists) {
                 $record->formation_id = $formationId;
@@ -192,7 +193,7 @@ class LearningRecords
                 $parent = $ancestor->parent_id;
             }
             $items[] = ['id' => $target->id, 'type' => $pin->target_type, 'title' => $target->title,
-                'label' => $target instanceof LearningUnit ? LearningUnit::KINDS[$target->kind] : LearningFormation::TYPES[$target->type],
+                'label' => $target instanceof LearningUnit ? app(LearningVocabulary::class)->label($userId, $formation->type, $target->kind) : app(LearningVocabulary::class)->typeLabel($target->type),
                 'origin' => $target instanceof LearningUnit ? implode(' / ', [$formation->title, ...$origin]) : 'Formación',
                 'href' => $target instanceof LearningUnit ? route('learning.units.show', [$formation->id, $target->id]) : route('learning.show', $formation->id)];
         }

@@ -38,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->scoped(\App\Services\Experience\PersonalExperience::class);
+        $this->app->scoped(\App\Services\Learning\LearningVocabulary::class);
         // CHG-068: canal push; las pruebas lo reemplazan por un doble.
         $this->app->bind(\App\Services\Notifications\Push\PushGateway::class, \App\Services\Notifications\Push\WebPushGateway::class);
         // CHG-095: una instancia por petición para no repetir la misma lectura en cada componente.

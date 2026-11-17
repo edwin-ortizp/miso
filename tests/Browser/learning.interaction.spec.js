@@ -78,7 +78,7 @@ for (const width of [375, 768, 1440]) {
         expect(bounds.x).toBeGreaterThanOrEqual(0);
         expect(bounds.x + bounds.width).toBeLessThanOrEqual(width + 1);
         await menu.getByRole('menuitem', {name: 'Editar', exact: true}).click();
-        const dialog = page.getByRole('dialog', {name: 'Editar carrera universitaria'});
+        const dialog = page.getByRole('dialog', {name: 'Editar pregrado'});
         await expect(dialog).toBeVisible();
         await dialog.getByRole('button', {name:'Organización', exact:true}).click();
         await expect(dialog.getByLabel('Institución o plataforma')).toBeVisible();

@@ -6,11 +6,17 @@ La primera entrega de Formación lleva la base del prototipo Learning a la aplic
 
 Abre **Productividad → Formación**. Si personalizaste los módulos visibles, activa Formación en Ajustes → Módulos. La incorporación del módulo no cambia tu selección anterior.
 
-El FAB **Agregar formación** abre el formulario sobre la pantalla actual. Su menú ofrece Carrera universitaria, Especialización, Maestría, Doctorado, Curso y Ruta personal. Puedes indicar categoría, institución o plataforma, descripción y fechas. Las categorías se administran desde el menú de la tabla o del detalle; no contienen materias.
+El FAB **Agregar formación** abre el formulario sobre la pantalla actual. Su menú ofrece Pregrado, Especialización, Maestría, Doctorado, Curso y Ruta personal. Puedes indicar categoría, institución o plataforma, descripción y fechas. Las categorías se administran desde el menú de la tabla o del detalle; no contienen materias.
 
-- Carrera y posgrados: periodos y materias directas; cada periodo contiene materias y cada materia, temas.
+- Pregrado, especialización, maestría y doctorado: semestres y materias directas; cada semestre contiene materias y cada materia, temas.
 - Curso: módulos y, dentro de ellos, temas.
 - Ruta personal: etapas, cursos y temas. Una etapa contiene cursos o temas; los cursos internos siguen la misma estructura de módulos y temas.
+
+### Vocabulario por tipo (CHG-141)
+
+Los nombres cambian según el tipo de formación y usan jerga colombiana: pregrado y posgrados hablan de **semestres**, **materias** y **temas**; un curso, de **módulos** y **temas** (no tiene semestres); una ruta personal, de **etapas**, **cursos** y **temas**. Los botones, títulos, avisos y estados vacíos concuerdan en género y número («Agregar semestre», «Solo las materias admiten créditos»).
+
+En **Formación → Ajustes** cada persona puede renombrar cada término (singular y plural) por tipo de formación, con vista previa y «Restaurar valores». Los valores por defecto viven en `config/learning.php`; los cambios se guardan en `module_settings` (módulo `learning`, clave `vocabulary`) y solo se guardan los que difieren del valor por defecto. Solo cambia lo que se muestra: las claves internas de tipos y contenidos no cambian. El servicio es `App\Services\Learning\LearningVocabulary`.
 
 Solo se crea lo que agregues. **Consultar** abre un nivel; la ubicación y el regreso permiten recorrer la jerarquía. Los menús permiten editar y ordenar unidades entre sus hermanos. No se trasladan unidades a otra ubicación.
 

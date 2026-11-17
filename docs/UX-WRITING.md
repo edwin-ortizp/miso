@@ -6,7 +6,7 @@ _Última revisión: 2026-11-11_
 
 MiSo se dirige a personas que combinan trabajo y metas personales y buscan sostener hábitos y avanzar hacia sus objetivos.
 
-Usa español latinoamericano neutro, sin regionalismos marcados. Prefiere palabras cotidianas y frases directas.
+Usa español latinoamericano neutro, sin regionalismos marcados. Prefiere palabras cotidianas y frases directas. Excepción documentada: en Formación se usa jerga colombiana de estudio («semestre», «materia»), porque la app es para un grupo de amigos en Colombia (CHG-141).
 
 ## Voz y tratamiento
 
@@ -126,3 +126,4 @@ Los textos observados proceden del código local. No se ha verificado su present
 - Sueño (CHG-129): aviso «MiSo registra tu sueño y muestra su evolución. No es un dispositivo médico ni reemplaza a tu profesional de salud.» Mensajes de meta neutros: «Alcanzaste tu meta», «Superaste tu meta por {tiempo}», «Faltaron {tiempo} para tu meta». Errores: «La hora de despertar debe ser posterior a la hora de dormir.», «Ese horario se cruza con otro registro de sueño.», «La duración debe estar entre 10 minutos y 24 horas.», «La meta debe estar entre 4 y 14 horas.». Sin «insomnio», «privación» ni consejos clínicos.
 - Ciclo (CHG-130): aviso «MiSo registra tu ciclo y muestra su evolución. No es un dispositivo médico ni un método anticonceptivo. Tus datos de ciclo son privados.»; estimación «Tiende a empezar entre el {a} y el {b} (según {n} ciclos).» y «Es una estimación: tu ciclo puede variar.»; sin datos «Con 3 inicios registrados podremos estimar tu próximo periodo.». Errores: «Ya tienes un periodo en curso. Márcalo como terminado o corrige su fecha.», «Esa fecha cae dentro de otro periodo registrado.», «La fecha no puede ser futura.». Eliminar: «Se eliminará el periodo que empezó el {fecha}. Los registros diarios se conservan.». Nunca «irregular», «anormal», fertilidad ni anticoncepción.
 - Tendencias (CHG-132): aviso «MiSo muestra la evolución de lo que registras. No diagnostica ni reemplaza a tu profesional de salud.»; dirección «Tiende a subir», «Tiende a bajar», «Se mantiene estable» (solo con 6 o más días con datos); hallazgo «Los días que dormiste al menos tu meta, tu energía tiende a ser más alta/más baja (a frente a b de 5). Esto no implica una causa.»; sin datos «Aún no hay datos para mostrar tendencias.». Nunca se atribuye causa ni se interpreta clínicamente.
+- 2026-11-17 — Formación habla en colombiano y según el tipo de estudio: pregrado y posgrados «semestre» y «materia», curso «módulo», ruta personal «etapa»; cada persona puede renombrar los términos en Formación → Ajustes. El vocabulario es estable por tipo, no aleatorio (CHG-141).

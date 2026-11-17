@@ -11,7 +11,7 @@ class LearningFormation extends Model
 {
     use BelongsToUser, HasUuids;
 
-    public const TYPES = ['degree' => 'Carrera universitaria', 'specialization' => 'Especialización', 'masters' => 'Maestría', 'doctorate' => 'Doctorado', 'course' => 'Curso', 'personal' => 'Ruta personal'];
+    public const TYPES = ['degree' => 'Pregrado', 'specialization' => 'Especialización', 'masters' => 'Maestría', 'doctorate' => 'Doctorado', 'course' => 'Curso', 'personal' => 'Ruta personal'];
 
     public const STATES = ['pending' => 'Pendiente', 'in_progress' => 'En curso', 'completed' => 'Completado'];
 

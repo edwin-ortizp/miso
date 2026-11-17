@@ -32,3 +32,8 @@
 [data-module='learning'] .md-form-dialog__nav-item[aria-current='true'] { color: var(--md-sys-color-on-primary-container); }
 .learning-page .learning-table-wrap td:first-child a,
 .learning-page .learning-path a { color: var(--md-module-accent); }
+
+/* CHG-141: ajustes de vocabulario. */
+.learning-vocabulary__group { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.learning-vocabulary__group legend { float: none; width: auto; padding: 0; margin: 0 0 4px; }
+.learning-vocabulary__preview { margin: 0; color: var(--md-sys-color-on-surface-variant); }
