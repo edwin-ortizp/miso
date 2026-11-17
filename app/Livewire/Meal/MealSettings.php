@@ -24,6 +24,13 @@ class MealSettings extends Component
 {
     use WithManagementCard;
 
+    public const SECTIONS = [
+        'stores' => ['label' => 'Tiendas', 'icon' => 'bi-shop', 'route' => 'meals.settings'],
+        'categories' => ['label' => 'Categorías de productos', 'icon' => 'bi-tags', 'route' => 'meals.settings.categories'],
+        'locations' => ['label' => 'Ubicaciones', 'icon' => 'bi-geo-alt', 'route' => 'meals.settings.locations'],
+        'schedules' => ['label' => 'Horarios', 'icon' => 'bi-clock', 'route' => 'meals.settings.schedules'],
+    ];
+
     #[Locked]
     public string $section = 'stores';
 
@@ -48,7 +55,7 @@ class MealSettings extends Component
 
     public function mount(string $section = 'stores'): void
     {
-        abort_unless(in_array($section, ['stores', 'categories', 'locations', 'schedules'], true), 404);
+        abort_unless(array_key_exists($section, self::SECTIONS), 404);
         $this->section = $section;
         $this->schedules = app(\App\Services\Meal\MealSchedule::class)->profiles((int) auth()->id());
     }

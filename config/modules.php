@@ -259,7 +259,7 @@ return [
             ['label' => 'Todos', 'route' => 'plans', 'icon' => 'bi-map', 'active' => ['plans', 'plans.show']],
             ['label' => 'Programados', 'route' => 'plans.scheduled', 'icon' => 'bi-calendar-event', 'active' => ['plans.scheduled'], 'preserve' => ['group','q','city','types','circles','people','tags','category']],
             ['label' => 'Historial', 'route' => 'plans.history', 'icon' => 'bi-clock-history', 'active' => ['plans.history'], 'preserve' => ['q','people']],
-            ['label' => 'Ajustes', 'route' => 'plans.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['plans.settings'], 'preserve' => []],
+            ['label' => 'Ajustes', 'route' => 'plans.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['plans.settings', 'plans.settings.categories'], 'preserve' => []],
         ],
     ],
     'learning' => [

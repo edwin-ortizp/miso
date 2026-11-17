@@ -45,7 +45,11 @@ class TaskSettings extends Component
         'bi-car-front' => 'Vehículo', 'bi-airplane' => 'Viaje', 'bi-star' => 'Estrella', 'bi-three-dots' => 'Otros',
     ];
 
-    public const SECTIONS = ['categories', 'statuses', 'planning'];
+    public const SECTIONS = [
+        'categories' => ['label' => 'Categorías', 'icon' => 'bi-tags', 'route' => 'tasks.settings'],
+        'statuses' => ['label' => 'Estados', 'icon' => 'bi-kanban', 'route' => 'tasks.settings.statuses'],
+        'planning' => ['label' => 'Horario para planificar', 'icon' => 'bi-calendar-check', 'route' => 'tasks.settings.planning'],
+    ];
 
     public string $section = 'categories';
 
@@ -95,7 +99,7 @@ class TaskSettings extends Component
 
     public function mount(string $section = 'categories'): void
     {
-        abort_unless(in_array($section, self::SECTIONS, true), 404);
+        abort_unless(array_key_exists($section, self::SECTIONS), 404);
         $this->section = $section;
         $this->globalCodePrefix = app(TaskCodeService::class)->globalPrefix(auth()->id());
         $this->loadPlanning();

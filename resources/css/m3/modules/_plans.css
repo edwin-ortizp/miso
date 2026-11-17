@@ -124,11 +124,6 @@
   .plan-images-form__preview { width: 48px; height: 40px; }
 }
 
-.plan-settings-layout { display:grid; grid-template-columns:minmax(0,1fr) 260px; gap:24px; align-items:start; }
-.plan-settings-layout > * { min-width:0; }
-.plan-settings-nav { display:flex; flex-direction:column; gap:8px; padding:16px; border:1px solid var(--md-sys-color-outline-variant); border-radius:16px; }
-.plan-settings-nav [aria-current] { background:var(--md-sys-color-primary-container); }
 .plan-icon-picker__results { display:grid; grid-template-columns:repeat(auto-fill,minmax(40px,1fr)); gap:8px; max-height:220px; overflow:auto; padding:4px; }
 .plan-icon-picker__results [aria-pressed="true"] { background:var(--md-sys-color-primary-container); }
 .plan-row__person.md-chip { text-decoration:none; }
-@media(max-width:767.98px) { .plan-settings-layout { grid-template-columns:minmax(0,1fr); } .plan-settings-nav { grid-row:1; flex-direction:row; flex-wrap:wrap; } }

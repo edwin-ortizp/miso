@@ -20,7 +20,12 @@ class PlanSettings extends Component
 {
     use WithManagementCard;
 
-    #[Url(history: true)]
+    public const SECTIONS = [
+        'tags' => ['label' => 'Tags de planes', 'icon' => 'bi-tags', 'route' => 'plans.settings'],
+        'categories' => ['label' => 'Categorías de planes', 'icon' => 'bi-grid', 'route' => 'plans.settings.categories'],
+    ];
+
+    #[Locked]
     public string $section = 'tags';
 
     #[Url(history: true)]
@@ -44,13 +49,10 @@ class PlanSettings extends Component
         return $this->section === 'categories' ? PlanCategory::class : PlanTag::class;
     }
 
-    public function updatedSection(): void
+    public function mount(string $section = 'tags'): void
     {
-        $this->section = $this->section === 'categories' ? 'categories' : 'tags';
-        $this->closeForm();
-        $this->q = '';
-        $this->message = '';
-        $this->resetPage();
+        abort_unless(array_key_exists($section, self::SECTIONS), 404);
+        $this->section = $section;
     }
 
     public function updatedQ(): void

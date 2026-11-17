@@ -1,6 +1,6 @@
 <x-module-shell module="meals" title="Ajustes de Comidas" archetype="settings">
     @if ($message)<p role="status" class="md-card-filled p-3">{{ $message }}</p>@endif
-    <div class="meal-settings-workspace meal-schedules-workspace">
+    <div class="module-settings-workspace meal-schedules-workspace">
         <form wire:submit="saveSchedules" class="md-card-elevated p-3 meal-schedule-form">
             <h2 class="md-title-large">Horarios</h2>
             <p>Se aplican a las comidas sin horario puntual. Las duraciones se indican en minutos.</p>
@@ -18,11 +18,6 @@
             @endforeach
             <button type="submit" class="md-btn md-btn-filled" wire:loading.attr="disabled">Guardar horarios</button>
         </form>
-        <nav class="meal-settings-nav" aria-label="Secciones de Ajustes de Comidas">
-            <a href="{{ route('meals.settings') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'stores' ? 'is-active' : '' }}" @if ($section === 'stores') aria-current="page" @endif><i class="bi bi-shop" aria-hidden="true"></i> Tiendas</a>
-            <a href="{{ route('meals.settings.categories') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'categories' ? 'is-active' : '' }}" @if ($section === 'categories') aria-current="page" @endif><i class="bi bi-tags" aria-hidden="true"></i> Categorías de productos</a>
-            <a href="{{ route('meals.settings.locations') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'locations' ? 'is-active' : '' }}" @if ($section === 'locations') aria-current="page" @endif><i class="bi bi-geo-alt" aria-hidden="true"></i> Ubicaciones</a>
-            <a href="{{ route('meals.settings.schedules') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'schedules' ? 'is-active' : '' }}" @if ($section === 'schedules') aria-current="page" @endif><i class="bi bi-clock" aria-hidden="true"></i> Horarios</a>
-        </nav>
+        <x-settings-sections label="Secciones de Ajustes de Comidas" :items="\App\Livewire\Meal\MealSettings::SECTIONS" :current="$section" />
     </div>
 </x-module-shell>

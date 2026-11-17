@@ -10,7 +10,7 @@
         <x-module-actions :primary="['label' => $labels['create'], 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
     </x-slot:actions>
     @if ($message)<div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message }}</div>@endif
-    <div class="meal-settings-workspace">
+    <div class="module-settings-workspace">
         <div>
             <x-ui.management-card id="meal-settings-catalog" :title="$labels['title']" :icon="$labels['icon']"
                                   :count="'('.$records->total().')'" search="search" :search-placeholder="$labels['search']" :paginator="$records" :noun="$labels['noun']">
@@ -53,12 +53,7 @@
                 @endif
             </x-ui.management-card>
         </div>
-        <nav class="meal-settings-nav" aria-label="Secciones de Ajustes de Comidas">
-            <a href="{{ route('meals.settings') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'stores' ? 'is-active' : '' }}" @if ($section === 'stores') aria-current="page" @endif><i class="bi bi-shop" aria-hidden="true"></i> Tiendas</a>
-            <a href="{{ route('meals.settings.categories') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'categories' ? 'is-active' : '' }}" @if ($section === 'categories') aria-current="page" @endif><i class="bi bi-tags" aria-hidden="true"></i> Categorías de productos</a>
-            <a href="{{ route('meals.settings.locations') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'locations' ? 'is-active' : '' }}" @if ($section === 'locations') aria-current="page" @endif><i class="bi bi-geo-alt" aria-hidden="true"></i> Ubicaciones</a>
-            <a href="{{ route('meals.settings.schedules') }}" wire:navigate class="meal-settings-nav__item {{ $section === 'schedules' ? 'is-active' : '' }}" @if ($section === 'schedules') aria-current="page" @endif><i class="bi bi-clock" aria-hidden="true"></i> Horarios</a>
-        </nav>
+        <x-settings-sections label="Secciones de Ajustes de Comidas" :items="\App\Livewire\Meal\MealSettings::SECTIONS" :current="$section" />
     </div>
     <x-ui.form-dialog :open="$showForm" close="closeForm" submit-action="save" id="meal-settings-form" :title="($editingId ? 'Editar ' : 'Crear ').$labels['one']" :icon="$labels['icon']" :submit="$confirmSimilar ? 'Crear de todos modos' : 'Guardar'">
         <x-ui.field name="name" label="Nombre" :required="true" maxlength="255" wire:model.live.debounce.300ms="name" />

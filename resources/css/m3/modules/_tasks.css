@@ -126,19 +126,6 @@
 }
 .task-row__chip-icon { font-size: 0.625rem; }
 
-/* Ajustes de tareas: contenido + navegación lateral derecha de secciones (mismo patrón que Ajustes de planes) */
-.task-settings-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 24px; align-items: start; }
-.task-settings-workspace > * { min-width: 0; }
-.task-settings-nav { display: grid; gap: 4px; padding: 8px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: var(--md-sys-shape-corner-large); background: var(--md-sys-color-surface-container-lowest); }
-.task-settings-nav__item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; min-height: 44px; border-radius: var(--md-sys-shape-corner-medium); color: var(--md-sys-color-on-surface-variant); text-decoration: none; }
-.task-settings-nav__item.is-active { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); }
-.task-settings-nav__item:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: -2px; }
-@media (max-width: 767.98px) {
-  .task-settings-workspace { grid-template-columns: minmax(0, 1fr); gap: 16px; }
-  .task-settings-nav { grid-row: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .task-settings-nav__item { padding: 10px 8px; gap: 6px; font-size: .8rem; }
-}
-
 /* Gantt (Frappe Gantt): sus variables --g-* se resuelven con tokens M3. */
 .md-task-gantt { padding: 16px; }
 .md-task-gantt__toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }

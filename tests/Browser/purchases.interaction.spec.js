@@ -166,11 +166,11 @@ for (const viewport of [{ width: 1440, height: 1000 }, { width: 390, height: 844
         await expect(category).not.toBeVisible();
         await page.reload();
         await expect(page.locator('#meal-settings-catalog')).toContainText(`Categoría navegador ${viewport.width}`);
-        const nav = await page.locator('.meal-settings-nav').boundingBox();
+        const nav = await page.locator('.module-settings-nav').boundingBox();
         const content = await page.locator('#meal-settings-catalog').boundingBox();
         expect(viewport.width < 768 ? nav.y < content.y : nav.x > content.x + content.width - 1).toBeTruthy();
         await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBeTruthy();
-        const accessibility = await new AxeBuilder({ page }).include('.meal-settings-workspace').analyze();
+        const accessibility = await new AxeBuilder({ page }).include('.module-settings-workspace').analyze();
         expect(accessibility.violations).toEqual([]);
         await page.goto('/meals/ingredients');
         await page.getByRole('button', { name: 'Agregar ingrediente', exact: true }).click();

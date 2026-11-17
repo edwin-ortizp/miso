@@ -120,7 +120,7 @@ class CategoryHierarchyTest extends TestCase
             ->set('name', 'Meal child')->set('parent_id', $meal->id)->call('save')->assertHasNoErrors();
         $this->assertDatabaseHas('meal_categories', ['name' => 'Meal child', 'parent_id' => $meal->id]);
         $plan = PlanCategory::create(['name' => 'Plan root']);
-        Livewire::test(PlanSettings::class)->set('section', 'categories')->call('openForm')
+        Livewire::test(PlanSettings::class, ['section' => 'categories'])->call('openForm')
             ->set('name', 'Plan child')->set('parent_id', $plan->id)->call('save')->assertHasNoErrors();
         $this->assertDatabaseHas('plan_categories', ['name' => 'Plan child', 'parent_id' => $plan->id]);
     }

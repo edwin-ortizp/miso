@@ -198,7 +198,8 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/relationships/{relationship}/tasks', RelationshipTasks::class)->name('relationships.tasks');
     Route::get('/plans/scheduled', \App\Livewire\Plan\PlanScheduled::class)->name('plans.scheduled');
     Route::get('/plans/history', \App\Livewire\Plan\PlanHistory::class)->name('plans.history');
-    Route::get('/plans/settings', \App\Livewire\Plan\PlanSettings::class)->name('plans.settings');
+    Route::get('/plans/settings', \App\Livewire\Plan\PlanSettings::class)->name('plans.settings')->defaults('section', 'tags');
+    Route::get('/plans/settings/categories', \App\Livewire\Plan\PlanSettings::class)->name('plans.settings.categories')->defaults('section', 'categories');
     Route::get('/plans', PlanIndex::class)->name('plans');
     Route::get('/plans/{plan}', PlanShow::class)->name('plans.show');
     Route::get('/learning', \App\Livewire\Learning\LearningPage::class)->name('learning');

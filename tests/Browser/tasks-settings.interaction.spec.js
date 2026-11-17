@@ -61,7 +61,7 @@ for (const width of [1280, 1600, 390]) {
         await page.waitForURL((url) => !url.pathname.includes('/login'));
 
         await page.goto('/tasks/settings');
-        const nav = page.locator('.task-settings-nav');
+        const nav = page.locator('.module-settings-nav');
         const card = page.locator('#task-settings-categories');
         await expect(card).toBeVisible();
         await expect(nav.getByRole('link', { name: 'Categorías', exact: true })).toHaveAttribute('aria-current', 'page');
@@ -160,7 +160,7 @@ for (const width of [1280, 1600, 390]) {
         await expect(page.getByRole('dialog')).toHaveCount(0);
         await expect(card.getByRole('cell', { name: newCategory, exact: true })).toBeVisible();
 
-        const categoriesA11y = await analyze(page, '.task-settings-workspace');
+        const categoriesA11y = await analyze(page, '.module-settings-workspace');
         expect(categoriesA11y.violations, describeViolations(categoriesA11y.violations)).toEqual([]);
         await page.screenshot({ path: `storage/framework/testing/playwright/tasks-settings/categories-${width}.png`, fullPage: true });
 
@@ -205,7 +205,7 @@ for (const width of [1280, 1600, 390]) {
         await expect(page.getByRole('dialog')).toHaveCount(0);
         await expect(statusCard.getByRole('cell', { name: newStatus, exact: true })).toBeVisible();
 
-        const statusesA11y = await analyze(page, '.task-settings-workspace');
+        const statusesA11y = await analyze(page, '.module-settings-workspace');
         expect(statusesA11y.violations, describeViolations(statusesA11y.violations)).toEqual([]);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
         expect(errors).toEqual([]);

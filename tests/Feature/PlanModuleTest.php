@@ -441,10 +441,10 @@ class PlanModuleTest extends TestCase
         $second = SavePlan::handle(new Plan, ['type' => 'restaurant', 'title' => 'Almuerzo', 'category' => 'comida rica']);
         $this->assertSame($plan->plan_category_id, $second->plan_category_id);
         $category = PlanCategory::query()->sole();
-        Livewire::test(PlanSettings::class)->set('section', 'categories')->call('openForm', $category->id)
+        Livewire::test(PlanSettings::class, ['section' => 'categories'])->call('openForm', $category->id)
             ->set('name', 'Gastronomía')->set('icon', 'bi-tree')->call('save')->assertHasNoErrors();
         $this->assertSame('Gastronomía', $plan->fresh()->category);
-        Livewire::test(PlanSettings::class)->set('section', 'categories')->call('delete', $category->id)->assertSee('está asociada a 2 planes');
+        Livewire::test(PlanSettings::class, ['section' => 'categories'])->call('delete', $category->id)->assertSee('está asociada a 2 planes');
         Livewire::test(PlanIndex::class)->set('category', $category->id)->assertSee('Cena')->assertSee('Almuerzo');
         SavePlan::handle($plan, ['category' => null]);
         $this->assertNull($plan->fresh()->plan_category_id);
@@ -476,7 +476,7 @@ class PlanModuleTest extends TestCase
         $this->actingAs($user);
         foreach ([['categories', 'openForm', $foreign->id], ['categories', 'delete', $foreign->id], ['tags', 'delete', $tag->id]] as [$section,$method,$id]) {
             try {
-                Livewire::test(PlanSettings::class)->set('section', $section)->call($method, $id);
+                Livewire::test(PlanSettings::class, ['section' => $section])->call($method, $id);
                 $this->fail('Foreign catalog accessible');
             } catch (ModelNotFoundException) {
                 $this->assertTrue(true);
@@ -529,5 +529,14 @@ class PlanModuleTest extends TestCase
         $plan->user_id = $user->id;
         SavePlan::handle($plan, ['title' => 'Plan sin sesión', 'type' => 'place', 'category' => 'Naturaleza']);
         $this->assertSame($user->id, PlanCategory::withoutGlobalScopes()->findOrFail($plan->plan_category_id)->user_id);
+    }
+
+    public function test_settings_sections_have_their_own_routes_and_unknown_ones_are_not_found(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        $this->get(route('plans.settings'))->assertOk()->assertSee('Tags de planes')->assertSee('Secciones de ajustes de planes');
+        $this->get(route('plans.settings.categories'))->assertOk()->assertSee('Categorías de planes');
+        Livewire::test(PlanSettings::class, ['section' => 'nope'])->assertStatus(404);
     }
 }

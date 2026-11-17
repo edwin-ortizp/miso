@@ -1,7 +1,7 @@
 <x-module-shell module="plans" archetype="settings" active-route="plans.settings" :navigation-query="[]">
     <x-slot:actions><x-module-actions :primary="['label'=>$section === 'categories' ? 'Crear categoría' : 'Crear tag','icon'=>'bi-plus-lg','action'=>'openForm']" /></x-slot:actions>
     @if ($message)<p role="status" class="plans-notice">{{ $message }}</p>@endif
-    <div class="plan-settings-layout">
+    <div class="module-settings-workspace">
         <x-ui.management-card id="plan-settings" :title="$section === 'categories' ? 'Categorías de planes' : 'Tags de planes'" :icon="$section === 'categories' ? 'bi-grid' : 'bi-tags'" search="q" search-placeholder="Buscar por nombre" :paginator="$records" :count="$records->total()">
             @if ($records->isEmpty())<x-ui.state variant="empty" title="No hay resultados" message="Prueba otra búsqueda o crea un elemento desde el botón flotante." icon="bi-tags" />
             @else
@@ -12,11 +12,7 @@
             </tbody></table>
             @endif
         </x-ui.management-card>
-        <nav class="plan-settings-nav" aria-label="Secciones de ajustes de planes">
-            @foreach (['categories'=>'Categorías de planes','tags'=>'Tags de planes'] as $key=>$label)
-                <x-ui.action variant="text" wire:click="$set('section','{{ $key }}')" :aria-current="$section === $key ? 'page' : null">{{ $label }}</x-ui.action>
-            @endforeach
-        </nav>
+        <x-settings-sections label="Secciones de ajustes de planes" :items="\App\Livewire\Plan\PlanSettings::SECTIONS" :current="$section" />
     </div>
     <x-ui.form-dialog module="plans" :open="$showForm" close="closeForm" submit-action="save" id="plan-catalog-dialog" :title="($editingId ? 'Editar ' : 'Crear ').($section === 'categories' ? 'categoría' : 'tag')" icon="bi-tags">
         <x-ui.field name="name" label="Nombre" :required="true" :maxlength="$section === 'categories' ? 80 : 60" wire:model="name" />
