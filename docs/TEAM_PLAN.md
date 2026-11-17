@@ -143,7 +143,8 @@ _Última actualización: 2026-11-17_
 | CHG-137 | M | Guardián contextual en las siete pestañas de Salud | in-progress | En verificación | 3/3 |
 | CHG-138 | M | Formación base en la aplicación real | in-progress | En verificación | 4/4 |
 | CHG-139 | M | Funciones apagables dentro de cada módulo | to-do | Borrador | 0/6 |
-| CHG-140 | M | Modales de Salud con el patrón visual de la app | to-do | Borrador | 0/0 |
+| CHG-140 | M | Modales de Salud con el patrón visual de la app | to-do | Borrador | 0/5 |
+| CHG-141 | M | Vocabulario de Formación según el tipo de estudio | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
