@@ -1,4 +1,12 @@
 <x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+    @if ($lockedNotice)
+        <x-ui.snackbar wire:key="locked-notice">
+            {{ $lockedNotice }}
+            <x-slot:actions>
+                <x-ui.icon-action icon="bi-x-lg" size="sm" label="Cerrar aviso" wire:click="$set('lockedNotice', null)" />
+            </x-slot:actions>
+        </x-ui.snackbar>
+    @endif
     @php
         $definitions = [
             'overdue' => ['Atrasadas', 'bi-exclamation-circle', 'is-overdue'],

@@ -35,6 +35,7 @@ trait InteractsWithTaskFields
             'end_date' => ['nullable', 'date'],
             'estimated_time' => ['nullable', 'integer', 'min:1', 'max:10080'],
             'is_private' => ['nullable', 'boolean'],
+            'schedule_locked' => ['nullable', 'boolean'],
             'recurrence' => ['nullable', 'string', Rule::in(['none', ...TaskRecurrenceService::PATTERNS])],
             'recurrence_interval' => ['nullable', 'integer', 'min:1', 'max:365'],
             'rrule' => ['nullable', 'string', 'max:255'],
@@ -142,6 +143,10 @@ trait InteractsWithTaskFields
             $attributes['is_private'] = (bool) $data['is_private'];
         }
 
+        if (array_key_exists('schedule_locked', $data)) {
+            $attributes['schedule_locked'] = (bool) $data['schedule_locked'];
+        }
+
         if (filled($data['status'] ?? null)) {
             $attributes['status_id'] = $this->statusAttribute($data['status']);
         }
@@ -207,6 +212,8 @@ trait InteractsWithTaskFields
                 ->description('Tiempo estimado en minutos.'),
             'is_private' => $schema->boolean()
                 ->description('Si la tarea es privada.'),
+            'schedule_locked' => $schema->boolean()
+                ->description('Horario fijo (p. ej. una reunión): true impide moverla. Una tarea con horario fijo no cambia de fecha hasta que antes se envíe schedule_locked=false.'),
             'recurrence' => $schema->string()
                 ->enum(['none', ...TaskRecurrenceService::PATTERNS])
                 ->description('Recurrencia: daily, weekly, monthly, custom (cada N días) o none para quitarla. Se combina con recurrence_interval.'),

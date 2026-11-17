@@ -106,6 +106,7 @@ class Task extends Model
         'paused_duration',
         'timer_active',
         'estimated_time',
+        'schedule_locked',
         'flow_position',
     ];
 
@@ -120,6 +121,7 @@ class Task extends Model
             'timer_paused' => 'boolean',
             'timer_active' => 'boolean',
             'estimated_time' => 'integer',
+            'schedule_locked' => 'boolean',
             'recurrence' => 'array',
             'external_refs' => 'array',
             'caldav_revision' => 'integer',

@@ -64,6 +64,11 @@ class UpdateTaskTool extends Tool
             return Response::error('No enviaste ningún campo para actualizar.');
         }
 
+        // CHG-144: una tarea con horario fijo no se mueve; primero hay que quitarle el horario fijo.
+        if ($task->schedule_locked && array_intersect_key($attributes, array_flip(['start_date', 'end_date']))) {
+            return Response::error('Esta tarea tiene horario fijo y no se puede mover. Si la persona quiere moverla, envía antes schedule_locked=false.');
+        }
+
         $task->update($attributes);
         $changed = array_values(array_diff(
             array_keys($task->getChanges()),

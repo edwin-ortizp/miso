@@ -10,4 +10,8 @@
         @endforeach
         @if ($estimatedTime ?? null)<span class="md-chip-tonal"><i class="bi bi-clock"></i> {{ $estimatedTime >= 60 ? intdiv($estimatedTime, 60).' h'.($estimatedTime % 60 ? ' '.($estimatedTime % 60).' min' : '') : $estimatedTime.' min' }}</span>@endif
     </div>
+    @isset($lockModel)
+        <x-ui.switch name="{{ $lockModel }}" label="Horario fijo" help="No se mueve con los atajos ni al reorganizar." :checked="(bool) ($scheduleLocked ?? false)" wire:model="{{ $lockModel }}" />
+        @error($lockModel)<div class="md-supporting-text" role="alert" style="color: var(--md-sys-color-error);">{{ $message }}</div>@enderror
+    @endisset
 </div>

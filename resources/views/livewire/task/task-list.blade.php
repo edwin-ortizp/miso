@@ -1,4 +1,12 @@
 <div data-module="tasks" class="lt-page" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+    @if ($lockedNotice)
+        <x-ui.snackbar wire:key="locked-notice">
+            {{ $lockedNotice }}
+            <x-slot:actions>
+                <x-ui.icon-action icon="bi-x-lg" size="sm" label="Cerrar aviso" wire:click="$set('lockedNotice', null)" />
+            </x-slot:actions>
+        </x-ui.snackbar>
+    @endif
     <div data-region="navigation">
         <x-module-tabs :tabs="config('modules.tasks.tabs')" :preserve="config('modules.tasks.preserve')" label="Vistas del módulo" />
     </div>

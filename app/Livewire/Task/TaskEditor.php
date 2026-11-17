@@ -34,6 +34,9 @@ class TaskEditor extends TaskList
     #[\Livewire\Attributes\Locked]
     public ?string $goalContext = null;
 
+    /** CHG-144: «Horario fijo»; el editor es el único lugar donde se cambia la fecha de una tarea fija. */
+    public bool $scheduleLocked = false;
+
     public function mount(?string $goalContext = null): void
     {
         if ($goalContext !== null) {
@@ -50,6 +53,7 @@ class TaskEditor extends TaskList
         $task = $id ? Task::where('user_id', auth()->id())->findOrFail($id) : null;
         parent::openForm($id);
         $this->editorIntent = '';
+        $this->scheduleLocked = (bool) $task?->schedule_locked;
         if ($task) $this->statusId = (string) ($task->status_id ?? '');
     }
 
@@ -137,15 +141,25 @@ class TaskEditor extends TaskList
         $schedule['estimated_time'] = $estimate ?: null;
         $this->validateReminders($this->endDate, $this->endTime);
         $existing = $this->editingId ? Task::where('user_id', auth()->id())->findOrFail($this->editingId) : null;
+        if ($existing?->schedule_locked && $this->scheduleLocked && ! $this->sameSchedule($existing, $schedule)) {
+            throw ValidationException::withMessages(['scheduleLocked' => 'Esta tarea tiene horario fijo. Quita el candado para moverla.']);
+        }
         return [
             'title' => trim($this->title), 'description' => $this->description ?: null,
             'category' => $this->category ?: null, 'priority' => $this->priority ?: null,
-            'size' => $this->size ?: null, ...$schedule, 'is_private' => $this->isPrivate,
+            'size' => $this->size ?: null, ...$schedule, 'schedule_locked' => $this->scheduleLocked, 'is_private' => $this->isPrivate,
             'is_recurrent' => $this->isRecurrent,
             'recurrence' => $this->isRecurrent
                 ? ($this->nativeRecurrenceRule !== '' && $existing ? $existing->recurrence : app(TaskRecurrenceService::class)->buildRecurrence('custom', $this->recurrenceIntervalDays))
                 : null,
         ];
+    }
+
+    private function sameSchedule(Task $task, array $schedule): bool
+    {
+        $same = fn ($a, $b) => ($a === null && $b === null) || ($a !== null && $b !== null && $a->timestamp === $b->timestamp);
+
+        return $same($task->start_date, $schedule['start_date'] ?? null) && $same($task->end_date, $schedule['end_date'] ?? null);
     }
 
     private function recurrenceSnapshot(Task $task): string
@@ -205,7 +219,7 @@ class TaskEditor extends TaskList
 
     protected function formDefaults(): array
     {
-        $fields = ['editingId', 'title', 'description', 'descriptionMode', 'category', 'statusId', 'priority', 'size', 'startDate', 'startTime', 'endDate', 'endTime', 'estimatedTime', 'isPrivate', 'isRecurrent', 'recurrenceIntervalDays', 'nativeRecurrenceRule', 'bulkTitles', 'editTask', 'relations', 'reminders'];
+        $fields = ['editingId', 'title', 'description', 'descriptionMode', 'category', 'statusId', 'priority', 'size', 'startDate', 'startTime', 'endDate', 'endTime', 'estimatedTime', 'scheduleLocked', 'isPrivate', 'isRecurrent', 'recurrenceIntervalDays', 'nativeRecurrenceRule', 'bulkTitles', 'editTask', 'relations', 'reminders'];
 
         return array_intersect_key(get_class_vars(self::class), array_flip($fields));
     }

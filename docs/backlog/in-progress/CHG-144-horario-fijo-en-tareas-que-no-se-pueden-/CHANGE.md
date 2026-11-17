@@ -1,5 +1,5 @@
 # CHG-144 · Horario fijo en tareas que no se pueden mover
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -85,15 +85,21 @@ Programación
 - Docs a actualizar: documentación de Tareas (concepto de horario fijo) y `docs/UX-WRITING.md` (término).
 
 ## 7. Tareas
-- [ ] T1 · Guardar si una tarea tiene horario fijo — Resp: developer — Modelo: estandar — Archivos: migración, `Task.php` — Hecho cuando: el campo existe, es falso por defecto y se prueba en MySQL.
-- [ ] T2 · Interruptor «Horario fijo» y candado visible — Resp: developer — Modelo: estandar — Archivos: `schedule-fields.blade.php`, `TaskEditor`, lista y calendario — Hecho cuando: se ve y se guarda según el boceto.
-- [ ] T3 · Bloquear el movimiento por todos los caminos — Resp: developer — Modelo: estandar — Archivos: `TaskCalendar`, `HandlesTaskRowActions`, `QuickEditor`, `TaskPlanning`, `ShiftTasksToDate`, `task-calendar.js` — Hecho cuando: ningún camino mueve una tarea fija y se avisa.
-- [ ] T4 · Exponer el campo en el MCP de tareas — Resp: developer — Modelo: estandar — Archivos: `app/Mcp/Tools/Task/*` — Hecho cuando: se puede leer y escribir.
-- [ ] T5 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasa la sección 5.
+- [x] T1 · Guardar si una tarea tiene horario fijo — Resp: developer — Modelo: estandar — Archivos: migración, `Task.php` — Hecho cuando: el campo existe, es falso por defecto y se prueba en MySQL.
+- [x] T2 · Interruptor «Horario fijo» y candado visible — Resp: developer — Modelo: estandar — Archivos: `schedule-fields.blade.php`, `TaskEditor`, lista y calendario — Hecho cuando: se ve y se guarda según el boceto.
+- [x] T3 · Bloquear el movimiento por todos los caminos — Resp: developer — Modelo: estandar — Archivos: `TaskCalendar`, `HandlesTaskRowActions`, `QuickEditor`, `TaskPlanning`, `ShiftTasksToDate`, `task-calendar.js` — Hecho cuando: ningún camino mueve una tarea fija y se avisa.
+- [x] T4 · Exponer el campo en el MCP de tareas — Resp: developer — Modelo: estandar — Archivos: `app/Mcp/Tools/Task/*` — Hecho cuando: se puede leer y escribir.
+- [x] T5 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasa la sección 5.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: migración `2026_11_17_000001` (`tasks.schedule_locked` booleano, falso por defecto), `Task` (`$fillable`, cast), interruptor «Horario fijo» en la sección Programación del editor (`scheduleLocked`; el editor pide quitar el candado antes de cambiar la fecha), candado en el calendario (`extendedProps.locked`, evento no editable), aviso `lockedNotice` en lista, calendario y planificación, y bloqueo en `moveToDay` (lista y calendario), `TaskCalendar::moveTask`, `TaskGantt::moveTask`, `TaskPlanning` (mover y quitar fechas), `QuickEditor` (snooze de Mi día) y `ShiftTasksToDate::apply` (cierre del día y «Volver» omiten las fijas). MCP: `schedule_locked` en crear, actualizar, leer y listar; `update-task-tool` rechaza cambiar fechas de una tarea fija salvo que antes se envíe `schedule_locked=false`.
+- Decisión: CalDAV no se bloquea (el origen externo manda), como se acordó. Las tareas fijas siguen movibles solo desde el editor.
+- Verificación local (PHP 8.4 en chroot): `TaskFixedScheduleTest` (8 pruebas) en verde; regresión de Task*, Home, WallPanel, MCP de tareas, CalDAV, Ui y shell con los mismos fallos que la rama base (incluye `test_shared_individual_dialog_uses_canonical_sections_without_bulk_controls`). `npm run build` correcto.
+- Pendiente de verificar: la migración se probó solo en SQLite; falta correrla en MySQL (`docs/TESTING.md`).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado a partir de la decisión del usuario: hay tareas con agenda bloqueada (como una reunión) que no se pueden mover libremente.
 - 2026-11-17 — Decisión delegada por el usuario («identifica tú la mejor manera»): nombre visible «Horario fijo»; el MCP rechaza cambios de fecha de una tarea fija salvo que antes se envíe `schedule_locked=false`; CalDAV puede moverla (el origen externo manda) y no se bloquea.
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

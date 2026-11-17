@@ -133,6 +133,13 @@ class TaskCalendar extends Component
     {
         abort_unless(auth()->check(), 403);
         $task = Task::where('user_id', auth()->id())->findOrFail($id);
+        if ($task->schedule_locked) {
+            // CHG-144: el calendario revierte el arrastre y avisa.
+            $this->lockedNotice = 'Esta tarea tiene horario fijo. Quita el candado para moverla.';
+            $this->dispatch('task-calendar-refresh');
+
+            return;
+        }
         $newStart = Carbon::parse($start);
         $newEnd = $end ? Carbon::parse($end) : null;
 
@@ -255,6 +262,7 @@ class TaskCalendar extends Component
         return [
             'id' => $task->id,
             'title' => $task->title,
+            ...($task->schedule_locked ? ['editable' => false, 'startEditable' => false, 'durationEditable' => false] : []),
             'start' => $allDay ? $start->toDateString() : $start->toIso8601String(),
             'end' => $allDay ? $end->copy()->addDay()->toDateString() : ($end->gt($start) ? $end->toIso8601String() : null),
             'allDay' => $allDay,
@@ -269,11 +277,13 @@ class TaskCalendar extends Component
                 'categoryColor' => $category && array_key_exists($category->color ?? '', \App\Support\Ui\CatalogColors::OPTIONS) ? $category->color : null,
                 'priority' => $task->priority ? (self::PRIORITIES[$task->priority] ?? null) : null,
                 'timeLabel' => $this->timeLabel($start, $end, $allDay),
+                'locked' => (bool) $task->schedule_locked,
             ],
             'classNames' => array_values(array_filter([
                 'md-calendar-task',
                 $task->completed ? 'is-completed' : null,
                 $task->is_recurrent ? 'is-recurrent' : null,
+                $task->schedule_locked ? 'is-locked' : null,
                 $task->priority ? 'is-'.$task->priority : null,
             ])),
         ];

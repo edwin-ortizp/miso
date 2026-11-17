@@ -61,6 +61,11 @@ class TaskGantt extends Component
     public function moveTask(string $id, string $start, string $end): void
     {
         $task = Task::findOrFail($id);
+        if ($task->schedule_locked) {
+            $this->dispatch('task-gantt-refresh');
+
+            return;
+        }
         $newStart = Carbon::parse($start)->startOfDay();
         $newEnd = Carbon::parse($end)->startOfDay();
         $atDay = fn (?Carbon $original, Carbon $day) => $original ? $day->copy()->setTime($original->hour, $original->minute) : $day;

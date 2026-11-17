@@ -10,7 +10,7 @@
     :sections="[
         'basic' => ['label' => 'Información básica', 'icon' => 'bi-file-earmark-text', 'error' => $errors->hasAny(['title', 'bulkTitles'])],
         'privacy' => ['label' => 'Privacidad', 'icon' => 'bi-lock'],
-        'schedule' => ['label' => 'Programación', 'icon' => 'bi-calendar3', 'error' => $errors->hasAny(['startDate', 'endDate', 'startTime', 'endTime'])],
+        'schedule' => ['label' => 'Programación', 'icon' => 'bi-calendar3', 'error' => $errors->hasAny(['startDate', 'endDate', 'startTime', 'endTime', 'scheduleLocked'])],
         ...(! $bulkEditor ? ['reminders' => ['label' => 'Recordatorios', 'icon' => 'bi-bell', 'error' => $errors->hasAny(['reminders', 'reminders.*'])]] : []),
         ...(isset($relationOptions) && ! $bulkEditor ? ['relations' => ['label' => 'Relacionado', 'icon' => 'bi-link-45deg', 'error' => $errors->hasAny(['relations', 'relations.*.id'])]] : []),
     ]">
@@ -83,7 +83,7 @@
             </x-ui.form-dialog-section>
             <x-ui.form-dialog-section name="schedule" title="Programación">
                 <div class="lt-cm-form">
-                    @include('livewire.task.partials.schedule-fields', ['idPrefix' => $dialogId, 'startModel' => 'startDate', 'startTimeModel' => 'startTime', 'endModel' => 'endDate', 'endTimeModel' => 'endTime', 'durationAction' => 'applyDuration'])
+                    @include('livewire.task.partials.schedule-fields', ['idPrefix' => $dialogId, 'startModel' => 'startDate', 'startTimeModel' => 'startTime', 'endModel' => 'endDate', 'endTimeModel' => 'endTime', 'durationAction' => 'applyDuration', 'lockModel' => 'scheduleLocked'])
                     @if ($showRecurrenceFields ?? false)
                         <div class="d-flex flex-wrap align-items-center gap-3">
                             @if ($localEditor ?? false)

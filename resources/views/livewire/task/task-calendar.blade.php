@@ -1,4 +1,12 @@
 <x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+    @if ($lockedNotice)
+        <x-ui.snackbar wire:key="locked-notice">
+            {{ $lockedNotice }}
+            <x-slot:actions>
+                <x-ui.icon-action icon="bi-x-lg" size="sm" label="Cerrar aviso" wire:click="$set('lockedNotice', null)" />
+            </x-slot:actions>
+        </x-ui.snackbar>
+    @endif
     <section class="md-card-elevated md-task-calendar" aria-label="Calendario de tareas, planes, cumpleaños y comidas" x-data="taskCalendar($wire)" @keydown.escape.window="if (actionEvent) { $event.preventDefault(); $event.stopPropagation(); closeActions() }" @resize.window="closeActions()" @scroll.window="closeActions(false)">
         <div class="md-calendar-compact-toolbar" wire:ignore aria-label="Navegación del calendario">
             <h2 class="md-title-medium md-calendar-period" aria-live="polite"><i class="bi bi-calendar4" aria-hidden="true"></i><span x-text="mobileDate"></span></h2>

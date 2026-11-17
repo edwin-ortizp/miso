@@ -30,15 +30,26 @@ trait HandlesTaskRowActions
         });
     }
 
+    /** CHG-144: aviso cuando una acción se omite por tratarse de una tarea con horario fijo. */
+    public ?string $lockedNotice = null;
+
+    private const LOCKED_MESSAGE = 'Esta tarea tiene horario fijo. Quita el candado para moverla.';
+
     public function moveToDay(string $id, int $daysFromToday): void
     {
         if (! auth()->check() || ! in_array($daysFromToday, [0, 1], true)) {
             return;
         }
+        $this->lockedNotice = null;
 
         DB::transaction(function () use ($id, $daysFromToday): void {
             $task = Task::where('user_id', auth()->id())->where('completed', false)->lockForUpdate()->find($id);
             if (! $task) {
+                return;
+            }
+            if ($task->schedule_locked) {
+                $this->lockedNotice = self::LOCKED_MESSAGE;
+
                 return;
             }
 

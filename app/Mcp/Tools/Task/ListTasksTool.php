@@ -104,6 +104,7 @@ class ListTasksTool extends Tool
                 'status_type' => $task->status?->type,
                 'completed' => $task->completed,
                 'start_date' => $task->start_date?->toDateString(),
+                'schedule_locked' => (bool) $task->schedule_locked,
                 'end_date' => $task->end_date?->toDateString(),
                 'is_recurrent' => $task->is_recurrent,
                 'has_description' => filled($task->description),

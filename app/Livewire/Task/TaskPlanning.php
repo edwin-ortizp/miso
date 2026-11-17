@@ -20,6 +20,9 @@ class TaskPlanning extends Component
     use FiltersTasks, LoadsTaskCategories;
     use HandlesRecurringTaskCompletion, InteractsWithTaskSchedule;
 
+    /** CHG-144: aviso cuando se omite una tarea con horario fijo. */
+    public ?string $lockedNotice = null;
+
     public bool $showForm = false;
     public string $descriptionMode = 'write';
     public ?string $editingId = null;
@@ -67,6 +70,11 @@ class TaskPlanning extends Component
         if (! $task) {
             return;
         }
+        if ($task->schedule_locked) {
+            $this->lockedNotice = 'Esta tarea tiene horario fijo. Quita el candado para moverla.';
+
+            return;
+        }
 
         $scheduledAt = $task->start_date ?? $task->end_date;
         $targetDay = today()->addDays($daysFromToday);
@@ -94,6 +102,12 @@ class TaskPlanning extends Component
 
     public function clearDates(string $id): void
     {
+        $task = Task::find($id);
+        if ($task?->schedule_locked) {
+            $this->lockedNotice = 'Esta tarea tiene horario fijo. Quita el candado para moverla.';
+
+            return;
+        }
         Task::whereKey($id)->update(['start_date' => null, 'end_date' => null]);
     }
 

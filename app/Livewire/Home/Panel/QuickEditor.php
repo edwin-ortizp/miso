@@ -127,6 +127,12 @@ class QuickEditor extends Component
             case 'snooze':
                 $this->validate(['scheduledDate' => ['required', 'date_format:Y-m-d'], 'scheduledTime' => ['nullable', 'date_format:H:i']]);
                 $task = Task::findOrFail($this->recordId);
+                if ($task->schedule_locked) {
+                    // CHG-144: un horario fijo se cambia desde el editor de la tarea.
+                    $this->addError('scheduledDate', 'Esta tarea tiene horario fijo. Quita el candado para moverla.');
+
+                    return;
+                }
                 $new = Carbon::parse($this->scheduledDate.' '.($this->scheduledTime ?: '00:00'), config('app.timezone'));
                 $duration = $task->start_date && $task->end_date ? $task->start_date->diffInSeconds($task->end_date, false) : null;
                 $task->update($task->start_date ? [

@@ -24,6 +24,10 @@ class ShiftTasksToDate
         $undo = [];
         DB::transaction(function () use ($tasks, $change, &$undo) {
             foreach ($tasks as $task) {
+                // CHG-144: una tarea con horario fijo no se reprograma por lotes.
+                if ($task->schedule_locked) {
+                    continue;
+                }
                 $undo[$task->id] = [
                     'start' => $task->start_date?->toDateTimeString(),
                     'end' => $task->end_date?->toDateTimeString(),

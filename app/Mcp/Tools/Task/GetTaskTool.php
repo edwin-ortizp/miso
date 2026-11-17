@@ -49,6 +49,7 @@ class GetTaskTool extends Tool
             'start_date' => $task->start_date?->format($task->start_is_date ? 'Y-m-d' : 'Y-m-d H:i'),
             'end_date' => $task->end_date?->format($task->end_is_date ? 'Y-m-d' : 'Y-m-d H:i'),
             'is_private' => $task->is_private,
+            'schedule_locked' => (bool) $task->schedule_locked,
             'is_recurrent' => $task->is_recurrent,
             'recurrence' => $task->is_recurrent ? [
                 'summary' => $recurrence->describe($task->recurrence),
