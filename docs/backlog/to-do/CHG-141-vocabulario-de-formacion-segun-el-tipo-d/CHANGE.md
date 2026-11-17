@@ -96,7 +96,5 @@ Formación › Ajustes › Vocabulario
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M) a partir de la exploración de Formación.
-- Abierta: en especialización, maestría y doctorado, ¿las unidades bajo el semestre son «materias», «cursos» o «asignaturas»? Propuesta de default: «materia» en todos; se puede renombrar en Ajustes.
-- Abierta: ¿el doctorado usa semestres? Propuesta: sí, mismo vocabulario que maestría.
-- Abierta: ¿renombrar los propios tipos de formación («Carrera universitaria» → «Pregrado»)? Propuesta: sí.
+- 2026-11-17 — Decisión del usuario: en especialización, maestría y doctorado las unidades bajo el semestre se llaman «materia». El doctorado también usa semestres. El tipo «Carrera universitaria» pasa a llamarse «Pregrado».
 - Abierta: ¿el vocabulario se personaliza por tipo de formación (propuesto) o una sola vez para toda la app?

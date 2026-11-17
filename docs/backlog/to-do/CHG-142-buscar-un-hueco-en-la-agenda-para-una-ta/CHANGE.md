@@ -20,7 +20,7 @@ Planificar tareas cuando la agenda está llena obliga a mirar el calendario y ad
   - Ventana con: resumen de la tarea, duración editable (chips 15 min, 30 min, 1 h, 2 h y otra), rango (esta semana, la próxima), preferencia de momento del día (cualquiera, mañana, tarde), línea de tiempo con lo ocupado y huecos sugeridos como chips.
   - Agendar en el hueco elegido (inicio y fin) con aviso y «Deshacer».
   - Servicio de huecos libres reutilizable que considera como ocupado: tareas con hora (`TaskCalendar::events()`), comidas (`MealSchedule`), tomas de medicamentos (`MedicationSchedule`) y fuera de la jornada.
-  - Ajuste «Horario para planificar» (días y horas hábiles, margen entre bloques) en Tareas → Ajustes, con patrón de `MealSchedule` y `ModuleSetting('tasks')`.
+  - Ajuste «Horario para planificar» **por persona** y por día de la semana (horas de inicio y fin, o día sin planificar) más margen entre bloques, en Tareas → Ajustes, con patrón de `MealSchedule` y `ModuleSetting('tasks')`. Valores por defecto: lunes a viernes de 8:00 a 18:00, sábado de 9:00 a 12:00 y domingo sin planificar; cada persona puede cambiarlos.
 - No incluye: lectura de calendarios externos (Google Calendar, CalDAV de eventos); sugerencias automáticas sin que la persona abra la ventana; reprogramar varias tareas a la vez; cambios a recurrencia (solo se agenda la ocurrencia actual, como `moveTask`); citas de salud y planes, que no tienen hora (ver pregunta abierta).
 - Criterios de aceptación (Dado/Cuando/Entonces):
   - Dada una tarea con 60 min estimados, cuando abro «Buscar un hueco», entonces veo hasta N horarios libres de 60 min dentro de mi jornada, ordenados del más próximo al más lejano, sin cruzar nada ocupado.
@@ -29,6 +29,7 @@ Planificar tareas cuando la agenda está llena obliga a mirar el calendario y ad
   - Dado que no hay huecos en el rango, cuando abro la ventana, entonces veo un estado vacío que ofrece ampliar el rango o acortar la duración.
   - Dada una tarea de todo el día o varios días, cuando abro la ventana, entonces la acción sigue disponible y trata la tarea con la duración elegida.
   - Dado otro usuario, cuando calcula huecos, entonces solo usa mis datos.
+  - Dado un usuario sin ajustes propios, cuando busca huecos, entonces usa los valores por defecto (L-V 8:00-18:00, sábado 9:00-12:00, domingo sin planificar).
   - Dado que cambio mi horario de jornada, cuando busco de nuevo, entonces las sugerencias lo respetan.
 
 ## 3. UX/UI
@@ -112,7 +113,7 @@ flowchart LR
 - Docs a actualizar: `docs/UX-WRITING.md` (término «hueco»), `docs/design-system.md` (si se publica componente nuevo), `docs/integrations/task-focus.md` si se enlaza con foco, y una nota de uso en la documentación de Tareas.
 
 ## 7. Tareas
-- [ ] T1 · Horario para planificar (jornada) en Tareas → Ajustes — Resp: developer — Modelo: estandar — Archivos: `TaskSettings`, vista, config — Hecho cuando: se guarda, valida y aísla por usuario.
+- [ ] T1 · Horario para planificar por día de la semana en Tareas → Ajustes — Resp: developer — Modelo: estandar — Archivos: `TaskSettings`, vista, config — Hecho cuando: defaults L-V 8-18 y sábado 9-12, editable por día, validado (`H:i`, fin posterior al inicio) y aislado por usuario.
 - [ ] T2 · Servicio de huecos libres — Resp: developer — Modelo: razonamiento — Archivos: `TaskSlotFinder.php` — Hecho cuando: pasan los casos de jornada, ocupación, margen y vacío, con presupuesto de consultas.
 - [ ] T3 · Ventana «Buscar un hueco» con sugerencias y línea de tiempo — Resp: developer — Modelo: razonamiento — Archivos: `FindSlot.php`, vista — Hecho cuando: cumple el boceto, los estados y la accesibilidad.
 - [ ] T4 · Agendar en el hueco con Deshacer — Resp: developer — Modelo: estandar — Archivos: `ScheduleTaskInSlot.php` — Hecho cuando: escribe fechas, revalida y refresca el calendario.
@@ -123,7 +124,7 @@ flowchart LR
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel L) a partir de la exploración de agenda y menú de tareas.
-- Abierta: jornada por defecto. Propuesta: lunes a viernes de 8:00 a 18:00 y margen de 10 min; editable en ajustes.
+- 2026-11-17 — Decisión del usuario: jornada por defecto lunes a viernes de 8:00 a 18:00 y sábados de 9:00 a 12:00 (domingo sin planificar); cada persona puede modificar sus propios horarios.
 - Abierta: citas de salud y planes no tienen hora. Propuesta: no bloquean el día; solo bloquean lo que tiene hora.
 - Abierta: ¿incluimos una herramienta MCP de solo lectura («buscar huecos») que comparta el servicio? Propuesta: sí, pero como CHG aparte para no crecer este.
 - Abierta: ¿la ventana se abre como diálogo en escritorio y hoja a pantalla completa en móvil? Propuesta: sí.
