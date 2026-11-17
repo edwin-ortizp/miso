@@ -111,4 +111,4 @@ flowchart LR
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Decisión del usuario: apagar = ocultar y detener avisos (rutas y MCP siguen igual); dependencias = aviso de confirmación con cascada.
-- Abierta: ¿las funciones base de Comidas son solo Ingredientes y Planificación, o también Compras? (Ingredientes sí es base).
+- 2026-11-17 — Decisión del usuario: Compras no es función base y se puede apagar. Las bases de Comidas quedan en Ingredientes y Planificación. Apagar Compras arrastra Historial de compras (comparten tablas de compras y tiendas).
