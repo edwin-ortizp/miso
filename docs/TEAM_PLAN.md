@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-16_
+_Última actualización: 2026-11-17_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -109,7 +109,7 @@ _Última actualización: 2026-11-16_
 | CHG-103 | M | Recepción FCM y apertura segura en Android | done | Cerrado | 2/2 |
 | CHG-104 | M | Generaciones personales y ajustes de Colección por secciones | done | Cerrado | 3/3 |
 | CHG-105 | M | Evitar bloqueo de Mi día al registrar foco en PWA móvil | done | Cerrado | 4/4 |
-| CHG-106 | M | Restaurar chat y cierre de superficies en Android | in-progress | En desarrollo | 0/4 |
+| CHG-106 | M | Restaurar chat y cierre de superficies en Android | in-progress | En desarrollo | 1/4 |
 | CHG-107 | S | Editar tareas y Markdown con una sola acción | done | Cerrado | 2/2 |
 | CHG-108 | M | Secciones de formularios visibles en móvil | in-progress | En desarrollo | 3/4 |
 | CHG-109 | M | Corregir barra de estado y escala de Android | to-do | Aprobado | 0/4 |
@@ -142,6 +142,7 @@ _Última actualización: 2026-11-16_
 | CHG-136 | M | Mi día renovado, Kanban por tandas, lista de tareas y guardianes | done | Cerrado | 7/7 |
 | CHG-137 | M | Guardián contextual en las siete pestañas de Salud | in-progress | En verificación | 3/3 |
 | CHG-138 | M | Formación base en la aplicación real | in-progress | En verificación | 4/4 |
+| CHG-139 | M | Funciones apagables dentro de cada módulo | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
