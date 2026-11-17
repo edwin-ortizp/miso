@@ -1,6 +1,6 @@
 # CHG-142 · Buscar un hueco en la agenda para una tarea
 **Estado:** Borrador
-**Nivel:** L
+**Nivel:** M
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
 **Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
@@ -129,3 +129,4 @@ flowchart LR
 - Abierta: ¿incluimos una herramienta MCP de solo lectura («buscar huecos») que comparta el servicio? Propuesta: sí, pero como CHG aparte para no crecer este.
 - Abierta: ¿la ventana se abre como diálogo en escritorio y hoja a pantalla completa en móvil? Propuesta: sí.
 - Abierta: ¿las tareas de otros (compartidas) bloquean? No aplica hoy (la app no comparte agendas).
+- 2026-11-17 — Nivel L → M
