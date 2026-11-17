@@ -1,9 +1,9 @@
 # CHG-148 · Ajustes de Hidratación con barra lateral de secciones
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** 2026-11-17
 **Relacionado:** CHG-147
 
 ## 0. En palabras simples
@@ -87,3 +87,5 @@ Ajustes de Hidratación
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-17 — Movido a in-progress/ (En desarrollo)
 - 2026-11-17 — Implementación terminada → En verificación
+- 2026-11-17 — Cerrado por el usuario (Compuerta 3) → done/
+- LECCIÓN: ninguna

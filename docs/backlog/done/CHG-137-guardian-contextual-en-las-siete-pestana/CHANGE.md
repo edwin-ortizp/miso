@@ -1,9 +1,9 @@
 # CHG-137 · Guardián contextual en las siete pestañas de Salud
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
+**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** 2026-11-17
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -64,3 +64,4 @@ Alcance y plan aprobados en conversación. LECCIÓN: ninguna.
 
 - Verificación final: Pint pasa en archivos PHP nuevos; diff --check pasa en archivos propios. Las modificaciones concurrentes de Formación y otros archivos ajenos se conservaron.
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-17 — Cerrado por el usuario (Compuerta 3) → done/

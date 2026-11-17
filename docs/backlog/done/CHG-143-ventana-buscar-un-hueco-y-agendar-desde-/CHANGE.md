@@ -1,9 +1,9 @@
 # CHG-143 · Ventana Buscar un hueco y agendar desde las tareas
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** 2026-11-17
 **Relacionado:** CHG-016, CHG-017, CHG-051, CHG-052, CHG-070, CHG-072, CHG-101
 **Depende de:** CHG-142 (servicio de huecos y horario para planificar). Se divide del CHG-142 original; CHG-144 (horario fijo) se integra al final.
 
@@ -118,3 +118,5 @@ flowchart LR
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-17 — Movido a in-progress/ (En desarrollo)
 - 2026-11-17 — Implementación terminada → En verificación
+- 2026-11-17 — Cerrado por el usuario (Compuerta 3) → done/
+- LECCIÓN: ninguna

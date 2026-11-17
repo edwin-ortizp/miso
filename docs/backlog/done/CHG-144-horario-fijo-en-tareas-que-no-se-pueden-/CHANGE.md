@@ -1,9 +1,9 @@
 # CHG-144 · Horario fijo en tareas que no se pueden mover
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** 2026-11-17
 **Relacionado:** CHG-142, CHG-143, CHG-145, CHG-052, CHG-072
 **Depende de:** ninguno técnico; se integra con CHG-142 (los fijos cuentan como ocupados y no movibles) y CHG-145 (el MCP no los mueve).
 
@@ -103,3 +103,5 @@ Programación
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-17 — Movido a in-progress/ (En desarrollo)
 - 2026-11-17 — Implementación terminada → En verificación
+- 2026-11-17 — Cerrado por el usuario (Compuerta 3) → done/
+- LECCIÓN: ninguna

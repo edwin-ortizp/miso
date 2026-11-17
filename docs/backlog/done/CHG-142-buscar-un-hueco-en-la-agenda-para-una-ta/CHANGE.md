@@ -1,9 +1,9 @@
 # CHG-142 · Horario para planificar y cálculo de huecos libres
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** 2026-11-17
 **Relacionado:** CHG-133, CHG-135, CHG-139, CHG-143, CHG-144, CHG-145
 **Dividido en:** CHG-142 (base, este), CHG-143 (ventana «Buscar un hueco»), CHG-144 (horario fijo), CHG-145 (MCP). Orden: 142 → 144 → 143 → 145.
 
@@ -104,3 +104,5 @@ Tareas › Ajustes › Horario para planificar
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-17 — Movido a in-progress/ (En desarrollo)
 - 2026-11-17 — Implementación terminada → En verificación
+- 2026-11-17 — Cerrado por el usuario (Compuerta 3) → done/
+- LECCIÓN: ninguna

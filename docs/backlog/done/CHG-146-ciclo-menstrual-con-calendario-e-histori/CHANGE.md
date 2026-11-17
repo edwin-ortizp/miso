@@ -1,9 +1,9 @@
 # CHG-146 · Ciclo menstrual con calendario e historial en cards
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** 2026-11-17
 **Relacionado:** CHG-130, CHG-140
 
 ## 0. En palabras simples
@@ -99,3 +99,5 @@ La vista de Ciclo usa `x-ui.section` sueltas: el calendario es una tabla cruda, 
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-17 — Movido a in-progress/ (En desarrollo)
 - 2026-11-17 — Implementación terminada → En verificación
+- 2026-11-17 — Cerrado por el usuario (Compuerta 3) → done/
+- LECCIÓN: ninguna

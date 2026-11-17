@@ -1,9 +1,9 @@
 # CHG-138 · Formación base en la aplicación real
-**Estado:** En verificación
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** —
+**Creado:** 2026-11-16 · **Aprobado:** 2026-11-16 · **Cerrado:** 2026-11-17
 **Relacionado:** —
 
 ## 0. En palabras simples
@@ -104,3 +104,4 @@ Diálogo: [Información básica | Organización][Cancelar | Guardar]
 - 2026-11-16 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-16 — Movido a in-progress/ (En desarrollo)
 - 2026-11-16 — Implementación terminada → En verificación
+- 2026-11-17 — Cerrado por el usuario (Compuerta 3) → done/
