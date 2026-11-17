@@ -202,7 +202,8 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/plans', PlanIndex::class)->name('plans');
     Route::get('/plans/{plan}', PlanShow::class)->name('plans.show');
     Route::get('/learning', \App\Livewire\Learning\LearningPage::class)->name('learning');
-    Route::get('/learning/settings', \App\Livewire\Learning\LearningSettings::class)->name('learning.settings');
+    Route::get('/learning/settings', \App\Livewire\Learning\LearningSettings::class)->name('learning.settings')->defaults('section', 'vocabulary');
+    Route::get('/learning/settings/categories', \App\Livewire\Learning\LearningSettings::class)->name('learning.settings.categories')->defaults('section', 'categories');
     Route::get('/learning/{formation}', \App\Livewire\Learning\LearningPage::class)->name('learning.show');
     Route::get('/learning/{formation}/units/{unit}', \App\Livewire\Learning\LearningPage::class)->name('learning.units.show');
 

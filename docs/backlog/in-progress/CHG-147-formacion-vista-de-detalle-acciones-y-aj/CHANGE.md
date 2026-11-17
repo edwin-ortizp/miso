@@ -1,9 +1,9 @@
 # CHG-147 · Formación: vista de detalle, acciones y ajustes con categorías
-**Estado:** Borrador
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-138, CHG-141
 
 ## 0. En palabras simples
@@ -80,13 +80,18 @@ Ajustes:  contenido │ Vocabulario
 - Docs a actualizar: `docs/learning.md`, `docs/category-catalogs.md`, `docs/UX-WRITING.md` (excepción de migas).
 
 ## 7. Tareas
-- [ ] T1 · Detalle de formación sin migas ni ⋯ suelto, con «Agregar» en menús y estado vacío — Resp: developer — Modelo: estandar — Archivos: `page.blade.php`, `LearningPage.php`, `_learning.css` — Hecho cuando: cumple el boceto.
-- [ ] T2 · Ajustes con barra lateral y sección Categorías — Resp: developer — Modelo: estandar — Archivos: `LearningSettings.php`, vistas, rutas, `config/modules.php` — Hecho cuando: se crean, editan y eliminan categorías.
-- [ ] T3 · Categorías por defecto para nuevos y existentes — Resp: developer — Modelo: estandar — Archivos: `CategoryCatalog.php`, migración — Hecho cuando: sembradas sin duplicar.
-- [ ] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests y capturas a 390/1440.
+- [x] T1 · Detalle de formación sin migas ni ⋯ suelto, con «Agregar» en menús y estado vacío — Resp: developer — Modelo: estandar — Archivos: `page.blade.php`, `LearningPage.php`, `_learning.css` — Hecho cuando: cumple el boceto.
+- [x] T2 · Ajustes con barra lateral y sección Categorías — Resp: developer — Modelo: estandar — Archivos: `LearningSettings.php`, vistas, rutas, `config/modules.php` — Hecho cuando: se crean, editan y eliminan categorías.
+- [x] T3 · Categorías por defecto para nuevos y existentes — Resp: developer — Modelo: estandar — Archivos: `CategoryCatalog.php`, migración — Hecho cuando: sembradas sin duplicar.
+- [x] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests y capturas a 390/1440.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: detalle sin migas (`nav.learning-path` y su CSS retirados), sin elipsis suelta ni «Categorías» en los menús; el ⋯ del encabezado y el de la tarjeta «Contenido» ofrecen «Agregar …» (vía `openUnit`), Editar y Eliminar; chips de tipo, estado, institución, créditos y fechas; estado vacío sin «botón flotante». Ajustes de Formación con barra lateral (Vocabulario y Categorías, rutas `learning.settings` y `learning.settings.categories`) usando la base de CHG-148; categorías por defecto en `CategoryCatalog::defaults('learning')` y migración `2026_11_17_000002_seed_default_learning_categories` para usuarios existentes. Docs: `docs/learning.md`.
+- Verificación local: `LearningSettingsSectionsTest` (5), `LearningModuleTest`, `LearningVocabularyTest` y `CategoryHierarchyTest` en verde; spec `learning.interaction.spec.js` actualizada (sin migas) y no ejecutada en este entorno; capturas a 390 y 1440 px revisadas. La migración de sembrado solo se probó con SQLite.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Especificado a partir del plan de pulido aceptado en la conversación; pendiente la Compuerta 2 (aprobación del usuario).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

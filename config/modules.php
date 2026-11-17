@@ -268,7 +268,7 @@ return [
         'preserve' => ['q', 'type', 'category', 'status'], 'rail' => true,
         'tabs' => [
             ['label' => 'Formaciones', 'route' => 'learning', 'icon' => 'bi-mortarboard', 'active' => ['learning', 'learning.show', 'learning.units.show']],
-            ['label' => 'Ajustes', 'route' => 'learning.settings', 'archetype' => 'settings', 'icon' => 'bi-gear', 'active' => ['learning.settings']],
+            ['label' => 'Ajustes', 'route' => 'learning.settings', 'archetype' => 'settings', 'icon' => 'bi-gear', 'active' => ['learning.settings', 'learning.settings.categories']],
         ],
     ],
     'goals' => [

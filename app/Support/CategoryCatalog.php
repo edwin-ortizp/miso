@@ -30,6 +30,7 @@ class CategoryCatalog
             'contacts' => ['familia' => 'Familia', 'amigo' => 'Amigo', 'trabajo' => 'Trabajo', 'pareja' => 'Pareja', 'otro' => 'Otro'],
             'relationship-events' => \App\Models\RelationshipEvent::CATEGORIES,
             'negative-habits' => ['health' => 'Salud', 'productivity' => 'Productividad', 'social' => 'Social', 'emotional' => 'Emocional', 'finance' => 'Finanzas', 'digital' => 'Digital', 'environment' => 'Medio ambiente'],
+            'learning' => ['technology' => 'Tecnología', 'languages' => 'Idiomas', 'science' => 'Ciencias', 'humanities' => 'Humanidades', 'health' => 'Salud', 'business' => 'Negocios', 'arts' => 'Arte', 'other' => 'Otro'],
             default => [],
         };
     }

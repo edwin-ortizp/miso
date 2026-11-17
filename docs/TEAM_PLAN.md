@@ -150,7 +150,7 @@ _Última actualización: 2026-11-17_
 | CHG-144 | M | Horario fijo en tareas que no se pueden mover | in-progress | En verificación | 5/5 |
 | CHG-145 | M | Huecos y cruces de agenda en el MCP | in-progress | En verificación | 4/4 |
 | CHG-146 | M | Ciclo menstrual con calendario e historial en cards | to-do | Borrador | 0/4 |
-| CHG-147 | M | Formación: vista de detalle, acciones y ajustes con categorías | to-do | Borrador | 0/4 |
+| CHG-147 | M | Formación: vista de detalle, acciones y ajustes con categorías | in-progress | En verificación | 4/4 |
 | CHG-148 | M | Ajustes de Hidratación con barra lateral de secciones | in-progress | En verificación | 3/3 |
 | CHG-149 | L | Ajustes con secciones y categorías en Ejercicio, Ánimo, Vehículos, Hábitos a evitar y Relaciones | in-progress | En verificación | 4/4 |
 <!-- team:table:end -->

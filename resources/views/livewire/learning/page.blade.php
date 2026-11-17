@@ -15,7 +15,8 @@
         foreach ($childKinds as $key) $createActions[] = ['label' => $vocab->addLabel($uid, $ftype, $key), 'action' => "openUnit('$key')", 'icon' => 'bi-plus-lg', 'create' => true];
         $primary = array_shift($createActions);
     }
-    $secondary = [...$createActions, ['label' => 'Categorías', 'href' => route('categories.settings', 'learning'), 'icon' => 'bi-tags']];
+    $secondary = $createActions;
+    $addActions = $formation ? array_map(fn ($key) => ['label' => $vocab->addLabel($uid, $ftype, $key), 'action' => "openUnit('$key')"], $childKinds) : [];
     $currentEditAction = $unit ? "openUnit('', '$unit->id')" : ($formation ? "openFormation('$formation->id')" : '');
     $currentDeleteAction = $formation ? "deleteRecord('$formation->id', ".($unit ? "'$unit->id'" : 'null').")" : '';
     $dialogLabel = $editor === 'unit' ? $vocab->singular($uid, $ftype, (string) $editorKind) : $vocab->typeLabel($draft['type'] ?? '');
@@ -56,28 +57,23 @@
     @error('deletion')<p role="alert" class="learning-error">{{ $message }}</p>@enderror
 
     @if ($formation)
-        <nav class="learning-path" aria-label="Ubicación en la formación">
-            <a href="{{ route('learning') }}" wire:navigate>Formación</a><span aria-hidden="true">/</span>
-            @if ($unit)<a href="{{ route('learning.show', $formation->id) }}" wire:navigate>{{ $formation->title }}</a>@else<span aria-current="page">{{ $formation->title }}</span>@endif
-            @foreach ($path as $part)
-                <span aria-hidden="true">/</span>
-                @if ($part->id === $unit->id)<span aria-current="page">{{ $part->title }}</span>@else<a href="{{ route('learning.units.show', [$formation->id, $part->id]) }}" wire:navigate>{{ $part->title }}</a>@endif
-            @endforeach
-        </nav>
         <div class="learning-summary">
             <div>
                 <x-ui.chip variant="tonal">{{ $unit ? $vocab->label($uid, $ftype, $unit->kind) : $vocab->typeLabel($formation->type) }}</x-ui.chip>
                 <x-ui.chip variant="tonal">{{ LearningFormation::STATES[$current->status] }}</x-ui.chip>
+                @if (!$unit && $formation->institution)<x-ui.chip variant="tonal" icon="bi-bank">{{ $formation->institution }}</x-ui.chip>@endif
+                @if ($unit?->credits !== null && $unit)<x-ui.chip variant="tonal" icon="bi-award">{{ $unit->credits }} {{ $unit->credits == 1 ? 'crédito' : 'créditos' }}</x-ui.chip>@endif
+                @if ($current->start_date || $current->end_date)<x-ui.chip variant="tonal" icon="bi-calendar3">{{ $current->start_date?->translatedFormat('d M Y') ?? 'Sin fecha inicial' }} – {{ $current->end_date?->translatedFormat('d M Y') ?? 'Sin fecha final' }}</x-ui.chip>@endif
                 @if ($current->description)<p class="learning-description">{{ $current->description }}</p>@endif
-                @if (!$unit && $formation->institution)<p>{{ $formation->institution }}</p>@endif
-                @if ($current->start_date || $current->end_date)<p>{{ $current->start_date?->translatedFormat('d M Y') ?? 'Sin fecha inicial' }} – {{ $current->end_date?->translatedFormat('d M Y') ?? 'Sin fecha final' }}</p>@endif
-                @if ($unit?->credits !== null && $unit)<p>Créditos: {{ $unit->credits }}</p>@endif
             </div>
             <div class="learning-summary__actions">
                 <button type="button" class="md-btn-icon" aria-label="{{ $currentPinned ? 'Quitar de accesos directos' : 'Fijar en accesos directos' }}" title="{{ $currentPinned ? 'Quitar de accesos directos' : 'Fijar en accesos directos' }}" aria-pressed="{{ $currentPinned ? 'true' : 'false' }}" wire:click="setPin('{{ $currentType }}', '{{ $current->id }}', {{ $currentPinned ? 'false' : 'true' }})"><i class="bi {{ $currentPinned ? 'bi-pin-angle-fill' : 'bi-pin-angle' }}" aria-hidden="true"></i></button>
                 <x-ui.menu label="Acciones del elemento">
+                    @foreach ($addActions as $add)
+                        <x-ui.menu-item icon="bi-plus-lg" :wire:click="$add['action']">{{ $add['label'] }}</x-ui.menu-item>
+                    @endforeach
+                    @if ($addActions)<x-ui.menu-divider />@endif
                     <x-ui.menu-item icon="bi-pencil" :wire:click="$currentEditAction" x-on:click="$el.closest('.md-menu').querySelector('button').focus()">Editar</x-ui.menu-item>
-                    <x-ui.menu-item icon="bi-tags" :href="route('categories.settings', 'learning')">Categorías</x-ui.menu-item>
                     <x-ui.menu-item icon="bi-trash" tone="danger" :wire:click="$currentDeleteAction" :wire:confirm="'¿Eliminar «'.$current->title.'»? Se quitará también su acceso directo.'">Eliminar</x-ui.menu-item>
                 </x-ui.menu>
             </div>
@@ -93,8 +89,16 @@
                     <x-ui.select label="Categoría" name="categoryFilter" wire:model.live="categoryFilter" :options="$categories" placeholder="Todas las categorías" />
                 </x-slot:filters>
                 <x-slot:filterActions><x-ui.action variant="text" wire:click="clearFilters">Limpiar filtros</x-ui.action><x-ui.action variant="filled" x-on:click="filtersOpen = false">Aplicar</x-ui.action></x-slot:filterActions>
-                <x-slot:menu><x-ui.menu-item icon="bi-tags" :href="route('categories.settings', 'learning')">Categorías</x-ui.menu-item></x-slot:menu>
             @endunless
+            <x-slot:menu>
+                @if ($formation)
+                    @foreach ($addActions as $add)
+                        <x-ui.menu-item icon="bi-plus-lg" :wire:click="$add['action']">{{ $add['label'] }}</x-ui.menu-item>
+                    @endforeach
+                @else
+                    <x-ui.menu-item icon="bi-tags" :href="route('learning.settings.categories')">Categorías</x-ui.menu-item>
+                @endif
+            </x-slot:menu>
             @if ($records->count())
                 <div class="learning-table-wrap">
                     <table class="md-table" aria-label="{{ $formation ? 'Contenido de '.$current->title : 'Formaciones' }}">
@@ -136,7 +140,7 @@
             @elseif (!$formation && ($search !== '' || $typeFilter !== '' || $categoryFilter !== '' || $statusFilter !== ''))
                 <x-ui.state variant="filtered-empty" icon="bi-search" message="No hay formaciones con estos filtros."><x-slot:actions><x-ui.action variant="text" wire:click="clearFilters">Limpiar filtros</x-ui.action></x-slot:actions></x-ui.state>
             @else
-                <x-ui.state variant="empty" icon="bi-mortarboard" :title="$formation ? 'Sin contenido todavía' : 'Aún no tienes formaciones'" :message="$formation ? ($childKinds ? 'Agrega '.$vocab->plurals($uid, $ftype, $childKinds).' desde el botón flotante.' : 'Agrega lo que necesitas desde el botón flotante.') : 'Organiza lo que quieres estudiar desde Agregar formación.'" />
+                <x-ui.state variant="empty" icon="bi-mortarboard" :title="$formation ? 'Sin contenido todavía' : 'Aún no tienes formaciones'" :message="$formation ? ($childKinds ? 'Agrega '.$vocab->plurals($uid, $ftype, $childKinds).' con el botón Agregar o desde el menú ⋯ de esta tarjeta.' : 'Esta formación todavía no admite contenido adicional.') : 'Organiza lo que quieres estudiar desde Agregar formación.'" />
             @endif
         </x-ui.management-card>
     @else

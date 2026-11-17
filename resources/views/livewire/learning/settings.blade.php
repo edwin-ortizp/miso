@@ -1,5 +1,15 @@
 <x-module-shell module="learning" class="learning-page" archetype="settings">
+    @if ($section === 'categories')
+        <x-slot:actions><x-module-actions :primary="['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']" /></x-slot:actions>
+    @endif
     @if ($message)<p role="status" class="learning-feedback">{{ $message }}</p>@endif
+    @if ($categoryMessage)<p role="status" class="learning-feedback">{{ $categoryMessage }}</p>@endif
+
+    <div class="module-settings-workspace">
+        <div>
+        @if ($section === 'categories')
+            @include('livewire.category.partials.section')
+        @else
 
     <form wire:submit="save" class="learning-vocabulary" id="learning-vocabulary">
         <x-ui.card variant="outlined" title="Vocabulario" icon="bi-spellcheck">
@@ -30,4 +40,8 @@
             </div>
         </x-ui.card>
     </form>
+        @endif
+        </div>
+        <x-settings-sections label="Secciones de Ajustes de Formación" :items="$sections" :current="$section" />
+    </div>
 </x-module-shell>

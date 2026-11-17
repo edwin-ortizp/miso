@@ -65,7 +65,7 @@ for (const width of [375, 768, 1440]) {
         } else expect(pins.x).toBeGreaterThanOrEqual(main.x + main.width);
         await page.locator('.learning-shortcuts a').filter({hasText: 'Cálculo diferencial'}).click();
         await expect(page).toHaveURL(new RegExp(`/learning/${fixture.degree}/units/${fixture.subject}`));
-        await expect(page.locator('.learning-path')).toContainText('Semestre 1');
+        await expect(page.locator('.learning-summary')).toContainText('Materia');
         await page.reload();
         await expect(page.locator('.learning-shortcuts')).toContainText('Cálculo diferencial');
         await page.goto('/learning');

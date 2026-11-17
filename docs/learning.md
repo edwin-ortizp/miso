@@ -6,7 +6,7 @@ La primera entrega de Formación lleva la base del prototipo Learning a la aplic
 
 Abre **Productividad → Formación**. Si personalizaste los módulos visibles, activa Formación en Ajustes → Módulos. La incorporación del módulo no cambia tu selección anterior.
 
-El FAB **Agregar formación** abre el formulario sobre la pantalla actual. Su menú ofrece Pregrado, Especialización, Maestría, Doctorado, Curso y Ruta personal. Puedes indicar categoría, institución o plataforma, descripción y fechas. Las categorías se administran desde el menú de la tabla o del detalle; no contienen materias.
+El FAB **Agregar formación** abre el formulario sobre la pantalla actual. Su menú ofrece Pregrado, Especialización, Maestría, Doctorado, Curso y Ruta personal. Puedes indicar categoría, institución o plataforma, descripción y fechas. Las categorías se administran en **Ajustes > Categorías** (vienen con Tecnología, Idiomas, Ciencias, Humanidades, Salud, Negocios, Arte y Otro); no contienen materias. En el detalle no hay migas: el regreso es la flecha de la barra, las etiquetas (tipo, estado, institución, fechas) van juntas y el menú ⋯ de la formación y el de la tarjeta «Contenido» ofrecen «Agregar …» además del botón flotante.
 
 - Pregrado, especialización, maestría y doctorado: semestres y materias directas; cada semestre contiene materias y cada materia, temas.
 - Curso: módulos y, dentro de ellos, temas.
