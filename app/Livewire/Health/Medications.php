@@ -51,7 +51,8 @@ class Medications extends Component
     public string $dose_unit = '';
     public string $form = '';
     public string $frequency_type = 'daily';
-    public string $timesText = '08:00';
+    /** @var list<string> Horarios HH:MM, uno por selector de hora. */
+    public array $times = ['08:00'];
     public string $interval_hours = '8';
     /** @var list<string> */
     public array $weekdays = [];
@@ -170,7 +171,7 @@ class Medications extends Component
         $this->dose_unit = (string) $medication->dose_unit;
         $this->form = (string) $medication->form;
         $this->frequency_type = $medication->frequency_type;
-        $this->timesText = implode(', ', $medication->times ?? []);
+        $this->times = array_values($medication->times ?? ['08:00']);
         $this->interval_hours = (string) ($medication->interval_hours ?? 8);
         $this->weekdays = array_map('strval', $medication->weekdays ?? []);
         $this->starts_on = $medication->starts_on->toDateString();
@@ -181,6 +182,26 @@ class Medications extends Component
         $this->showForm = true;
     }
 
+    /** Añade un selector de hora; por defecto, dos horas después del último horario. */
+    public function addTime(): void
+    {
+        if (count($this->times) >= 12) {
+            return;
+        }
+        $last = end($this->times) ?: '06:00';
+        $next = Carbon::createFromFormat('H:i', preg_match('/^\d{2}:\d{2}$/', $last) ? $last : '06:00')->addHours(2);
+        $this->times[] = $next->format('H:i');
+    }
+
+    public function removeTime(int $index): void
+    {
+        if (count($this->times) <= 1) {
+            return;
+        }
+        unset($this->times[$index]);
+        $this->times = array_values($this->times);
+    }
+
     public function closeForm(): void
     {
         $this->showForm = false;
@@ -189,7 +210,7 @@ class Medications extends Component
 
     public function save(): void
     {
-        $times = array_values(array_filter(array_map('trim', preg_split('/[,;\s]+/', $this->timesText) ?: [])));
+        $times = array_values(array_filter(array_map(fn ($time) => trim((string) $time), $this->times), fn ($time) => $time !== ''));
 
         $data = $this->remapErrors(fn () => SaveMedication::validate([
             'name' => $this->name,
@@ -205,7 +226,7 @@ class Medications extends Component
             'instructions' => $this->instructions === '' ? null : $this->instructions,
             'notes' => $this->notes === '' ? null : $this->notes,
             'is_sensitive' => $this->is_sensitive,
-        ]), ['times' => 'timesText']);
+        ]), []);
 
         SaveMedication::handle($data, $this->editingId ? Medication::findOrFail($this->editingId) : null);
 
@@ -263,7 +284,7 @@ class Medications extends Component
 
     /**
      * Las acciones validan con las claves del dominio (times, name…); aquí cada error cae en el
-     * campo de la pantalla que lo origina (timesText, adhocName…).
+     * campo de la pantalla que lo origina (times, adhocName…).
      *
      * @param  array<string, string>  $map
      */
@@ -291,7 +312,7 @@ class Medications extends Component
         $this->dose_unit = '';
         $this->form = '';
         $this->frequency_type = 'daily';
-        $this->timesText = '08:00';
+        $this->times = ['08:00'];
         $this->interval_hours = '8';
         $this->weekdays = [];
         $this->starts_on = '';

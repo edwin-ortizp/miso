@@ -52,6 +52,12 @@ class ComponentCatalog
             'description' => 'Activa o desactiva una opción binaria; reemplaza al checkbox suelto en formularios.',
             'usage' => '<x-ui.switch name="nextPurchase" label="Incluir en lista de compras" wire:model="nextPurchase" />',
         ],
+        'choice-chips' => [
+            'layer' => 'primitives',
+            'title' => 'Selector de opciones',
+            'description' => 'Selector táctil de opciones cortas (días de la semana, síntomas, escalas) con botones de 44 px y aria-pressed; se enlaza a una propiedad de Livewire.',
+            'usage' => '<x-ui.choice-chips name="weekdays" label="Días de la semana" shape="round" :options="$weekdayNames" :short="$weekdayShort" />',
+        ],
         'chip' => [
             'layer' => 'primitives',
             'title' => 'Chip',

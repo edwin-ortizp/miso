@@ -114,35 +114,54 @@
     </x-ui.management-card>
 
     @if ($showForm)
+        @php
+            $measurementErrors = $errors->hasAny(['type', 'value', 'value2', 'context', 'measuredAt']);
+            $measurementDetailErrors = $errors->hasAny(['pulse', 'health_event_id', 'notes']);
+        @endphp
         <div wire:key="health-measurement-form-{{ $editingId ?? 'new' }}">
-            <x-ui.form-dialog :open="$showForm" close="closeForm"
+            <x-ui.form-dialog :open="$showForm" close="closeForm" module="health" icon="bi-activity"
                               title="{{ $editingId ? 'Editar medición' : 'Registrar medición' }}"
-                              submit-action="save" id="health-measurement-form">
-                <x-ui.select name="type" label="Tipo" :options="$typeOptions" :selected="$type" wire:model.live="type" />
-                <x-ui.field name="value" :label="$definition['value_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
-                            step="any" wire:model="value" />
-                @isset($definition['value2_label'])
-                    <x-ui.field name="value2" :label="$definition['value2_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
-                                step="any" wire:model="value2" />
-                @endisset
-                @if ($contextOptions !== [])
-                    <x-ui.select name="context" label="Momento" placeholder="Sin indicar" :options="$contextOptions" :selected="$context" wire:model="context" />
-                @endif
-                <x-ui.field name="measuredAt" label="Fecha y hora" type="datetime-local" wire:model="measuredAt" />
+                              :submit="$editingId ? 'Actualizar medición' : 'Guardar medición'"
+                              submit-action="save" id="health-measurement-form"
+                              :sections="[
+                                  'measurement' => ['label' => 'Medición', 'icon' => 'bi-activity', 'error' => $measurementErrors],
+                                  'details' => ['label' => 'Detalles', 'icon' => 'bi-card-text', 'error' => $measurementDetailErrors],
+                              ]">
+                <x-ui.form-dialog-section name="measurement" title="Medición" description="Qué mediste y cuánto.">
+                    <div class="d-flex flex-column gap-3">
+                        <x-ui.select name="type" label="Tipo" :options="$typeOptions" :selected="$type" wire:model.live="type" />
+                        @isset($definition['value2_label'])
+                            <div class="md-field-pair">
+                                <x-ui.field name="value" :label="$definition['value_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
+                                            step="any" wire:model="value" />
+                                <x-ui.field name="value2" :label="$definition['value2_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
+                                            step="any" wire:model="value2" />
+                            </div>
+                        @else
+                            <x-ui.field name="value" :label="$definition['value_label'].' ('.$definition['unit'].')'" type="number" inputmode="decimal"
+                                        step="any" wire:model="value" />
+                        @endisset
+                        @if ($contextOptions !== [])
+                            <x-ui.select name="context" label="Momento" placeholder="Sin indicar" :options="$contextOptions" :selected="$context" wire:model="context" />
+                        @endif
+                        <x-ui.field name="measuredAt" label="Fecha y hora" type="datetime-local" wire:model="measuredAt" />
+                    </div>
+                </x-ui.form-dialog-section>
 
-                <details>
-                    <summary>Más detalle</summary>
-                    @isset($definition['limits']['pulse'])
-                        <x-ui.field name="pulse" label="Pulso (lpm)" type="number" inputmode="numeric" step="1" wire:model="pulse" />
-                    @endisset
-                    <x-ui.select name="health_event_id" label="Examen relacionado" placeholder="Ninguno"
-                                 help="Un «Chequeo o examen» de Salud al que pertenece esta medición."
-                                 :options="$examOptions" :selected="$health_event_id" wire:model="health_event_id" />
-                    <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
-                    <x-ui.switch name="isSensitive" label="Mantener oculta al asistente"
-                                 help="Las consultas amplias del asistente no la incluirán."
-                                 :checked="$isSensitive" wire:model="isSensitive" />
-                </details>
+                <x-ui.form-dialog-section name="details" title="Detalles" description="Pulso, examen relacionado, notas y privacidad.">
+                    <div class="d-flex flex-column gap-3">
+                        @isset($definition['limits']['pulse'])
+                            <x-ui.field name="pulse" label="Pulso (lpm)" type="number" inputmode="numeric" step="1" wire:model="pulse" />
+                        @endisset
+                        <x-ui.select name="health_event_id" label="Examen relacionado" placeholder="Ninguno"
+                                     help="Un «Chequeo o examen» de Salud al que pertenece esta medición."
+                                     :options="$examOptions" :selected="$health_event_id" wire:model="health_event_id" />
+                        <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
+                        <x-ui.switch name="isSensitive" label="Mantener oculta al asistente"
+                                     help="Las consultas amplias del asistente no la incluirán."
+                                     :checked="$isSensitive" wire:model="isSensitive" />
+                    </div>
+                </x-ui.form-dialog-section>
             </x-ui.form-dialog>
         </div>
     @endif

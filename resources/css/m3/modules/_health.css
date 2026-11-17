@@ -174,3 +174,40 @@
 @media (max-width: 1100px) { .health-body-card__stage { grid-template-columns: 1fr; } .health-heat-legend ul { grid-template-columns: repeat(5, auto); justify-content: start; gap: 6px 14px; } }
 @media (max-width: 767.98px) { .health-body-svg { max-height: 460px; } .health-heat-legend ul { grid-template-columns: repeat(3, auto); } .health-body-detail { flex-wrap: wrap; } }
 @media (prefers-reduced-motion: reduce) { .health-bz > path { transition: none; } .health-bz.is-pulse > path { animation: none; } }
+
+/* Lista de horarios (medicamentos): un selector de hora por fila. */
+.md-time-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.md-time-list legend {
+  float: none;
+  width: auto;
+  margin: 0 0 4px;
+  padding: 0;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.md-time-list__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Días del calendario del ciclo: objetivo táctil de 44 px. */
+.md-cycle-day {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+/* Acciones de una toma: Tomado, Omitir y Deshacer con objetivo táctil de 44 px. */
+.md-touch-action {
+  min-height: 2.75rem;
+}

@@ -75,7 +75,7 @@
                         @foreach ($week as $day)
                             <td wire:key="day-{{ $day['date']->toDateString() }}">
                                 @if ($day['in_month'])
-                                    <button type="button" class="md-btn-text md-btn--sm" wire:click="openDay('{{ $day['date']->toDateString() }}')"
+                                    <button type="button" class="md-btn-text md-btn--sm md-cycle-day" wire:click="openDay('{{ $day['date']->toDateString() }}')"
                                             aria-label="{{ $day['date']->translatedFormat('j \d\e F') }}{{ $day['period'] ? ', periodo' : '' }}{{ $day['logged'] ? ', con registro' : '' }}{{ $day['estimated'] ? ', ventana estimada' : '' }}{{ $day['today'] ? ', hoy' : '' }}">
                                         {{ $day['date']->day }}
                                         @if ($day['period']) <i class="bi bi-droplet-fill" aria-hidden="true"></i> @endif
@@ -151,38 +151,53 @@
     @endif
 
     @if ($dialog !== '')
+        @php
+            $cycleDayErrors = $errors->hasAny(['date', 'flow', 'symptoms', 'symptoms.*']);
+            $cycleDetailErrors = $errors->hasAny(['notes']);
+            $cycleSubmit = ['start' => 'Guardar inicio', 'end' => 'Guardar fin', 'day' => 'Guardar registro', 'edit' => 'Actualizar periodo'][$dialog] ?? 'Guardar';
+        @endphp
         <div wire:key="cycle-dialog-{{ $dialog }}-{{ $editingId ?? $date }}">
-            <x-ui.form-dialog :open="true" close="closeDialog" title="{{ $titles[$dialog] ?? 'Ciclo' }}"
-                              submit-action="save" id="cycle-form">
-                @if (in_array($dialog, ['start', 'edit'], true))
-                    <x-ui.field name="started_on" label="Empezó el" type="date" wire:model="started_on" />
-                @endif
-                @if (in_array($dialog, ['end', 'edit'], true))
-                    <x-ui.field name="ended_on" label="Terminó el" type="date" wire:model="ended_on"
-                                :help="$dialog === 'edit' ? 'Déjalo vacío si el periodo sigue en curso.' : null" />
-                @endif
+            <x-ui.form-dialog :open="true" close="closeDialog" module="health" icon="bi-droplet"
+                              title="{{ $titles[$dialog] ?? 'Ciclo' }}" :submit="$cycleSubmit"
+                              submit-action="save" id="cycle-form"
+                              :sections="$dialog === 'day' ? [
+                                  'day' => ['label' => 'Registro', 'icon' => 'bi-droplet', 'error' => $cycleDayErrors],
+                                  'details' => ['label' => 'Detalles', 'icon' => 'bi-card-text', 'error' => $cycleDetailErrors],
+                              ] : []">
                 @if ($dialog === 'day')
-                    <x-ui.field name="date" label="Día" type="date" wire:model="date" />
-                    <x-ui.select name="flow" label="Flujo" placeholder="Sin indicar" :options="$flows" :selected="$flow" wire:model="flow" />
-                    <fieldset>
-                        <legend class="md-body-medium">Síntomas</legend>
-                        @foreach ($symptomOptions as $key => $label)
-                            <label class="md-body-medium">
-                                <input type="checkbox" value="{{ $key }}" wire:model="symptoms"> {{ $label }}
-                            </label>
-                        @endforeach
-                        @error('symptoms.*') <p class="md-body-small" role="alert">{{ $message }}</p> @enderror
-                    </fieldset>
+                    <x-ui.form-dialog-section name="day" title="Registro del día" description="Cómo estuvo este día.">
+                        <div class="d-flex flex-column gap-3">
+                            <x-ui.field name="date" label="Día" type="date" wire:model="date" />
+                            <x-ui.select name="flow" label="Flujo" placeholder="Sin indicar" :options="$flows" :selected="$flow" wire:model="flow" />
+                            <x-ui.choice-chips name="symptoms" label="Síntomas" :options="$symptomOptions" />
+                        </div>
+                    </x-ui.form-dialog-section>
+
+                    <x-ui.form-dialog-section name="details" title="Detalles" description="Notas y privacidad.">
+                        <div class="d-flex flex-column gap-3">
+                            <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
+                            <x-ui.switch name="is_sensitive" label="Mantener oculto al asistente"
+                                         help="Recomendado. El asistente solo lo verá si se lo pides."
+                                         :checked="$is_sensitive" wire:model="is_sensitive" />
+                        </div>
+                    </x-ui.form-dialog-section>
+                @else
+                    <div class="d-flex flex-column gap-3">
+                        @if (in_array($dialog, ['start', 'edit'], true))
+                            <x-ui.field name="started_on" label="Empezó el" type="date" wire:model="started_on" />
+                        @endif
+                        @if (in_array($dialog, ['end', 'edit'], true))
+                            <x-ui.field name="ended_on" label="Terminó el" type="date" wire:model="ended_on"
+                                        :help="$dialog === 'edit' ? 'Déjalo vacío si el periodo sigue en curso.' : null" />
+                        @endif
+                        <x-ui.textarea name="notes" label="Notas (opcional)" wire:model="notes" />
+                        @if ($dialog === 'start')
+                            <x-ui.switch name="is_sensitive" label="Mantener oculto al asistente"
+                                         help="Recomendado. El asistente solo lo verá si se lo pides."
+                                         :checked="$is_sensitive" wire:model="is_sensitive" />
+                        @endif
+                    </div>
                 @endif
-                <details>
-                    <summary>Más detalle</summary>
-                    <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
-                    @if (in_array($dialog, ['start', 'day'], true))
-                        <x-ui.switch name="is_sensitive" label="Mantener oculto al asistente"
-                                     help="Recomendado. El asistente solo lo verá si se lo pides."
-                                     :checked="$is_sensitive" wire:model="is_sensitive" />
-                    @endif
-                </details>
             </x-ui.form-dialog>
         </div>
     @endif

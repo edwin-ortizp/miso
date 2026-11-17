@@ -55,7 +55,7 @@ class MedicationsModuleTest extends TestCase
             ->set('name', 'Metformina')
             ->set('dose_amount', '850')
             ->set('dose_unit', 'mg')
-            ->set('timesText', '08:00, 20:00')
+            ->set('times', ['08:00', '20:00'])
             ->call('save')
             ->assertHasNoErrors()
             ->assertSet('showForm', false)
@@ -73,10 +73,10 @@ class MedicationsModuleTest extends TestCase
         Livewire::actingAs($user)->test(Medications::class)
             ->call('openForm')
             ->set('name', '')
-            ->set('timesText', 'mañana')
+            ->set('times', ['mañana'])
             ->call('save')
-            ->assertHasErrors(['name', 'timesText'])
-            ->set('name', 'X')->set('timesText', '08:00')->set('frequency_type', 'weekdays')
+            ->assertHasErrors(['name', 'times.0'])
+            ->set('name', 'X')->set('times', ['08:00'])->set('frequency_type', 'weekdays')
             ->call('save')
             ->assertHasErrors(['weekdays'])
             ->set('weekdays', ['1', '3'])
@@ -158,12 +158,42 @@ class MedicationsModuleTest extends TestCase
         Livewire::actingAs($user)->test(Medications::class)
             ->call('edit', $med->id)
             ->assertSet('name', 'Losartán')
-            ->assertSet('timesText', '08:00, 20:00')
-            ->set('timesText', '09:00')
+            ->assertSet('times', ['08:00', '20:00'])
+            ->set('times', ['09:00'])
             ->call('save')
             ->assertHasNoErrors();
 
         $this->assertSame(['09:00'], $med->fresh()->times);
+    }
+
+    public function test_times_are_individual_selectors_that_can_be_added_and_removed(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test(Medications::class)
+            ->call('openForm')
+            ->assertSet('times', ['08:00'])
+            ->call('addTime')
+            ->assertSet('times', ['08:00', '10:00'])
+            ->call('removeTime', 0)
+            ->assertSet('times', ['10:00'])
+            ->call('removeTime', 0)
+            ->assertSet('times', ['10:00'])
+            ->assertSee('Agregar hora')
+            ->assertSee('Hora 1');
+    }
+
+    public function test_weekdays_use_the_touch_chip_selector_with_a_visible_privacy_switch(): void
+    {
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)->test(Medications::class)
+            ->call('openForm')
+            ->set('frequency_type', 'weekdays')
+            ->assertSee('md-choice-chips', false)
+            ->assertSee('aria-label="Miércoles"', false)
+            ->assertSee('Mantener oculto al asistente')
+            ->assertDontSee('Más detalle');
     }
 
     public function test_user_never_sees_or_touches_another_users_data(): void

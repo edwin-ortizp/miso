@@ -115,30 +115,50 @@
     </x-ui.management-card>
 
     @if ($showForm)
+        @php
+            $sleepErrors = $errors->hasAny(['slept_at', 'woke_at']);
+            $sleepDetailErrors = $errors->hasAny(['quality', 'notes']);
+        @endphp
         <div wire:key="sleep-form-{{ $editingId ?? 'new' }}">
-            <x-ui.form-dialog :open="$showForm" close="closeForm"
+            <x-ui.form-dialog :open="$showForm" close="closeForm" module="health" icon="bi-moon-stars"
                               title="{{ $editingId ? 'Editar sueño' : 'Registrar sueño' }}"
-                              submit-action="save" id="sleep-form">
-                <x-ui.field name="slept_at" label="Me dormí" type="datetime-local" wire:model="slept_at" />
-                <x-ui.field name="woke_at" label="Desperté" type="datetime-local" wire:model="woke_at" />
-                <details>
-                    <summary>Más detalle</summary>
-                    <x-ui.select name="quality" label="¿Cómo dormiste?" placeholder="Sin indicar" :options="$qualities" :selected="$quality" wire:model="quality" />
-                    <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
-                    <x-ui.switch name="is_sensitive" label="Mantener oculto al asistente"
-                                 help="Las consultas amplias del asistente no lo incluirán."
-                                 :checked="$is_sensitive" wire:model="is_sensitive" />
-                </details>
+                              :submit="$editingId ? 'Actualizar sueño' : 'Guardar sueño'"
+                              submit-action="save" id="sleep-form"
+                              :sections="[
+                                  'sleep' => ['label' => 'Sueño', 'icon' => 'bi-moon-stars', 'error' => $sleepErrors],
+                                  'details' => ['label' => 'Detalles', 'icon' => 'bi-card-text', 'error' => $sleepDetailErrors],
+                              ]">
+                <x-ui.form-dialog-section name="sleep" title="Sueño" description="Cuándo te dormiste y cuándo despertaste.">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="md-field-pair">
+                            <x-ui.field name="slept_at" label="Me dormí" type="datetime-local" wire:model="slept_at" />
+                            <x-ui.field name="woke_at" label="Desperté" type="datetime-local" wire:model="woke_at" />
+                        </div>
+                    </div>
+                </x-ui.form-dialog-section>
+
+                <x-ui.form-dialog-section name="details" title="Detalles" description="Cómo dormiste, notas y privacidad.">
+                    <div class="d-flex flex-column gap-3">
+                        <x-ui.choice-chips name="quality" label="¿Cómo dormiste?" :multiple="false" :options="$qualities" />
+                        <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
+                        <x-ui.switch name="is_sensitive" label="Mantener oculto al asistente"
+                                     help="Las consultas amplias del asistente no lo incluirán."
+                                     :checked="$is_sensitive" wire:model="is_sensitive" />
+                    </div>
+                </x-ui.form-dialog-section>
             </x-ui.form-dialog>
         </div>
     @endif
 
     @if ($showGoal)
         <div wire:key="sleep-goal-form">
-            <x-ui.form-dialog :open="$showGoal" close="closeGoal" title="Meta de horas de sueño"
+            <x-ui.form-dialog :open="$showGoal" close="closeGoal" module="health" icon="bi-bullseye"
+                              title="Meta de horas de sueño" submit="Guardar meta"
                               submit-action="saveGoal" id="sleep-goal-form">
-                <x-ui.field name="goalHours" label="Horas por noche" type="number" inputmode="decimal" step="0.5" min="4" max="14"
-                            help="Entre 4 y 14 horas. Por defecto 8." wire:model="goalHours" />
+                <div class="d-flex flex-column gap-3">
+                    <x-ui.field name="goalHours" label="Horas por noche" type="number" inputmode="decimal" step="0.5" min="4" max="14"
+                                help="Entre 4 y 14 horas. Por defecto 8." wire:model="goalHours" />
+                </div>
             </x-ui.form-dialog>
         </div>
     @endif

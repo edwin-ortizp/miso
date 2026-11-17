@@ -1,5 +1,5 @@
 # CHG-140 · Modales de Salud con el patrón visual de la app
-**Estado:** Aprobado
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -92,15 +92,20 @@ La auditoría mostró que los cuatro modales usan `x-ui.form-dialog` solo como c
 - Docs a actualizar: `docs/design-system.md` (nuevo componente de chips y regla de selectores de opciones táctiles) y la entrada del catálogo `/ui-catalog`.
 
 ## 7. Tareas
-- [ ] T1 · Selector de opciones tipo chip reutilizable (días, síntomas) — Resp: developer — Modelo: estandar — Archivos: componente, CSS, catálogo — Hecho cuando: ≥44 px, `aria-pressed`, publicado en `/ui-catalog` y `ui:conformance` limpio.
-- [ ] T2 · Modal de Medicamentos con secciones, días en chips y botones de 44 px — Resp: developer — Modelo: estandar — Archivos: `medications.blade.php` — Hecho cuando: cumple el boceto, los horarios son selectores de hora (sin texto libre, sin duplicados) y su test sigue verde.
-- [ ] T3 · Modal de Ciclo con secciones, síntomas en chips y privacidad visible — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php` — Hecho cuando: días del calendario de 44 px y test verde.
-- [ ] T4 · Modales de Sueño y Mediciones con secciones y pares de campos — Resp: developer — Modelo: estandar — Archivos: `sleep.blade.php`, `health-measurements.blade.php` — Hecho cuando: sin `<details>` nativos, calidad del sueño en peldaños 1-5 y validaciones visibles.
-- [ ] T5 · Pruebas de navegador y documentación — Resp: developer — Modelo: estandar — Archivos: spec nuevo, `docs/design-system.md` — Hecho cuando: pasan la matriz de tamaños, teclado y axe.
+- [x] T1 · Selector de opciones tipo chip reutilizable (días, síntomas) — Resp: developer — Modelo: estandar — Archivos: componente, CSS, catálogo — Hecho cuando: ≥44 px, `aria-pressed`, publicado en `/ui-catalog` y `ui:conformance` limpio.
+- [x] T2 · Modal de Medicamentos con secciones, días en chips y botones de 44 px — Resp: developer — Modelo: estandar — Archivos: `medications.blade.php` — Hecho cuando: cumple el boceto, los horarios son selectores de hora (sin texto libre, sin duplicados) y su test sigue verde.
+- [x] T3 · Modal de Ciclo con secciones, síntomas en chips y privacidad visible — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php` — Hecho cuando: días del calendario de 44 px y test verde.
+- [x] T4 · Modales de Sueño y Mediciones con secciones y pares de campos — Resp: developer — Modelo: estandar — Archivos: `sleep.blade.php`, `health-measurements.blade.php` — Hecho cuando: sin `<details>` nativos, calidad del sueño en peldaños 1-5 y validaciones visibles.
+- [x] T5 · Pruebas de navegador y documentación — Resp: developer — Modelo: estandar — Archivos: spec nuevo, `docs/design-system.md` — Hecho cuando: pasan la matriz de tamaños, teclado y axe.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: `x-ui.choice-chips` (variantes `pill` y `round`, `aria-pressed`, 44 px) publicado en `/ui-catalog`; modales de Medicamentos, Ciclo, Sueño y Mediciones con ícono, secciones (con error por sección), campos con espaciado y pares; sin `<details>`; privacidad visible; horarios de Medicamentos como selectores de hora con «Agregar hora» (`$times` en `Medications.php`); calidad del sueño con selección única; días del calendario de Ciclo y acciones de toma a 44 px.
+- Verificación local (PHP 8.4 en chroot): `PersonalExperienceTest`, `MedicationsModuleTest`, `MedicationReminderTest`, Cycle/Sleep/HealthMeasurements/HealthTrends/UiCatalog/UiPrimitives/UiPatterns en verde; 11 fallos preexistentes idénticos en la rama base (log-viewer, `catalog-chip`, deuda de `game/*`, capas CSS de `_game`/`_text-fields`, `test_pending_health_tasks…`, shell en `/`, `/bienvenida`). Playwright `health-dialogs.interaction.spec.js` pasa a 360/390/1440 (táctil ≥44 px, sin desbordes, axe sin serious/critical). `npm run build` correcto.
+- Nota: la franja de secciones en móvil depende del CHG-108 (aún En desarrollo); se ve correcta en las capturas a 390 px.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M) a partir de la auditoría de los modales de Salud.
 - 2026-11-17 — Decisión del usuario: los horarios de Medicamentos dejan de ser texto libre y pasan a selectores de hora individuales con «＋ hora» (no se admite escribir cualquier cosa). La calidad del sueño pasa a peldaños de 1 a 5.
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

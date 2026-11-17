@@ -51,12 +51,12 @@
                         </x-slot:leading>
                         <x-slot:trailing>
                             @if (in_array($row['state'], ['pending', 'overdue'], true))
-                                <x-ui.action variant="filled" size="sm" icon="bi-check2" aria-label="Marcar {{ $label }} como tomada"
+                                <x-ui.action variant="filled" class="md-touch-action" icon="bi-check2" aria-label="Marcar {{ $label }} como tomada"
                                              wire:click="take('{{ $med->id }}', '{{ $slot->format('Y-m-d H:i') }}')">Tomado</x-ui.action>
-                                <x-ui.action variant="text" size="sm" aria-label="Omitir {{ $label }}"
+                                <x-ui.action variant="text" class="md-touch-action" aria-label="Omitir {{ $label }}"
                                              wire:click="openSkip('{{ $med->id }}', '{{ $slot->format('Y-m-d H:i') }}')">Omitir</x-ui.action>
                             @else
-                                <x-ui.action variant="text" size="sm" icon="bi-arrow-counterclockwise" aria-label="Deshacer el registro de {{ $label }}"
+                                <x-ui.action variant="text" class="md-touch-action" icon="bi-arrow-counterclockwise" aria-label="Deshacer el registro de {{ $label }}"
                                              wire:click="undo('{{ $row['intake']->id }}')">Deshacer</x-ui.action>
                             @endif
                         </x-slot:trailing>
@@ -165,61 +165,93 @@
     </x-ui.management-card>
 
     @if ($showForm)
+        @php
+            $medicationErrors = $errors->hasAny(['name', 'dose_amount', 'dose_unit', 'frequency_type', 'times', 'times.*', 'interval_hours', 'weekdays', 'weekdays.*']);
+            $medicationDetailErrors = $errors->hasAny(['starts_on', 'ends_on', 'form', 'instructions', 'notes']);
+            $weekdayNames = [1 => 'Lunes', 2 => 'Martes', 3 => 'Miércoles', 4 => 'Jueves', 5 => 'Viernes', 6 => 'Sábado', 0 => 'Domingo'];
+            $weekdayShort = [1 => 'L', 2 => 'M', 3 => 'X', 4 => 'J', 5 => 'V', 6 => 'S', 0 => 'D'];
+        @endphp
         <div wire:key="medication-form-{{ $editingId ?? 'new' }}">
-            <x-ui.form-dialog :open="$showForm" close="closeForm"
+            <x-ui.form-dialog :open="$showForm" close="closeForm" module="health" icon="bi-capsule"
                               title="{{ $editingId ? 'Editar medicamento' : 'Registrar medicamento' }}"
-                              submit-action="save" id="medication-form">
-                <x-ui.field name="name" label="Nombre" maxlength="120" wire:model="name" />
-                <x-ui.field name="dose_amount" label="Dosis" type="number" inputmode="decimal" step="any" wire:model="dose_amount" />
-                <x-ui.field name="dose_unit" label="Unidad" maxlength="20" help="Por ejemplo: mg, ml, tabletas." wire:model="dose_unit" />
-                <x-ui.select name="frequency_type" label="Frecuencia" :options="$frequencies" :selected="$frequency_type" wire:model.live="frequency_type" />
-                <x-ui.field name="timesText" label="Horarios" help="Con formato HH:MM, separados por coma. Ejemplo: 08:00, 20:00." wire:model="timesText" />
-                @if ($frequency_type === 'every_hours')
-                    <x-ui.field name="interval_hours" label="Cada cuántas horas" type="number" min="1" max="24" step="1" wire:model="interval_hours" />
-                @endif
-                @if ($frequency_type === 'weekdays')
-                    <fieldset>
-                        <legend class="md-body-medium">Días de la semana</legend>
-                        @foreach ($weekdayOptions as $number => $dayLabel)
-                            <label class="md-body-medium">
-                                <input type="checkbox" value="{{ $number }}" wire:model="weekdays"> {{ $dayLabel }}
-                            </label>
-                        @endforeach
-                        @error('weekdays') <p class="md-body-small" role="alert">{{ $message }}</p> @enderror
-                    </fieldset>
-                @endif
-                <x-ui.field name="starts_on" label="Desde" type="date" wire:model="starts_on" />
+                              :submit="$editingId ? 'Actualizar medicamento' : 'Guardar medicamento'"
+                              submit-action="save" id="medication-form"
+                              :sections="[
+                                  'medication' => ['label' => 'Medicamento', 'icon' => 'bi-capsule', 'error' => $medicationErrors],
+                                  'details' => ['label' => 'Detalles', 'icon' => 'bi-card-text', 'error' => $medicationDetailErrors],
+                              ]">
+                <x-ui.form-dialog-section name="medication" title="Medicamento" description="Qué tomas, cuánto y cuándo.">
+                    <div class="d-flex flex-column gap-3">
+                        <x-ui.field name="name" label="Nombre" maxlength="120" wire:model="name" />
+                        <div class="md-field-pair">
+                            <x-ui.field name="dose_amount" label="Dosis" type="number" inputmode="decimal" step="any" wire:model="dose_amount" />
+                            <x-ui.field name="dose_unit" label="Unidad" maxlength="20" help="Por ejemplo: mg, ml, tabletas." wire:model="dose_unit" />
+                        </div>
+                        <x-ui.select name="frequency_type" label="Frecuencia" :options="$frequencies" :selected="$frequency_type" wire:model.live="frequency_type" />
+                        @if ($frequency_type === 'every_hours')
+                            <x-ui.field name="interval_hours" label="Cada cuántas horas" type="number" min="1" max="24" step="1" wire:model="interval_hours" />
+                        @endif
+                        @if ($frequency_type === 'weekdays')
+                            <x-ui.choice-chips name="weekdays" label="Días de la semana" shape="round"
+                                               :options="$weekdayNames" :short="$weekdayShort" />
+                        @endif
+                        <fieldset class="md-time-list">
+                            <legend class="md-label-medium">Horarios</legend>
+                            @foreach ($times as $index => $time)
+                                <div class="md-time-list__row" wire:key="medication-time-{{ $index }}">
+                                    <x-ui.field :name="'times.'.$index" :label="'Hora '.($index + 1)" type="time" wire:model="times.{{ $index }}" />
+                                    @if (count($times) > 1)
+                                        <x-ui.icon-action icon="bi-x-lg" label="Quitar hora {{ $index + 1 }}" wire:click="removeTime({{ $index }})" />
+                                    @endif
+                                </div>
+                            @endforeach
+                            @error('times') <p class="md-body-small md-choice-chips__error" role="alert">{{ $message }}</p> @enderror
+                            @if (count($times) < 12)
+                                <x-ui.action variant="text" icon="bi-plus-lg" wire:click="addTime">Agregar hora</x-ui.action>
+                            @endif
+                        </fieldset>
+                    </div>
+                </x-ui.form-dialog-section>
 
-                <details>
-                    <summary>Más detalle</summary>
-                    <x-ui.field name="ends_on" label="Hasta (opcional)" type="date" wire:model="ends_on" />
-                    <x-ui.field name="form" label="Presentación" maxlength="30" help="Por ejemplo: tableta, jarabe, inyección." wire:model="form" />
-                    <x-ui.field name="instructions" label="Indicaciones" maxlength="255" help="Por ejemplo: con comida." wire:model="instructions" />
-                    <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
-                    <x-ui.switch name="is_sensitive" label="Mantener oculto al asistente"
-                                 help="Las consultas amplias del asistente no lo incluirán."
-                                 :checked="$is_sensitive" wire:model="is_sensitive" />
-                </details>
+                <x-ui.form-dialog-section name="details" title="Detalles" description="Duración, indicaciones y privacidad.">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="md-field-pair">
+                            <x-ui.field name="starts_on" label="Desde" type="date" wire:model="starts_on" />
+                            <x-ui.field name="ends_on" label="Hasta (opcional)" type="date" wire:model="ends_on" />
+                        </div>
+                        <x-ui.field name="form" label="Presentación" maxlength="30" help="Por ejemplo: tableta, jarabe, inyección." wire:model="form" />
+                        <x-ui.field name="instructions" label="Indicaciones" maxlength="255" help="Por ejemplo: con comida." wire:model="instructions" />
+                        <x-ui.textarea name="notes" label="Notas" wire:model="notes" />
+                        <x-ui.switch name="is_sensitive" label="Mantener oculto al asistente"
+                                     help="Las consultas amplias del asistente no lo incluirán."
+                                     :checked="$is_sensitive" wire:model="is_sensitive" />
+                    </div>
+                </x-ui.form-dialog-section>
             </x-ui.form-dialog>
         </div>
     @endif
 
     @if ($showAdHoc)
         <div wire:key="medication-adhoc-form">
-            <x-ui.form-dialog :open="$showAdHoc" close="closeAdHoc" title="Registrar toma puntual"
+            <x-ui.form-dialog :open="$showAdHoc" close="closeAdHoc" module="health" icon="bi-capsule"
+                              title="Registrar toma puntual" submit="Registrar toma"
                               submit-action="saveAdHoc" id="medication-adhoc-form">
-                <x-ui.field name="adhocName" label="Medicamento" maxlength="120" wire:model="adhocName" />
-                <x-ui.field name="adhocDoseAmount" label="Dosis" type="number" inputmode="decimal" step="any" wire:model="adhocDoseAmount" />
-                <x-ui.field name="adhocDoseUnit" label="Unidad" maxlength="20" help="Por ejemplo: mg, ml, tabletas." wire:model="adhocDoseUnit" />
-                <x-ui.field name="adhocTakenAt" label="Cuándo la tomaste" type="datetime-local" wire:model="adhocTakenAt" />
-                <x-ui.textarea name="adhocNotes" label="Notas" wire:model="adhocNotes" />
+                <div class="d-flex flex-column gap-3">
+                    <x-ui.field name="adhocName" label="Medicamento" maxlength="120" wire:model="adhocName" />
+                    <div class="md-field-pair">
+                        <x-ui.field name="adhocDoseAmount" label="Dosis" type="number" inputmode="decimal" step="any" wire:model="adhocDoseAmount" />
+                        <x-ui.field name="adhocDoseUnit" label="Unidad" maxlength="20" help="Por ejemplo: mg, ml, tabletas." wire:model="adhocDoseUnit" />
+                    </div>
+                    <x-ui.field name="adhocTakenAt" label="Cuándo la tomaste" type="datetime-local" wire:model="adhocTakenAt" />
+                    <x-ui.textarea name="adhocNotes" label="Notas" wire:model="adhocNotes" />
+                </div>
             </x-ui.form-dialog>
         </div>
     @endif
 
     @if ($showSkip)
         <div wire:key="medication-skip-form">
-            <x-ui.form-dialog :open="$showSkip" close="closeSkip" title="Omitir toma" submit="Omitir"
+            <x-ui.form-dialog :open="$showSkip" close="closeSkip" module="health" icon="bi-skip-forward" title="Omitir toma" submit="Omitir"
                               submit-action="saveSkip" id="medication-skip-form">
                 <x-ui.field name="skipReason" label="Motivo (opcional)" maxlength="255" help="Por ejemplo: náuseas o viaje." wire:model="skipReason" />
             </x-ui.form-dialog>
