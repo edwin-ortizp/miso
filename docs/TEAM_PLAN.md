@@ -142,12 +142,12 @@ _Última actualización: 2026-11-17_
 | CHG-136 | M | Mi día renovado, Kanban por tandas, lista de tareas y guardianes | done | Cerrado | 7/7 |
 | CHG-137 | M | Guardián contextual en las siete pestañas de Salud | in-progress | En verificación | 3/3 |
 | CHG-138 | M | Formación base en la aplicación real | in-progress | En verificación | 4/4 |
-| CHG-139 | M | Funciones apagables dentro de cada módulo | to-do | Borrador | 0/6 |
-| CHG-140 | M | Modales de Salud con el patrón visual de la app | to-do | Borrador | 0/5 |
-| CHG-141 | M | Vocabulario de Formación según el tipo de estudio | to-do | Borrador | 0/4 |
-| CHG-142 | M | Buscar un hueco en la agenda para una tarea | to-do | Borrador | 0/6 |
-| CHG-143 | M | Ventana Buscar un hueco y agendar desde las tareas | to-do | Borrador | 0/4 |
-| CHG-144 | M | Horario fijo en tareas que no se pueden mover | to-do | Borrador | 0/5 |
+| CHG-139 | M | Funciones apagables dentro de cada módulo | to-do | Aprobado | 0/6 |
+| CHG-140 | M | Modales de Salud con el patrón visual de la app | to-do | Aprobado | 0/5 |
+| CHG-141 | M | Vocabulario de Formación según el tipo de estudio | to-do | Aprobado | 0/4 |
+| CHG-142 | M | Horario para planificar y cálculo de huecos libres | to-do | Aprobado | 0/4 |
+| CHG-143 | M | Ventana Buscar un hueco y agendar desde las tareas | to-do | Aprobado | 0/4 |
+| CHG-144 | M | Horario fijo en tareas que no se pueden mover | to-do | Aprobado | 0/5 |
 | CHG-145 | M | Huecos y cruces de agenda en el MCP | to-do | Borrador | 0/4 |
 <!-- team:table:end -->
 

@@ -1,9 +1,9 @@
 # CHG-139 · Funciones apagables dentro de cada módulo
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-093, CHG-095, CHG-134, CHG-137
 
 ## 0. En palabras simples
@@ -32,6 +32,7 @@ Hoy solo se activan o desactivan módulos completos. Se añade una segunda capa 
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: pantalla de ajustes (Ajustes → Personalizar módulos); no existe `## Anatomía` para ajustes, se sigue el patrón de `GameSettings`.
 - Flujo y cantidad de pasos: Ajustes → Personalizar módulos → mover un interruptor → (si hay dependientes) confirmar → Guardar. 3-4 pasos.
 - Qué contiene cada pantalla y qué es lo más importante: la lista existente de módulos; cada módulo activo con funciones se expande mostrando sus interruptores con una línea de descripción. Lo central: saber qué se queda y qué se va.
 - Estados: módulo apagado → su grupo de funciones oculto (se conserva lo guardado); funciones base → interruptor fijo en «Siempre activa»; error de validación → mensaje en línea; guardado → recarga de la sección como hoy.
@@ -112,3 +113,4 @@ flowchart LR
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Decisión del usuario: apagar = ocultar y detener avisos (rutas y MCP siguen igual); dependencias = aviso de confirmación con cascada.
 - 2026-11-17 — Decisión del usuario: Compras no es función base y se puede apagar. Las bases de Comidas quedan en Ingredientes y Planificación. Apagar Compras arrastra Historial de compras (comparten tablas de compras y tiendas).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)

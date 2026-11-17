@@ -1,9 +1,9 @@
 # CHG-144 · Horario fijo en tareas que no se pueden mover
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-142, CHG-143, CHG-145, CHG-052, CHG-072
 **Depende de:** ninguno técnico; se integra con CHG-142 (los fijos cuentan como ocupados y no movibles) y CHG-145 (el MCP no los mueve).
 
@@ -33,6 +33,7 @@ Algunas tareas ocupan la agenda en un momento que no se puede cambiar. Hoy todas
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: sección «Programación» del diálogo de tarea (`edit-task-dialog`); no existe `## Anatomía` para ese diálogo.
 - Flujo y cantidad de pasos: editar tarea → Programación → interruptor «Horario fijo» → guardar (1 paso extra, opcional).
 - Qué contiene cada pantalla y qué es lo más importante: el interruptor junto a fecha y hora; en lista y calendario, un candado discreto junto al título.
 - Estados (vacío / carga / error / éxito / validaciones): un intento de mover una tarea fija muestra aviso «Esta tarea tiene horario fijo. Quita el candado para moverla.» con acción «Quitar candado».
@@ -94,6 +95,5 @@ Programación
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado a partir de la decisión del usuario: hay tareas con agenda bloqueada (como una reunión) que no se pueden mover libremente.
-- Abierta: nombre visible. Propuesta: «Horario fijo».
-- Abierta: ¿una tarea fija editada desde el MCP debe rechazar cambios de fecha salvo que se envíe antes `schedule_locked=false`? Propuesta: sí, rechazar con mensaje claro.
-- Abierta: ¿CalDAV puede mover una tarea fija? Propuesta: sí (el origen externo manda), registrando el cambio.
+- 2026-11-17 — Decisión delegada por el usuario («identifica tú la mejor manera»): nombre visible «Horario fijo»; el MCP rechaza cambios de fecha de una tarea fija salvo que antes se envíe `schedule_locked=false`; CalDAV puede moverla (el origen externo manda) y no se bloquea.
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)

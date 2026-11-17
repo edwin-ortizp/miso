@@ -1,9 +1,9 @@
 # CHG-142 · Horario para planificar y cálculo de huecos libres
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-133, CHG-135, CHG-139, CHG-143, CHG-144, CHG-145
 **Dividido en:** CHG-142 (base, este), CHG-143 (ventana «Buscar un hueco»), CHG-144 (horario fijo), CHG-145 (MCP). Orden: 142 → 144 → 143 → 145.
 
@@ -32,6 +32,7 @@ No existe nada de disponibilidad, horario hábil ni zona horaria por persona. Es
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: pestaña de ajustes del módulo Tareas (arquetipo `settings`); no existe `## Anatomía` para ajustes.
 - Flujo y cantidad de pasos: Tareas → Ajustes → «Horario para planificar» → ajustar días → Guardar. 3-4 pasos.
 - Qué contiene cada pantalla y qué es lo más importante: siete filas (lunes a domingo) con interruptor «Planificar este día» y horas de inicio y fin; margen entre bloques; «Restaurar valores». Lo central: ver de un vistazo cuándo estás disponible.
 - Estados (vacío / carga / error / éxito / validaciones): fin ≤ inicio → error en línea; guardado → «Horario guardado.»; todos los días apagados → aviso «No se propondrán horarios mientras todos los días estén sin planificar».
@@ -97,3 +98,4 @@ Tareas › Ajustes › Horario para planificar
 - 2026-11-17 — Decisión del usuario: jornada por defecto lunes a viernes 8:00–18:00 y sábados 9:00–12:00 (domingo sin planificar); cada persona modifica sus propios horarios.
 - 2026-11-17 — Decisión del usuario: dividir el CHG original en varios de nivel M; el MCP debe poder encontrar huecos y cruces; las tareas con agenda bloqueada (reuniones) no se mueven libremente. Dividido en: CHG-143, CHG-144, CHG-145.
 - 2026-11-17 — Citas de salud y planes sin hora no bloquean el día (propuesta por defecto, revisable).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)

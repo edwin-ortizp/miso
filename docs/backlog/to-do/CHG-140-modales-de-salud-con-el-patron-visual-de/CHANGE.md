@@ -1,9 +1,9 @@
 # CHG-140 · Modales de Salud con el patrón visual de la app
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-108, CHG-126, CHG-129, CHG-130, CHG-133, CHG-137, CHG-139
 
 ## 0. En palabras simples
@@ -31,6 +31,7 @@ La auditoría mostró que los cuatro modales usan `x-ui.form-dialog` solo como c
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: diálogo de formulario con secciones de `x-ui.form-dialog` (como `habit-dialog`); no existe `## Anatomía` para formularios.
 - Flujo y cantidad de pasos: igual que hoy (abrir → completar → guardar). Lo esencial en la primera sección; lo opcional en la segunda, sin esconderlo.
 - Qué contiene cada pantalla y qué es lo más importante:
   - Medicamentos: «Medicamento» (nombre, dosis y unidad en par, frecuencia, días, horarios) y «Detalles» (inicio, fin, notas, privacidad).
@@ -102,3 +103,4 @@ La auditoría mostró que los cuatro modales usan `x-ui.form-dialog` solo como c
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M) a partir de la auditoría de los modales de Salud.
 - 2026-11-17 — Decisión del usuario: los horarios de Medicamentos dejan de ser texto libre y pasan a selectores de hora individuales con «＋ hora» (no se admite escribir cualquier cosa). La calidad del sueño pasa a peldaños de 1 a 5.
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)

@@ -77,4 +77,4 @@ No aplica — no hay pantalla nueva. La experiencia es la conversación con Clau
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado a partir de la decisión del usuario: el MCP debe poder encontrar huecos y detectar qué tareas se cruzan para ayudar a reorganizar la agenda; las tareas con agenda bloqueada (reuniones) no se mueven.
-- Abierta: nombres definitivos de las herramientas.
+- 2026-11-17 — Decisión delegada por el usuario («identifica tú la mejor manera»): nombres `find-task-slots-tool` y `list-schedule-conflicts-tool`.

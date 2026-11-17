@@ -1,9 +1,9 @@
 # CHG-143 · Ventana Buscar un hueco y agendar desde las tareas
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-016, CHG-017, CHG-051, CHG-052, CHG-070, CHG-072, CHG-101
 **Depende de:** CHG-142 (servicio de huecos y horario para planificar). Se divide del CHG-142 original; CHG-144 (horario fijo) se integra al final.
 
@@ -32,6 +32,7 @@ Es la parte visible de «encontrar un hueco» al estilo de Teams. La ventana con
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: diálogo de consulta y acción sobre el módulo Tareas (pantalla completa en móvil); no existe `## Anatomía` para diálogos.
 - Flujo y cantidad de pasos: ⋯ → «Buscar un hueco» → (opcional ajustar duración/rango) → tocar un horario → «Agendar aquí». Tres toques; los valores por defecto ya dan resultados.
 - Qué contiene cada pantalla y qué es lo más importante: tarea y duración arriba; **horarios sugeridos como chips agrupados por día**; línea de tiempo del día seleccionado con lo ocupado y el hueco resaltado. Lo central: ver rápido cuándo cabe y qué hay alrededor.
 - Estados (vacío / carga / error / éxito / validaciones): carga con skeleton; vacío con acciones (ampliar rango, acortar duración); error sereno con reintento; éxito con aviso y «Deshacer»; hueco ocupado → aviso y recálculo.
@@ -108,4 +109,5 @@ flowchart LR
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado dividiendo el CHG-142 original (Borrador, nivel M).
-- Propuesta: diálogo en escritorio y pantalla completa en móvil.
+- 2026-11-17 — Decisión delegada por el usuario («identifica tú la mejor manera»): diálogo en escritorio y pantalla completa en móvil.
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)

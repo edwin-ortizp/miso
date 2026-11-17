@@ -1,9 +1,9 @@
 # CHG-141 · Vocabulario de Formación según el tipo de estudio
-**Estado:** Borrador
+**Estado:** Aprobado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-138, CHG-096
 **Depende de:** CHG-138 (En verificación: cerrarlo antes de implementar; ambos tocan `page.blade.php`, `editor.blade.php`, `LearningPage.php`)
 
@@ -33,6 +33,7 @@ Hoy los tipos de formación son: carrera universitaria, especialización, maestr
 
 ## 3. UX/UI
 ### 3.1 Experiencia (ux-designer)
+- Plantilla: pestaña «Ajustes» del módulo (arquetipo `settings`, patrón de `plans.settings`); no existe `## Anatomía` para ajustes.
 - Flujo y cantidad de pasos: sin pasos nuevos en el uso diario. Personalizar: Formación → Ajustes → «Vocabulario» → editar palabras → guardar (3-4 pasos).
 - Qué contiene cada pantalla y qué es lo más importante: una tabla de términos agrupada por tipo de formación (singular, plural), con vista previa de cómo se leerá («Agregar materia»).
 - Estados (vacío / carga / error / éxito / validaciones): valor vacío → vuelve al default; texto demasiado largo (máx. 30) o repetido dentro del mismo tipo → error en línea; guardado → «Vocabulario guardado.»; botón «Restaurar valores».
@@ -97,4 +98,5 @@ Formación › Ajustes › Vocabulario
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M) a partir de la exploración de Formación.
 - 2026-11-17 — Decisión del usuario: en especialización, maestría y doctorado las unidades bajo el semestre se llaman «materia». El doctorado también usa semestres. El tipo «Carrera universitaria» pasa a llamarse «Pregrado».
-- Abierta: ¿el vocabulario se personaliza por tipo de formación (propuesto) o una sola vez para toda la app?
+- 2026-11-17 — Decisión delegada por el usuario («identifica tú la mejor manera»): el vocabulario se personaliza por tipo de formación.
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
