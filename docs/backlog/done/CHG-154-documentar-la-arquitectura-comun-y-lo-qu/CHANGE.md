@@ -1,9 +1,9 @@
 # CHG-154 · Documentar la arquitectura comun y lo que no se migra
-**Estado:** Borrador
+**Estado:** Cerrado
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** 2026-11-17
 **Relacionado:** CHG-148, CHG-149, CHG-150
 
 ## 0. En palabras simples
@@ -63,11 +63,18 @@ No aplica — sin pantallas.
 - Docs a actualizar: `docs/ARCHITECTURE.md`.
 
 ## 7. Tareas
-- [ ] T1 · Guía de piezas comunes y decisiones de no migrar — Resp: developer — Modelo: estandar — Archivos: `docs/ARCHITECTURE.md` — Hecho cuando: revisada.
-- [ ] T2 · Topes de ánimo como constantes — Resp: developer — Modelo: estandar — Archivos: ánimo — Hecho cuando: tests de ánimo en verde.
+- [x] T1 · Guía de piezas comunes y decisiones de no migrar — Resp: developer — Modelo: estandar — Archivos: `docs/ARCHITECTURE.md` — Hecho cuando: revisada.
+- [x] T2 · Topes de ánimo como constantes — Resp: developer — Modelo: estandar — Archivos: ánimo — Hecho cuando: tests de ánimo en verde.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: sección «Piezas comunes» y «Lo que no se migró a propósito» en `docs/ARCHITECTURE.md`; los topes de ánimo pasan a constantes nombradas (`MoodLogger::PICKER_SIZE` 8 y `MoodLogger::CHAT_QUICK_SIZE` 5) sin cambiar el comportamiento.
+- Verificación local: pruebas de ánimo en verde (ver abajo).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Parte del plan «arquitectura común» aceptado en la conversación (inventario de duplicación previo).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación
+- 2026-11-17 — Cerrado por el usuario (Compuerta 3) → done/
+- LECCIÓN: ninguna

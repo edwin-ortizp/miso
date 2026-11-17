@@ -14,7 +14,7 @@
                 ['label' => 'Escribir en el diario', 'icon' => 'bi-journal-text', 'href' => route('journal', ['date' => $selectedDate])],
             ]"
             :greeting="config('companion_chat.mood.greeting')"
-            :quick="$prioritizedStates->take(5)->map(fn ($state) => [
+            :quick="$prioritizedStates->take(\App\Support\MoodLogger::CHAT_QUICK_SIZE)->map(fn ($state) => [
                 'type' => 'tap', 'id' => 'mood-'.$state->id, 'emoji' => $state->emoji, 'label' => $state->text,
                 'aria' => 'Registrar '.$state->text, 'echo' => $state->emoji.' '.$state->text,
                 'call' => 'saveMood', 'args' => [(string) $state->id], 'reply' => config('companion_chat.mood.reply'),

@@ -17,6 +17,9 @@ class MoodLogger
     /** How many emotions the compact picker shows before "Más emociones". */
     public const PICKER_SIZE = 8;
 
+    /** Estados que ofrece el chat del compañero (un subconjunto de los priorizados del selector). */
+    public const CHAT_QUICK_SIZE = 5;
+
     public function record(MoodState $state, ?string $date = null): MoodEntry
     {
         $now = Carbon::now();

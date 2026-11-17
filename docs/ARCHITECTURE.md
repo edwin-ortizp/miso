@@ -22,3 +22,23 @@ Regla para todo cambio que agregue algo que corra solo en el servidor (cron, sch
 - **Hosting compartido:** sin colas ni procesos permanentes; cada corrida tiene un límite de tiempo y de lote y la siguiente continúa.
 - **Idempotente:** correrlo dos veces (cron duplicado, reintento, dos servidores) no repite la acción en su ventana (día, franja, minuto). Se garantiza en base de datos con una restricción única sobre (usuario, ventana) o una clave de idempotencia, no solo con banderas en memoria; además `->withoutOverlapping()` en el scheduler (`->onOneServer()` solo si algún día hay más de un servidor).
 - **Probado:** cada tarea tiene una prueba que la ejecuta dos veces seguidas y comprueba que el efecto ocurre una sola vez.
+
+## Piezas comunes (CHG-148 a CHG-153)
+Antes de copiar código entre módulos, usa la pieza común que ya existe:
+
+| Necesidad | Pieza | Dónde |
+|---|---|---|
+| Favoritos personales y «más usados» de un catálogo | `CatalogPicker` (`favoriteIds`, `ordered`, `quick`, `mostUsed`, `suggestions`), tabla `catalog_favorites`, trait `WithCatalogFavorites`, componente `x-ui.favorite-toggle` | `app/Services/Catalog`, `config/catalog_picker.php`; guía en `docs/catalog-favorites.md` |
+| Gestionar categorías de un catálogo (`user_categories`) | trait `ManagesUserCategories` y parcial `livewire/category/partials/section` | `app/Livewire/Concerns`; la página `categories.settings` también los usa |
+| Ajustes de un módulo con secciones | `SECTIONS` como mapa en el componente, rutas por sección con `->defaults('section', …)`, `#[Locked] $section` con 404 en `mount`, y `<x-settings-sections>` con las clases `module-settings-*` | Hidratación, Ejercicio, Ánimo, Formación, Comidas, Tareas, Planes y otros |
+| Listas de gestión con búsqueda, orden, filtros y paginación | `WithManagementCard` y `x-ui.management-card` | `app/Livewire/Concerns` |
+
+Para sumar un catálogo con favoritos basta registrarlo en `config/catalog_picker.php` (modelo y, si hay «más usados», tabla de registros y clave foránea).
+
+### Lo que no se migró a propósito
+- **`MoodState.is_pinned` y `sort_order`:** es un fijado con orden manual para el selector rápido y alimenta una API pública (`prioritized()`); `MoodLogger::prioritizedStates` ya mezcla fijados, recientes y frecuentes. El selector muestra `MoodLogger::PICKER_SIZE` (8) estados y el chat del compañero `MoodLogger::CHAT_QUICK_SIZE` (5).
+- **`LearningShortcut` (accesos directos de Formación):** apuntan a dos tipos (formación o unidad) con posición propia y se borran en cascada con su destino; no son un favorito de un catálogo de un solo modelo.
+- **`FavoriteCompanion`:** un único compañero con efectos de juego, guardado en la configuración del juego.
+- **Categorías con campos propios (`TaskCategory`, `MealCategory`, `PlanCategory`):** tienen color, prefijo, ícono o reasignación; solo comparten `x-ui.category-parent`.
+- **Ajustes con otro patrón:** `GameSettingsPage` y `SettingsPage` (grupos y un solo formulario), y las páginas de una sola sección (`HabitSettings`, `PomodoroSettings`, `NotificationSettings`).
+
