@@ -14,7 +14,7 @@ class WaterSettingsManagementTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_settings_page_renders_the_drink_types_card_and_goal_panel(): void
+    public function test_settings_page_renders_the_drink_types_card_and_the_section_nav(): void
     {
         $user = User::factory()->create(['daily_water_goal' => 2500]);
         $this->actingAs($user);
@@ -23,9 +23,48 @@ class WaterSettingsManagementTest extends TestCase
         $this->get('/water/settings')->assertOk()
             ->assertSee('Tipos de bebida')
             ->assertSee('Nueva bebida')
+            ->assertSee('Secciones de Ajustes de hidratación')
             ->assertSee('Meta diaria')
-            ->assertSee('2.500')
-            ->assertSee('md-module-workspace--rail', false);
+            ->assertSee('Categorías')
+            ->assertDontSee('Gestionar categorías');
+    }
+
+    public function test_goal_section_shows_and_saves_the_daily_goal(): void
+    {
+        $user = User::factory()->create(['daily_water_goal' => 2500]);
+        $this->actingAs($user);
+
+        $this->get('/water/settings/goal')->assertOk()->assertSee('2.500')->assertSee('Nueva meta (ml)');
+
+        Livewire::test(WaterSettings::class, ['section' => 'goal'])
+            ->set('dailyWaterGoal', 3000)->call('saveGoal')->assertHasNoErrors()
+            ->assertSet('message', 'Meta diaria actualizada.');
+
+        $this->assertSame(3000, $user->fresh()->daily_water_goal);
+    }
+
+    public function test_categories_section_manages_drink_categories(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $this->get('/water/settings/categories')->assertOk()->assertSee('Categorías · Bebidas')->assertSee('Crear categoría');
+
+        Livewire::test(WaterSettings::class, ['section' => 'categories'])
+            ->call('openCategoryForm')->assertSet('showCategoryForm', true)
+            ->set('categoryName', 'Calientes')->call('saveCategory')->assertHasNoErrors()
+            ->assertSet('showCategoryForm', false)
+            ->assertSee('Calientes')
+            ->call('openCategoryForm')->set('categoryName', 'calientes')->call('saveCategory')->assertHasErrors('categoryName');
+
+        $this->assertDatabaseHas('user_categories', ['user_id' => $user->id, 'domain' => 'drinks', 'name' => 'Calientes']);
+    }
+
+    public function test_unknown_section_is_not_found(): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        Livewire::test(WaterSettings::class, ['section' => 'nope'])->assertStatus(404);
     }
 
     public function test_fab_dialog_creates_a_drink_type_and_closes(): void

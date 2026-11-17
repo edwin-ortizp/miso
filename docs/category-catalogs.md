@@ -21,3 +21,6 @@ Al revertir, los valores predeterminados intactos conservan sus claves; las etiq
 Validación focal: `php artisan test --filter=CategoryHierarchyTest`. Las pruebas cubren jerarquía, aislamiento, gestión web, filtros, MCP, migración y reversión en SQLite. El despliegue requiere ejecutar las migraciones antes de servir las nuevas pantallas; las comprobaciones locales no ejecutan migraciones sobre datos personales.
 
 Los mockups contienen catálogos de demostración independientes por dominio y conservan sus cambios durante la sesión del navegador. Sus fuentes están en `docs/mockup-system`; `dist` se genera con el compilador compartido.
+
+## Gestión desde los ajustes del módulo (CHG-148)
+Las categorías de un catálogo se gestionan dentro de **Ajustes del módulo**, en una sección «Categorías» con barra lateral, y no con un botón suelto que sale a `/categories/{dominio}`. El CRUD es el trait `App\Livewire\Concerns\ManagesUserCategories` (propiedades con prefijo `category*`, acciones `openCategoryForm`, `saveCategory` y `deleteCategory`) y el parcial `livewire/category/partials/section.blade.php`; la navegación lateral es `x-settings-sections` con las clases `module-settings-*` de `_settings.css`. Bebidas ya lo usa (`/water/settings/categories`). La ruta `categories.settings` se mantiene para el resto de dominios y los enlaces antiguos.

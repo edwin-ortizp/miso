@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Water;
 
+use App\Livewire\Concerns\ManagesUserCategories;
 use App\Livewire\Concerns\WithManagementCard;
 use App\Models\DrinkLog;
 use App\Models\DrinkType;
 use App\Support\WaterGoal;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -16,7 +18,14 @@ use Livewire\Component;
 #[Title('Ajustes de hidratación')]
 class WaterSettings extends Component
 {
+    use ManagesUserCategories;
     use WithManagementCard;
+
+    public const SECTIONS = [
+        'drinks' => ['label' => 'Bebidas', 'icon' => 'bi-cup-straw', 'route' => 'water.settings'],
+        'goal' => ['label' => 'Meta diaria', 'icon' => 'bi-bullseye', 'route' => 'water.settings.goal'],
+        'categories' => ['label' => 'Categorías', 'icon' => 'bi-diagram-3', 'route' => 'water.settings.categories'],
+    ];
 
     public const FACTORS = [
         'all' => 'Todos',
@@ -36,6 +45,9 @@ class WaterSettings extends Component
         'factor' => 'Mayor factor',
         'logs' => 'Más registros',
     ];
+
+    #[Locked]
+    public string $section = 'drinks';
 
     #[Url(as: 'q', history: true, except: '')]
     public string $search = '';
@@ -65,8 +77,11 @@ class WaterSettings extends Component
 
     public string $message = '';
 
-    public function mount(): void
+    public function mount(string $section = 'drinks'): void
     {
+        abort_unless(array_key_exists($section, self::SECTIONS), 404);
+        $this->section = $section;
+        $this->useCategoryDomain('drinks');
         $this->dailyWaterGoal = auth()->user()->daily_water_goal;
         $this->normalizeFilters();
     }
@@ -232,15 +247,18 @@ class WaterSettings extends Component
             default => $query->orderBy('name'),
         };
 
+        $onDrinks = $this->section === 'drinks';
+
         return view('livewire.water.water-settings', [
-            'drinkTypes' => $query->paginate($this->perPage()),
-            'totalTypes' => DrinkType::count(),
+            'drinkTypes' => $onDrinks ? $query->paginate($this->perPage()) : null,
+            'totalTypes' => $onDrinks ? DrinkType::count() : 0,
             'activeFilters' => $this->activeFilters(),
             'factors' => self::FACTORS,
             'usages' => self::USAGES,
             'sorts' => self::SORTS,
             'goal' => WaterGoal::forUser(auth()->user()),
-        ]);
+            'sections' => self::SECTIONS,
+        ] + ($this->section === 'categories' ? $this->categoryViewData() : []));
     }
 
     private function normalizeFilters(): void

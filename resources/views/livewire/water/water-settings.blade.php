@@ -2,21 +2,40 @@
     use App\Support\Ui\DataState;
 
     $isFiltered = count($activeFilters) > 0 || trim($search) !== '';
-    $typesState = $drinkTypes->count() > 0
+    $typesState = $section !== 'drinks' ? null : ($drinkTypes->count() > 0
         ? DataState::CONTENT
-        : ($totalTypes > 0 && $isFiltered ? DataState::FILTERED_EMPTY : DataState::EMPTY);
+        : ($totalTypes > 0 && $isFiltered ? DataState::FILTERED_EMPTY : DataState::EMPTY));
 @endphp
 
-<x-module-shell module="water">
-    <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Nueva bebida', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
-    </x-slot:actions>
-
-    @if ($message)
-        <div class="md-card-filled mb-3 py-3" role="status">{{ $message }}</div>
+<x-module-shell module="water" title="Ajustes de hidratación" archetype="settings">
+    @if ($section !== 'goal')
+        <x-slot:actions>
+            <x-module-actions :primary="$section === 'categories'
+                ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
+                : ['label' => 'Nueva bebida', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        </x-slot:actions>
     @endif
 
-    <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'drinks')">Gestionar categorías</x-ui.action></nav>
+    @if ($message || $categoryMessage)
+        <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message ?: $categoryMessage }}</div>
+    @endif
+
+    <div class="module-settings-workspace">
+        <div>
+        @if ($section === 'categories')
+            @include('livewire.category.partials.section')
+        @elseif ($section === 'goal')
+            <x-context-widget title="Meta diaria" icon="bi-bullseye">
+                <p class="md-headline-small mb-0"><strong>{{ number_format($goal, 0, ',', '.') }}</strong> <span class="md-body-medium">ml al día</span></p>
+                <p class="md-body-small mb-3">≈ {{ number_format(round($goal / 250), 0, ',', '.') }} vasos de 250 ml</p>
+                <form wire:submit="saveGoal" class="d-grid gap-2" novalidate>
+                    <x-ui.field name="dailyWaterGoal" label="Nueva meta (ml)" type="number" min="500" max="10000" step="50" wire:model="dailyWaterGoal" />
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="md-btn-filled"><i class="bi bi-floppy" aria-hidden="true"></i><span>Guardar</span></button>
+                    </div>
+                </form>
+            </x-context-widget>
+        @else
     <x-ui.management-card id="water-drink-types" title="Tipos de bebida" icon="bi-cup-straw"
                           :count="'('.$drinkTypes->total().' / '.$totalTypes.')'" search="search" search-placeholder="Buscar bebida"
                           :active-filters="count($activeFilters)" :paginator="$drinkTypes" noun="bebidas"
@@ -78,20 +97,12 @@
                         message="Crea una bebida para usarla en tus registros de hidratación." />
         @endif
     </x-ui.management-card>
+        @endif
+        </div>
+        <x-settings-sections label="Secciones de Ajustes de hidratación" :items="$sections" :current="$section" />
+    </div>
 
-    <x-slot:rail>
-        <x-context-widget title="Meta diaria" icon="bi-bullseye">
-            <p class="md-headline-small mb-0"><strong>{{ number_format($goal, 0, ',', '.') }}</strong> <span class="md-body-medium">ml al día</span></p>
-            <p class="md-body-small mb-3">≈ {{ number_format(round($goal / 250), 0, ',', '.') }} vasos de 250 ml</p>
-            <form wire:submit="saveGoal" class="d-grid gap-2" novalidate>
-                <x-ui.field name="dailyWaterGoal" label="Nueva meta (ml)" type="number" min="500" max="10000" step="50" wire:model="dailyWaterGoal" />
-                <div class="d-flex justify-content-end">
-                    <button type="submit" class="md-btn-filled"><i class="bi bi-floppy" aria-hidden="true"></i><span>Guardar</span></button>
-                </div>
-            </form>
-        </x-context-widget>
-    </x-slot:rail>
-
+    @if ($section === 'drinks')
     <x-ui.form-dialog :open="$showForm" close="closeForm" submit-action="save" id="water-drink-type-dialog"
                       :title="$editingId ? 'Editar bebida' : 'Nueva bebida'" icon="bi-cup-straw" submit="Guardar">
         <div class="d-flex flex-column gap-3">
@@ -102,4 +113,5 @@
                         help="Multiplica los ml registrados: 1,00 hidrata igual que el agua." wire:model="hydrationFactor" />
         </div>
     </x-ui.form-dialog>
+    @endif
 </x-module-shell>

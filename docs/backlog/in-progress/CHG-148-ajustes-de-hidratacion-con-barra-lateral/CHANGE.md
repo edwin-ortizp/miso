@@ -1,9 +1,9 @@
 # CHG-148 · Ajustes de Hidratación con barra lateral de secciones
-**Estado:** Borrador
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-147
 
 ## 0. En palabras simples
@@ -72,12 +72,18 @@ Ajustes de Hidratación
 - Docs a actualizar: `docs/category-catalogs.md` (ubicación de la gestión de categorías de bebidas).
 
 ## 7. Tareas
-- [ ] T1 · Ajustes de Hidratación con secciones y barra lateral — Resp: developer — Modelo: estandar — Archivos: `WaterSettings.php`, vistas, rutas, `config/modules.php` — Hecho cuando: cumple el boceto y se quita el botón suelto.
-- [ ] T2 · Sección Categorías de bebidas — Resp: developer — Modelo: estandar — Archivos: `WaterSettings.php`, vista — Hecho cuando: se crean, editan y eliminan categorías.
-- [ ] T3 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests y capturas a 390/1440.
+- [x] T1 · Ajustes de Hidratación con secciones y barra lateral — Resp: developer — Modelo: estandar — Archivos: `WaterSettings.php`, vistas, rutas, `config/modules.php` — Hecho cuando: cumple el boceto y se quita el botón suelto.
+- [x] T2 · Sección Categorías de bebidas — Resp: developer — Modelo: estandar — Archivos: `WaterSettings.php`, vista — Hecho cuando: se crean, editan y eliminan categorías.
+- [x] T3 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests y capturas a 390/1440.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: `WaterSettings` con secciones Bebidas, Meta diaria y Categorías (rutas `water.settings`, `.goal`, `.categories`, 404 si no existe); base compartida: trait `ManagesUserCategories`, parcial de categorías, componente `x-settings-sections` y CSS `module-settings-*`; se retira el botón suelto y el panel lateral de meta. Documentado en `docs/category-catalogs.md`.
+- Desviación: `Category\CategorySettings` (ruta antigua) no se migró al trait para no romper `CategoryHierarchyTest`; queda como compatibilidad.
+- Verificación local (PHP 8.4 en chroot): `WaterSettingsManagementTest`, `WaterProgressViewsTest`, `WaterDrinkCatalogTest` y `CategoryHierarchyTest` en verde; `ModuleExperienceTest` mantiene los mismos 2 fallos preexistentes; `ui:conformance` sin deuda nueva (solo la de `game/*` y `task-list`); `npm run build` correcto. Capturas a 390 y 1440 px revisadas (Bebidas, Meta diaria y Categorías).
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Especificado a partir del plan de pulido aceptado en la conversación; pendiente la Compuerta 2 (aprobación del usuario).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

@@ -151,8 +151,8 @@ _Última actualización: 2026-11-17_
 | CHG-145 | M | Huecos y cruces de agenda en el MCP | in-progress | En verificación | 4/4 |
 | CHG-146 | M | Ciclo menstrual con calendario e historial en cards | to-do | Borrador | 0/4 |
 | CHG-147 | M | Formación: vista de detalle, acciones y ajustes con categorías | to-do | Borrador | 0/4 |
-| CHG-148 | M | Ajustes de Hidratación con barra lateral de secciones | to-do | Borrador | 0/3 |
-| CHG-149 | L | Ajustes con secciones y categorias en Ejercicio, Animo, Vehiculos, Habitos a evitar y Relaciones | to-do | Borrador | 0/0 |
+| CHG-148 | M | Ajustes de Hidratación con barra lateral de secciones | in-progress | En verificación | 3/3 |
+| CHG-149 | L | Ajustes con secciones y categorías en Ejercicio, Ánimo, Vehículos, Hábitos a evitar y Relaciones | to-do | Borrador | 0/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

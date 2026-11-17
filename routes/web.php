@@ -114,7 +114,9 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/water/calendar', WaterCalendar::class)->name('water.calendar');
     Route::get('/water/weekly', WaterWeekly::class)->name('water.weekly');
     Route::get('/water/range', WaterRange::class)->name('water.range');
-    Route::get('/water/settings', WaterSettings::class)->name('water.settings');
+    Route::get('/water/settings', WaterSettings::class)->name('water.settings')->defaults('section', 'drinks');
+    Route::get('/water/settings/goal', WaterSettings::class)->name('water.settings.goal')->defaults('section', 'goal');
+    Route::get('/water/settings/categories', WaterSettings::class)->name('water.settings.categories')->defaults('section', 'categories');
     Route::get('/exercise', ExerciseDaily::class)->name('exercise');
     Route::get('/exercise/statistics', ExerciseStatistics::class)->name('exercise.statistics');
     Route::get('/exercise/settings', ExerciseSettings::class)->name('exercise.settings');
