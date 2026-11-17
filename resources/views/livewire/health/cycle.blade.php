@@ -7,6 +7,7 @@
 @endphp
 
 <x-module-shell module="health">
+    <livewire:game.guardian-card module="health" variant="top" :section-context="$guardianContext" />
     <x-slot:actions>
         <x-module-actions :primary="['label' => $openCycle ? 'Terminó mi periodo' : 'Empezó mi periodo', 'icon' => 'bi-droplet', 'action' => $openCycle ? 'quickEnd' : 'quickStart']"
             :secondary="[
@@ -59,6 +60,7 @@
             <x-ui.icon-action icon="bi-chevron-left" label="Mes anterior" size="sm" wire:click="previousMonth" />
             <x-ui.icon-action icon="bi-chevron-right" label="Mes siguiente" size="sm" wire:click="nextMonth" />
         </x-slot:actions>
+        <div class="md-mcard__scroll" role="region" aria-label="Calendario del ciclo" tabindex="0">
         <table class="md-table" aria-label="Calendario de {{ $monthDate->translatedFormat('F Y') }}">
             <thead>
                 <tr>
@@ -87,6 +89,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
         <p class="md-body-small mb-0">
             <i class="bi bi-droplet-fill" aria-hidden="true"></i> Periodo ·
             <i class="bi bi-dot" aria-hidden="true"></i> Día registrado ·
@@ -183,4 +186,7 @@
             </x-ui.form-dialog>
         </div>
     @endif
+    <x-slot:rail>
+        @include('livewire.health.partials.guardian-rail')
+    </x-slot:rail>
 </x-module-shell>

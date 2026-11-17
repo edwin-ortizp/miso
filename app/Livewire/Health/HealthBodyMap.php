@@ -31,6 +31,13 @@ class HealthBodyMap extends Component
 
     public string $sort = 'count';
 
+    public ?string $selectedZone = null;
+
+    public function selectZone(?string $zone): void
+    {
+        $this->selectedZone = array_key_exists($zone ?? '', HealthEvent::BODY_AREAS) ? $zone : null;
+    }
+
     private int $eventTotal = 0;
 
     public function mount(): void
@@ -105,6 +112,7 @@ class HealthBodyMap extends Component
 
         return view('livewire.health.health-body-map', [
             'zones' => $this->sorted($zones),
+            'guardianContext' => \App\Services\Game\Guardian\HealthContext::body($zones, $this->eventTotal, $this->selectedZone),
             'mapZones' => $mapZones,
             'total' => $this->eventTotal,
             'activeFilters' => $this->activeFilters(),

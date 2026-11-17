@@ -121,25 +121,27 @@ _Última actualización: 2026-11-16_
 | CHG-115 | M | Registro MiSo: bienvenida en Refugio vivo | done | Cerrado | 2/2 |
 | CHG-116 | M | Bienvenida guiada con un primer hábito cotidiano | done | Cerrado | 4/4 |
 | CHG-117 | S | Aviso de ball en la campanita del header | done | Cerrado | 3/3 |
-| CHG-118 | S | Mover fecha de fin al cambiar la de inicio de una tarea | in-progress | En verificación | 1/1 |
-| CHG-119 | S | Objetivos: alinear fecha límite si el inicio la supera | in-progress | En verificación | 1/1 |
-| CHG-120 | M | Modo oscuro de la app | in-progress | En verificación | 4/4 |
-| CHG-121 | S | Objetivos: crear un KPI más intuitivo | in-progress | En verificación | 2/2 |
+| CHG-118 | S | Mover fecha de fin al cambiar la de inicio de una tarea | done | Cerrado | 1/1 |
+| CHG-119 | S | Objetivos: alinear fecha límite si el inicio la supera | done | Cerrado | 1/1 |
+| CHG-120 | M | Modo oscuro de la app | done | Cerrado | 4/4 |
+| CHG-121 | S | Objetivos: crear un KPI más intuitivo | done | Cerrado | 2/2 |
 | CHG-122 | M | Social A: perfil social y amistades por código o usuario | in-progress | En desarrollo | 6/6 |
-| CHG-123 | M | Social B: racha compartida sin castigo entre amigos | in-progress | En desarrollo | 5/5 |
-| CHG-124 | M | Social C: tabla semanal de amigos con doble opt-in | in-progress | En desarrollo | 5/5 |
-| CHG-125 | M | Social D: notificaciones de amistad y racha compartida | in-progress | En desarrollo | 4/4 |
-| CHG-126 | M | Salud: base de mediciones y presión arterial | in-progress | En verificación | 3/3 |
-| CHG-127 | S | Salud: glucosa en sangre | in-progress | En verificación | 2/2 |
-| CHG-128 | S | Salud: creatinina y laboratorios | in-progress | En verificación | 2/2 |
-| CHG-129 | M | Salud: seguimiento del sueño | in-progress | En verificación | 4/4 |
-| CHG-130 | L | Salud: ciclo menstrual | in-progress | En verificación | 6/6 |
-| CHG-131 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | in-progress | En verificación | 2/2 |
-| CHG-132 | M | Salud: tendencias y contexto de mediciones | in-progress | En verificación | 4/4 |
-| CHG-133 | M | Salud: medicamentos tomados y por tomar (con MCP) | in-progress | En verificación | 4/4 |
-| CHG-134 | M | Salud: recordatorios de medicamentos con el cron existente | in-progress | En verificación | 4/4 |
-| CHG-135 | M | Auditoría integral: consultas repetidas, suite de pruebas y pulido | to-do | Aprobado | 6/6 |
-| CHG-136 | M | Mi día renovado, Kanban por tandas, lista de tareas y guardianes | to-do | Aprobado | 0/7 |
+| CHG-123 | M | Social B: racha compartida sin castigo entre amigos | done | Cerrado | 5/5 |
+| CHG-124 | M | Social C: tabla semanal de amigos con doble opt-in | done | Cerrado | 5/5 |
+| CHG-125 | M | Social D: notificaciones de amistad y racha compartida | done | Cerrado | 4/4 |
+| CHG-126 | M | Salud: base de mediciones y presión arterial | done | Cerrado | 3/3 |
+| CHG-127 | S | Salud: glucosa en sangre | done | Cerrado | 2/2 |
+| CHG-128 | S | Salud: creatinina y laboratorios | done | Cerrado | 2/2 |
+| CHG-129 | M | Salud: seguimiento del sueño | done | Cerrado | 4/4 |
+| CHG-130 | L | Salud: ciclo menstrual | done | Cerrado | 6/6 |
+| CHG-131 | S | Salud: peso, frecuencia cardiaca, saturación y temperatura | done | Cerrado | 2/2 |
+| CHG-132 | M | Salud: tendencias y contexto de mediciones | done | Cerrado | 4/4 |
+| CHG-133 | M | Salud: medicamentos tomados y por tomar (con MCP) | done | Cerrado | 4/4 |
+| CHG-134 | M | Salud: recordatorios de medicamentos con el cron existente | done | Cerrado | 4/4 |
+| CHG-135 | M | Auditoría integral: consultas repetidas, suite de pruebas y pulido | done | Cerrado | 6/6 |
+| CHG-136 | M | Mi día renovado, Kanban por tandas, lista de tareas y guardianes | done | Cerrado | 7/7 |
+| CHG-137 | M | Guardián contextual en las siete pestañas de Salud | in-progress | En verificación | 3/3 |
+| CHG-138 | M | Formación base en la aplicación real | in-progress | En verificación | 4/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

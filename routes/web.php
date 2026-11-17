@@ -192,6 +192,10 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/plans/settings', \App\Livewire\Plan\PlanSettings::class)->name('plans.settings');
     Route::get('/plans', PlanIndex::class)->name('plans');
     Route::get('/plans/{plan}', PlanShow::class)->name('plans.show');
+    Route::get('/learning', \App\Livewire\Learning\LearningPage::class)->name('learning');
+    Route::get('/learning/{formation}', \App\Livewire\Learning\LearningPage::class)->name('learning.show');
+    Route::get('/learning/{formation}/units/{unit}', \App\Livewire\Learning\LearningPage::class)->name('learning.units.show');
+
     Route::get('/goals', GoalIndex::class)->name('goals');
     Route::get('/goals/{goal}', GoalDetail::class)->name('goals.show');
     Route::get('/statistics', StatisticsDashboard::class)->name('statistics');

@@ -6,6 +6,7 @@
 @endphp
 
 <x-module-shell module="health">
+    <livewire:game.guardian-card module="health" variant="top" :section-context="$guardianContext" />
     <p class="md-body-medium" id="trends-notice">
         MiSo muestra la evolución de lo que registras. No diagnostica ni reemplaza a tu profesional de salud.
     </p>
@@ -73,4 +74,7 @@
             </p>
         </x-ui.section>
     @endif
+    <x-slot:rail>
+        @include('livewire.health.partials.guardian-rail')
+    </x-slot:rail>
 </x-module-shell>

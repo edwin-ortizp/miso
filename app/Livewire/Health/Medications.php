@@ -317,6 +317,7 @@ class Medications extends Component
 
         return view('livewire.health.medications', [
             'today' => $today,
+            'guardianContext' => \App\Services\Game\Guardian\HealthContext::medications($today),
             'takenToday' => $today->whereIn('state', ['taken', 'skipped'])->count(),
             'medications' => $medications,
             'history' => $history,

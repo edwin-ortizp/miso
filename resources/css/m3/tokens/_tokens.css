@@ -429,3 +429,6 @@ body {
 :root[data-theme='dark'] [data-module='health'] {
   --md-module-on-action: #4A0A0A;
 }
+
+/* Formación shares the prototype primary accent, including theme changes. */
+[data-module='learning'] { --md-module-accent: var(--md-sys-color-primary); }

@@ -178,6 +178,7 @@ class Sleep extends Component
 
         return view('livewire.health.sleep', [
             'goal' => $goal,
+            'guardianContext' => \App\Services\Game\Guardian\HealthContext::sleep($last, $goal, SleepProgress::summary($week, $goal)),
             'last' => $last,
             'weekSummary' => SleepProgress::summary($week, $goal),
             'history' => $history,
