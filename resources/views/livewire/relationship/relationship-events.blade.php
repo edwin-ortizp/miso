@@ -9,7 +9,6 @@
     @php
         $eventFilterCount = collect([$showArchived, $includeSensitive, $relationFilter, $categoryFilter])->filter()->count();
     @endphp
-    <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'relationship-events')">Gestionar categorías</x-ui.action></nav>
     <x-ui.management-card id="relationship-events" title="Acontecimientos" icon="bi-calendar-event" :count="'('.$events->total().')'"
                           search="search" search-placeholder="Buscar acontecimientos" :active-filters="$eventFilterCount"
                           :paginator="$events" noun="acontecimientos" alpine="openMenu: null">

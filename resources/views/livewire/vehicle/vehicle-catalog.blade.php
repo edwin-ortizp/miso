@@ -13,17 +13,23 @@
 @endphp
 
 <x-module-shell module="vehicles" title="Catálogo de mantenimientos" subtitle="Plantillas base y personales para tu garaje." icon="bi-tools" archetype="list" :back="\App\Support\Ui\Tabs\VehicleTabs::back()">
-    <x-slot:actions><x-module-actions mobile-style="inline" :primary="['label' => 'Nueva plantilla', 'icon' => 'bi-plus-lg', 'action' => 'openTemplateForm']" /></x-slot:actions>
+    <x-slot:actions><x-module-actions mobile-style="inline" :primary="$section === 'categories'
+        ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
+        : ['label' => 'Nueva plantilla', 'icon' => 'bi-plus-lg', 'action' => 'openTemplateForm']" /></x-slot:actions>
 
 
-    @if ($catalogMessage)
-        <x-ui.snackbar>{{ $catalogMessage }}</x-ui.snackbar>
+    @if ($catalogMessage || $categoryMessage)
+        <x-ui.snackbar>{{ $catalogMessage ?: $categoryMessage }}</x-ui.snackbar>
     @endif
 
     @php
         $catalogActive = count(array_filter([$catalogCategory, $catalogSource, $catalogVehicleType, $catalogPowerSource, $catalogTransmissionType], static fn ($value) => $value !== ''));
     @endphp
-    <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'maintenance')">Gestionar categorías</x-ui.action></nav>
+    <div class="module-settings-workspace">
+        <div>
+        @if ($section === 'categories')
+            @include('livewire.category.partials.section')
+        @else
     <x-ui.management-card clear="clearCatalogFilters" id="vehicle-catalog" title="Plantillas" icon="bi-tools" :count="'('.$catalogTemplates->total().')'"
                           search="catalogSearch" search-placeholder="Buscar nombre o descripción" :active-filters="$catalogActive"
                           :paginator="$catalogTemplates" noun="plantillas" alpine="openMenu: null">
@@ -111,6 +117,12 @@
             </x-ui.state>
         @endif
     </x-ui.management-card>
+        @endif
+        </div>
+        <x-settings-sections label="Secciones del catálogo de mantenimientos" :items="$sections" :current="$section" />
+    </div>
 
-    @include('livewire.vehicle.partials.template-form')
+    @if ($section === 'templates')
+        @include('livewire.vehicle.partials.template-form')
+    @endif
 </x-module-shell>

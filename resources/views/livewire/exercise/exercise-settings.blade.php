@@ -4,16 +4,20 @@
 
 <x-module-shell module="exercise" archetype="settings">
     <x-slot:actions>
-        <x-module-actions
-            :primary="['label' => 'Nuevo tipo', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
- />
+        <x-module-actions :primary="$section === 'categories'
+            ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
+            : ['label' => 'Nuevo tipo', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
     </x-slot:actions>
 
-    @if ($message)
-        <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message }}</div>
+    @if ($message || $categoryMessage)
+        <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message ?: $categoryMessage }}</div>
     @endif
 
-    <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'exercise')">Gestionar categorías</x-ui.action></nav>
+    <div class="module-settings-workspace">
+        <div>
+        @if ($section === 'categories')
+            @include('livewire.category.partials.section')
+        @else
     <x-ui.management-card id="exercise-types" title="Tipos de ejercicio" icon="bi-tags" :count="'('.$types->total().' / '.$totalCount.')'"
                           search="search" search-placeholder="Buscar tipo de ejercicio" :active-filters="$category !== '' ? 1 : 0"
                           :paginator="$types" noun="tipos">
@@ -90,6 +94,10 @@
         @endif
     @endforelse
     </x-ui.management-card>
+        @endif
+        </div>
+        <x-settings-sections label="Secciones de Ajustes de ejercicio" :items="$sections" :current="$section" />
+    </div>
 
     <x-slot:rail>
         <x-context-widget title="Meta diaria" icon="bi-bullseye">
@@ -104,6 +112,7 @@
         </x-context-widget>
     </x-slot:rail>
 
+    @if ($section === 'types')
     <x-ui.form-dialog :open="$showForm" close="closeForm" submit-action="save" id="exercise-type-dialog"
                       :title="$editingId ? 'Editar tipo de ejercicio' : 'Nuevo tipo de ejercicio'" icon="bi-tags"
                       :submit="$editingId ? 'Actualizar' : 'Crear tipo'">
@@ -142,4 +151,5 @@
             </div>
         @endif
     </x-ui.form-dialog>
+    @endif
 </x-module-shell>

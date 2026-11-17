@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Vehicle;
 
+use App\Livewire\Concerns\ManagesUserCategories;
 use App\Models\MaintenanceTemplate;
 use App\Models\VehicleMaintenancePlan;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -15,7 +17,16 @@ use App\Livewire\Concerns\WithManagementCard;
 #[Title('Catálogo de mantenimientos')]
 class VehicleCatalog extends Component
 {
+    use ManagesUserCategories;
     use WithManagementCard;
+
+    public const SECTIONS = [
+        'templates' => ['label' => 'Plantillas', 'icon' => 'bi-tools', 'route' => 'vehicles.catalog'],
+        'categories' => ['label' => 'Categorías', 'icon' => 'bi-diagram-3', 'route' => 'vehicles.catalog.categories'],
+    ];
+
+    #[Locked]
+    public string $section = 'templates';
 
     public bool $showTemplateForm = false;
 
@@ -133,6 +144,13 @@ class VehicleCatalog extends Component
         return MaintenanceTemplate::availableTo((int) auth()->id());
     }
 
+    public function mount(string $section = 'templates'): void
+    {
+        abort_unless(array_key_exists($section, self::SECTIONS), 404);
+        $this->section = $section;
+        $this->useCategoryDomain('maintenance');
+    }
+
     private function resetTemplateForm(): void
     {
         $this->reset('editingTemplateId', 'templateName', 'templateCategory', 'templateDescription', 'templateVehicleTypes', 'templatePowerSources', 'templateTransmissionTypes', 'templateDefaultIntervalDays', 'templateDefaultIntervalUsage');
@@ -166,6 +184,7 @@ class VehicleCatalog extends Component
         }
         $catalogTemplates = $query->orderBy('category')->orderBy('name')->paginate($this->perPage());
 
-        return view('livewire.vehicle.vehicle-catalog', compact('catalogTemplates', 'catalogCategories'));
+        return view('livewire.vehicle.vehicle-catalog', ['catalogTemplates' => $catalogTemplates, 'catalogCategories' => $catalogCategories, 'sections' => self::SECTIONS]
+            + ($this->section === 'categories' ? $this->categoryViewData() : []));
     }
 }

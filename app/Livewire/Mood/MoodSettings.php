@@ -2,10 +2,12 @@
 
 namespace App\Livewire\Mood;
 
+use App\Livewire\Concerns\ManagesUserCategories;
 use App\Models\MoodState;
 use App\Support\DefaultMoodStates;
 use App\Support\MoodCatalog;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -19,7 +21,17 @@ use App\Livewire\Concerns\WithManagementCard;
 #[Title('Ajustes de emociones')]
 class MoodSettings extends Component
 {
+    use ManagesUserCategories;
     use WithManagementCard;
+
+    public const SECTIONS = [
+        'states' => ['label' => 'Catálogo de emociones', 'icon' => 'bi-emoji-smile', 'route' => 'mood.settings'],
+        'categories' => ['label' => 'Categorías', 'icon' => 'bi-diagram-3', 'route' => 'mood.settings.categories'],
+    ];
+
+    #[Locked]
+    public string $section = 'states';
+
     #[Url(as: 'q', history: true, keep: true)]
     public string $search = '';
 
@@ -211,6 +223,13 @@ class MoodSettings extends Component
         return ['status', 'category'];
     }
 
+    public function mount(string $section = 'states'): void
+    {
+        abort_unless(array_key_exists($section, self::SECTIONS), 404);
+        $this->section = $section;
+        $this->useCategoryDomain('mood');
+    }
+
     public function render()
     {
         $term = trim($this->search);
@@ -224,13 +243,14 @@ class MoodSettings extends Component
             ->paginate($this->perPage());
 
         return view('livewire.mood.mood-settings', [
+            'sections' => self::SECTIONS,
             'states' => $states,
             'categories' => \App\Support\CategoryCatalog::options('mood'),
             'activeCount' => MoodState::active()->count(),
             'totalCount' => MoodState::count(),
             'pinnedCount' => MoodState::active()->where('is_pinned', true)->count(),
             'missingDefaults' => count(DefaultMoodStates::all()) - MoodState::whereNotNull('default_key')->count(),
-        ]);
+        ] + ($this->section === 'categories' ? $this->categoryViewData() : []));
     }
 
     /** @return array<string, array<int, mixed>> */

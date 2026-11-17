@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Exercise;
 
+use App\Livewire\Concerns\ManagesUserCategories;
 use App\Models\ExerciseLog;
 use App\Models\ExerciseType;
 use App\Support\ExerciseProgress;
@@ -9,6 +10,7 @@ use App\Support\DefaultExerciseTypes;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Layout;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -23,6 +25,15 @@ use App\Livewire\Concerns\WithManagementCard;
 class ExerciseSettings extends Component
 {
     use WithManagementCard;
+    use ManagesUserCategories;
+
+    public const SECTIONS = [
+        'types' => ['label' => 'Tipos de ejercicio', 'icon' => 'bi-tags', 'route' => 'exercise.settings'],
+        'categories' => ['label' => 'Categorías', 'icon' => 'bi-diagram-3', 'route' => 'exercise.settings.categories'],
+    ];
+
+    #[Locked]
+    public string $section = 'types';
     #[Url(as: 'q', history: true, keep: true)]
     public string $search = '';
 
@@ -51,8 +62,11 @@ class ExerciseSettings extends Component
 
     public ?int $dailyExerciseMinutes = null;
 
-    public function mount(): void
+    public function mount(string $section = 'types'): void
     {
+        abort_unless(array_key_exists($section, self::SECTIONS), 404);
+        $this->section = $section;
+        $this->useCategoryDomain('exercise');
         $this->dailyExerciseMinutes = auth()->user()->daily_exercise_minutes ?: ExerciseProgress::DEFAULT_DAILY_MINUTES;
     }
 
@@ -246,6 +260,7 @@ class ExerciseSettings extends Component
         $deleting = $this->deletingId ? ExerciseType::withCount('logs')->find($this->deletingId) : null;
 
         return view('livewire.exercise.exercise-settings', [
+            'sections' => self::SECTIONS,
             'groups' => $groups,
             'types' => $types,
             'categories' => \App\Support\CategoryCatalog::options('exercise'),
@@ -256,7 +271,7 @@ class ExerciseSettings extends Component
                 ? ExerciseType::whereKeyNot($deleting->id)->orderBy('name')->get()
                     ->mapWithKeys(fn ($type) => [$type->id => trim(($type->icon ?? '').' '.$type->name)])->all()
                 : [],
-        ]);
+        ] + ($this->section === 'categories' ? $this->categoryViewData() : []));
     }
 
     protected function validationAttributes(): array

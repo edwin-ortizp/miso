@@ -1,9 +1,9 @@
 # CHG-149 · Ajustes con secciones y categorías en Ejercicio, Ánimo, Vehículos, Hábitos a evitar y Relaciones
-**Estado:** Borrador
+**Estado:** En verificación
 **Nivel:** L
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-147, CHG-148
 
 ## 0. En palabras simples
@@ -82,13 +82,19 @@ Ajustes de Relaciones
 - Docs a actualizar: `docs/category-catalogs.md`, `docs/design-system.md` (patrón «ajustes con secciones»).
 
 ## 7. Tareas
-- [ ] T1 · Ajustes de Ejercicio y Ánimo con secciones y categorías — Resp: developer — Modelo: razonamiento — Archivos: componentes, vistas, rutas, `config/modules.php` — Hecho cuando: sin botón suelto y tests verdes.
-- [ ] T2 · Ajustes nuevos de Vehículos — Resp: developer — Modelo: razonamiento — Archivos: `VehicleSettings`, vistas, rutas — Hecho cuando: plantillas y categorías en secciones, redirección del catálogo antiguo.
-- [ ] T3 · Ajustes nuevos de Hábitos a evitar y Relaciones — Resp: developer — Modelo: razonamiento — Archivos: componentes nuevos, vistas, rutas, pestañas — Hecho cuando: categorías gestionables y botón retirado.
-- [ ] T4 · Pruebas y documentación — Resp: developer — Modelo: razonamiento — Archivos: tests, docs — Hecho cuando: pasan los tests y capturas a 390/1440.
+- [x] T1 · Ajustes de Ejercicio y Ánimo con secciones y categorías — Resp: developer — Modelo: razonamiento — Archivos: componentes, vistas, rutas, `config/modules.php` — Hecho cuando: sin botón suelto y tests verdes.
+- [x] T2 · Ajustes nuevos de Vehículos — Resp: developer — Modelo: razonamiento — Archivos: `VehicleSettings`, vistas, rutas — Hecho cuando: plantillas y categorías en secciones, redirección del catálogo antiguo.
+- [x] T3 · Ajustes nuevos de Hábitos a evitar y Relaciones — Resp: developer — Modelo: razonamiento — Archivos: componentes nuevos, vistas, rutas, pestañas — Hecho cuando: categorías gestionables y botón retirado.
+- [x] T4 · Pruebas y documentación — Resp: developer — Modelo: razonamiento — Archivos: tests, docs — Hecho cuando: pasan los tests y capturas a 390/1440.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado sobre la base de CHG-148: Ejercicio (`exercise.settings` + `.categories`, «Meta diaria» sigue en el panel), Ánimo (`mood.settings` + `.categories`, con `archetype="settings"`), Vehículos (el catálogo de mantenimientos `vehicles.catalog` gana la sección `vehicles.catalog.categories`), Hábitos a evitar (nuevo `NegativeHabitSettings`, pestañas Semana y Ajustes) y Relaciones (nuevo `RelationshipSettings`, secciones de personas y acontecimientos, pestaña Ajustes). Se retiran los seis botones sueltos «Gestionar categorías».
+- Desviaciones: en Vehículos no se creó un `VehicleSettings` aparte; `VehicleCatalog` ya es la sección «Plantillas» y se conserva la ruta `vehicles.catalog` (sin redirección). Hábitos a evitar muestra solo la sección Categorías, sin barra lateral de un único elemento.
+- Verificación local: nuevo `ModuleCategorySettingsTest` (10 pruebas) en verde; regresión de Ejercicio, Ánimo, Vehículos, Relaciones, Hábitos a evitar, Agua, categorías, `ModuleExperienceTest` y `UrlStateTest` con los mismos 19 resultados que la línea base (fallos preexistentes); `ui:conformance` sin deuda nueva; `npm run build` correcto; capturas a 390 y 1440 px revisadas.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel L)
 - 2026-11-17 — Especificado a partir del plan de pulido; pendiente la Compuerta 2 (aprobación del usuario).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

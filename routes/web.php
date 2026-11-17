@@ -33,6 +33,7 @@ use App\Livewire\Meal\MealSettings;
 use App\Livewire\Meal\MealWeekly;
 use App\Livewire\Mood\MoodSettings;
 use App\Livewire\Mood\MoodTracker;
+use App\Livewire\NegativeHabit\NegativeHabitSettings;
 use App\Livewire\NegativeHabit\NegativeHabitWeekly;
 use App\Livewire\Plan\PlanIndex;
 use App\Livewire\Plan\PlanShow;
@@ -119,7 +120,8 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/water/settings/categories', WaterSettings::class)->name('water.settings.categories')->defaults('section', 'categories');
     Route::get('/exercise', ExerciseDaily::class)->name('exercise');
     Route::get('/exercise/statistics', ExerciseStatistics::class)->name('exercise.statistics');
-    Route::get('/exercise/settings', ExerciseSettings::class)->name('exercise.settings');
+    Route::get('/exercise/settings', ExerciseSettings::class)->name('exercise.settings')->defaults('section', 'types');
+    Route::get('/exercise/settings/categories', ExerciseSettings::class)->name('exercise.settings.categories')->defaults('section', 'categories');
     Route::get('/health', HealthIndex::class)->name('health');
     Route::get('/health/body', HealthBodyMap::class)->name('health.body');
     Route::get('/health/trends', \App\Livewire\Health\Trends::class)->name('health.trends');
@@ -128,7 +130,8 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/health/medications', \App\Livewire\Health\Medications::class)->name('health.medications');
     Route::get('/health/measurements', \App\Livewire\Health\HealthMeasurements::class)->name('health.measurements');
     Route::get('/vehicles', VehicleIndex::class)->name('vehicles');
-    Route::get('/vehicles/maintenance-catalog', VehicleCatalog::class)->name('vehicles.catalog');
+    Route::get('/vehicles/maintenance-catalog', VehicleCatalog::class)->name('vehicles.catalog')->defaults('section', 'templates');
+    Route::get('/vehicles/maintenance-catalog/categories', VehicleCatalog::class)->name('vehicles.catalog.categories')->defaults('section', 'categories');
     Route::get('/vehicles/{vehicle}', VehicleShow::class)->name('vehicles.show');
     Route::get('/vehicles/{vehicle}/fuel', VehicleFuel::class)->name('vehicles.fuel');
     Route::get('/vehicles/{vehicle}/maintenance', VehicleMaintenance::class)->name('vehicles.maintenance');
@@ -138,7 +141,8 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/habits/weekly', HabitWeekly::class)->name('habits.weekly');
     Route::get('/habits/settings', HabitSettings::class)->name('habits.settings');
     Route::get('/mood', MoodTracker::class)->name('mood');
-    Route::get('/mood/settings', MoodSettings::class)->name('mood.settings');
+    Route::get('/mood/settings', MoodSettings::class)->name('mood.settings')->defaults('section', 'states');
+    Route::get('/mood/settings/categories', MoodSettings::class)->name('mood.settings.categories')->defaults('section', 'categories');
     Route::get('/journal', JournalEntries::class)->name('journal');
     Route::get('/journal/summary', JournalSummary::class)->name('journal.summary');
     Route::get('/journal/life', JournalLifeCalendar::class)->name('journal.life');
@@ -185,6 +189,8 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/amigos/semana', WeeklyBoard::class)->name('social.week');
     Route::get('/relationships', RelationshipIndex::class)->name('relationships');
     Route::get('/relationships/events', RelationshipEvents::class)->name('relationships.events');
+    Route::get('/relationships/settings', \App\Livewire\Relationship\RelationshipSettings::class)->name('relationships.settings')->defaults('section', 'people');
+    Route::get('/relationships/settings/events', \App\Livewire\Relationship\RelationshipSettings::class)->name('relationships.settings.events')->defaults('section', 'events');
     Route::get('/relationships/birthdays', RelationshipBirthdays::class)->name('relationships.birthdays');
     Route::get('/relationships/{relationship}', RelationshipShow::class)->name('relationships.show');
     Route::get('/relationships/{relationship}/plans', RelationshipPlans::class)->name('relationships.plans');
@@ -204,6 +210,7 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/goals/{goal}', GoalDetail::class)->name('goals.show');
     Route::get('/statistics', StatisticsDashboard::class)->name('statistics');
     Route::get('/negative-habits', NegativeHabitWeekly::class)->name('negative-habits');
+    Route::get('/negative-habits/settings', NegativeHabitSettings::class)->name('negative-habits.settings');
     Route::get('/categories/{domain}', \App\Livewire\Category\CategorySettings::class)->name('categories.settings');
     Route::get('/settings', SettingsPage::class)->name('settings');
     Route::get('/settings/{section}', SettingsPage::class)

@@ -14,7 +14,6 @@
     {{-- Habits grouped by category --}}
     @php $grouped = $habits->getCollection()->groupBy('category'); @endphp
 
-    <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'negative-habits')">Gestionar categorías</x-ui.action></nav>
     <x-ui.management-card id="negative-habits" title="Hábitos a evitar" icon="bi-shield-check" :count="'('.$habits->total().')'" :paginator="$habits" noun="hábitos">
     @foreach ($grouped as $category => $categoryHabits)
             <p class="md-mcard__section-label text-capitalize">{{ $categoryOptions[$category] ?? $category }}</p>

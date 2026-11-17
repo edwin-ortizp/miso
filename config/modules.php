@@ -70,7 +70,7 @@ return [
         'tabs' => [
             ['label' => 'Registro diario', 'route' => 'exercise', 'icon' => 'bi-activity', 'active' => ['exercise']],
             ['label' => 'Estadísticas', 'route' => 'exercise.statistics', 'archetype' => 'dashboard', 'icon' => 'bi-bar-chart-line', 'active' => ['exercise.statistics']],
-            ['label' => 'Ajustes', 'route' => 'exercise.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['exercise.settings']],
+            ['label' => 'Ajustes', 'route' => 'exercise.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['exercise.settings', 'exercise.settings.categories']],
         ],
     ],
     'health' => [
@@ -128,7 +128,7 @@ return [
         'rail_routes' => ['mood'],
         'tabs' => [
             ['label' => 'Registro diario', 'route' => 'mood', 'icon' => 'bi-emoji-smile', 'active' => ['mood']],
-            ['label' => 'Ajustes', 'route' => 'mood.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['mood.settings']],
+            ['label' => 'Ajustes', 'route' => 'mood.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['mood.settings', 'mood.settings.categories']],
         ],
     ],
     'journal' => [
@@ -245,6 +245,7 @@ return [
             ['label' => 'Relaciones', 'route' => 'relationships', 'icon' => 'bi-people', 'active' => ['relationships']],
             ['label' => 'Acontecimientos', 'route' => 'relationships.events', 'icon' => 'bi-calendar-event', 'active' => ['relationships.events']],
             ['label' => 'Cumpleaños', 'route' => 'relationships.birthdays', 'icon' => 'bi-cake2', 'active' => ['relationships.birthdays']],
+            ['label' => 'Ajustes', 'route' => 'relationships.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['relationships.settings', 'relationships.settings.events']],
         ],
     ],
     'plans' => [
@@ -290,6 +291,10 @@ return [
         // CHG-063: panel lateral con el guardián en la página principal.
         'rail' => true,
         'rail_routes' => ['negative-habits'],
+        'tabs' => [
+            ['label' => 'Semana', 'route' => 'negative-habits', 'icon' => 'bi-shield-check', 'active' => ['negative-habits']],
+            ['label' => 'Ajustes', 'route' => 'negative-habits.settings', 'archetype' => 'settings', 'icon' => 'bi-sliders', 'active' => ['negative-habits.settings']],
+        ],
     ],
     'settings' => [
         'archetype' => 'settings',

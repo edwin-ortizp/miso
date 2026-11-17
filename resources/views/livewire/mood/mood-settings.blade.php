@@ -1,18 +1,22 @@
-<x-module-shell module="mood">
+<x-module-shell module="mood" archetype="settings">
     <x-slot:actions>
-        <x-module-actions
-            :primary="['label' => 'Nueva emoción', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
- />
+        <x-module-actions :primary="$section === 'categories'
+            ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
+            : ['label' => 'Nueva emoción', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
     </x-slot:actions>
 
-    @if ($message)
-        <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message }}</div>
+    @if ($message || $categoryMessage)
+        <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message ?: $categoryMessage }}</div>
     @endif
 
     @php
         $moodFilterCount = collect([$status, $category])->filter()->count();
     @endphp
-    <nav aria-label="Ajustes de categorías"><x-ui.action variant="text" icon="bi-diagram-3" :href="route('categories.settings', 'mood')">Gestionar categorías</x-ui.action></nav>
+    <div class="module-settings-workspace">
+        <div>
+        @if ($section === 'categories')
+            @include('livewire.category.partials.section')
+        @else
     <x-ui.management-card id="mood-catalog" title="Catálogo de emociones" icon="bi-emoji-smile" :count="'('.$states->total().' / '.$totalCount.')'"
                           search="search" search-placeholder="Buscar una emoción" :active-filters="$moodFilterCount"
                           :paginator="$states" noun="emociones" alpine="openMenu: null" flush>
@@ -132,6 +136,10 @@
             </div>
         @endforelse
     </x-ui.management-card>
+        @endif
+        </div>
+        <x-settings-sections label="Secciones de Ajustes de ánimo" :items="$sections" :current="$section" />
+    </div>
 
     <x-slot:rail>
         <x-context-widget title="Tu catálogo" icon="bi-emoji-smile" tone="success">
