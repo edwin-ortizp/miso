@@ -184,7 +184,7 @@ class Dashboard extends Component
         // Water stats
         $waterTotal = DrinkLog::where('date', $date)->sum('hydration_value');
         $waterGoal = WaterGoal::forUser(auth()->user());
-        $drinkTypes = DrinkType::orderBy('name')->get();
+        $drinkTypes = app(\App\Services\Catalog\CatalogPicker::class)->quick('drinks', 8);
 
         // Mood & energy
         $lastMood = MoodEntry::whereDate('date', $date)->latest('timestamp')->first();

@@ -155,7 +155,7 @@ class QuickEditor extends Component
     public function render()
     {
         return view('livewire.home.panel.quick-editor', [
-            'drinks' => $this->kind === 'water' ? DrinkType::orderBy('name')->pluck('name', 'id')->all() : [],
+            'drinks' => $this->kind === 'water' ? app(\App\Services\Catalog\CatalogPicker::class)->ordered('drinks')->pluck('name', 'id')->all() : [],
             'moods' => $this->kind === 'mood' ? MoodState::active()->orderBy('sort_order')->get()->mapWithKeys(fn ($s) => [$s->id => $s->emoji.' '.$s->text])->all() : [],
         ]);
     }

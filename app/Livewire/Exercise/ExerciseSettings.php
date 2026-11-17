@@ -3,6 +3,8 @@
 namespace App\Livewire\Exercise;
 
 use App\Livewire\Concerns\ManagesUserCategories;
+use App\Livewire\Concerns\WithCatalogFavorites;
+use App\Services\Catalog\CatalogPicker;
 use App\Models\ExerciseLog;
 use App\Models\ExerciseType;
 use App\Support\ExerciseProgress;
@@ -26,6 +28,7 @@ class ExerciseSettings extends Component
 {
     use WithManagementCard;
     use ManagesUserCategories;
+    use WithCatalogFavorites;
 
     public const SECTIONS = [
         'types' => ['label' => 'Tipos de ejercicio', 'icon' => 'bi-tags', 'route' => 'exercise.settings'],
@@ -34,6 +37,9 @@ class ExerciseSettings extends Component
 
     #[Locked]
     public string $section = 'types';
+
+    #[Url(as: 'fav', history: true, except: false)]
+    public bool $onlyFavorites = false;
     #[Url(as: 'q', history: true, keep: true)]
     public string $search = '';
 
@@ -243,6 +249,8 @@ class ExerciseSettings extends Component
     public function render()
     {
         $term = trim($this->search);
+        $picker = app(CatalogPicker::class);
+        $favoriteIds = $picker->favoriteIds('exercise');
 
         $types = ExerciseType::query()
             ->withCount('logs')
@@ -250,17 +258,20 @@ class ExerciseSettings extends Component
             ->when($term !== '', fn ($query) => $query->where('name', 'like', "%{$term}%"))
             ->when($this->category === 'none', fn ($query) => $query->whereNull('category'))
             ->when(! in_array($this->category, ['', 'none'], true), fn ($query) => $query->whereIn('category', \App\Support\CategoryCatalog::expand('exercise', [$this->category])))
+            ->when($this->onlyFavorites, fn ($query) => $query->whereIn('id', $picker->favoriteIds('exercise') ?: ['-']))
             ->orderBy('name')
             ->paginate($this->perPage());
 
         $order = array_flip(array_keys(\App\Support\CategoryCatalog::options('exercise')));
-        $groups = $types->getCollection()->groupBy(fn (ExerciseType $type) => $type->category ?? '')
-            ->sortBy(fn ($group, $key) => $order[$key] ?? PHP_INT_MAX);
+        $groups = $types->getCollection()->groupBy(fn (ExerciseType $type) => in_array($type->id, $favoriteIds, true) ? '__favorites' : ($type->category ?? ''))
+            ->sortBy(fn ($group, $key) => $key === '__favorites' ? -1 : ($order[$key] ?? PHP_INT_MAX));
 
         $deleting = $this->deletingId ? ExerciseType::withCount('logs')->find($this->deletingId) : null;
 
         return view('livewire.exercise.exercise-settings', [
             'sections' => self::SECTIONS,
+            'favoriteIds' => $favoriteIds,
+            'suggestions' => $this->section === 'types' ? $picker->suggestions('exercise', 5) : collect(),
             'groups' => $groups,
             'types' => $types,
             'categories' => \App\Support\CategoryCatalog::options('exercise'),

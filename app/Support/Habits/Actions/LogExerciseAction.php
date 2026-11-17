@@ -34,7 +34,7 @@ class LogExerciseAction extends HabitAction
 
     public function fields(): array
     {
-        $types = ExerciseType::query()->orderBy('name')->pluck('name', 'id')->all();
+        $types = app(\App\Services\Catalog\CatalogPicker::class)->ordered('exercise')->pluck('name', 'id')->all();
 
         return [
             HabitActionField::select('exercise_type_id', '¿Qué ejercicio hiciste?', $types, ['required', 'string'], array_key_first($types), ask: true),

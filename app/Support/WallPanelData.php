@@ -117,7 +117,7 @@ class WallPanelData
             'waterTotal' => DrinkLog::whereDate('date', $today)->sum('hydration_value'),
             'waterLogs' => DrinkLog::whereDate('date', $today)->orderByDesc('timestamp')->limit(8)->get(),
             'waterGoal' => WaterGoal::forUser(auth()->user()),
-            'drinkTypes' => DrinkType::orderBy('name')->get(),
+            'drinkTypes' => app(\App\Services\Catalog\CatalogPicker::class)->ordered('drinks'),
             'focusMinutes' => (int) floor(PomodoroSession::whereDate('date', $today)->where('completed', true)->sum('duration') / 60),
             'focusGoal' => app(PomodoroSettings::class)->goalFor($today),
             'goals' => Goal::where('status', 'active')->orderBy('due_date')->get(),

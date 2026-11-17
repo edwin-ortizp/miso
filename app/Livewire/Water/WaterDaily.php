@@ -334,7 +334,9 @@ class WaterDaily extends Component
         // El progreso del día se calcula sobre todos los registros, no solo la página visible.
         $totalHydration = (clone $dayLogs)->sum('hydration_value');
         $totalAmount = (clone $dayLogs)->sum('amount');
-        $drinkTypes = DrinkType::orderBy('name')->get();
+        $picker = app(\App\Services\Catalog\CatalogPicker::class);
+        $drinkTypes = $picker->ordered('drinks');
+        $quickDrinks = $picker->quick('drinks', 6, $drinkTypes);
         $drinkFilterLabel = $this->drinkFilter !== '' ? $drinkTypes->firstWhere('id', $this->drinkFilter)?->name : null;
         $activeFilters = $this->dateFilterChips();
         if ($drinkFilterLabel) {
@@ -352,6 +354,8 @@ class WaterDaily extends Component
             'totalHydration' => $totalHydration,
             'totalAmount' => $totalAmount,
             'drinkTypes' => $drinkTypes,
+            'quickDrinks' => $quickDrinks,
+            'favoriteIds' => $picker->favoriteIds('drinks'),
             'rawPercentage' => $rawPercentage,
             'streak' => WaterProgress::streak($this->dailyGoal),
             'monthData' => WaterProgress::month(Carbon::parse($this->selectedDate), $this->dailyGoal, Carbon::parse($this->normalizeCalendarMonth($this->calendarMonth).'-01')),

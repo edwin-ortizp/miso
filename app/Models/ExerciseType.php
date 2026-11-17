@@ -25,4 +25,9 @@ class ExerciseType extends Model
     {
         return $this->hasMany(ExerciseLog::class);
     }
+
+    protected static function booted(): void
+    {
+        static::deleted(fn (self $type) => app(\App\Services\Catalog\CatalogPicker::class)->forget('exercise', (string) $type->id));
+    }
 }

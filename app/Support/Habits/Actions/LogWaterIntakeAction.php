@@ -34,7 +34,7 @@ class LogWaterIntakeAction extends HabitAction
 
     public function fields(): array
     {
-        $types = DrinkType::query()->orderBy('name')->pluck('name', 'id')->all();
+        $types = app(\App\Services\Catalog\CatalogPicker::class)->ordered('drinks')->pluck('name', 'id')->all();
 
         return [
             HabitActionField::select('drink_type_id', 'Bebida', $types, ['required', 'string'], array_key_first($types)),

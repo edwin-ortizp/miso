@@ -193,6 +193,19 @@ class ExerciseDaily extends Component
         $this->steps = $estimate['steps'] ?? $this->steps;
     }
 
+    /** Chat del compañero: registra 30 min del ejercicio elegido. */
+    public function quickAdd(string $exerciseTypeId, int $minutes = 30)
+    {
+        $type = ExerciseType::find($exerciseTypeId);
+        if (! $type) {
+            return ['ok' => false, 'message' => 'No encontré ese ejercicio.'];
+        }
+
+        \App\Actions\LogExercise::handle($type, $this->selectedDate, ['duration' => $minutes]);
+
+        return ['ok' => true, 'minutes' => (int) ExerciseLog::whereDate('date', $this->selectedDate)->sum('duration')];
+    }
+
     public function save()
     {
         if (!$this->exerciseTypeId) return;
@@ -258,7 +271,9 @@ class ExerciseDaily extends Component
             ->orderBy('created_at', $this->sort === 'oldest' ? 'asc' : 'desc')
             ->paginate($this->perPage());
 
-        $exerciseTypes = ExerciseType::orderBy('name')->get();
+        $picker = app(\App\Services\Catalog\CatalogPicker::class);
+        $exerciseTypes = $picker->ordered('exercise');
+        $quickExercises = $picker->quick('exercise', 4, $exerciseTypes);
         $typeFilterLabel = $this->typeFilter !== '' ? $exerciseTypes->firstWhere('id', $this->typeFilter)?->name : null;
         $activeFilters = $this->dateFilterChips();
         if ($typeFilterLabel) {
@@ -271,6 +286,8 @@ class ExerciseDaily extends Component
         $totalSteps = (clone $dayLogs)->sum('steps');
 
         return view('livewire.exercise.exercise-daily', [
+            'quickExercises' => $quickExercises,
+            'favoriteIds' => $picker->favoriteIds('exercise'),
             'logs' => $logs,
             'sorts' => self::SORTS,
             'totalLogs' => ExerciseLog::count(),

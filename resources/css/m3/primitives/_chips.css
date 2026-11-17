@@ -338,3 +338,7 @@
 .md-choice-chips__error {
   color: var(--md-sys-color-error);
 }
+
+/* Estrella de favorito (CHG-150): objetivo táctil de 44 px; marcada usa el color de acento. */
+.md-favorite-toggle { min-width: 2.75rem; min-height: 2.75rem; color: var(--md-sys-color-on-surface-variant); }
+.md-favorite-toggle.is-on { color: var(--md-sys-color-primary); }

@@ -153,6 +153,7 @@ _Última actualización: 2026-11-17_
 | CHG-147 | M | Formación: vista de detalle, acciones y ajustes con categorías | in-progress | En verificación | 4/4 |
 | CHG-148 | M | Ajustes de Hidratación con barra lateral de secciones | in-progress | En verificación | 3/3 |
 | CHG-149 | L | Ajustes con secciones y categorías en Ejercicio, Ánimo, Vehículos, Hábitos a evitar y Relaciones | in-progress | En verificación | 4/4 |
+| CHG-150 | M | Favoritos personales y más usados en catálogos de bebidas y ejercicios | in-progress | En verificación | 4/4 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

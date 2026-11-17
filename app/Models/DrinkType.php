@@ -24,4 +24,9 @@ class DrinkType extends Model
     {
         return $this->hasMany(DrinkLog::class);
     }
+
+    protected static function booted(): void
+    {
+        static::deleted(fn (self $type) => app(\App\Services\Catalog\CatalogPicker::class)->forget('drinks', (string) $type->id));
+    }
 }

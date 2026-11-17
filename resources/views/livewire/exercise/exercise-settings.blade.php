@@ -43,13 +43,21 @@
         <x-slot:menu>
             <x-ui.menu-item icon="bi-arrow-counterclockwise" wire:click="restoreDefaults">Restaurar tipos predeterminados</x-ui.menu-item>
         </x-slot:menu>
+        <div class="md-favorites-bar" role="group" aria-label="Favoritos y sugeridos">
+            <x-ui.chip variant="filter" icon="bi-star" :selected="$onlyFavorites" wire:click="$toggle('onlyFavorites')">Solo favoritos</x-ui.chip>
+            @foreach ($suggestions as $suggestion)
+                <x-ui.chip variant="suggestion" icon="bi-star" wire:key="suggest-{{ $suggestion->id }}" wire:click="toggleFavorite('exercise', '{{ $suggestion->id }}')"
+                           title="Más usado: agregar a favoritos" aria-label="Agregar {{ $suggestion->name }} a favoritos, es de los más usados">{{ $suggestion->name }}</x-ui.chip>
+            @endforeach
+            @if ($suggestions->isNotEmpty())<span class="md-body-small md-favorites-bar__hint">Sugeridos por tu uso</span>@endif
+        </div>
         <p class="md-mcard__section-label">{{ $usedCount }} con registros · las calorías y pasos por hora se usan para estimar cada registro</p>
 
     @forelse ($groups as $key => $types)
-        <x-ui.section :title="DefaultExerciseTypes::categoryLabel($key ?: null)" :level="3"
+        <x-ui.section :title="$key === '__favorites' ? 'Favoritos' : DefaultExerciseTypes::categoryLabel($key ?: null)" :level="3"
                       description="{{ $types->count() }} {{ $types->count() === 1 ? 'tipo' : 'tipos' }}"
                       wire:key="exercise-category-{{ $key ?: 'none' }}">
-            <x-ui.list label="Tipos de {{ DefaultExerciseTypes::categoryLabel($key ?: null) }}">
+            <x-ui.list label="Tipos de {{ $key === '__favorites' ? 'favoritos' : DefaultExerciseTypes::categoryLabel($key ?: null) }}">
                 @foreach ($types as $type)
                     @php
                         $usage = $type->logs_count
@@ -65,6 +73,7 @@
                             <span class="md-list-icon-circle" aria-hidden="true">{{ $type->icon ?: '🏃' }}</span>
                         </x-slot:leading>
                         <x-slot:trailing>
+                            <x-ui.favorite-toggle :favorite="in_array($type->id, $favoriteIds, true)" :label="$type->name" wire:click="toggleFavorite('exercise', '{{ $type->id }}')" />
                             <x-ui.row-actions :label="'Más acciones de '.$type->name">
                                 <x-slot:primary wire:click="openForm('{{ $type->id }}')">Editar</x-slot:primary>
                                 <x-ui.menu-divider />

@@ -30,7 +30,7 @@ class QuickWaterController extends Controller
         $previous = Auth::user();
         Auth::setUser($user);
         try {
-            $water = DrinkType::where('name', 'like', '%agua%')->orderBy('name')->first() ?? DrinkType::orderBy('name')->first();
+            $water = app(\App\Services\Catalog\CatalogPicker::class)->defaultWater();
             if ($water) {
                 LogDrink::handle($water, now()->toDateString(), 250);
             }

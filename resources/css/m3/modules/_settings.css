@@ -177,3 +177,7 @@
   .module-settings-nav { grid-row: 1; grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .module-settings-nav__item { padding: 10px 8px; gap: 6px; font-size: .8rem; }
 }
+
+/* Barra de favoritos y sugeridos sobre las tablas de catálogo (CHG-150). */
+.md-favorites-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 12px; }
+.md-favorites-bar__hint { color: var(--md-sys-color-on-surface-variant); }

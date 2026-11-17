@@ -71,6 +71,11 @@ return [
         'reply' => '+250 ml de {name}. ¡Vas por {total} ml hoy!',
     ],
 
+    'exercise' => [
+        'greeting' => '¿Qué ejercicio hiciste?',
+        'reply' => '+30 min de {name}. ¡Sigue así!',
+    ],
+
     'mood' => [
         'greeting' => '¿Cómo te sientes ahora?',
         'reply' => 'Gracias por contármelo.',

@@ -1,7 +1,7 @@
 @php
     use App\Support\Ui\DataState;
 
-    $isFiltered = count($activeFilters) > 0 || trim($search) !== '';
+    $isFiltered = count($activeFilters) > 0 || trim($search) !== '' || $onlyFavorites;
     $typesState = $section !== 'drinks' ? null : ($drinkTypes->count() > 0
         ? DataState::CONTENT
         : ($totalTypes > 0 && $isFiltered ? DataState::FILTERED_EMPTY : DataState::EMPTY));
@@ -57,6 +57,14 @@
             </x-slot:strip>
         @endif
 
+        <div class="md-favorites-bar" role="group" aria-label="Favoritas y sugeridas">
+            <x-ui.chip variant="filter" icon="bi-star" :selected="$onlyFavorites" wire:click="$toggle('onlyFavorites')">Solo favoritas</x-ui.chip>
+            @foreach ($suggestions as $suggestion)
+                <x-ui.chip variant="suggestion" icon="bi-star" wire:key="suggest-{{ $suggestion->id }}" wire:click="toggleFavorite('drinks', '{{ $suggestion->id }}')"
+                           title="Más usada: agregar a favoritas" aria-label="Agregar {{ $suggestion->name }} a favoritas, es de las más usadas">{{ $suggestion->name }}</x-ui.chip>
+            @endforeach
+            @if ($suggestions->isNotEmpty())<span class="md-body-small md-favorites-bar__hint">Sugeridas por tu uso</span>@endif
+        </div>
         @if ($typesState === DataState::CONTENT)
             <table class="md-table md-table--stack">
                 <thead>
@@ -70,7 +78,10 @@
                 <tbody>
                     @foreach ($drinkTypes as $type)
                         <tr wire:key="drink-type-{{ $type->id }}">
-                            <td class="md-table__title"><span aria-hidden="true">{{ $type->icon ?: '💧' }}</span> {{ $type->name }}</td>
+                            <td class="md-table__title">
+                                <x-ui.favorite-toggle :favorite="in_array($type->id, $favoriteIds, true)" :label="$type->name" wire:click="toggleFavorite('drinks', '{{ $type->id }}')" />
+                                <span aria-hidden="true">{{ $type->icon ?: '💧' }}</span> {{ $type->name }}
+                            </td>
                             <td class="md-table__nowrap">×{{ number_format((float) $type->hydration_factor, 2, ',', '.') }}</td>
                             <td class="md-table__nowrap">{{ $type->logs_count ? number_format($type->logs_count, 0, ',', '.') : 'Sin registros' }}</td>
                             <td class="md-table__actions">

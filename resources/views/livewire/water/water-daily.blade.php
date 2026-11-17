@@ -11,7 +11,7 @@
     <x-slot:actions>
         <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
             :greeting="config('companion_chat.water.greeting')"
-            :quick="$drinkTypes->take(4)->map(fn ($type) => [
+            :quick="$quickDrinks->take(4)->map(fn ($type) => [
                 'type' => 'tap', 'id' => 'drink-'.$type->id, 'emoji' => $type->icon ?? '💧', 'label' => $type->name.' · 250 ml',
                 'aria' => 'Registrar 250 ml de '.$type->name, 'echo' => '250 ml de '.$type->name,
                 'call' => 'quickAdd', 'args' => [(string) $type->id, 250],
@@ -34,7 +34,7 @@
         <x-slot:filters>
             <x-ui.select name="filterDateScope" label="Fecha" :options="$dateScopes" :selected="$dateScope" icon="bi-calendar-event" x-model="draftScope" />
             <x-ui.select name="filterDrink" label="Bebida" placeholder="Todas"
-                         :options="$drinkTypes->mapWithKeys(fn ($type) => [$type->id => ($type->icon ?? '💧').' '.$type->name])->all()"
+                         :options="$drinkTypes->mapWithKeys(fn ($type) => [$type->id => (in_array($type->id, $favoriteIds, true) ? '★ ' : '').($type->icon ?? '💧').' '.$type->name])->all()"
                          :selected="$drinkFilter" icon="bi-cup-straw" x-model="draftDrink" />
         </x-slot:filters>
         <x-slot:filterActions>
@@ -135,7 +135,7 @@
                 <p class="md-body-small">Registra 250 ml de una bebida habitual.</p>
                 <x-ui.filter-bar label="Bebidas habituales">
                     <x-slot:chips>
-                        @foreach ($drinkTypes->take(6) as $type)
+                        @foreach ($quickDrinks as $type)
                             <x-ui.chip variant="suggestion" wire:click="quickAdd('{{ $type->id }}', 250)" wire:key="quick-{{ $type->id }}">
                                 {{ $type->icon ?? '💧' }} {{ $type->name }} (250 ml)
                             </x-ui.chip>
@@ -173,7 +173,7 @@
                               x-on:submit.capture="if (confirming) { $event.preventDefault(); $event.stopImmediatePropagation(); }">
                 <div x-show="!confirming">
                     <x-ui.combobox id="water-drink-type" name="drinkTypeId" label="Tipo de bebida" placeholder="Buscar bebida…"
-                                 :options="$drinkTypes->mapWithKeys(fn ($type) => [$type->id => ($type->icon ?? '💧').' '.$type->name.' (x'.$type->hydration_factor.')'])->all()"
+                                 :options="$drinkTypes->mapWithKeys(fn ($type) => [$type->id => (in_array($type->id, $favoriteIds, true) ? '★ ' : '').($type->icon ?? '💧').' '.$type->name.' (x'.$type->hydration_factor.')'])->all()"
                                  wire:model="drinkTypeId" />
                     <x-ui.field name="amount" label="Cantidad (ml)" type="number" min="1" step="50" wire:model="amount" />
                     <x-ui.field name="time" label="Hora" type="time" wire:model="time" />

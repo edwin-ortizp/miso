@@ -58,6 +58,12 @@ class ComponentCatalog
             'description' => 'Selector táctil de opciones cortas (días de la semana, síntomas, escalas) con botones de 44 px y aria-pressed; se enlaza a una propiedad de Livewire.',
             'usage' => '<x-ui.choice-chips name="weekdays" label="Días de la semana" shape="round" :options="$weekdayNames" :short="$weekdayShort" />',
         ],
+        'favorite-toggle' => [
+            'layer' => 'primitives',
+            'title' => 'Marcar favorito',
+            'description' => 'Botón de estrella con aria-pressed para marcar o desmarcar un elemento de un catálogo como favorito personal.',
+            'usage' => '<x-ui.favorite-toggle :favorite="$isFavorite" label="Agua" wire:click="toggleFavorite(\'drinks\', \'{{ $id }}\')" />',
+        ],
         'chip' => [
             'layer' => 'primitives',
             'title' => 'Chip',

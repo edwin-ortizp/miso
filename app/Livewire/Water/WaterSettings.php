@@ -3,6 +3,8 @@
 namespace App\Livewire\Water;
 
 use App\Livewire\Concerns\ManagesUserCategories;
+use App\Livewire\Concerns\WithCatalogFavorites;
+use App\Services\Catalog\CatalogPicker;
 use App\Livewire\Concerns\WithManagementCard;
 use App\Models\DrinkLog;
 use App\Models\DrinkType;
@@ -19,6 +21,7 @@ use Livewire\Component;
 class WaterSettings extends Component
 {
     use ManagesUserCategories;
+    use WithCatalogFavorites;
     use WithManagementCard;
 
     public const SECTIONS = [
@@ -41,6 +44,7 @@ class WaterSettings extends Component
     ];
 
     public const SORTS = [
+        'favorites' => 'Favoritas primero',
         'name' => 'Nombre (A–Z)',
         'factor' => 'Mayor factor',
         'logs' => 'Más registros',
@@ -58,8 +62,11 @@ class WaterSettings extends Component
     #[Url(as: 'usage', history: true, except: 'all')]
     public string $usage = 'all';
 
-    #[Url(as: 'sort', history: true, except: 'name')]
-    public string $sort = 'name';
+    #[Url(as: 'sort', history: true, except: 'favorites')]
+    public string $sort = 'favorites';
+
+    #[Url(as: 'fav', history: true, except: false)]
+    public bool $onlyFavorites = false;
 
     public ?int $dailyWaterGoal = null;
 
@@ -239,12 +246,14 @@ class WaterSettings extends Component
             ->when($this->factor === 'neutral', fn ($q) => $q->where('hydration_factor', 1))
             ->when($this->factor === 'high', fn ($q) => $q->where('hydration_factor', '>', 1))
             ->when($this->usage === 'used', fn ($q) => $q->has('logs'))
-            ->when($this->usage === 'unused', fn ($q) => $q->doesntHave('logs'));
+            ->when($this->usage === 'unused', fn ($q) => $q->doesntHave('logs'))
+            ->when($this->onlyFavorites, fn ($q) => $q->whereIn('id', app(CatalogPicker::class)->favoriteIds('drinks') ?: ['-']));
 
         match ($this->sort) {
             'factor' => $query->orderByDesc('hydration_factor')->orderBy('name'),
             'logs' => $query->orderByDesc('logs_count')->orderBy('name'),
-            default => $query->orderBy('name'),
+            'name' => $query->orderBy('name'),
+            default => $this->favoritesFirst($query, 'drinks')->orderBy('name'),
         };
 
         $onDrinks = $this->section === 'drinks';
@@ -258,6 +267,8 @@ class WaterSettings extends Component
             'sorts' => self::SORTS,
             'goal' => WaterGoal::forUser(auth()->user()),
             'sections' => self::SECTIONS,
+            'favoriteIds' => app(CatalogPicker::class)->favoriteIds('drinks'),
+            'suggestions' => $onDrinks ? app(CatalogPicker::class)->suggestions('drinks', 5) : collect(),
         ] + ($this->section === 'categories' ? $this->categoryViewData() : []));
     }
 
@@ -265,7 +276,7 @@ class WaterSettings extends Component
     {
         $this->factor = array_key_exists($this->factor, self::FACTORS) ? $this->factor : 'all';
         $this->usage = array_key_exists($this->usage, self::USAGES) ? $this->usage : 'all';
-        $this->sort = array_key_exists($this->sort, self::SORTS) ? $this->sort : 'name';
+        $this->sort = array_key_exists($this->sort, self::SORTS) ? $this->sort : 'favorites';
     }
 
     private function resetForm(): void

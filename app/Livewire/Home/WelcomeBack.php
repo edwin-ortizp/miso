@@ -61,7 +61,7 @@ class WelcomeBack extends Component
 
     public function addWater(): void
     {
-        $water = DrinkType::where('name', 'like', '%agua%')->orderBy('name')->first() ?? DrinkType::orderBy('name')->first();
+        $water = app(\App\Services\Catalog\CatalogPicker::class)->defaultWater();
         if ($water) {
             LogDrink::handle($water, today()->toDateString(), 250);
             $this->message = 'Un vaso de agua. Buen comienzo.';

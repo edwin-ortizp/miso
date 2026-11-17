@@ -30,6 +30,16 @@ trait ResolvesDrinkType
             return Response::error("No encontré ningún tipo de bebida que coincida con \"{$term}\". Créalo desde la app o usa un nombre existente.");
         }
 
+        // Si varias coinciden y solo una es favorita, se elige esa; los favoritos solo desempatan.
+        if ($matches->count() > 1) {
+            $favorites = array_flip(app(\App\Services\Catalog\CatalogPicker::class)->favoriteIds('drinks'));
+            $favorite = $matches->filter(fn ($type) => isset($favorites[$type->id]));
+
+            if ($favorite->count() === 1) {
+                return $favorite->first();
+            }
+        }
+
         if ($matches->count() > 1) {
             $list = $matches->map(fn (DrinkType $type) => "{$type->name} (id: {$type->id})")->implode(', ');
 

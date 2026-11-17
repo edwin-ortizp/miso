@@ -8,7 +8,14 @@
 
 <x-module-shell module="exercise">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar ejercicio', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        <x-module-actions :primary="['label' => 'Registrar ejercicio', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
+            :greeting="config('companion_chat.exercise.greeting')"
+            :quick="$quickExercises->map(fn ($type) => [
+                'type' => 'tap', 'id' => 'exercise-'.$type->id, 'emoji' => $type->icon ?? '🏃', 'label' => $type->name.' · 30 min',
+                'aria' => 'Registrar 30 minutos de '.$type->name, 'echo' => '30 min de '.$type->name,
+                'call' => 'quickAdd', 'args' => [(string) $type->id, 30],
+                'reply' => str_replace('{name}', $type->name, config('companion_chat.exercise.reply')),
+            ])->values()->all()" />
     </x-slot:actions>
 
     <x-slot:controls>
@@ -26,7 +33,7 @@
         <x-slot:filters>
             <x-ui.select name="filterDateScope" label="Fecha" :options="$dateScopes" :selected="$dateScope" icon="bi-calendar-event" x-model="draftScope" />
             <x-ui.select name="filterExerciseType" label="Tipo de ejercicio" placeholder="Todos"
-                         :options="$exerciseTypes->mapWithKeys(fn ($type) => [$type->id => ($type->icon ?? '🏃').' '.$type->name])->all()"
+                         :options="$exerciseTypes->mapWithKeys(fn ($type) => [$type->id => (in_array($type->id, $favoriteIds, true) ? '★ ' : '').($type->icon ?? '🏃').' '.$type->name])->all()"
                          :selected="$typeFilter" icon="bi-tag" x-model="draftType" />
         </x-slot:filters>
         <x-slot:filterActions>
