@@ -81,6 +81,8 @@ use App\Mcp\Tools\Task\CreateTaskTool;
 use App\Mcp\Tools\Task\GetTaskTool;
 use App\Mcp\Tools\Task\LinkTaskTool;
 use App\Mcp\Tools\Task\ListTaskCategoriesTool;
+use App\Mcp\Tools\Task\FindTaskSlotsTool;
+use App\Mcp\Tools\Task\ListScheduleConflictsTool;
 use App\Mcp\Tools\Task\ListTasksTool;
 use App\Mcp\Tools\Task\ManageTaskCategoryTool;
 use App\Mcp\Tools\Task\ManageTaskStatusTool;
@@ -120,6 +122,7 @@ No consultes para preguntas generales que no dependen de su vida, si el dato ya 
 - "¿Cómo me fue?", resumen del día o la semana → get-recent-activity-tool.
 - Recomendar planes → list-plans-tool (círculo, persona, ciudad, not_visited) + list-plan-visits-tool para no repetir lo reciente.
 - Los códigos legibles (p. ej. SGX-00002) identifican tareas: usa get-task-tool con task_id igual al código antes de refinar; update, complete y link también aceptan código o UUID.
+- Agenda: «¿qué se me cruza?» → list-schedule-conflicts-tool; «encuéntrame un hueco» → find-task-slots-tool (usa task_id para la duración de la tarea). Para reorganizar: primero los cruces, luego huecos para las tareas con movable=true, propón y, solo con la confirmación del usuario, update-task-tool con start_date y end_date. Las tareas con horario fijo (schedule_locked, p. ej. reuniones), las comidas y las tomas no se mueven.
 - Trabajo y pendientes → list-tasks-tool por categoría, por tipo de estado (status_type: todo, ready, in_progress, done) o con updated_since; get-task-tool solo para la tarea en foco. Los estados son personalizables (manage-task-status-tool); para terminar una tarea usa complete-task-tool.
 - Metas, propósitos o progreso → list-goals-tool (con goal_id o title para el detalle).
 - Comida, qué cocinar o el mercado de la semana → list-meal-plan-tool y list-recipes-tool.
@@ -158,6 +161,8 @@ class LifeTrackerServer extends Server
         CreateTaskTool::class,
         CompleteTaskTool::class,
         ListTasksTool::class,
+        FindTaskSlotsTool::class,
+        ListScheduleConflictsTool::class,
         GetTaskTool::class,
         UpdateTaskTool::class,
         ListTaskCategoriesTool::class,

@@ -1,9 +1,9 @@
 # CHG-145 · Huecos y cruces de agenda en el MCP
-**Estado:** Borrador
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** razonamiento
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-142, CHG-144
 **Depende de:** CHG-142 (servicio de huecos) y CHG-144 (horario fijo).
 
@@ -31,15 +31,13 @@ El MCP ya permite crear y actualizar tareas con fechas, pero no sabe dónde hay 
   - Dados rangos inválidos o demasiado grandes, cuando se piden, entonces se responde con un error claro.
 
 ## 3. UX/UI
-No aplica — no hay pantalla nueva. La experiencia es la conversación con Claude.
+No aplica — no hay pantalla nueva. La experiencia es la conversación con Claude; el flujo (ver cruces → proponer huecos → confirmar → `update-task-tool`) va en las instrucciones del servidor.
 ### 3.1 Experiencia (ux-designer)
-- Flujo y cantidad de pasos: No aplica — el flujo conversacional va en las instrucciones del servidor.
-- Qué contiene cada pantalla y qué es lo más importante: No aplica.
-- Estados (vacío / carga / error / éxito / validaciones): No aplica a UI; las respuestas de error de las herramientas son claras y sin culpa.
-- Información necesaria y momento de presentación: No aplica.
-- Accesibilidad de uso: No aplica.
+No aplica — sin pantallas ni flujo de interfaz.
+
 ### 3.2 Visual (ui-designer)
-- No aplica — sin cambios visuales (solo aparece el nombre de las herramientas en la lista de Ajustes → Servidor MCP).
+No aplica — sin cambios visuales (solo aparece el nombre de las herramientas en Ajustes → Servidor MCP).
+
 ### 3.3 Escritura (ux-writer)
 - Ubicación y estado: descripciones de herramientas y mensajes de error.
 - Textos finales (variables y variantes): descripciones en español, con ejemplo de formato `YYYY-MM-DD HH:MM`; error: «El rango es demasiado grande. Pide como máximo {n} días.»
@@ -68,13 +66,18 @@ No aplica — no hay pantalla nueva. La experiencia es la conversación con Clau
 - Docs a actualizar: documentación del MCP de MiSo (lista de herramientas y flujo de reorganización).
 
 ## 7. Tareas
-- [ ] T1 · Herramienta para buscar huecos — Resp: developer — Modelo: razonamiento — Archivos: `FindTaskSlotsTool.php` — Hecho cuando: devuelve huecos correctos con límites.
-- [ ] T2 · Herramienta para listar cruces con `movable` — Resp: developer — Modelo: razonamiento — Archivos: `ListScheduleConflictsTool.php`, `TaskSlotFinder` — Hecho cuando: agrupa cruces y marca las fijas.
-- [ ] T3 · Registro, catálogo e instrucciones del servidor — Resp: developer — Modelo: estandar — Archivos: `LifeTrackerServer.php`, `ToolCatalog.php` — Hecho cuando: aparecen en Ajustes → Servidor MCP y las instrucciones describen el flujo.
-- [ ] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasa la sección 5.
+- [x] T1 · Herramienta para buscar huecos — Resp: developer — Modelo: razonamiento — Archivos: `FindTaskSlotsTool.php` — Hecho cuando: devuelve huecos correctos con límites.
+- [x] T2 · Herramienta para listar cruces con `movable` — Resp: developer — Modelo: razonamiento — Archivos: `ListScheduleConflictsTool.php`, `TaskSlotFinder` — Hecho cuando: agrupa cruces y marca las fijas.
+- [x] T3 · Registro, catálogo e instrucciones del servidor — Resp: developer — Modelo: estandar — Archivos: `LifeTrackerServer.php`, `ToolCatalog.php` — Hecho cuando: aparecen en Ajustes → Servidor MCP y las instrucciones describen el flujo.
+- [x] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasa la sección 5.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: `find-task-slots-tool` y `list-schedule-conflicts-tool` (solo lectura, módulo Tareas) sobre `TaskSlotFinder`; registradas en `LifeTrackerServer` (con el flujo de reorganización en sus instrucciones) y en el catálogo (`find-` pasa a contar como lectura en `ToolCatalog`). Las tomas de medicamentos aparecen como «Toma de medicamento» sin nombre, para no exponer medicación sensible en consultas amplias. Documentado en `docs/integrations/agenda-mcp.md`.
+- Verificación local (PHP 8.4 en chroot): `LifeTrackerTaskSlotsMcpTest` (7 pruebas) y toda la carpeta `tests/Feature/Mcp` (213 pruebas) en verde.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado a partir de la decisión del usuario: el MCP debe poder encontrar huecos y detectar qué tareas se cruzan para ayudar a reorganizar la agenda; las tareas con agenda bloqueada (reuniones) no se mueven.
 - 2026-11-17 — Decisión delegada por el usuario («identifica tú la mejor manera»): nombres `find-task-slots-tool` y `list-schedule-conflicts-tool`.
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

@@ -31,7 +31,7 @@ class ToolCatalog
         'Common' => ['Común', 'bi-tools'],
     ];
 
-    private const READ_PREFIXES = ['list-', 'get-', 'compare-', 'suggest-'];
+    private const READ_PREFIXES = ['list-', 'get-', 'compare-', 'suggest-', 'find-'];
 
     /** @var array<int, array<string, mixed>>|null */
     private ?array $tools = null;
