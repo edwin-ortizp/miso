@@ -1,9 +1,9 @@
 # CHG-146 · Ciclo menstrual con calendario e historial en cards
-**Estado:** Borrador
+**Estado:** En verificación
 **Nivel:** M
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
-**Creado:** 2026-11-17 · **Aprobado:** — · **Cerrado:** —
+**Creado:** 2026-11-17 · **Aprobado:** 2026-11-17 · **Cerrado:** —
 **Relacionado:** CHG-130, CHG-140
 
 ## 0. En palabras simples
@@ -84,13 +84,18 @@ La vista de Ciclo usa `x-ui.section` sueltas: el calendario es una tabla cruda, 
 - Docs a actualizar: `docs/UX-WRITING.md` (CHG-130, ubicación de textos del ciclo).
 
 ## 7. Tareas
-- [ ] T1 · Historial de ciclos como tabla de gestión — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php`, `Cycle.php` — Hecho cuando: card con contador, orden, paginación, estado vacío y acciones por fila.
-- [ ] T2 · Calendario en card con rejilla nueva — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php`, `_health.css` — Hecho cuando: cumple el boceto, estados por forma e ícono y 44 px.
-- [ ] T3 · Resumen unificado y textos consolidados — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php` — Hecho cuando: sin párrafos sueltos y textos de CHG-130 intactos.
-- [ ] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests y capturas a 390/1440.
+- [x] T1 · Historial de ciclos como tabla de gestión — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php`, `Cycle.php` — Hecho cuando: card con contador, orden, paginación, estado vacío y acciones por fila.
+- [x] T2 · Calendario en card con rejilla nueva — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php`, `_health.css` — Hecho cuando: cumple el boceto, estados por forma e ícono y 44 px.
+- [x] T3 · Resumen unificado y textos consolidados — Resp: developer — Modelo: estandar — Archivos: `cycle.blade.php` — Hecho cuando: sin párrafos sueltos y textos de CHG-130 intactos.
+- [x] T4 · Pruebas y documentación — Resp: developer — Modelo: estandar — Archivos: tests, docs — Hecho cuando: pasan los tests y capturas a 390/1440.
 
 ## 8. Bitácora de implementación (developer)
+- 2026-11-17 — Implementado: historial de ciclos como `x-ui.management-card` (contador, paginación con `WithManagementCard`, badge «En curso», acciones por fila); calendario en card con rejilla CSS de 7 columnas (`md-cycle-grid`), celdas de 44 px, periodo/hoy/registrado/estimado por forma, ícono y `aria-label`, y leyenda al pie; «Ciclo actual» y «Próximo periodo» unidos en una card «Resumen»; aviso médico único bajo el módulo y ayudas redundantes del formulario retiradas, con los textos de CHG-130 intactos.
+- Verificación local: `CycleModuleTest` (14, con dos pruebas nuevas de historial y calendario) y `CycleProgressTest` en verde; `npm run build` correcto; capturas a 390 y 1440 px revisadas. La spec de navegador `health-dialogs.interaction.spec.js` no se ejecutó en este entorno.
 
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel M)
 - 2026-11-17 — Especificado a partir del plan de pulido aceptado en la conversación; pendiente la Compuerta 2 (aprobación del usuario).
+- 2026-11-17 — Aprobado por el usuario (Compuerta 2)
+- 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación

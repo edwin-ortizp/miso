@@ -3,6 +3,7 @@
 namespace App\Livewire\Health;
 
 use App\Actions\LogCycle;
+use App\Livewire\Concerns\WithManagementCard;
 use App\Models\CycleDayLog;
 use App\Models\MenstrualCycle;
 use App\Support\CycleProgress;
@@ -20,6 +21,8 @@ use Livewire\Component;
 #[Title('Ciclo')]
 class Cycle extends Component
 {
+    use WithManagementCard;
+
     #[Url(as: 'month', history: true, except: '')]
     public string $month = '';
 
@@ -176,6 +179,7 @@ class Cycle extends Component
 
         return view('livewire.health.cycle', [
             'cycles' => $cycles,
+            'historyPage' => $this->paginateCollection($cycles),
             'guardianContext' => \App\Services\Game\Guardian\HealthContext::cycle($cycles, $summary, CycleDayLog::orderByDesc('date')->first()),
             'lengths' => $lengths,
             'summary' => $summary,

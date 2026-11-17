@@ -201,11 +201,23 @@
   gap: 8px;
 }
 
-/* Días del calendario del ciclo: objetivo táctil de 44 px. */
-.md-cycle-day {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
-}
+/* Calendario del ciclo: rejilla de 7 columnas con celdas táctiles de al menos 44 px. */
+.md-cycle-notice { display: flex; gap: 8px; align-items: flex-start; margin: 0; color: var(--md-sys-color-on-surface-variant); }
+.md-cycle-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px 32px; margin: 0; }
+.md-cycle-summary dt { color: var(--md-sys-color-on-surface-variant); font-size: .8rem; font-weight: 600; }
+.md-cycle-summary dd { margin: 0; }
+.md-card-header__spacer { flex: 1 1 auto; }
+.md-cycle-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.md-cycle-grid__head { padding: 4px 0; text-align: center; color: var(--md-sys-color-on-surface-variant); font-size: .75rem; font-weight: 600; }
+.md-cycle-day { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 2.75rem; height: 3.25rem; padding: 2px; border: 1px solid transparent; border-radius: var(--md-sys-shape-corner-medium); background: transparent; color: var(--md-sys-color-on-surface); font: inherit; cursor: pointer; }
+.md-cycle-day--pad { cursor: default; }
+.md-cycle-day:hover:not(.md-cycle-day--pad) { background: var(--md-sys-color-surface-container); }
+.md-cycle-day:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 1px; }
+.md-cycle-day.is-period { background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); font-weight: 700; }
+.md-cycle-day.is-estimated { border: 1px dashed var(--md-sys-color-outline); }
+.md-cycle-day.is-today { border: 2px solid var(--md-sys-color-primary); }
+.md-cycle-day__marks { display: flex; align-items: center; gap: 2px; min-height: 1em; font-size: .7rem; line-height: 1; }
+.md-cycle-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 12px; color: var(--md-sys-color-on-surface-variant); }
 
 /* Acciones de una toma: Tomado, Omitir y Deshacer con objetivo táctil de 44 px. */
 .md-touch-action {

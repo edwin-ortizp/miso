@@ -202,4 +202,35 @@ class CycleModuleTest extends TestCase
         $this->assertSame(1, MenstrualCycle::withoutGlobalScopes()->count());
         $this->assertSame(1, CycleDayLog::withoutGlobalScopes()->count());
     }
+
+    public function test_history_is_a_management_card_with_pagination_and_open_badge(): void
+    {
+        $user = User::factory()->create();
+        for ($i = 0; $i < 30; $i++) {
+            $this->cycle($user, Carbon::parse('2024-01-01')->addDays($i * 28)->toDateString(), Carbon::parse('2024-01-05')->addDays($i * 28)->toDateString());
+        }
+        $this->cycle($user, '2026-11-15');
+
+        $component = Livewire::actingAs($user)->test(Cycle::class)
+            ->assertSee('Historial de ciclos')->assertSee('(31)')->assertSee('En curso')->assertSee('id="cycle-history"', false);
+
+        $this->assertCount(25, $component->viewData('historyPage')->items());
+        $this->assertSame(31, $component->viewData('historyPage')->total());
+    }
+
+    public function test_calendar_is_a_card_grid_that_marks_period_today_and_logged_days(): void
+    {
+        $user = User::factory()->create();
+        $this->cycle($user, '2026-11-10', '2026-11-14');
+        $user->cycleDayLogs()->create(['date' => '2026-11-12', 'flow' => 'medium']);
+
+        $html = Livewire::actingAs($user)->test(Cycle::class)->assertSee('Noviembre 2026')->assertSee('id="cycle-calendar"', false)
+            ->assertDontSee('md-mcard__scroll', false)->html();
+
+        $this->assertStringContainsString('md-cycle-grid', $html);
+        $this->assertStringContainsString('is-period', $html);
+        $this->assertStringContainsString('is-today', $html);
+        $this->assertStringContainsString('is-logged', $html);
+        $this->assertStringContainsString('12 de noviembre, periodo, con registro', $html);
+    }
 }
