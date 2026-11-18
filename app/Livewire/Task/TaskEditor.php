@@ -134,11 +134,8 @@ class TaskEditor extends TaskList
         if ($this->editorIntent === 'schedule' && ! filled($this->startDate) && ! filled($this->endDate)) {
             throw ValidationException::withMessages(['endDate' => 'Indica una fecha para programar la tarea.']);
         }
-        $estimate = $this->estimatedTime;
-        $schedule = $this->taskScheduleData();
+        $schedule = $this->taskScheduleData(deriveEstimate: false);
         if ($schedule === null) return null;
-        $this->estimatedTime = $estimate;
-        $schedule['estimated_time'] = $estimate ?: null;
         $this->validateReminders($this->endDate, $this->endTime);
         $existing = $this->editingId ? Task::where('user_id', auth()->id())->findOrFail($this->editingId) : null;
         if ($existing?->schedule_locked && $this->scheduleLocked && ! $this->sameSchedule($existing, $schedule)) {

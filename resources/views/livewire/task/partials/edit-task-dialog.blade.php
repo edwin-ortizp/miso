@@ -20,7 +20,10 @@
         </x-slot:headerActions>
     @endif
     @if ($localEditor && ! $bulkEditor)
-        <p class="md-body-small" wire:dirty wire:target="title,description,category,statusId,priority,size,estimatedTime,startDate,startTime,endDate,endTime,isPrivate,isRecurrent,recurrenceIntervalDays,relations,reminders" role="status">Cambios pendientes de guardar</p>
+        <p class="md-body-small" role="status" x-data="{ pendingChanges: false }" x-show="pendingChanges" x-cloak
+            x-on:miso-form-state.document.capture="if ($event.target === $el.closest('form')) pendingChanges = $event.detail.dirty">
+            Cambios pendientes de guardar
+        </p>
     @endif
     <div class="task-properties-layout">
         <aside class="task-properties-panel lt-cm-form" aria-label="Propiedades de la tarea">
@@ -36,7 +39,7 @@
             @endif
             <x-ui.select name="priority" label="Prioridad" :id="$dialogId.'-priority'" :options="$priorities" placeholder="Sin prioridad" wire:model="priority" />
             <x-ui.select name="size" label="Tamaño" :id="$dialogId.'-size'" :options="$sizes" placeholder="Sin tamaño" wire:model="size" />
-            @if (! $bulkEditor)<x-ui.field name="estimatedTime" label="Tiempo estimado (min)" type="number" min="0" :id="$dialogId.'-estimate'" wire:model="estimatedTime" />@endif
+            @if (! $bulkEditor)<x-ui.field name="estimatedTime" label="Tiempo estimado (min)" type="number" min="0" :id="$dialogId.'-estimate'" wire:model.live.blur="estimatedTime" />@endif
             @if ($localEditor && ! $bulkEditor)
                 <section class="task-focus-block" aria-label="Foco">
                     <h3 class="md-title-small">Foco</h3>

@@ -31,12 +31,21 @@
                         <article class="md-planning-card" wire:key="planning-{{ $task->id }}">
                             <button x-on:click="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-planning-card-main" aria-label="Abrir tarea: {{ $task->title }}">
                                 <span class="md-planning-card-title"><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>
-                                <span class="md-planning-card-meta">
-                                    @if ($task->category)<x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="accent" :icon="$this->categoryIcon($task->category)">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>@endif
-                                    @if ($task->priority)<span class="md-planning-priority {{ $task->priority }}"></span>@endif
-                                    @if ($scheduledDate)<span><i class="bi bi-calendar3"></i> {{ $scheduledDate->translatedFormat('d M, H:i') }}</span>@endif
-                                    @if ($task->estimated_time)<span><i class="bi bi-clock"></i> {{ $task->estimated_time_label }}</span>@endif
-                                </span>
+                                @if ($preview = $task->descriptionPreview())
+                                    <span class="task-card__description">{{ $preview }}</span>
+                                @endif
+                                @if ($scheduledDate || $task->estimated_time)
+                                    <span class="md-planning-card-meta">
+                                        @if ($scheduledDate)<span><i class="bi bi-calendar3"></i> <x-ui.task-schedule-lock :locked="$task->schedule_locked" /> {{ $scheduledDate->translatedFormat('d M, H:i') }}</span>@endif
+                                        @if ($task->estimated_time)<span><i class="bi bi-clock"></i> {{ $task->estimated_time_label }}</span>@endif
+                                    </span>
+                                @endif
+                                @if ($task->category || $task->priority)
+                                    <span class="task-card__footer md-planning-card-tags">
+                                        @if ($task->category)<x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="accent" :icon="$this->categoryIcon($task->category)">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>@endif
+                                        @if ($task->priority)<span class="md-planning-priority {{ $task->priority }}" title="{{ $priorities[$task->priority] ?? $task->priority }}"></span>@endif
+                                    </span>
+                                @endif
                             </button>
                             <footer class="md-planning-card-actions">
                                 <button wire:click.stop="toggleComplete('{{ $task->id }}')" class="md-btn-icon" title="Completar" aria-label="Completar {{ $task->title }}"><i class="bi bi-check2"></i></button>

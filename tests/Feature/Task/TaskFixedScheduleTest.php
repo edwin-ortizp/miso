@@ -118,6 +118,25 @@ class TaskFixedScheduleTest extends TestCase
         $this->assertTrue($task->fresh()->schedule_locked);
     }
 
+    public function test_list_and_planning_show_the_icon_only_while_the_schedule_is_locked(): void
+    {
+        $task = $this->fixed(['start_date' => today()->setTime(10, 0), 'end_date' => today()->setTime(11, 0)]);
+        $this->fixed(['schedule_locked' => false]);
+        $icon = 'class="bi bi-lock-fill task-locked-icon"';
+
+        foreach ([TaskList::class, TaskPlanning::class] as $view) {
+            $html = Livewire::test($view)->html();
+            $this->assertSame(1, substr_count($html, $icon));
+        }
+
+        Livewire::test(TaskEditor::class)->call('openForm', $task->id)
+            ->set('scheduleLocked', false)->call('save')->assertHasNoErrors();
+
+        foreach ([TaskList::class, TaskPlanning::class] as $view) {
+            Livewire::test($view)->assertDontSee($icon, false);
+        }
+    }
+
     public function test_the_calendar_marks_fixed_events_as_locked_and_not_draggable(): void
     {
         $task = $this->fixed(['start_date' => today()->setTime(10, 0), 'end_date' => today()->setTime(11, 0)]);

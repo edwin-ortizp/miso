@@ -6,7 +6,7 @@
                     <thead><tr><th scope="col">Hora</th><th scope="col">Nombre</th><th scope="col">Tipo</th></tr></thead>
                     <tbody>
                         @foreach ($day['rows'] as $row)
-                            <tr class="{{ $row['done'] ? 'is-done' : '' }}" x-show="layers.{{ $row['kind'] }}"><td data-label="Hora">{{ $row['time'] ?? 'Sin hora' }}</td><td data-label="Nombre">{{ $row['title'] }}</td><td data-label="Tipo"><span class="wall-agenda__kind wall-agenda__kind--{{ $row['kind'] }}">{{ ['task' => 'Tarea', 'plan' => 'Plan', 'person' => 'Persona', 'meal' => 'Comida'][$row['kind']] ?? $row['kind'] }}</span></td></tr>
+                            <tr class="{{ $row['done'] ? 'is-done' : '' }}" x-show="layers.{{ $row['kind'] }}"><td data-label="Hora"><x-ui.task-schedule-lock :locked="$row['scheduleLocked'] ?? false" />{{ $row['time'] ?? 'Sin hora' }}</td><td data-label="Nombre">{{ $row['title'] }}</td><td data-label="Tipo"><span class="wall-agenda__kind wall-agenda__kind--{{ $row['kind'] }}">{{ ['task' => 'Tarea', 'plan' => 'Plan', 'person' => 'Persona', 'meal' => 'Comida'][$row['kind']] ?? $row['kind'] }}</span></td></tr>
                         @endforeach
                     </tbody>
                 </table>

@@ -35,6 +35,7 @@
                 </div>
                 <div class="md-list-item-supporting">
                     <x-ui.task-code :code="$task->code" />
+                    <x-ui.task-schedule-lock :locked="$task->schedule_locked && (bool) $task->end_date" />
                     @if ($isOverdue)
                         <span class="home-tone-text--error">Vencida · {{ $task->end_date->translatedFormat('d M') }}</span>
                     @elseif ($task->end_date)

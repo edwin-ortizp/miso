@@ -57,7 +57,7 @@
                                     <span class="md-table__meta">Recurrente</span>
                                 @endif
                             </td>
-                            <td class="md-table__date">{{ $task->end_date ? \App\Support\EventDate::day($task->end_date)->label() : 'Sin fecha' }}</td>
+                            <td class="md-table__date"><x-ui.task-schedule-lock :locked="$task->schedule_locked && (bool) $task->end_date" />{{ $task->end_date ? \App\Support\EventDate::day($task->end_date)->label() : 'Sin fecha' }}</td>
                             <td class="md-table__nowrap">{{ $priorities[$task->priority] ?? '—' }}</td>
                             <td class="md-table__nowrap">
                                 @if ($task->completed)

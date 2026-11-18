@@ -51,7 +51,7 @@ class WallPanelData
                 }
                 $allDay = $task->start_date ? $task->start_is_date : $task->end_is_date;
                 $time = ! $allDay && $start->isSameDay($day) ? $start->format('H:i') : null;
-                $rows[] = $this->row('task', $task->id, $task->title, $time, $task->completed);
+                $rows[] = $this->row('task', $task->id, $task->title, $time, $task->completed) + ['scheduleLocked' => $task->schedule_locked];
             }
             foreach ($plans as $plan) {
                 if ($plan->scheduled_on->lte($day) && ($plan->ends_on ?? $plan->scheduled_on)->gte($day)) {

@@ -3,6 +3,8 @@
 use App\Actions\RecordPlanVisit;
 use App\Actions\SavePlan;
 use App\Models\Plan;
+use App\Models\PlanCategory;
+use App\Models\PlanTag;
 use App\Models\Relationship;
 use App\Models\User;
 use Illuminate\Contracts\Console\Kernel;
@@ -31,3 +33,13 @@ $longPlan = Plan::factory()->for($user)->create([
 ]);
 $longPlan->circles()->attach($longCircle);
 Plan::factory()->for($user)->count(12)->create(['status' => 'pending']);
+
+$bundleUser = User::factory()->create(['email' => 'plan-bundle-browser@example.test', 'password' => 'browser-test-password']);
+auth()->login($bundleUser);
+$bundlePerson = Relationship::factory()->for($bundleUser)->create(['full_name' => 'Contacto de planes']);
+\App\Models\Circle::factory()->for($bundleUser)->create(['name' => 'Círculo de prueba']);
+SavePlan::handle(new Plan, ['title' => 'Cena programada', 'type' => 'restaurant', 'category' => 'Gastronomía'], null, [$bundlePerson->id]);
+PlanTag::create(['name' => 'Etiqueta de prueba']);
+for ($index = 1; $index <= 10; $index++) {
+    PlanCategory::create(['name' => 'Categoría de prueba '.$index, 'normalized_name' => 'categoría de prueba '.$index]);
+}

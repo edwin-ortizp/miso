@@ -54,69 +54,43 @@
         <div wire:loading.delay.remove wire:target="filter,categoryFilter,priorityFilter,dateFilter,sizeFilter,search,gotoPage,previousPage,nextPage">
         <div id="task-list-focus" tabindex="-1" role="group" aria-label="Lista de tareas">
         @forelse ($tasks as $task)
-                <div class="md-list-item task-row {{ $task->completed ? 'md-list-item--completed' : '' }}" wire:key="task-row-{{ $task->id }}">
-                <div class="md-list-item-content">
+            @php
+                $subtaskProgress = $task->subtask_progress;
+            @endphp
+            <div class="md-list-item task-row {{ $task->completed ? 'md-list-item--completed' : '' }}" wire:key="task-row-{{ $task->id }}">
                 <button x-on:click.stop="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-task-open-button w-100" aria-label="Abrir tarea: {{ $task->title }}">
-                    <div class="d-flex align-items-center gap-2">
+                    <span class="d-flex align-items-center gap-2">
                         <span class="md-list-item-headline {{ $task->completed ? '' : 'fw-medium' }}">
-                            <x-ui.task-code :code="$task->code" /> {{ $task->title }}
+                            @if ($task->code)<span class="task-row__code"><x-ui.task-code :code="$task->code" /></span> @endif{{ $task->title }}
                         </span>
                         @if ($task->is_private)
-                            <i class="bi bi-lock-fill" style="color: var(--md-sys-color-on-surface-variant); font-size: 0.75rem;"></i>
+                            <i class="bi bi-lock-fill task-row__private" title="Privada" aria-hidden="true"></i>
                         @endif
-                    </div>
+                    </span>
                     @if ($preview = $task->descriptionPreview())
-                        <div class="md-list-item-supporting text-truncate">{{ $preview }}</div>
+                        <span class="md-list-item-supporting task-card__description">{{ $preview }}</span>
                     @endif
                 </button>
-                    <div class="d-flex flex-wrap gap-1 mt-1">
-                        @if ($task->priority)
-                            @php
-                                $priorityChipClass = match($task->priority) {
-                                    'urgent-important' => 'md-chip-tonal--error',
-                                    'not-urgent-important' => 'md-chip-tonal--warning',
-                                    'urgent-not-important' => 'md-chip-tonal--info',
-                                    default => 'md-chip-tonal',
-                                };
-                            @endphp
-                            <span class="md-chip-tonal {{ $priorityChipClass }}">{{ $priorities[$task->priority] ?? $task->priority }}</span>
-                        @endif
-                        @if ($task->category)
-                            <x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="accent" :icon="$this->categoryIcon($task->category)">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>
-                        @endif
-                        @if ($task->size)
-                            <span class="md-chip-tonal">{{ $task->size }}</span>
-                        @endif
-                        @if ($task->subtask_progress)
-                            <span class="md-chip-tonal md-chip-tonal--info">
-                                <i class="bi bi-check2-square" style="font-size: 0.625rem;"></i> {{ $task->subtask_progress['completed'] }}/{{ $task->subtask_progress['total'] }} subtareas
-                            </span>
-                        @endif
-                        @if ($task->is_recurrent)
-                            @php
-                                $recurrence = $task->recurrence ?? [];
-                                $recurrenceLabel = match ($recurrence['pattern'] ?? 'custom') {
-                                    'daily' => 'Diaria',
-                                    'weekly' => 'Semanal',
-                                    'monthly' => 'Mensual',
-                                    default => 'Cada '.max(1, (int) ($recurrence['customDays'] ?? 1)).' días',
-                                };
-                            @endphp
-                            <span class="md-chip-tonal"><i class="bi bi-arrow-repeat" style="font-size: 0.625rem;"></i> {{ $recurrenceLabel }}</span>
-                        @endif
-                        <button type="button" id="task-date-{{ $task->id }}"
-                                class="md-chip-tonal {{ $task->isOverdue() ? 'md-chip-tonal--error' : '' }}"
-                                aria-haspopup="dialog" aria-label="Cambiar fechas de {{ $task->title }}: {{ $task->isOverdue() ? 'Vencida · ' : '' }}{{ $task->scheduleLabel() ?: 'Sin fecha' }}"
-                                wire:click="openQuickDates('{{ $task->id }}')">
-                            <i class="bi {{ $task->isOverdue() ? 'bi-exclamation-circle' : 'bi-calendar' }} task-row__chip-icon" aria-hidden="true"></i>
-                            <span>{{ $task->isOverdue() ? 'Vencida · ' : '' }}{{ $task->scheduleLabel() ?: 'Sin fecha' }}</span>
-                        </button>
-                        @if ($task->estimated_time)<span class="md-chip-tonal"><i class="bi bi-clock" style="font-size: 0.625rem;"></i> {{ $task->estimated_time_label }}</span>@endif
-                    </div>
-                </div>
-                <div class="task-row__status">
-                    @if ($task->status)
-                        <x-ui.catalog-chip :color="$task->status->color" tone="accent" :icon="$task->status->icon" title="Estado">{{ $task->status->name }}</x-ui.catalog-chip>
+                <div class="task-row__planning">
+                    <button type="button" id="task-date-{{ $task->id }}"
+                            class="md-chip-tonal {{ $task->isOverdue() ? 'md-chip-tonal--error' : '' }}"
+                            aria-haspopup="dialog" aria-label="Cambiar fechas de {{ $task->title }}: {{ $task->isOverdue() ? 'Vencida · ' : '' }}{{ $task->scheduleLabel() ?: 'Sin fecha' }}{{ $task->schedule_locked && ($task->start_date || $task->end_date) ? ' · Horario fijo' : '' }}"
+                            wire:click="openQuickDates('{{ $task->id }}')">
+                        <i class="bi {{ $task->isOverdue() ? 'bi-exclamation-circle' : 'bi-calendar' }} task-row__chip-icon" aria-hidden="true"></i>
+                        <span><x-ui.task-schedule-lock :locked="$task->schedule_locked && ($task->start_date || $task->end_date)" />{{ $task->isOverdue() ? 'Vencida · ' : '' }}{{ $task->scheduleLabel() ?: 'Sin fecha' }}</span>
+                    </button>
+                    @if ($task->estimated_time)<span class="md-chip-tonal"><i class="bi bi-clock task-row__chip-icon" aria-hidden="true"></i> {{ $task->estimated_time_label }}</span>@endif
+                    @if ($task->is_recurrent)
+                        @php
+                            $recurrence = $task->recurrence ?? [];
+                            $recurrenceLabel = match ($recurrence['pattern'] ?? 'custom') {
+                                'daily' => 'Diaria',
+                                'weekly' => 'Semanal',
+                                'monthly' => 'Mensual',
+                                default => 'Cada '.max(1, (int) ($recurrence['customDays'] ?? 1)).' días',
+                            };
+                        @endphp
+                        <span class="md-chip-tonal"><i class="bi bi-arrow-repeat task-row__chip-icon" aria-hidden="true"></i> {{ $recurrenceLabel }}</span>
                     @endif
                 </div>
                 <div class="md-list-item-trailing">
@@ -144,7 +118,36 @@
                         <x-ui.menu-item icon="bi-trash" tone="danger" wire:click="delete('{{ $task->id }}')" wire:confirm="La tarea «{{ $task->title }}» se elimina de forma permanente.">Eliminar</x-ui.menu-item>
                     </x-ui.row-actions>
                 </div>
-                </div>
+                @if ($task->category || $task->size || $task->priority || $subtaskProgress || $task->status)
+                    <div class="task-card__footer task-row__tags">
+                        @if ($task->category)
+                            <x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="accent" :icon="$this->categoryIcon($task->category)">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>
+                        @endif
+                        @if ($task->size)
+                            <span class="md-chip-tonal">{{ $task->size }}</span>
+                        @endif
+                        @if ($task->priority)
+                            @php
+                                $priorityChipClass = match($task->priority) {
+                                    'urgent-important' => 'md-chip-tonal--error',
+                                    'not-urgent-important' => 'md-chip-tonal--warning',
+                                    'urgent-not-important' => 'md-chip-tonal--info',
+                                    default => 'md-chip-tonal',
+                                };
+                            @endphp
+                            <span class="md-chip-tonal {{ $priorityChipClass }}">{{ $priorities[$task->priority] ?? $task->priority }}</span>
+                        @endif
+                        @if ($subtaskProgress)
+                            <span class="md-chip-tonal md-chip-tonal--info">
+                                <i class="bi bi-check2-square task-row__chip-icon" aria-hidden="true"></i> {{ $subtaskProgress['completed'] }}/{{ $subtaskProgress['total'] }} subtareas
+                            </span>
+                        @endif
+                        @if ($task->status)
+                            <x-ui.catalog-chip :color="$task->status->color" tone="accent" :icon="$task->status->icon" class="task-row__status" title="Estado">{{ $task->status->name }}</x-ui.catalog-chip>
+                        @endif
+                    </div>
+                @endif
+            </div>
         @empty
             <div class="text-center py-5" style="color: var(--md-sys-color-on-surface-variant);">
                 <i class="bi bi-list-task" style="font-size: 3rem; opacity: 0.4;"></i>

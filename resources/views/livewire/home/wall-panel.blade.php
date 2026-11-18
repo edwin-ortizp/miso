@@ -1,4 +1,4 @@
-<div class="wall-panel" data-module="home" x-data="wallPanel({{ \Illuminate\Support\Js::from(config('app.timezone')) }})" @panel-goals.window="goalsOpen = true" @panel-detail-close.window="$wire.closeDetail()">
+<div class="wall-panel" data-module="home" x-data="wallPanel({{ \Illuminate\Support\Js::from(config('app.timezone')) }})" @task-editor-saved.window="$wire.$refresh()" @panel-goals.window="goalsOpen = true" @panel-detail-close.window="$wire.closeDetail()">
     <main class="wall-grid" id="panel-main">
         <h1 class="visually-hidden">Panel de pared</h1>
         <section class="wall-now" aria-label="Ahora">
@@ -36,28 +36,28 @@
                 <div class="wall-timeline__body">
                     <div class="wall-timeline__track">
                         <span class="wall-timeline__now" x-show="nowMinute >= start && nowMinute <= start + 480" x-effect="$el.style.setProperty('--md-progress-value', (nowMinute - start) / 480 * 100)">Ahora</span>
-                        <template x-for="(group, index) in groups" :key="index"><x-ui.action variant="tonal" class="wall-pin wall-control" x-bind:class="{ 'is-done': group.every(item => item.done) }" x-effect="$el.style.setProperty('--md-progress-value', (group[0].minute - start) / 480 * 100)" x-bind:aria-label="group.map(item => item.time + ' ' + item.title).join(', ')" @click="cluster = group; clusterOpen = true"><span x-text="group.length > 1 ? group.length : group[0].time"></span></x-ui.action></template>
+                        <template x-for="(group, index) in groups" :key="index"><x-ui.action variant="tonal" class="wall-pin wall-control" x-bind:class="{ 'is-done': group.every(item => item.done) }" x-effect="$el.style.setProperty('--md-progress-value', (group[0].minute - start) / 480 * 100)" x-bind:aria-label="group.map(item => item.time + (item.scheduleLocked ? ' Horario fijo ' : ' ') + item.title).join(', ')" @click="cluster = group; clusterOpen = true"><x-ui.task-schedule-lock x-show="group.length === 1 && group[0].scheduleLocked" /><span x-text="group.length > 1 ? group.length : group[0].time"></span></x-ui.action></template>
                     </div>
                     <div class="wall-timeline__scale"><template x-for="offset in [0, 120, 240, 360, 480]"><span x-text="formatMinute(start + offset)"></span></template></div>
                 </div>
                 <x-ui.icon-action icon="bi-chevron-right" label="Horas siguientes" @click="shift(240)" />
                 <x-ui.dialog standard expanded state="clusterOpen" title="En este momento" size="lg">
-                    <template x-for="item in cluster"><p><b x-text="item.time"></b> <span x-text="item.title"></span> <span x-text="item.done ? ' · Hecho' : ''"></span></p></template>
+                    <template x-for="item in cluster"><p><x-ui.task-schedule-lock x-show="item.scheduleLocked" /><b x-text="item.time"></b> <span x-text="item.title"></span> <span x-text="item.done ? ' · Hecho' : ''"></span></p></template>
                     <x-slot:actions><x-ui.action class="wall-control" variant="text" @click="clusterOpen = false">Cerrar</x-ui.action></x-slot:actions>
                 </x-ui.dialog>
             </div>
         </section>
         <section class="wall-next" aria-label="Ahora y lo próximo">
             <h2>{{ $currentTask ? 'En este momento' : 'Lo próximo' }}</h2>
-            @php($now = $currentTask ? ['id' => $currentTask->id, 'title' => $currentTask->title, 'time' => $currentTask->start_date->format('H:i').($currentTask->end_date ? ' – '.$currentTask->end_date->format('H:i') : '')] : $nextTasks->first())
+            @php($now = $currentTask ? ['id' => $currentTask->id, 'title' => $currentTask->title, 'scheduleLocked' => $currentTask->schedule_locked, 'time' => $currentTask->start_date->format('H:i').($currentTask->end_date ? ' – '.$currentTask->end_date->format('H:i') : '')] : $nextTasks->first())
             @if ($now)
-                <strong class="wall-next__title">{{ $now['title'] }}</strong><p>Hoy · {{ $now['time'] }}</p>
+                <strong class="wall-next__title">{{ $now['title'] }}</strong><p>Hoy · <x-ui.task-schedule-lock :locked="$now['scheduleLocked'] ?? false" />{{ $now['time'] }}</p>
                 <div class="wall-next__actions">
                     <x-ui.action class="wall-control" variant="filled" icon="bi-stopwatch" @click="$dispatch('panel-focus', {start: true, taskId: {{ \Illuminate\Support\Js::from($now['id']) }}})">Iniciar foco</x-ui.action>
                     <x-ui.icon-action emphasis="tonal" icon="bi-check2-circle" label="Completar" wire:click="toggleTask('{{ $now['id'] }}')" wire:loading.attr="disabled" />
                     <x-ui.icon-action emphasis="tonal" icon="bi-alarm" label="Posponer" @click="$dispatch('panel-quick', {kind: 'snooze', id: {{ \Illuminate\Support\Js::from($now['id']) }}})" />
                 </div>
-                @if ($after = $nextTasks->first(fn ($task) => $task['id'] !== $now['id']))<p class="wall-next__after"><span>Sigue</span><b>{{ $after['time'] }} · {{ $after['title'] }}</b></p>@endif
+                @if ($after = $nextTasks->first(fn ($task) => $task['id'] !== $now['id']))<p class="wall-next__after"><span>Sigue</span><b><x-ui.task-schedule-lock :locked="$after['scheduleLocked'] ?? false" />{{ $after['time'] }} · {{ $after['title'] }}</b></p>@endif
             @else
                 <strong>Sin tareas próximas con hora</strong><p>Consulta la agenda para ver las tareas sin hora.</p>
                 <div><x-ui.action class="wall-control" variant="filled" icon="bi-stopwatch" @click="$dispatch('panel-focus', {start: true})">Iniciar foco</x-ui.action></div>
@@ -79,7 +79,7 @@
                         <button type="button" class="md-btn-text wall-day__head" @click="dayIndex = {{ $i }}; agendaOpen = true" aria-label="Ver agenda del {{ $day['date']->locale('es')->translatedFormat('l d F') }}"><span>{{ $i === 0 ? 'Hoy' : $day['date']->locale('es')->translatedFormat('D') }}</span><b>{{ $day['date']->day }}</b></button>
                         <div class="wall-day__items" x-ref="items">
                             @forelse ($day['rows'] as $index => $row)
-                                <button type="button" class="md-btn-text wall-row wall-row--{{ $row['kind'] }} {{ $row['done'] ? 'is-done' : '' }}" x-show="layers.{{ $row['kind'] }} && rows.filter(row => layers[row.kind]).findIndex(row => row.kind === {{ \Illuminate\Support\Js::from($row['kind']) }} && row.id === {{ \Illuminate\Support\Js::from($row['id']) }} && row.title === {{ \Illuminate\Support\Js::from($row['title']) }}) < limit" @if ($row['kind'] === 'task') @click="$dispatch('task-editor', {action: 'openForm', id: {{ \Illuminate\Support\Js::from($row['id']) }}})" @else wire:click="openDetail('{{ $row['kind'] }}', '{{ $row['id'] }}')" @endif title="{{ $row['title'] }}"><small>{{ $row['time'] ?? 'Día' }}</small><span>{{ $row['title'] }}</span></button>
+                                <button type="button" class="md-btn-text wall-row wall-row--{{ $row['kind'] }} {{ $row['done'] ? 'is-done' : '' }}" x-show="layers.{{ $row['kind'] }} && rows.filter(row => layers[row.kind]).findIndex(row => row.kind === {{ \Illuminate\Support\Js::from($row['kind']) }} && row.id === {{ \Illuminate\Support\Js::from($row['id']) }} && row.title === {{ \Illuminate\Support\Js::from($row['title']) }}) < limit" @if ($row['kind'] === 'task') @click="$dispatch('task-editor', {action: 'openForm', id: {{ \Illuminate\Support\Js::from($row['id']) }}})" @else wire:click="openDetail('{{ $row['kind'] }}', '{{ $row['id'] }}')" @endif title="{{ $row['title'] }}"><small><x-ui.task-schedule-lock :locked="$row['scheduleLocked'] ?? false" />{{ $row['time'] ?? 'Día' }}</small><span>{{ $row['title'] }}</span></button>
                             @empty
                                 <p class="wall-muted">Día libre</p>
                             @endforelse
@@ -144,7 +144,7 @@
         ['label' => 'Agregar hábito', 'icon' => 'bi-check2-square', 'event' => 'panel-habit'],
     ]" />
     @include('livewire.home.panel.sheets')
-    <div class="wall-ambient" x-show="ambient" x-cloak role="dialog" aria-modal="true" aria-label="Modo ambiente" x-md-surface="ambient" @md-surface-close="ambient = false"><strong x-text="clock"></strong><span x-text="dateLabel"></span>@if($now)<p>{{ $now['time'] }} · {{ $now['title'] }}</p>@endif<x-ui.action class="wall-control" variant="tonal" @click="ambient = false">Salir del modo ambiente</x-ui.action></div>
+    <div class="wall-ambient" x-show="ambient" x-cloak role="dialog" aria-modal="true" aria-label="Modo ambiente" x-md-surface="ambient" @md-surface-close="ambient = false"><strong x-text="clock"></strong><span x-text="dateLabel"></span>@if($now)<p><x-ui.task-schedule-lock :locked="$now['scheduleLocked'] ?? false" />{{ $now['time'] }} · {{ $now['title'] }}</p>@endif<x-ui.action class="wall-control" variant="tonal" @click="ambient = false">Salir del modo ambiente</x-ui.action></div>
     <livewire:task.task-editor :edit-task="$editTask" :expanded="true" :key="'wall-task-task-editor'" />
     <livewire:home.panel.shopping-editor  :key="'wall-home-panel-shopping-editor'" />
     <livewire:home.panel.habit-editor  :key="'wall-home-panel-habit-editor'" />

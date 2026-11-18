@@ -30,32 +30,37 @@
                                             <i class="bi bi-check" style="font-size: 0.7rem;"></i>
                                         @endif
                                     </button>
-                                    <div style="min-width: 0;">
+                                    <div class="task-kanban-card__summary">
                                         <span class="md-body-small {{ $task->completed ? '' : 'fw-medium' }}" style="color: var(--md-sys-color-on-surface);">
                                             <x-ui.task-code :code="$task->code" /> {{ $task->title }}
                                         </span>
-                                        @if ($task->category)
-                                            <div class="task-kanban-card__category"><x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="accent" :icon="$this->categoryIcon($task->category)" class="task-kanban-category">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip></div>
+                                        @if ($preview = $task->descriptionPreview())
+                                            <span class="task-card__description">{{ $preview }}</span>
                                         @endif
                                     </div>
                                 </div>
                                 @php $step = $statusSteps[$task->status_id] ?? null; @endphp
-                                <footer class="task-kanban-card__actions" aria-label="Estado de {{ $task->title }}">
-                                    <button type="button" class="md-btn-icon md-btn--sm"
-                                            wire:click="moveStatus('{{ $task->id }}', 'previous')" wire:loading.attr="disabled"
-                                            @disabled(! ($step['previous'] ?? null))
-                                            aria-label="{{ isset($step['previous']) ? 'Mover a '.$step['previous']->name : 'Sin estado anterior' }}"
-                                            title="{{ isset($step['previous']) ? 'Anterior: '.$step['previous']->name : 'Sin estado anterior' }}">
-                                        <i class="bi bi-arrow-left" aria-hidden="true"></i>
-                                    </button>
-                                    <span class="task-kanban-card__status" title="{{ $step['current']->name ?? 'Sin estado' }}">{{ $step['current']->name ?? 'Sin estado' }}</span>
-                                    <button type="button" class="md-btn-icon md-btn--sm"
-                                            wire:click="moveStatus('{{ $task->id }}', 'next')" wire:loading.attr="disabled"
-                                            @disabled(! ($step['next'] ?? null))
-                                            aria-label="{{ isset($step['next']) ? 'Mover a '.$step['next']->name : 'Sin estado siguiente' }}"
-                                            title="{{ isset($step['next']) ? 'Siguiente: '.$step['next']->name : 'Sin estado siguiente' }}">
-                                        <i class="bi bi-arrow-right" aria-hidden="true"></i>
-                                    </button>
+                                <footer class="task-card__footer task-kanban-card__footer">
+                                    @if ($task->category)
+                                        <x-ui.catalog-chip :color="$this->categoryColor($task->category)" tone="accent" :icon="$this->categoryIcon($task->category)" class="task-kanban-category">{{ $categories[$task->category] ?? $task->category }}</x-ui.catalog-chip>
+                                    @endif
+                                    <div class="task-kanban-card__actions" role="group" aria-label="Estado de {{ $task->title }}">
+                                        <button type="button" class="md-btn-icon md-btn--sm"
+                                                wire:click="moveStatus('{{ $task->id }}', 'previous')" wire:loading.attr="disabled"
+                                                @disabled(! ($step['previous'] ?? null))
+                                                aria-label="{{ isset($step['previous']) ? 'Mover a '.$step['previous']->name : 'Sin estado anterior' }}"
+                                                title="{{ isset($step['previous']) ? 'Anterior: '.$step['previous']->name : 'Sin estado anterior' }}">
+                                            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+                                        </button>
+                                        <span class="task-kanban-card__status" title="{{ $step['current']->name ?? 'Sin estado' }}">{{ $step['current']->name ?? 'Sin estado' }}</span>
+                                        <button type="button" class="md-btn-icon md-btn--sm"
+                                                wire:click="moveStatus('{{ $task->id }}', 'next')" wire:loading.attr="disabled"
+                                                @disabled(! ($step['next'] ?? null))
+                                                aria-label="{{ isset($step['next']) ? 'Mover a '.$step['next']->name : 'Sin estado siguiente' }}"
+                                                title="{{ isset($step['next']) ? 'Siguiente: '.$step['next']->name : 'Sin estado siguiente' }}">
+                                            <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
                                 </footer>
                             </div>
                         @empty

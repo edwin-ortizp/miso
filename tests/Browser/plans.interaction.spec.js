@@ -12,9 +12,17 @@ test.beforeAll(async()=>{
  for(let i=0;i<60;i++){try{if((await fetch('http://127.0.0.1:8028/login')).ok)return;}catch{}await new Promise(resolve=>setTimeout(resolve,500));}throw Error('Server did not start');
 });
 test.afterAll(()=>server?.kill());
+async function login(page, email = 'plan-browser@example.test') {
+ await page.goto('/login');
+ await page.locator('#login-email').fill(email);
+ await page.locator('#login-pw').fill('browser-test-password');
+ await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
+ await page.waitForURL(url => !url.pathname.includes('/login'));
+}
+
 for(const width of [1440,390]) test(`plans real interactions ${width}`,async({page})=>{
  test.setTimeout(90000);page.setDefaultTimeout(10000);const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.setViewportSize({width,height:1000});await page.goto('/login');await page.getByLabel('Correo electrónico',{exact:true}).fill('plan-browser@example.test');await page.getByLabel('Contraseña',{exact:true}).fill('browser-test-password');await page.getByRole('button',{name:'Iniciar Sesión'}).click();await page.waitForURL(url=>!url.pathname.includes('/login'));
+ await page.setViewportSize({width,height:1000});await login(page);
  await page.goto('/plans');expect(await page.locator('.plans-kpis').evaluate(el=>getComputedStyle(el).borderTopWidth)).toBe('0px');await page.screenshot({path:`storage/framework/testing/playwright/plans/all-${width}.png`,fullPage:true});await expect(page.locator('.plan-row__person').first()).toHaveAttribute('href',/relationships\//);await page.locator('.plan-row__person').first().click();await expect(page).toHaveURL(/relationships\//);await page.goBack();await expect(page.locator('.plans-list')).toBeVisible();
  const nav=()=>page.getByRole('navigation',{name:'Vistas del módulo'});
  await nav().getByRole('link',{name:'Programados',exact:true}).click();await expect(page.getByRole('link',{name:'Cena programada',exact:true})).toBeVisible();await expect(page.getByRole('link',{name:'Plan vencido',exact:true})).toHaveCount(0);
@@ -39,11 +47,7 @@ for(const width of [1440,390]) test(`plans real interactions ${width}`,async({pa
 
 for (const width of [320, 375, 390, 768, 1440]) test(`plans fit viewport ${width}`, async ({page}) => {
  await page.setViewportSize({width,height:1000});
- await page.goto('/login');
- await page.getByLabel('Correo electr�nico',{exact:true}).fill('plan-browser@example.test');
- await page.getByLabel('Contrase�a',{exact:true}).fill('browser-test-password');
- await page.getByRole('button',{name:'Iniciar Sesi�n'}).click();
- await page.waitForURL(url=>!url.pathname.includes('/login'));
+ await login(page);
  await page.goto('/plans?sort=name');
  const row=page.locator('.plan-row').filter({hasText:'Evento extenso'});
  await expect(row).toBeVisible();await expect(row.getByText('Vencido',{exact:true})).toHaveCount(0);
@@ -53,7 +57,7 @@ for (const width of [320, 375, 390, 768, 1440]) test(`plans fit viewport ${width
   expect(outside).toEqual([]);
  };
  await assertFit();await page.screenshot({path:`storage/framework/testing/playwright/plans/fit-${width}.png`,fullPage:true});
- await row.getByRole('button',{name:/M�s opciones/}).click();await expect(page.getByRole('menuitem',{name:'Ver detalle',exact:true})).toBeVisible();await page.keyboard.press('Escape');
+ await row.getByRole('button',{name:/Más opciones/}).click();await expect(page.getByRole('menuitem',{name:'Ver detalle',exact:true})).toBeVisible();await page.keyboard.press('Escape');
  await page.getByRole('button',{name:/Filtros/}).first().click();await expect(page.getByLabel('Ciudad',{exact:true})).toBeVisible();await assertFit();await page.keyboard.press('Escape');
  const search=page.getByPlaceholder('Buscar planes');
  if(!await search.isVisible()) await page.getByRole('button',{name:'Buscar',exact:true}).click();
@@ -61,3 +65,87 @@ for (const width of [320, 375, 390, 768, 1440]) test(`plans fit viewport ${width
  await search.fill('');await expect(page.locator('.plan-row')).toHaveCount(10);
  await page.getByRole('button',{name:/Siguiente/}).click();await expect(page.locator('.plan-row')).toHaveCount(6);await assertFit();
 });
+
+for (const width of [1440, 390]) {
+ test(`reloads Plans when the published bundle version changes at ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 1000 });
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => {
+   if (/Detected multiple instances of (Livewire|Alpine)|Alpine Expression Error/.test(message.text())) {
+    errors.push(message.text());
+   }
+  });
+
+  await login(page, 'plan-bundle-browser@example.test');
+  await page.goto('/plans');
+  await page.waitForFunction(() => Boolean(window.Livewire?.first()));
+
+  await page.evaluate(() => { window.planNavigationMarker = true; });
+  await page.getByRole('link', { name: 'Cena programada', exact: true }).click();
+  await expect(page).toHaveURL(/\/plans\/[^/?]+/);
+  expect(await page.evaluate(() => window.planNavigationMarker)).toBe(true);
+  await page.goBack();
+  await expect(page.locator('.plans-list')).toBeVisible();
+  expect(await page.evaluate(() => window.planNavigationMarker)).toBe(true);
+
+  const destination = '/plans?sort=name';
+  const isDestination = url => url.pathname === '/plans' && url.searchParams.get('sort') === 'name';
+  const documentRequests = [];
+  page.on('request', request => {
+   if (request.resourceType() === 'document' && isDestination(new URL(request.url()))) {
+    documentRequests.push(request.url());
+   }
+  });
+  await page.route(isDestination, async route => {
+   const response = await route.fetch();
+   const html = await response.text();
+   await route.fulfill({
+    response,
+    body: html.replace(/(\/js\/app\.js\?v=)\d+/g, (_, prefix) => prefix + '9876543210'),
+   });
+  });
+
+  await page.evaluate(url => window.Livewire.navigate(url), destination);
+  await expect(page).toHaveURL(isDestination);
+  await expect.poll(() => documentRequests.length).toBe(1);
+  await expect(page.locator('.plans-list')).toBeVisible();
+  await page.waitForFunction(() => Boolean(window.Livewire?.first()));
+  await page.locator('.md-module-primary-fab[aria-label="Agregar plan"]').click();
+  const form = page.getByRole('dialog', { name: 'Agregar plan', exact: true });
+  const isLivewireUpdate = response => response.request().method() === 'POST'
+   && new URL(response.url()).pathname.includes('/livewire');
+  const category = form.getByRole('combobox', { name: 'Categoría' });
+  await category.click();
+  await category.fill('Gastronomía');
+  const categoryUpdate = page.waitForResponse(isLivewireUpdate);
+  await form.getByRole('option', { name: 'Gastronomía', exact: true }).click();
+  expect((await categoryUpdate).ok()).toBe(true);
+  await expect(category).toHaveValue('Gastronomía');
+
+  for (const [field, option] of [
+   ['Etiquetas', 'Etiqueta de prueba'],
+   ['Círculos', 'Círculo de prueba'],
+   ['Personas', 'Contacto de planes'],
+  ]) {
+   if (field === 'Círculos') {
+    await form.getByRole('button', { name: 'Personas y círculos', exact: true }).click();
+   }
+   const trigger = form.getByRole('button', { name: field, exact: true });
+   await trigger.click();
+   const panel = form.getByRole('dialog', { name: field, exact: true });
+   const checkbox = panel.getByRole('checkbox', { name: option });
+   const update = page.waitForResponse(isLivewireUpdate);
+   await checkbox.check();
+   expect((await update).ok()).toBe(true);
+   await expect(checkbox).toBeChecked();
+   await checkbox.press('Escape');
+   await expect(panel).toBeHidden();
+   await expect(trigger).toHaveText(option);
+  }
+  await form.getByRole('button', { name: 'Información básica', exact: true }).click();
+  await expect(category).toHaveValue('Gastronomía');
+  await expect(form.getByRole('button', { name: 'Etiquetas', exact: true })).toHaveText('Etiqueta de prueba');
+  expect(errors).toEqual([]);
+ });
+}

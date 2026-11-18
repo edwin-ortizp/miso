@@ -172,6 +172,11 @@ _Última actualización: 2026-11-18_
 | CHG-166 | M | Notas cortes y simulador académico | in-progress | En desarrollo | 0/1 |
 | CHG-167 | M | Evaluaciones académicas en Calendario | in-progress | En desarrollo | 0/1 |
 | CHG-168 | M | Registro de ejercicio según la actividad | in-progress | En verificación | 3/3 |
+| CHG-169 | S | Sincronizar inicio fin y duración de las tareas | in-progress | En verificación | 1/1 |
+| CHG-170 | S | Reorganizar información en las tarjetas de tareas | in-progress | En verificación | 1/1 |
+| CHG-171 | S | Mostrar candado junto al horario fijo | in-progress | En verificación | 1/1 |
+| CHG-172 | S | Corregir carga duplicada de Livewire y Alpine | in-progress | En verificación | 1/1 |
+| CHG-173 | XS | Presentar el listado de tareas como tarjetas en desktop | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

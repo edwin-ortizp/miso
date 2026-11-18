@@ -26,10 +26,12 @@
                                         <span class="task-flow-position">{{ $loop->iteration }}</span>
                                         <span class="task-flow-card-content">
                                             <span class="task-flow-card-title"><x-ui.task-code :code="$task->code" /> {{ $task->title }}</span>
-                                            @if ($task->size || $task->estimated_time)
+                                            @if ($preview = $task->descriptionPreview())
+                                                <span class="task-card__description">{{ $preview }}</span>
+                                            @endif
+                                            @if ($task->estimated_time)
                                                 <span class="task-flow-card-meta">
-                                                    @if ($task->size)<span>{{ $task->size }}</span>@endif
-                                                    @if ($task->estimated_time)<span>{{ $task->estimated_time_label }}</span>@endif
+                                                    <span>{{ $task->estimated_time_label }}</span>
                                                 </span>
                                             @endif
                                         </span>
@@ -39,6 +41,9 @@
                                         <button wire:click="movePrevious('{{ $task->id }}')" @disabled($loop->first) class="md-btn-icon" title="Mover antes" aria-label="Mover {{ $task->title }} antes"><i class="bi bi-arrow-left"></i></button>
                                         <button wire:click="moveNext('{{ $task->id }}')" @disabled($loop->last && $lane['pendingTotal'] === $lane['tasks']->count()) class="md-btn-icon" title="Mover después" aria-label="Mover {{ $task->title }} después"><i class="bi bi-arrow-right"></i></button>
                                     </div>
+                                    @if ($task->size)
+                                        <div class="task-card__footer task-flow-card-tags"><span>{{ $task->size }}</span></div>
+                                    @endif
                                 </article>
                             </li>
                         @endforeach

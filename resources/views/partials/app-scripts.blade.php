@@ -2,5 +2,12 @@
 @if (app()->environment('local') && is_file(public_path('hot')))
     @vite('resources/js/app.js')
 @else
-    <script type="module" src="{{ asset('js/app.js') }}?v={{ filemtime(public_path('js/app.js')) }}"></script>
+    @php($bundleUrl = asset('js/app.js').'?v='.filemtime(public_path('js/app.js')))
+    {{-- Livewire vuelve a ejecutar este script del head si cambia su atributo de versión. --}}
+    <script data-bundle="{{ $bundleUrl }}">
+        if (window.Livewire) window.location.reload();
+    </script>
+    @unless (request()->hasHeader('X-Livewire-Navigate'))
+        <script type="module" src="{{ $bundleUrl }}"></script>
+    @endunless
 @endif

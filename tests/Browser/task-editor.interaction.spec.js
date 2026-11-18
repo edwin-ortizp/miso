@@ -14,7 +14,7 @@ test.beforeAll(async () => {
     const database = path.join(directory, 'layout-browser.sqlite');
     closeSync(openSync(database, 'a'));
     const env = { ...process.env, APP_ENV: 'testing', DB_CONNECTION: 'sqlite', DB_DATABASE: database, DB_URL: '', CACHE_STORE: 'array', SESSION_DRIVER: 'file', DEBUGBAR_ENABLED: 'false', APP_CONFIG_CACHE: path.join(directory, 'unused-task-editor-config.php') };
-    execFileSync('php', ['tests/Browser/support/layout-fixture.php'], { env, encoding: 'utf8' });
+    execFileSync('php', ['tests/Browser/support/layout-fixture.php'], { env: { ...env, TEST_TASK_CARDS: '1' }, encoding: 'utf8' });
     server = spawn('php', ['-S', '127.0.0.1:8032', path.resolve('vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')], { cwd: path.resolve('public'), env, stdio: 'ignore', windowsHide: true });
     for (let i = 0; i < 60; i++) {
         try { if ((await fetch(`${BASE}/login`)).ok) return; } catch {}
@@ -30,9 +30,9 @@ test.beforeEach(async ({ page }) => {
     blocked = [];
     await page.route(/\/(vendor|build)\//, route => { blocked.push(route.request().url()); return route.abort(); });
     await page.goto(`${BASE}/login`);
-    await page.getByLabel('Correo electrónico', { exact: true }).fill('layout@example.test');
-    await page.getByLabel('Contraseña', { exact: true }).fill('browser-test-password');
-    await page.getByRole('button', { name: 'Iniciar Sesión' }).click();
+    await page.locator('input[type=email]').fill('layout@example.test');
+    await page.locator('input[type=password]').fill('browser-test-password');
+    await page.locator('button[type=submit]').click();
     await page.waitForURL(url => !url.pathname.includes('/login'));
     await page.goto(`${BASE}/tasks/list`);
     await page.getByRole('button', { name: 'Nueva tarea', exact: true }).click();
@@ -44,6 +44,90 @@ async function taskSection(dialog, name) {
     const nav = dialog.getByRole('navigation', { name: 'Secciones del formulario' });
     await nav.getByRole('button', { name: new RegExp('^' + name) }).click();
 }
+
+for (const width of [390, 1440]) test(`las tarjetas separan la planificación y los tags a ${width} px`, async ({ page }, testInfo) => {
+    const title = 'Preparar informe de prueba';
+    await page.locator('#task-editor').getByRole('button', { name: 'Cancelar', exact: true }).click();
+    await page.setViewportSize({ width, height: 844 });
+
+    const row = page.locator('.task-row').filter({ hasText: title });
+    const footer = row.locator('.task-card__footer');
+    const openTask = row.getByRole('button', { name: `Abrir tarea: ${title}` });
+    const date = row.getByRole('button', { name: new RegExp(`Cambiar fechas de ${title}`) });
+    await expect(openTask.locator('.md-task-code')).toBeVisible();
+    await expect(openTask.locator('.task-card__description')).toHaveText('Revisar cifras y enviar el resumen');
+    await expect(date).toContainText('09:00');
+    await expect(row.locator('.task-row__planning')).toContainText('45 min');
+    await expect(row.locator('.task-row__planning')).toContainText('Semanal');
+    await expect(footer).toContainText('Personal');
+    await expect(footer).toContainText('Importante');
+    await expect(footer).toContainText('1/2 subtareas');
+    await expect(footer.locator('.task-row__status')).not.toBeEmpty();
+
+    const geometry = await row.evaluate(card => {
+        const summary = card.querySelector('.md-task-open-button').getBoundingClientRect();
+        const planning = card.querySelector('.task-row__planning').getBoundingClientRect();
+        const tags = card.querySelector('.task-card__footer').getBoundingClientRect();
+        const style = getComputedStyle(card);
+        return {
+            innerWidth: card.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+            tagsWidth: tags.width,
+            footerBelowPlanning: tags.top >= planning.bottom,
+            planningBesideSummary: planning.left >= summary.right,
+            cardFits: card.scrollWidth <= card.clientWidth,
+        };
+    });
+    expect(geometry.tagsWidth).toBeCloseTo(geometry.innerWidth, 0);
+    expect(geometry.footerBelowPlanning).toBe(true);
+    expect(geometry.planningBesideSummary).toBe(width === 1440);
+    expect(geometry.cardFits).toBe(true);
+    await expect(footer).toHaveCSS('border-top-width', '1px');
+    await row.screenshot({ path: testInfo.outputPath('tarjeta-lista.png') });
+
+    const more = row.getByRole('button', { name: `Más acciones de ${title}` });
+    await more.click();
+    await expect(row.getByRole('menuitem', { name: 'Editar', exact: true })).toBeVisible();
+    await more.press('Escape');
+    await date.click();
+    const quickDates = page.locator('#task-quick-dates-dialog');
+    await expect(quickDates).toBeVisible();
+    await quickDates.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    await expect(date).toBeFocused();
+    await openTask.click();
+    await expect(page.locator('#task-editor').getByRole('textbox', { name: 'Título', exact: true })).toHaveValue(title);
+});
+
+test('el candado del listado se actualiza al guardar Horario fijo', async ({ page }) => {
+    const dialog = page.locator('#task-editor');
+    await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    const title = 'Preparar informe de prueba';
+    const date = page.getByRole('button', { name: new RegExp(`Cambiar fechas de ${title}`) });
+    const lock = date.locator('.task-locked-icon');
+    await expect(lock).toHaveCount(0);
+    await page.getByRole('button', { name: `Abrir tarea: ${title}` }).click();
+
+    for (const enabled of [true, false]) {
+        await dialog.locator('.md-form-dialog__head').getByRole('button', { name: 'Editar', exact: true }).click();
+        await taskSection(dialog, 'Programación');
+        await dialog.getByRole('switch', { name: 'Horario fijo' }).press('Space');
+        await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+        await expect(lock).toHaveCount(enabled ? 1 : 0);
+    }
+});
+
+test('Kanban, Planificación y Flujo mantienen los datos y las acciones de la tarjeta', async ({ page }) => {
+    for (const [route, cardClass, tag, action] of [
+        ['kanban', '.task-kanban-card', 'Personal', 'Completar tarea: Preparar informe de prueba'],
+        ['planning', '.md-planning-card', 'Personal', 'Completar Preparar informe de prueba'],
+        ['flow', '.task-flow-card', 'S', 'Completar Preparar informe de prueba'],
+    ]) {
+        await page.goto(`${BASE}/tasks/${route}`);
+        const card = page.locator(cardClass).filter({ hasText: 'Preparar informe de prueba' });
+        await expect(card.locator('.task-card__description')).toHaveText('Revisar cifras y enviar el resumen');
+        await expect(card.locator('.task-card__footer')).toContainText(tag);
+        await expect(card.getByRole('button', { name: action, exact: true })).toBeVisible();
+    }
+});
 
 for (const width of [360, 390, 1440]) test(`Editar enables Markdown in one action ${width}`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
@@ -134,12 +218,13 @@ test('el editor sigue funcionando tras programar con clicks', async ({ page }) =
     await taskSection(dialog, 'Programación');
     const start = dialog.getByLabel('Fecha inicio', { exact: true });
     await start.click({ position: { x: 24, y: 28 } });
-    await page.keyboard.type('21102026');
-    await dialog.locator('#task-editor-end').click({ position: { x: 24, y: 28 } });
-    await page.keyboard.type('22102026');
-    await dialog.locator('#task-editor-start-time').click({ position: { x: 24, y: 28 } });
-    await page.keyboard.type('0930a');
-    await page.waitForTimeout(800);
+    await start.fill('2026-10-21');
+    const end = dialog.locator('#task-editor-end');
+    await end.click({ position: { x: 24, y: 28 } });
+    await end.fill('2026-10-22');
+    const startTime = dialog.locator('#task-editor-start-time');
+    await startTime.click({ position: { x: 24, y: 28 } });
+    await startTime.fill('09:30');
     await expect(start).toHaveValue('2026-10-21');
     await expect(dialog.locator('#task-editor-end')).toHaveValue('2026-10-22');
     await expect(dialog.locator('#task-editor-start-time')).toHaveValue('09:30');
@@ -149,6 +234,50 @@ test('el editor sigue funcionando tras programar con clicks', async ({ page }) =
     await source.evaluate(el => el.setSelectionRange(0, 4));
     await dialog.locator('[data-markdown-snippet="bold"]').click();
     await expect(source).toHaveValue('**hola**');
+});
+
+for (const width of [390, 1440]) test(`la programación sincroniza inicio, fin y minutos a ${width} px`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    const dialog = page.locator('#task-editor');
+    const title = `Turno nocturno ${width}`;
+    const duration = dialog.getByRole('spinbutton', { name: 'Tiempo estimado (min)' });
+    const startTime = dialog.locator('#task-editor-start-time');
+    const endDate = dialog.getByLabel('Fecha fin', { exact: true });
+    const endTime = dialog.locator('#task-editor-end-time');
+
+    await dialog.getByRole('textbox', { name: 'Título', exact: true }).fill(title);
+    await taskSection(dialog, 'Programación');
+    await dialog.getByLabel('Fecha inicio', { exact: true }).fill('2026-11-18');
+    await startTime.fill('21:30');
+    await duration.fill('90');
+    await duration.blur();
+    await expect(endTime).toHaveValue('23:00');
+    await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+    await expect(dialog).toBeHidden();
+
+    await page.getByRole('button', { name: `Abrir tarea: ${title}`, exact: true }).click();
+    await expect(duration).toHaveValue('90');
+    await dialog.locator('.md-form-dialog__head').getByRole('button', { name: 'Editar', exact: true }).click();
+    await taskSection(dialog, 'Programación');
+    await startTime.fill('23:30');
+    await startTime.blur();
+    await expect(endDate).toHaveValue('2026-11-19');
+    await expect(endTime).toHaveValue('01:00');
+    await expect(duration).toHaveValue('90');
+    await expect(dialog.getByText('Cambios pendientes de guardar')).toBeVisible();
+
+    await endTime.fill('00:15');
+    await endTime.blur();
+    await expect(duration).toHaveValue('45');
+
+    await endDate.fill('2026-11-18');
+    await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+    await expect(dialog.getByText('El fin debe ser igual o posterior al inicio.')).toBeVisible();
+    await endDate.fill('2026-11-19');
+    await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+    await expect(dialog.locator('.md-form-dialog__head').getByRole('button', { name: 'Editar', exact: true })).toBeVisible();
+    await expect(duration).toHaveValue('45');
+    await expect(dialog.getByText('Cambios pendientes de guardar')).toBeHidden();
 });
 
 test('la barra Markdown pasa a edición desde la vista previa', async ({ page }) => {
