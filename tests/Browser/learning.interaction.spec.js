@@ -4,7 +4,7 @@ import { spawn, execFileSync } from 'node:child_process';
 import { mkdirSync, closeSync, openSync } from 'node:fs';
 import path from 'node:path';
 
-const port = 8087;
+const port = Number(process.env.MISO_LEARNING_TEST_PORT || 8087);
 const directory = path.resolve('storage/framework/testing');
 let server, fixture;
 test.describe.configure({ mode: 'serial' });
@@ -157,3 +157,114 @@ test('create, validate, persist, pin and delete from an empty account', async ({
     await expect(page).toHaveURL(/\/learning$/);
     await expect(page.getByText('Aún no tienes formaciones')).toBeVisible();
 });
+
+for (const width of [390, 768, 1440]) {
+    test('Academic dashboard, quick capture and projection '+width, async ({ page }) => {
+        test.setTimeout(90000);
+        const errors = [];
+        page.on('pageerror', error => errors.push(error.message));
+        await page.setViewportSize({ width, height: 950 });
+        const academic = fixture.academic[width];
+        await login(page);
+        await page.getByRole('link', { name: 'Mi estudio', exact: true }).click();
+        await expect(page).toHaveURL(/learning\/study$/);
+        const study = page.locator('.learning-page');
+        await expect(study.getByRole('heading', { name: 'Agenda', exact: true })).toBeVisible();
+        await study.getByLabel('Semestre', { exact: true }).selectOption(academic.period);
+
+        const fab = page.getByRole('button', { name: 'Agregar tarea', exact: true });
+        await fab.click();
+        const dialog = page.getByRole('dialog', { name: 'Agregar tarea', exact: true });
+        await expect(dialog).toBeVisible();
+        await expect(dialog.getByLabel('Materia', { exact: false })).toHaveValue(academic.subject);
+        const task = 'Entrega académica '+width;
+        const date = await page.evaluate(() => new Intl.DateTimeFormat('sv-SE', {
+            timeZone: 'America/Bogota', year: 'numeric', month: '2-digit', day: '2-digit',
+        }).format(new Date()));
+        await dialog.getByLabel('Título', { exact: false }).fill(task);
+        await dialog.getByLabel('Fecha de entrega (opcional)').fill(date);
+        await dialog.getByLabel('Cuenta para la nota').check();
+        await dialog.getByLabel('Peso en la materia (%)').fill('30');
+        await expect(dialog.getByRole('button', { name: 'Guardar' })).toBeInViewport();
+        await page.screenshot({path: directory+'/study-capture-'+width+'.png'});
+        await dialog.getByRole('button', { name: 'Guardar' }).click();
+        await expect(dialog).toHaveCount(0);
+        await expect(study.getByRole('status').filter({ hasText: 'Tarea y evaluación guardadas.' })).toBeVisible();
+        await expect(study.getByRole('button', { name: task, exact: true })).toBeVisible();
+        await expect(study.getByRole('link', { name: 'Mi estudio', exact: true })).toHaveAttribute('aria-current', 'page');
+        await expect(fab).toBeFocused();
+        await page.screenshot({path: directory+'/study-dashboard-'+width+'.png', fullPage: true});
+
+        await study.getByRole('button', { name: 'Completar '+task, exact: true }).click();
+        await expect(study.getByRole('button', { name: task, exact: true })).toHaveCount(0);
+        await page.goto('/learning/'+fixture.degree+'/units/'+academic.subject);
+        await page.getByRole('link', { name: 'Notas', exact: true }).click();
+        await expect(page.getByRole('heading', { name: 'Calificación', exact: true })).toBeVisible();
+        await page.getByRole('button', { name: 'Registrar nota de '+task, exact: true }).click();
+        const score = page.getByRole('dialog', { name: 'Registrar nota', exact: true });
+        await score.getByLabel('Nota', { exact: true }).fill('4,20');
+        await score.getByRole('button', { name: 'Guardar' }).click();
+        await expect(score).toHaveCount(0);
+        await expect(page.getByText('4,20', { exact: true }).first()).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Editar nota de '+task, exact: true })).toBeFocused();
+
+        if (width === 390) {
+            await page.getByRole('button', { name: 'Agregar evaluación', exact: true }).click();
+            await page.getByRole('menuitem', { name: 'Agregar evaluación', exact: true }).click();
+            const exam = page.getByRole('dialog', { name: 'Agregar evaluación', exact: true });
+            await exam.getByLabel('Título', { exact: false }).fill('Parcial de práctica');
+            await exam.getByLabel('Fecha (opcional)').fill(date);
+            await exam.getByLabel('Peso en la materia (%)').fill('70');
+            await exam.getByRole('button', { name: 'Guardar' }).click();
+            await expect(page.getByText('Necesitas 2,49 para pasar', { exact: true })).toBeVisible();
+            await page.getByRole('button', { name: 'Simular notas', exact: true }).click();
+            const simulator = page.getByRole('dialog', { name: 'Simular notas', exact: true });
+            await simulator.getByLabel('Parcial de práctica', { exact: true }).fill('3');
+            await simulator.getByRole('button', { name: 'Calcular', exact: true }).click();
+            await expect(simulator.getByRole('status')).toContainText('Nota simulada 3,36');
+            await page.keyboard.press('Escape');
+            await expect(simulator).toHaveCount(0);
+            await expect(page.getByRole('button', { name: 'Simular notas', exact: true })).toBeFocused();
+            await expect(page.getByText('Necesitas 2,49 para pasar', { exact: true })).toBeVisible();
+
+            await page.goto('/tasks/calendar');
+            const event = page.locator('.fc-event').filter({ hasText: 'Parcial de práctica' });
+            await expect(event).toBeVisible();
+            await page.getByRole('button', { name: 'Filtros', exact: true }).click();
+            await page.getByLabel('Evaluaciones', { exact: true }).uncheck();
+            await page.getByRole('button', { name: 'Filtrar', exact: true }).click();
+            await expect(event).toBeHidden();
+            await page.reload();
+            await expect(event).toBeHidden();
+            await page.getByRole('button', { name: /^Filtros/ }).click();
+            await page.getByLabel('Evaluaciones', { exact: true }).check();
+            await page.getByRole('button', { name: 'Filtrar', exact: true }).click();
+            await event.press('Enter');
+            await expect(page.locator('.learning-grade-row--selected')).toContainText('Parcial de práctica');
+        }
+        for (const theme of ['light', 'dark']) {
+            await page.evaluate(value => { document.documentElement.dataset.theme = value; }, theme);
+            await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+            const audit = await new AxeBuilder({ page }).include('.learning-page').withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+            expect(audit.violations).toEqual([]);
+            await page.screenshot({path: directory+'/study-grades-'+width+'-'+theme+'.png', fullPage: true});
+        }
+        if (width === 768) {
+            await page.goto('/learning/'+fixture.degree+'/units/'+fixture.subject+'?section=grades');
+            await page.getByRole('button', { name: 'Configurar calificación', exact: true }).click();
+            const settings = page.getByRole('dialog', { name: 'Configurar calificación', exact: true });
+            await settings.getByLabel('Esquema', { exact: true }).selectOption('cuts');
+            await settings.getByRole('button', { name: 'Guardar', exact: true }).click();
+            await expect(settings).toHaveCount(0);
+            await page.locator('.md-fab-split__toggle:visible, .md-fab-split__compact:visible').click();
+            await page.getByRole('menuitem', { name: 'Agregar corte', exact: true }).click();
+            const cut = page.getByRole('dialog', { name: 'Agregar corte', exact: true });
+            await cut.getByLabel('Título', { exact: false }).fill('Primer corte');
+            await cut.getByLabel('Peso del corte en la materia (%)', { exact: false }).fill('30');
+            await cut.getByRole('button', { name: 'Guardar', exact: true }).click();
+            await expect(page.getByRole('heading', { name: 'Primer corte · 30 % de la materia' })).toBeVisible();
+            await expect(page.getByText('Falta definir 70 % del peso de la materia entre sus cortes.')).toBeVisible();
+        }
+        expect(errors).toEqual([]);
+    });
+}

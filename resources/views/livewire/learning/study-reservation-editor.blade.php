@@ -1,5 +1,5 @@
 <div>
-    @if ($formation)
+    @if ($formation && $showUpcoming)
         <x-ui.card title="Próximas reservas">
             @forelse ($upcoming as $entry)
                 <x-ui.action variant="text" wire:key="{{ $entry['id'] }}"

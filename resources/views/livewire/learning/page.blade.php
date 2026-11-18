@@ -6,6 +6,12 @@
     $ftype = $formation?->type;
     $semesterLabel = $formation?->kind === 'academic' ? $vocab->label($uid, $ftype, 'period') : '';
     $current = $unit ?? $formation;
+    $academic = $unit?->kind === 'subject';
+    $academicTabs = ['summary' => 'Resumen', 'tasks' => 'Tareas', 'grades' => 'Notas', 'content' => 'Contenido'];
+    $academicSection = isset($academicTabs[$subjectSection]) ? $subjectSection : 'summary';
+    $academicTask = ['label' => 'Agregar tarea', 'icon' => 'bi-plus-lg', 'event' => 'study-academic-edit', 'detail' => ['type' => 'task'], 'create' => true];
+    $academicEvaluation = ['label' => 'Agregar evaluación', 'icon' => 'bi-journal-check', 'event' => 'study-academic-edit', 'detail' => ['type' => 'evaluation'], 'create' => true];
+    $academicCut = ['label' => 'Agregar corte', 'icon' => 'bi-pie-chart', 'event' => 'study-academic-edit', 'detail' => ['type' => 'cut'], 'create' => true];
     $currentType = $unit ? 'unit' : 'formation';
     $currentPinned = $current && in_array($currentType.':'.$current->id, $pinKeys, true);
     $createActions = [];
@@ -19,34 +25,33 @@
     $reservationAction = ['label' => 'Reservar tiempo de estudio', 'icon' => 'bi-calendar-plus', 'event' => 'study-reservation-create', 'create' => true];
     $secondary = $primary ? [...$createActions, $reservationAction] : [];
     $primary ??= $reservationAction;
+    if ($academic && $academicSection !== 'content') {
+        $secondary = $academicSection === 'grades' ? [$academicTask] : [$academicEvaluation];
+        if ($academicSection === 'grades' && app(\App\Services\Learning\AcademicRecords::class)->book($uid, $unit->id)->mode === 'cuts') {
+            $secondary[] = $academicCut;
+        }
+        $secondary[] = $reservationAction;
+        $primary = $academicSection === 'grades' ? $academicEvaluation : $academicTask;
+    }
     $addActions = $formation ? array_map(fn ($key) => ['label' => $vocab->addLabel($uid, $ftype, $key), 'action' => "openUnit('$key')"], $childKinds) : [];
     $currentEditAction = $unit ? "openUnit('', '$unit->id')" : ($formation ? "openFormation('$formation->id')" : '');
     $currentDeleteAction = $formation ? "deleteRecord('$formation->id', ".($unit ? "'$unit->id'" : 'null').")" : '';
     $dialogLabel = $editor === 'unit' ? $vocab->singular($uid, $ftype, (string) $editorKind) : $vocab->typeLabel($draft['type'] ?? '');
 @endphp
-<x-module-shell module="learning" class="learning-page" :title="$current?->title" :back="$back" :archetype="$formation ? 'detail' : 'list'">
+<x-module-shell module="learning" :class="$academic ? 'learning-page learning-page--academic' : 'learning-page'" :title="$current?->title" :back="$back" :archetype="$formation ? 'detail' : 'list'"
+    :active-route="$unit ? 'learning.units.show' : ($formation ? 'learning.show' : 'learning')">
     @if ($primary)
         <x-slot:actions><x-module-actions :primary="$primary" :secondary="$secondary" :split="true" /></x-slot:actions>
     @endif
-    <x-slot:contextBefore>
-        <div class="learning-shortcuts">
-            <x-context-widget title="Accesos directos" icon="bi-pin-angle">
-                @if ($shortcuts)
-                    <ul class="learning-shortcuts__list">
-                        @foreach ($shortcuts as $shortcut)
-                            <li wire:key="pin-{{ $shortcut['type'] }}-{{ $shortcut['id'] }}">
-                                <a href="{{ $shortcut['href'] }}" wire:navigate><strong>{{ $shortcut['title'] }}</strong><small>{{ $shortcut['label'] }} · {{ $shortcut['origin'] }}</small></a>
-                                <button type="button" class="md-btn-icon" wire:click="setPin('{{ $shortcut['type'] }}', '{{ $shortcut['id'] }}', false)" aria-label="Quitar de accesos directos: {{ $shortcut['title'] }}" title="Quitar de accesos directos"><i class="bi bi-pin-angle-fill" aria-hidden="true"></i></button>
-                            </li>
-                        @endforeach
-                    </ul>
-                @else
-                    <p class="md-body-small">Fija una formación o cualquier contenido desde su menú para abrirlo directamente.</p>
-                @endif
-            </x-context-widget>
-        </div>
-    </x-slot:contextBefore>
+    @unless ($academic)
+        <x-slot:contextBefore>
+            @include('livewire.learning.shortcuts')
+        </x-slot:contextBefore>
+    @endunless
     <x-slot:rail>
+        @if ($academic)
+            @include('livewire.learning.shortcuts')
+        @endif
         <x-context-widget title="Guardián de Formación" icon="bi-stars">
             @if (\App\Livewire\Game\GuardianCard::visibleFor((int) auth()->id(), 'learning'))
                 <livewire:game.guardian-card module="learning" variant="rail" />
@@ -86,7 +91,21 @@
         </div>
     @endif
 
-    @if (!$formation || $childKinds || $records->count())
+    @if ($academic)
+        <nav class="learning-academic-tabs" aria-label="Secciones de {{ $unit->title }}">
+            @foreach ($academicTabs as $key => $label)
+                <x-ui.action :variant="$academicSection === $key ? 'tonal' : 'text'"
+                    :aria-current="$academicSection === $key ? 'page' : null"
+                    :href="route('learning.units.show', [$formation->id, $unit->id, 'section' => $key])" wire:navigate>{{ $label }}</x-ui.action>
+            @endforeach
+        </nav>
+        @if ($academicSection !== 'content')
+            <livewire:learning.subject-panel :unit-id="$unit->id" :section="$academicSection" :evaluation="$evaluation"
+                :key="'learning-subject-panel-'.$unit->id.'-'.$academicSection.'-'.$evaluation" />
+        @endif
+    @endif
+
+    @if ((! $academic || $academicSection === 'content') && (!$formation || $childKinds || $records->count()))
         <x-ui.management-card id="learning-records" :create-actions="[$primary, ...$secondary]" :title="$formation ? 'Contenido' : 'Formaciones'" icon="bi-mortarboard" :count="(string)($paginator?->total() ?? $records->count())" :search="$formation ? null : 'search'" search-placeholder="Buscar formaciones" :paginator="$paginator" noun="formaciones" :portal-filters="true" :active-filters="(int)($typeFilter !== '') + (int)($statusFilter !== '') + (int)($categoryFilter !== '')">
             @unless ($formation)
                 <x-slot:filters>
@@ -159,10 +178,14 @@
                 <x-ui.state variant="empty" icon="bi-mortarboard" :title="$formation ? 'Sin contenido todavía' : 'Aún no tienes formaciones'" :message="$formation ? ($childKinds ? 'Agrega '.$vocab->plurals($uid, $ftype, $childKinds).' con el botón Agregar o desde el menú ⋯ de esta tarjeta.' : 'Esta formación todavía no admite contenido adicional.') : 'Organiza lo que quieres estudiar desde Agregar formación.'" />
             @endif
         </x-ui.management-card>
-    @else
+    @elseif (! $academic)
         <p>{{ $unit ? $vocab->demonstrative($uid, $ftype, $unit->kind) : 'Esta formación' }} todavía no tiene registros adicionales.</p>
     @endif
     @include('livewire.learning.editor')
-    <livewire:learning.study-reservation-editor :formation="$formation?->id" :unit="$unit?->id"
+    @if ($academic)
+        <livewire:learning.academic-editor :context="$unit->id" :key="'academic-editor-'.$unit->id" />
+        <livewire:task.task-editor :key="'learning-task-editor-'.$unit->id" />
+    @endif
+    <livewire:learning.study-reservation-editor :formation="$formation?->id" :unit="$unit?->id" :show-upcoming="! $academic || $academicSection === 'summary'"
         :key="'study-reservation-editor-'.($current?->id ?? 'index')" />
 </x-module-shell>

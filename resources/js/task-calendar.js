@@ -16,8 +16,8 @@ function loadFullCalendar() {
 
 const compact = () => matchMedia('(max-width: 767.98px)').matches;
 const layerStorageKey = 'miso.task-calendar.layers.v1';
-const labels = { tasks: 'Tareas', plans: 'Planes', birthdays: 'Cumpleaños', meals: 'Comidas', habits: 'Hábitos', reservations: 'Reservas', health: 'Salud' };
-const defaultLayers = () => ({ tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, health: false });
+const labels = { tasks: 'Tareas', plans: 'Planes', birthdays: 'Cumpleaños', meals: 'Comidas', habits: 'Hábitos', reservations: 'Reservas', evaluations: 'Evaluaciones', health: 'Salud' };
+const defaultLayers = () => ({ tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, evaluations: true, health: false });
 
 export function readCalendarLayers(account = null) {
     try {
@@ -28,6 +28,7 @@ export function readCalendarLayers(account = null) {
             delete value.health;
             delete value.habits;
             delete value.reservations;
+            delete value.evaluations;
         }
         if (value && ['tasks', 'plans', 'birthdays'].every(key => typeof value[key] === 'boolean')) {
             return Object.fromEntries(Object.keys(defaultLayers()).map(key => [key, typeof value[key] === 'boolean' ? value[key] : defaultLayers()[key]]));

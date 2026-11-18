@@ -52,7 +52,7 @@ class TaskCalendar extends Component
     /**
      * Eventos de FullCalendar para el rango visible [$start, $end).
      */
-    public function events(string $start, string $end, array $layers = ['tasks', 'plans', 'birthdays', 'meals', 'habits', 'reservations']): array
+    public function events(string $start, string $end, array $layers = ['tasks', 'plans', 'birthdays', 'meals', 'habits', 'reservations', 'evaluations']): array
     {
         abort_unless(auth()->check(), 403);
         try {
@@ -65,8 +65,8 @@ class TaskCalendar extends Component
         }
         abort_unless($rangeStart->lt($rangeEnd) && $rangeStart->diffInDays($rangeEnd) <= 732, 422);
         validator(['layers' => $layers], [
-            'layers' => 'array|max:7',
-            'layers.*' => 'string|in:tasks,plans,birthdays,meals,habits,health,reservations',
+            'layers' => 'array|max:8',
+            'layers.*' => 'string|in:tasks,plans,birthdays,meals,habits,health,reservations,evaluations',
         ])->validate();
 
         $events = [];
@@ -131,6 +131,7 @@ class TaskCalendar extends Component
             in_array('meals', $layers, true) ? app(\App\Services\Meal\MealSchedule::class)->events($user, $rangeStart, $rangeEnd) : [],
             in_array('habits', $layers, true) ? $personal->habits($user, $rangeStart, $rangeEnd) : [],
             in_array('reservations', $layers, true) ? app(\App\Services\Calendar\StudySchedule::class)->events($user, $rangeStart, $rangeEnd) : [],
+            in_array('evaluations', $layers, true) ? app(\App\Services\Learning\StudyAgenda::class)->calendarEvents($user, $rangeStart, $rangeEnd) : [],
             in_array('health', $layers, true) ? $personal->health($user, $rangeStart, $rangeEnd) : [],
         );
     }

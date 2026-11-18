@@ -35,3 +35,216 @@
 .learning-vocabulary__group { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; border: 0; min-width: 0; }
 .learning-vocabulary__group legend { float: none; width: auto; padding: 0; margin: 0 0 4px; }
 .learning-vocabulary__preview { margin: 0; color: var(--md-sys-color-on-surface-variant); }
+
+.learning-study-grid,
+.learning-subject-panels {
+    display: grid;
+    gap: var(--md-sys-space-md);
+    align-items: start;
+}
+
+.learning-study-grid > *,
+.learning-subject-panels > * {
+    min-width: 0;
+}
+
+.learning-study-filters,
+.learning-academic-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--md-sys-space-sm);
+    align-items: start;
+}
+
+.learning-study-filters,
+.learning-study-dates {
+    margin-block-end: var(--md-sys-space-md);
+}
+
+.learning-academic-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .25rem;
+    margin-block: .5rem 1rem;
+}
+
+.learning-academic-tabs > *,
+.learning-grade-row-actions > * {
+    min-height: 44px;
+}
+
+.learning-academic-feedback:empty {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+}
+
+.learning-academic-feedback:not(:empty) {
+    margin-block: .5rem;
+    color: var(--md-sys-color-on-surface);
+}
+
+.learning-academic-context,
+.learning-agenda-meta {
+    color: var(--md-sys-color-on-surface-variant);
+    font-size: .875rem;
+}
+
+.learning-academic-context {
+    margin: 0;
+}
+
+.learning-academic-toggle {
+    min-height: 44px;
+}
+
+.learning-agenda-list,
+.learning-attention-list {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.learning-agenda-row,
+.learning-grade-row,
+.learning-attention-list > li {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    min-width: 0;
+    padding: .625rem 0;
+}
+
+.learning-agenda-row + .learning-agenda-row,
+.learning-grade-row + .learning-grade-row,
+.learning-attention-list > li + li,
+.learning-grade-group + .learning-grade-group {
+    border-block-start: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.learning-agenda-glyph {
+    display: grid;
+    place-items: center;
+    flex: 0 0 2.25rem;
+    block-size: 2.25rem;
+    border-radius: 50%;
+    color: var(--md-module-accent);
+    background: color-mix(in srgb, var(--md-module-accent) 12%, transparent);
+}
+
+.learning-agenda-description {
+    display: grid;
+    flex: 1;
+    min-width: 0;
+    gap: .15rem;
+    overflow-wrap: anywhere;
+}
+
+.learning-agenda-link {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    min-height: 44px;
+    padding: 0;
+    color: var(--md-sys-color-on-surface);
+    background: transparent;
+    border: 0;
+    font: inherit;
+    font-weight: 700;
+    text-align: start;
+    text-decoration: underline;
+    text-underline-offset: .2em;
+    overflow-wrap: anywhere;
+}
+
+.learning-attention-list > li {
+    display: grid;
+    gap: .125rem;
+}
+
+.learning-attention-list p {
+    margin: .25rem 0 0;
+}
+
+.learning-academic-forecast {
+    margin: 0 0 .75rem;
+    font-size: clamp(1.125rem, 2.5vw, 1.625rem);
+    line-height: 1.25;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.learning-grade-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
+    gap: .75rem;
+    padding: .75rem;
+    margin-block: 0 .75rem;
+    border-radius: var(--md-sys-shape-corner-medium, 12px);
+    background: var(--md-sys-color-surface-container);
+}
+
+.learning-grade-metrics dt {
+    font-size: .8125rem;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.learning-grade-metrics dd {
+    margin: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.learning-grade-group + .learning-grade-group {
+    margin-block-start: .75rem;
+    padding-block-start: .75rem;
+}
+
+.learning-grade-group-head,
+.learning-grade-row-actions {
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    justify-content: space-between;
+}
+
+.learning-grade-group h4 {
+    margin: 0;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+}
+
+.learning-grade-row {
+    flex-wrap: wrap;
+}
+
+.learning-grade-row .learning-agenda-description {
+    flex-basis: min(100%, 12rem);
+}
+
+.learning-grade-row--selected {
+    padding-inline: .5rem;
+    border-inline-start: 3px solid var(--md-module-accent);
+    background: color-mix(in srgb, var(--md-module-accent) 8%, transparent);
+}
+
+@media (min-width: 960px) {
+    .learning-study-grid:not(.learning-study-grid--wide) {
+        grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    }
+}
+
+.learning-page--academic [data-region="context"] .learning-shortcuts {
+    margin-block-end: 1rem;
+}
+
+@media (max-width: 1199.98px) {
+    .learning-page--academic .md-module-primary {
+        grid-row: 1;
+    }
+
+    .learning-page--academic .md-module-workspace > [data-region="context"] {
+        grid-row: 2;
+    }
+}

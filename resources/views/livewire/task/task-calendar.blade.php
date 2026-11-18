@@ -30,7 +30,7 @@
                     <x-ui.action variant="outlined" icon="bi-sliders" class="md-calendar-filter-button" x-ref="filterTrigger" data-popover-trigger @click="openFilters()" x-bind:aria-expanded="filtersOpen.toString()" aria-controls="calendar-filters">Filtros <x-ui.badge tone="primary" x-show="hasLayerFilter" x-cloak label="1 filtro aplicado">1</x-ui.badge></x-ui.action>
                     <x-ui.popover state="filtersOpen" title="Filtros" id="calendar-filters">
                         <fieldset><legend class="md-title-small">Tipos de elemento</legend>
-                            @foreach (['tasks' => 'Tareas', 'plans' => 'Planes', 'birthdays' => 'Cumpleaños', 'meals' => 'Comidas', 'habits' => 'Hábitos', 'reservations' => 'Reservas', 'health' => 'Salud'] as $layer => $label)
+                            @foreach (['tasks' => 'Tareas', 'plans' => 'Planes', 'birthdays' => 'Cumpleaños', 'meals' => 'Comidas', 'habits' => 'Hábitos', 'reservations' => 'Reservas', 'evaluations' => 'Evaluaciones', 'health' => 'Salud'] as $layer => $label)
                                 <label class="md-checkbox"><input type="checkbox" x-model="draftLayers.{{ $layer }}"> {{ $label }}</label>
                             @endforeach
                         </fieldset>

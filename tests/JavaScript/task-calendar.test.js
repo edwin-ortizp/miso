@@ -18,18 +18,18 @@ test('layer preferences validate stored values and tolerate inaccessible storage
     try {
         for (const value of [null, '{', '{}', '{"tasks":false,"plans":true,"birthdays":"true"}']) {
             globalThis.localStorage = { getItem: () => value };
-            assert.deepEqual(readCalendarLayers(), { tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, health: false });
+            assert.deepEqual(readCalendarLayers(), { tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, evaluations: true, health: false });
         }
         globalThis.localStorage = { getItem: () => '{"tasks":false,"plans":true,"birthdays":false,"extra":42}' };
-        assert.deepEqual(readCalendarLayers(), { tasks: false, plans: true, birthdays: false, meals: true, habits: true, reservations: true, health: false });
+        assert.deepEqual(readCalendarLayers(), { tasks: false, plans: true, birthdays: false, meals: true, habits: true, reservations: true, evaluations: true, health: false });
         globalThis.localStorage = { getItem() { throw Error('blocked'); } };
-        assert.deepEqual(readCalendarLayers(), { tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, health: false });
+        assert.deepEqual(readCalendarLayers(), { tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, evaluations: true, health: false });
     } finally { globalThis.localStorage = original; }
 });
 
 test('default layers have no filter and hidden layers are named explicitly', () => {
     const state = calendar({});
-    state.layers = { tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, health: false };
+    state.layers = { tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, evaluations: true, health: false };
     assert.equal(state.hasLayerFilter, false);
     assert.equal(state.layerFilterLabel, '');
     state.layers.meals = false;
@@ -152,7 +152,7 @@ test('hiding a loaded layer is local and enabling an absent layer fetches the ra
     const state = calendar({});
     const visibility = [];
     let fetches = 0;
-    state.requestedLayers = ['tasks', 'plans', 'birthdays', 'meals', 'habits', 'reservations'];
+    state.requestedLayers = ['tasks', 'plans', 'birthdays', 'meals', 'habits', 'reservations', 'evaluations'];
     state.calendar = {
         batchRendering: run => run(),
         getEvents: () => [{ extendedProps: { type: 'habits' }, setProp: (_, value) => visibility.push(value) }],

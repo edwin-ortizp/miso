@@ -32,7 +32,7 @@ class LearningModuleTest extends TestCase
         $this->get('/learning')->assertOk()->assertSee('Degree');
     }
 
-    public function test_index_detail_unit_and_categories_render_with_shell_and_no_future_actions(): void
+    public function test_index_detail_unit_and_categories_render_with_shell(): void
     {
         $user = User::factory()->create();
         $this->actingAs($user);
@@ -40,9 +40,10 @@ class LearningModuleTest extends TestCase
         $formation = $service->saveFormation($user->id, null, ['title' => 'Carrera real', 'type' => 'degree', 'status' => 'in_progress']);
         $subject = $service->saveUnit($user->id, $formation->id, null, null, 'subject', ['title' => 'Matemáticas', 'status' => 'pending']);
         foreach ([route('learning'), route('learning.show', $formation->id), route('learning.units.show', [$formation->id, $subject->id]), route('categories.settings', 'learning')] as $url) {
-            $this->get($url)->assertOk()->assertSee('data-module="learning"', false)->assertDontSee('Agregar reserva')->assertDontSee('Agregar evaluación');
+            $this->get($url)->assertOk()->assertSee('data-module="learning"', false)->assertDontSee('Agregar reserva');
         }
         $this->get(route('learning.show', $formation->id))->assertSee('Matemáticas')->assertSee('Accesos directos');
+        $this->get(route('learning.units.show', [$formation->id, $subject->id]))->assertSee('Agregar evaluación')->assertSee('Próximo compromiso');
     }
 
     public function test_creating_editing_pinning_and_deleting_from_livewire_persists(): void

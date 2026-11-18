@@ -4,7 +4,7 @@ La primera entrega de Formación lleva la base del prototipo Learning a la aplic
 
 ## Organizar estudios
 
-Abre **Productividad → Formación**. Si personalizaste los módulos visibles, activa Formación en Ajustes → Módulos. La incorporación del módulo no cambia tu selección anterior.
+Abre **Productividad → Formación** para entrar en **Mi estudio**. Elige **Formaciones** para administrar tu estructura de estudios. Si personalizaste los módulos visibles, activa Formación en Ajustes → Módulos. La incorporación del módulo no cambia tu selección anterior.
 
 El FAB **Agregar formación** abre el formulario sobre la pantalla actual. Su menú ofrece Pregrado, Especialización, Maestría, Doctorado, Curso y Ruta personal. Puedes indicar categoría, institución o plataforma, descripción y fechas. Las categorías se administran en **Ajustes > Categorías** (vienen con Tecnología, Idiomas, Ciencias, Humanidades, Salud, Negocios, Arte y Otro); no contienen materias. En el detalle no hay migas: el regreso es la flecha de la barra, las etiquetas (tipo, estado, institución, fechas) van juntas y el menú ⋯ de la formación y el de la tarjeta «Contenido» ofrecen «Agregar …» además del botón flotante.
 
@@ -30,9 +30,16 @@ Solo se eliminan formaciones o unidades vacías, previa confirmación. Retira pr
 
 En escritorio, accesos y guardián acompañan al contenido a la derecha. Por debajo de 1200 px, los accesos aparecen antes del contenido y el guardián después. Se usa el guardián real del módulo según las reglas de equipo/colección de MiSo; sin uno disponible aparece orientación textual.
 
-## Alcance
+## Mi estudio y notas
 
-Esta entrega no incluye materiales, asociaciones a tareas/objetivos/hábitos, evaluaciones, seguimiento de foco ni reservas. Se incorporarán en entregas posteriores. No hay importación del mockup, herramientas MCP nuevas ni premios por crear registros.
+**Mi estudio** reúne vencidos y próximos siete días. Filtra por formación o semestre, o abre **Ver toda la agenda** para elegir fechas y consultar los compromisos sin fecha. Las materias con una meta exigente aparecen en **Materias que requieren atención**.
+
+- Desde **Mi estudio** o una materia, usa **Agregar tarea**. Si marcas **Cuenta para la nota**, la tarea se incorpora también a **Notas**. Puedes registrar su peso después. El título y la fecha se leen de la tarea y se actualizan con los cambios de Tareas. Completar la entrega no registra una nota.
+- En **Notas**, abre **Configurar calificación** para editar la escala, el mínimo para pasar y el esquema de pesos. En modo **Por cortes**, usa **Agregar corte** en el FAB. Los cortes tienen un porcentaje en la materia y las evaluaciones, un porcentaje dentro del corte. Para registrar solo la nota global de un corte, agrega una evaluación con peso interno de 100 %.
+- Cuando todas las ponderaciones suman 100 %, el resumen calcula la nota necesaria en lo pendiente. La comparación se hace antes del redondeo visual. **Simular notas** permite probar resultados y descartarlos al salir. Una nota en blanco queda pendiente y el cero cuenta como nota.
+- En **Calendario → Filtros**, **Evaluaciones** muestra parciales y otros hitos con fecha propia. Las entregas evaluables se muestran en **Tareas**. Selecciona una evaluación para ir a su fila en **Notas**.
+
+El seguimiento académico está disponible para materias de pregrado, especialización, maestría y doctorado. Las notas pertenecen a tu cuenta y dependen de la escala y los pesos que registraste.
 
 ## Comprobación y despliegue
 

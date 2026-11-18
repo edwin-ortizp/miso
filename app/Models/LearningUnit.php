@@ -20,6 +20,11 @@ class LearningUnit extends Model
         return ['start_date' => 'date', 'end_date' => 'date', 'credits' => 'decimal:1'];
     }
 
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
     public function formation(): BelongsTo
     {
         return $this->belongsTo(LearningFormation::class, 'formation_id');

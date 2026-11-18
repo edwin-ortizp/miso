@@ -290,6 +290,7 @@
 .md-calendar-meal { --fc-event-bg-color: var(--md-sys-color-secondary-container); --fc-event-border-color: var(--md-sys-color-secondary); --fc-event-text-color: var(--md-sys-color-on-secondary-container); }
 .md-calendar-habit { --fc-event-bg-color: var(--md-sys-color-secondary-container); --fc-event-border-color: var(--md-sys-color-secondary); --fc-event-text-color: var(--md-sys-color-on-secondary-container); }
 .md-calendar-reservation { --fc-event-bg-color: var(--md-sys-color-primary-container); --fc-event-border-color: var(--md-sys-color-primary); --fc-event-text-color: var(--md-sys-color-on-primary-container); }
+.md-calendar-event--evaluations { --fc-event-bg-color: var(--md-sys-color-secondary-container); --fc-event-border-color: var(--md-sys-color-secondary); --fc-event-text-color: var(--md-sys-color-on-secondary-container); }
 .md-calendar-health { --fc-event-bg-color: var(--md-sys-color-tertiary-container); --fc-event-border-color: var(--md-sys-color-tertiary); --fc-event-text-color: var(--md-sys-color-on-tertiary-container); }
 .md-calendar-layer--meal { color: var(--md-sys-color-secondary); }
 

@@ -150,6 +150,11 @@ class LearningRecords
             if ($children->exists()) {
                 throw ValidationException::withMessages(['deletion' => 'Este elemento tiene contenido. Retíralo antes de eliminarlo.']);
             }
+            if ($unitId && $record->kind === 'subject'
+                && (DB::table('learning_subject_tasks')->where('unit_id', $unitId)->where('user_id', $userId)->exists()
+                    || DB::table('learning_evaluations')->where('unit_id', $unitId)->where('user_id', $userId)->exists())) {
+                throw ValidationException::withMessages(['deletion' => 'Esta materia tiene tareas o evaluaciones vinculadas. Retíralas antes de eliminarla.']);
+            }
             LearningShortcut::withoutGlobalScopes()->where('user_id', $userId)->where('target_type', $unitId ? 'unit' : 'formation')->where('target_id', $record->id)->delete();
             $record->delete();
         });

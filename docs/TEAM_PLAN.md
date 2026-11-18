@@ -168,6 +168,9 @@ _Última actualización: 2026-11-17_
 | CHG-162 | M | Salud privada en calendario | in-progress | En verificación | 1/1 |
 | CHG-163 | M | Reservas de estudio en calendario | in-progress | En verificación | 1/1 |
 | CHG-164 | M | Personalizar la conversación del compañero por pantalla | in-progress | En verificación | 1/1 |
+| CHG-165 | M | Mi estudio agenda y tareas académicas | in-progress | En desarrollo | 0/1 |
+| CHG-166 | M | Notas cortes y simulador académico | in-progress | En desarrollo | 0/1 |
+| CHG-167 | M | Evaluaciones académicas en Calendario | in-progress | En desarrollo | 0/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

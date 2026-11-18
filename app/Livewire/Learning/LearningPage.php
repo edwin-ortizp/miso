@@ -58,6 +58,12 @@ class LearningPage extends Component
 
     public string $formSection = 'basic';
 
+    #[Url(as: 'section')]
+    public string $subjectSection = '';
+
+    #[Url]
+    public string $evaluation = '';
+
     public function mount(?string $formation = null, ?string $unit = null): void
     {
         $this->formationId = $formation;
@@ -216,6 +222,9 @@ class LearningPage extends Component
         $this->records()->pin((int) auth()->id(), $type, $id, $pinned);
         $this->message = $pinned ? 'Acceso directo fijado.' : 'Acceso directo retirado.';
     }
+
+    #[\Livewire\Attributes\On('study-academic-changed')]
+    public function refreshAcademicActions(): void {}
 
     public function render()
     {

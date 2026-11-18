@@ -22,7 +22,7 @@ return [
             ['label' => 'Tareas', 'route' => 'tasks.list', 'module' => 'tasks', 'icon' => 'bi-list-task', 'active' => ['tasks*']],
             ['label' => 'Pomodoro', 'route' => 'pomodoro', 'module' => 'pomodoro', 'icon' => 'bi-stopwatch', 'active' => ['pomodoro*']],
             ['label' => 'Objetivos', 'route' => 'goals', 'module' => 'goals', 'icon' => 'bi-flag', 'active' => ['goals*']],
-            ['label' => 'Formación', 'route' => 'learning', 'module' => 'learning', 'icon' => 'bi-mortarboard', 'active' => ['learning*']],
+            ['label' => 'Formación', 'route' => 'learning.study', 'module' => 'learning', 'icon' => 'bi-mortarboard', 'active' => ['learning*']],
             ['label' => 'Colección', 'route' => 'game.balls', 'module' => 'game', 'icon' => 'bi-stars', 'active' => ['game*'], 'counter' => 'App\Support\Game\TabCounters@balls'],
         ]],
         'life' => ['label' => 'Vida personal', 'icon' => 'bi-person-heart', 'items' => [
@@ -266,7 +266,9 @@ return [
         'title' => 'Formación', 'subtitle' => 'Organiza lo que estudias y avanza paso a paso.', 'icon' => 'bi-mortarboard',
         'archetype' => 'list', 'patterns' => ['learning*'],
         'preserve' => ['q', 'type', 'category', 'status'], 'rail' => true,
+        'rail_routes' => ['learning', 'learning.show', 'learning.units.show'],
         'tabs' => [
+            ['label' => 'Mi estudio', 'route' => 'learning.study', 'icon' => 'bi-calendar2-week', 'active' => ['learning.study']],
             ['label' => 'Formaciones', 'route' => 'learning', 'icon' => 'bi-mortarboard', 'active' => ['learning', 'learning.show', 'learning.units.show']],
             ['label' => 'Ajustes', 'route' => 'learning.settings', 'archetype' => 'settings', 'icon' => 'bi-gear', 'active' => ['learning.settings', 'learning.settings.categories']],
         ],

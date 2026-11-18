@@ -23,6 +23,9 @@ class StudyReservationEditor extends Component
     public ?string $unit = null;
 
     #[Locked]
+    public bool $showUpcoming = true;
+
+    #[Locked]
     public ?string $reservation = null;
 
     #[Locked]
@@ -181,7 +184,7 @@ class StudyReservationEditor extends Component
     {
         $user = auth()->id();
         return view('livewire.learning.study-reservation-editor', [
-            'upcoming' => $this->formation ? collect(app(StudySchedule::class)
+            'upcoming' => $this->formation && $this->showUpcoming ? collect(app(StudySchedule::class)
                 ->events((int) $user, today(), today()->addDays(28), $this->formation, $this->unit))
                 ->sortBy('start') : [],
             'formations' => $this->open ? LearningFormation::where('user_id', $user)->orderBy('title')->pluck('title', 'id') : [],
