@@ -43,7 +43,7 @@ class HabitActionPromptTest extends TestCase
 
         $this->assertTrue($feedback['requiresInput']);
         $this->assertSame(
-            ['exercise_type_id', 'duration'],
+            ['exercise_type_id', 'total_reps', 'sets', 'reps', 'duration', 'distance', 'weight', 'calories', 'steps', 'notes'],
             array_column($feedback['promptFields'], 'key'),
         );
         $this->assertTrue(HabitCompletion::sole()->completed);
@@ -130,6 +130,30 @@ class HabitActionPromptTest extends TestCase
         Livewire::test(HabitTracker::class)
             ->call('toggleHabit', $habit->id)
             ->assertSet('showHabitActionPrompt', false);
+    }
+
+    public function test_strength_prompt_uses_configured_type_and_is_safe_to_confirm_twice(): void
+    {
+        [$habit, $type] = $this->exerciseHabit();
+        $type->update(['name' => 'Flexiones']);
+        $habit->action()->firstOrFail()->update(['config' => [
+            'exercise_type_id' => $type->id,
+            'duration' => 30,
+        ]]);
+
+        Livewire::test(HabitTracker::class)
+            ->call('toggleHabit', $habit->id)
+            ->assertSet('habitActionInput.exercise_type_id', $type->id)
+            ->assertSet('habitActionInput.duration', null)
+            ->assertSee('Repeticiones totales')
+            ->set('habitActionInput.total_reps', 30)
+            ->call('confirmHabitAction')
+            ->assertHasNoErrors();
+
+        $date = HabitCompletion::sole()->date->toDateString();
+        $this->assertNull(app(HabitGamificationService::class)->resolveAction($habit->id, $date, ['total_reps' => 40])['actionResult']);
+        $this->assertSame(30, (int) ExerciseLog::sole()->total_reps);
+        $this->assertNull(ExerciseLog::sole()->calories);
     }
 
     /** @return array{0: HabitDefinition, 1: ExerciseType} */

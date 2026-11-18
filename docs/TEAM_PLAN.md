@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-17_
+_Última actualización: 2026-11-18_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -171,6 +171,7 @@ _Última actualización: 2026-11-17_
 | CHG-165 | M | Mi estudio agenda y tareas académicas | in-progress | En desarrollo | 0/1 |
 | CHG-166 | M | Notas cortes y simulador académico | in-progress | En desarrollo | 0/1 |
 | CHG-167 | M | Evaluaciones académicas en Calendario | in-progress | En desarrollo | 0/1 |
+| CHG-168 | M | Registro de ejercicio según la actividad | in-progress | En verificación | 3/3 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

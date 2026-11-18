@@ -6,12 +6,14 @@ use App\Actions\LogExercise;
 use App\Livewire\Concerns\HasUrlDate;
 use App\Models\ExerciseLog;
 use App\Models\ExerciseType;
+use App\Support\ExerciseMetrics;
 use App\Support\ExerciseProgress;
 use App\Support\GoalCalendar;
 use Carbon\Carbon;
 use Livewire\Component;
 use App\Livewire\Concerns\WithDefaultDateFilter;
 use App\Livewire\Concerns\WithManagementCard;
+use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
@@ -47,15 +49,18 @@ class ExerciseDaily extends Component
 
     // Form
     public bool $showForm = false;
+    #[Locked]
     public ?string $editingId = null;
     public string $exerciseTypeId = '';
-    public ?int $sets = null;
-    public ?int $reps = null;
-    public ?int $duration = null;
-    public ?float $distance = null;
-    public ?float $weight = null;
-    public ?int $calories = null;
-    public ?int $steps = null;
+    public bool $seriesMode = false;
+    public $total_reps = null;
+    public $sets = null;
+    public $reps = null;
+    public $duration = null;
+    public $distance = null;
+    public $weight = null;
+    public $calories = null;
+    public $steps = null;
     public string $notes = '';
 
     public function mount()
@@ -143,12 +148,14 @@ class ExerciseDaily extends Component
             if ($log) {
                 $this->editingId = $id;
                 $this->exerciseTypeId = $log->exercise_type_id ?? '';
+                $this->total_reps = $log->total_reps;
+                $this->seriesMode = $log->sets !== null || $log->reps !== null;
                 $this->sets = $log->sets;
                 $this->reps = $log->reps;
                 $this->duration = $log->duration;
                 $this->distance = $log->distance;
                 $this->weight = $log->weight;
-                $this->calories = $log->calories;
+                $this->calories = in_array($log->calories_source, ['catalog_rate', 'speed_met'], true) ? null : $log->calories;
                 $this->steps = $log->steps;
                 $this->notes = $log->notes ?? '';
             }
@@ -164,76 +171,79 @@ class ExerciseDaily extends Component
         $this->resetForm();
     }
 
-    public function updatedExerciseTypeId()
+    public function updatedExerciseTypeId(): void
     {
-        if (!$this->editingId) {
-            $this->estimateFromDuration();
-        }
-    }
-
-    public function updatedDuration()
-    {
-        $this->estimateFromDuration();
-    }
-
-    /** Recalcula calorías y pasos sugeridos; el usuario puede sobrescribirlos después. */
-    private function estimateFromDuration(): void
-    {
-        if (!$this->exerciseTypeId || !$this->duration) {
+        if ($this->editingId) {
             return;
         }
 
-        $type = ExerciseType::find($this->exerciseTypeId);
-        if (!$type) {
-            return;
-        }
-
-        $estimate = LogExercise::estimate($type, $this->duration);
-        $this->calories = $estimate['calories'] ?? $this->calories;
-        $this->steps = $estimate['steps'] ?? $this->steps;
+        $this->seriesMode = false;
+        $this->reset(array_keys(ExerciseMetrics::RULES));
+        $this->resetValidation();
     }
 
-    /** Chat del compañero: registra 30 min del ejercicio elegido. */
-    public function quickAdd(string $exerciseTypeId, int $minutes = 30)
+    public function setSeriesMode(bool $series): void
+    {
+        $this->seriesMode = $series;
+        $this->resetValidation(['total_reps', 'sets', 'reps']);
+    }
+
+    public function openQuickExercise(string $exerciseTypeId): array
     {
         $type = ExerciseType::find($exerciseTypeId);
         if (! $type) {
             return ['ok' => false, 'message' => 'No encontré ese ejercicio.'];
         }
 
-        \App\Actions\LogExercise::handle($type, $this->selectedDate, ['duration' => $minutes]);
+        $this->openForm();
+        $this->exerciseTypeId = $type->id;
+
+        return ['ok' => true, 'pending' => true];
+    }
+
+    /** Atajo explícito de minutos en el chat del compañero. */
+    public function quickAdd(string $exerciseTypeId, int $minutes = 30): array
+    {
+        $type = ExerciseType::find($exerciseTypeId);
+        if (! $type) {
+            return ['ok' => false, 'message' => 'No encontré ese ejercicio.'];
+        }
+
+        if (ExerciseMetrics::profile($type) !== 'duration') {
+            return $this->openQuickExercise($exerciseTypeId);
+        }
+
+        LogExercise::handle($type, $this->selectedDate, ['duration' => $minutes]);
 
         return ['ok' => true, 'minutes' => (int) ExerciseLog::whereDate('date', $this->selectedDate)->sum('duration')];
     }
 
-    public function save()
+    public function save(): void
     {
-        if (!$this->exerciseTypeId) return;
+        $type = ExerciseType::find($this->exerciseTypeId);
+        if (! $type) {
+            $this->addError('exerciseTypeId', 'Elige un ejercicio de tu catálogo.');
 
-        $data = [
-            'date' => $this->selectedDate,
-            'exercise_type_id' => $this->exerciseTypeId,
-            'sets' => $this->sets,
-            'reps' => $this->reps,
-            'duration' => $this->duration,
-            'distance' => $this->distance,
-            'weight' => $this->weight,
-            'calories' => $this->calories,
-            'steps' => $this->steps,
-            'notes' => $this->notes ?: null,
-        ];
-
-        if ($this->editingId) {
-            $log = ExerciseLog::find($this->editingId);
-            if ($log) {
-                // Editar desde «Todas las fechas» no mueve el registro al día seleccionado.
-                unset($data['date']);
-                $log->update($data);
-            }
-        } else {
-            ExerciseLog::create($data);
+            return;
         }
 
+        $log = $this->editingId ? ExerciseLog::findOrFail($this->editingId) : null;
+        $data = [];
+        foreach (array_keys(ExerciseMetrics::RULES) as $key) {
+            $data[$key] = $this->{$key} === '' ? null : $this->{$key};
+        }
+        if ($this->seriesMode) {
+            $data['total_reps'] = null;
+        } else {
+            $data['sets'] = $data['reps'] = null;
+        }
+
+        if ($log && ($data['calories'] === null && in_array($log->calories_source, ['catalog_rate', 'speed_met'], true)
+            || $data['calories'] !== null && (string) $data['calories'] === (string) $log->calories)) {
+            unset($data['calories']);
+        }
+
+        LogExercise::handle($type, $this->selectedDate, $data, $log);
         $this->closeForm();
     }
 
@@ -244,7 +254,10 @@ class ExerciseDaily extends Component
 
     private function resetForm()
     {
+        $this->resetValidation();
         $this->exerciseTypeId = '';
+        $this->seriesMode = false;
+        $this->total_reps = null;
         $this->sets = null;
         $this->reps = null;
         $this->duration = null;
@@ -287,6 +300,8 @@ class ExerciseDaily extends Component
 
         return view('livewire.exercise.exercise-daily', [
             'quickExercises' => $quickExercises,
+            'exerciseProfile' => ($formType = $exerciseTypes->firstWhere('id', $this->exerciseTypeId))
+                ? ExerciseMetrics::profile($formType) : null,
             'favoriteIds' => $picker->favoriteIds('exercise'),
             'logs' => $logs,
             'sorts' => self::SORTS,

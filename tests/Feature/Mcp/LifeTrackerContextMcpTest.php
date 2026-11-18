@@ -340,6 +340,8 @@ class LifeTrackerContextMcpTest extends TestCase
         $this->assertSame(2, $exercise['summary']['sessions']);
         $this->assertSame(50, $exercise['summary']['minutes']);
         $this->assertSame('Trotar', $exercise['by_type'][0]['type']);
+        $this->assertArrayNotHasKey('pace_seconds_per_km', $exercise['sessions'][0]);
+        $this->assertSame(450, $exercise['sessions'][1]['pace_seconds_per_km']);
 
         $hydration = $this->data(LifeTrackerServer::actingAs($user)->tool(ListWaterIntakeTool::class, ['days' => 3]));
         $this->assertCount(3, $hydration['by_day']);

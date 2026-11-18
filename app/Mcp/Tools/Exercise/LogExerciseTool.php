@@ -4,6 +4,7 @@ namespace App\Mcp\Tools\Exercise;
 
 use App\Actions\LogExercise;
 use App\Mcp\Tools\Exercise\Concerns\ResolvesExerciseType;
+use App\Support\ExerciseMetrics;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
@@ -21,14 +22,7 @@ class LogExerciseTool extends Tool
             'exercise_type_id' => ['nullable', 'string'],
             'exercise_type_name' => ['nullable', 'string'],
             'date' => ['nullable', 'date'],
-            'duration' => ['nullable', 'integer', 'min:0'],
-            'sets' => ['nullable', 'integer', 'min:0'],
-            'reps' => ['nullable', 'integer', 'min:0'],
-            'distance' => ['nullable', 'numeric', 'min:0'],
-            'weight' => ['nullable', 'numeric', 'min:0'],
-            'calories' => ['nullable', 'integer', 'min:0'],
-            'steps' => ['nullable', 'integer', 'min:0'],
-            'notes' => ['nullable', 'string', 'max:1000'],
+            ...ExerciseMetrics::RULES,
         ]);
 
         $type = $this->resolveExerciseType($data['exercise_type_id'] ?? null, $data['exercise_type_name'] ?? null);
@@ -40,7 +34,8 @@ class LogExerciseTool extends Tool
 
         $message = "Ejercicio registrado: \"{$type->name}\" el {$log->date->toDateString()}.";
         if ($log->calories !== null) {
-            $message .= " {$log->calories} kcal.";
+            $label = $log->calories_source === 'manual' ? 'kcal' : 'kcal estimadas';
+            $message .= " {$log->calories} {$label}.";
         }
         if ($log->steps !== null) {
             $message .= " {$log->steps} pasos.";
@@ -58,6 +53,8 @@ class LogExerciseTool extends Tool
                 ->description('Nombre del tipo de ejercicio (p. ej. "Correr"). Alternativa a "exercise_type_id".'),
             'date' => $schema->string()
                 ->description('Fecha en formato YYYY-MM-DD. Por defecto hoy.'),
+            'total_reps' => $schema->integer()
+                ->description('Repeticiones totales para un registro sin desglose por series.'),
             'duration' => $schema->integer()
                 ->description('Duración en minutos.'),
             'sets' => $schema->integer()

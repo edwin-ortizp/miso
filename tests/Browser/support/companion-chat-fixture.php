@@ -17,6 +17,17 @@ foreach ([
 
 \App\Models\DrinkType::create(['name' => 'Agua de prueba', 'hydration_factor' => 1, 'icon' => '💧']);
 \App\Models\ExerciseType::create(['name' => 'Caminata de prueba', 'calories_per_hour' => 150, 'steps_equivalent' => 0]);
+$pushups = \App\Models\ExerciseType::create(['name' => 'Flexiones de pecho', 'calories_per_hour' => 350]);
+\App\Models\ExerciseType::create(['name' => 'Trotar', 'calories_per_hour' => 500]);
+$exerciseHabit = \App\Models\HabitDefinition::create(['name' => 'Flexiones de la mañana', 'time_of_day' => 'anytime']);
+\App\Models\HabitAction::create([
+    'habit_id' => $exerciseHabit->id,
+    'action_key' => 'exercise.log',
+    'mode' => \App\Models\HabitAction::MODE_PROMPT,
+    'config' => ['exercise_type_id' => $pushups->id],
+]);
+$fixture['exerciseHabit'] = $exerciseHabit->id;
+
 \App\Models\MoodState::create(['text' => 'Calma de prueba', 'emoji' => '🙂', 'value' => 3, 'is_active' => true, 'is_pinned' => true, 'sort_order' => 0]);
 
 // CHG-113: pantallas de detalle con datos propios (vehículo y relación).

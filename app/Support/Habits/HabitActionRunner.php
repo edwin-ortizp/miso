@@ -6,6 +6,7 @@ use App\Models\HabitAction as HabitActionSetting;
 use App\Models\HabitCompletion;
 use App\Models\HabitDefinition;
 use Carbon\CarbonInterface;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
@@ -44,7 +45,7 @@ class HabitActionRunner
                 'requiresInput' => true,
                 'promptFields' => array_map(
                     fn (HabitActionField $field) => $field->toArray(),
-                    $handler->promptFields(),
+                    $handler->promptFields($setting->config ?? []),
                 ),
                 'actionResult' => null,
             ];
@@ -69,7 +70,14 @@ class HabitActionRunner
             return null;
         }
 
-        return $this->run($handler, $setting, $habit, $completion, $date, $this->validated($handler, $input));
+        return DB::transaction(function () use ($handler, $setting, $habit, $completion, $date, $input): ?string {
+            $current = HabitCompletion::query()->lockForUpdate()->findOrFail($completion->id);
+            if (! $current->completed || $current->actionable_id) {
+                return null;
+            }
+
+            return $this->run($handler, $setting, $habit, $current, $date, $this->validated($handler, $input));
+        });
     }
 
     /** Deshace el registro que dejó la acción, si lo hubo. */

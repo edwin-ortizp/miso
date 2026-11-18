@@ -47,7 +47,7 @@ abstract class HabitAction
      *
      * @return array<int, HabitActionField>
      */
-    public function promptFields(): array
+    public function promptFields(array $config = []): array
     {
         return array_values(array_filter($this->fields(), fn (HabitActionField $field) => $field->ask));
     }

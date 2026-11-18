@@ -33,6 +33,7 @@ class HabitGamificationService
             $completion = HabitCompletion::query()
                 ->where('habit_id', $habit->id)
                 ->whereDate('date', $selected->toDateString())
+                ->lockForUpdate()
                 ->first();
             $isCompleting = ! $completion?->completed;
 

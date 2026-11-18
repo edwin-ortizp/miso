@@ -4,59 +4,66 @@ namespace App\Actions;
 
 use App\Models\ExerciseLog;
 use App\Models\ExerciseType;
+use App\Support\ExerciseEnergy;
+use App\Support\ExerciseMetrics;
+use Illuminate\Support\Facades\Validator;
 
-/**
- * Registra una sesión de ejercicio. Compartida por las pantallas de Ejercicio,
- * las herramientas MCP y las acciones de hábitos.
- *
- * El dueño del registro lo asigna el trait BelongsToUser a partir del usuario autenticado.
- */
 class LogExercise
 {
-    /**
-     * Calorías y pasos que implica una duración según el tipo de ejercicio.
-     * Cada valor es null cuando no hay duración o el tipo no define esa tasa.
-     *
-     * @return array{calories: ?int, steps: ?int}
-     */
-    public static function estimate(ExerciseType $type, ?int $duration): array
+    public static function handle(ExerciseType $type, string $date, array $data, ?ExerciseLog $log = null): ExerciseLog
     {
-        if (! $duration) {
-            return ['calories' => null, 'steps' => null];
+        abort_unless(auth()->id() && (int) $type->user_id === (int) auth()->id()
+            && (! $log || (int) $log->user_id === (int) auth()->id()), 404);
+
+        $data = Validator::make($data, ExerciseMetrics::RULES, [], ExerciseMetrics::LABELS)->validate();
+        $log ??= new ExerciseLog(['date' => $date]);
+        $previousCalories = $log->calories;
+        $previousSource = $log->calories_source;
+        $previousSteps = $log->steps;
+
+        $log->fill(['exercise_type_id' => $type->id, ...$data]);
+        $hours = (float) $log->duration / 60;
+        if (array_key_exists('calories', $data) && $data['calories'] !== null) {
+            $log->calories_source = 'manual';
+        } elseif ($log->isDirty('calories') || ! $log->exists
+            || ($previousCalories === null || in_array($previousSource, ['catalog_rate', 'speed_met'], true))
+                && $log->isDirty(['distance', 'duration', 'exercise_type_id'])) {
+            $kg = (float) auth()->user()->current_weight_kg;
+            $distance = round((float) $log->distance, 2);
+            $met = $hours > 0 && $distance > 0 && $kg > 0
+                ? ExerciseEnergy::met(ExerciseMetrics::profile($type), $distance / $hours)
+                : null;
+
+            $log->calories_source = match (true) {
+                $met !== null => 'speed_met',
+                $hours > 0 && $type->calories_per_hour > 0 => 'catalog_rate',
+                default => null,
+            };
+            $log->calories = match ($log->calories_source) {
+                'speed_met' => self::rounded($hours * $met * $kg),
+                'catalog_rate' => self::rounded($hours * $type->calories_per_hour),
+                default => null,
+            };
+            if ($log->calories === null) {
+                $log->calories_source = null;
+            }
         }
 
-        return [
-            'calories' => $type->calories_per_hour > 0
-                ? (int) round(($duration / 60) * $type->calories_per_hour)
-                : null,
-            'steps' => $type->steps_equivalent > 0
-                ? (int) round(($duration / 60) * $type->steps_equivalent)
-                : null,
-        ];
+        if ($log->steps === null && (! $log->exists || $previousSteps !== null || $log->isDirty(['duration', 'exercise_type_id']))) {
+            $log->steps = $hours > 0 && $type->steps_equivalent > 0
+                ? self::rounded($hours * $type->steps_equivalent)
+                : null;
+        }
+
+        $log->save();
+
+        return $log->setRelation('exerciseType', $type);
     }
 
-    /**
-     * Crea el registro completando calorías y pasos a partir de la duración
-     * cuando no se indicaron explícitamente.
-     *
-     * @param  array{sets?: ?int, reps?: ?int, duration?: ?int, distance?: ?float, weight?: ?float, calories?: ?int, steps?: ?int, notes?: ?string}  $data
-     */
-    public static function handle(ExerciseType $type, string $date, array $data): ExerciseLog
+    private static function rounded(float $value): ?int
     {
-        $duration = $data['duration'] ?? null;
-        $estimate = self::estimate($type, $duration);
+        $value = round($value);
 
-        return ExerciseLog::create([
-            'date' => $date,
-            'exercise_type_id' => $type->id,
-            'sets' => $data['sets'] ?? null,
-            'reps' => $data['reps'] ?? null,
-            'duration' => $duration,
-            'distance' => $data['distance'] ?? null,
-            'weight' => $data['weight'] ?? null,
-            'calories' => $data['calories'] ?? $estimate['calories'],
-            'steps' => $data['steps'] ?? $estimate['steps'],
-            'notes' => $data['notes'] ?? null,
-        ]);
+        return $value <= 2147483647 ? (int) $value : null;
     }
 }

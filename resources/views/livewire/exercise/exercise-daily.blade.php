@@ -11,12 +11,17 @@
     <x-slot:actions>
         <x-module-actions :primary="$createAction"
             :greeting="config('companion_chat.exercise.greeting')"
-            :quick="$quickExercises->map(fn ($type) => [
-                'type' => 'tap', 'id' => 'exercise-'.$type->id, 'emoji' => $type->icon ?? '🏃', 'label' => $type->name.' · 30 min',
-                'aria' => 'Registrar 30 minutos de '.$type->name, 'echo' => '30 min de '.$type->name,
-                'call' => 'quickAdd', 'args' => [(string) $type->id, 30],
-                'reply' => str_replace('{name}', $type->name, config('companion_chat.exercise.reply')),
-            ])->values()->all()" />
+            :quick="$quickExercises->map(function ($type) {
+                $timed = \App\Support\ExerciseMetrics::profile($type) === 'duration';
+                return [
+                    'type' => 'tap', 'id' => 'exercise-'.$type->id, 'emoji' => $type->icon ?? '🏃',
+                    'label' => $type->name.($timed ? ' · 30 min' : ''),
+                    'aria' => $timed ? 'Registrar 30 minutos de '.$type->name : 'Abrir registro de '.$type->name,
+                    'call' => $timed ? 'quickAdd' : 'openQuickExercise',
+                    'args' => $timed ? [(string) $type->id, 30] : [(string) $type->id],
+                    'reply' => str_replace('{name}', $type->name, config('companion_chat.exercise.reply')),
+                ];
+            })->values()->all()" />
     </x-slot:actions>
 
     <x-slot:controls>
@@ -64,9 +69,14 @@
                         @php
                             $logDate = \Carbon\Carbon::parse($log->date);
                             $typeName = $log->exerciseType?->name ?? 'Ejercicio';
+                            $pace = $log->paceSecondsPerKm();
                             $detail = collect([
                                 $log->duration ? $log->duration.' min' : null,
-                                $log->sets && $log->reps ? $log->sets.' × '.$log->reps : null,
+                                $log->sets !== null && $log->reps !== null ? $log->sets.' × '.$log->reps : null,
+                                $log->sets !== null && $log->reps === null ? $log->sets.' series' : null,
+                                $log->reps !== null && $log->sets === null ? $log->reps.' reps por serie' : null,
+                                $log->totalRepetitions() !== null ? $log->totalRepetitions().' repeticiones' : null,
+                                $pace !== null ? \App\Support\ExerciseMetrics::formatPace($pace) : null,
                                 $log->weight ? $log->weight.' kg' : null,
                                 $log->distance ? $log->distance.' km' : null,
                                 $log->steps ? number_format($log->steps, 0, ',', '.').' pasos' : null,
@@ -79,7 +89,7 @@
                                 @if ($log->notes)<span class="md-table__meta">{{ $log->notes }}</span>@endif
                             </td>
                             <td>{{ $detail ?: '—' }}</td>
-                            <td class="md-table__nowrap">{{ $log->calories ? number_format($log->calories, 0, ',', '.').' kcal' : '—' }}</td>
+                            <td class="md-table__nowrap">{{ $log->calories !== null ? number_format($log->calories, 0, ',', '.').' kcal'.(in_array($log->calories_source, ['catalog_rate', 'speed_met'], true) ? ' estimadas' : '') : '—' }}</td>
                             <td class="md-table__actions">
                                 <x-ui.row-actions :label="'Más acciones del registro de '.$typeName">
                                     <x-slot:primary wire:click="openForm('{{ $log->id }}')">Editar</x-slot:primary>
@@ -145,40 +155,26 @@
 
     <x-ui.form-dialog :open="$showForm" close="closeForm" submit-action="save" id="exercise-dialog"
                       :title="$editingId ? 'Editar ejercicio' : 'Registrar ejercicio'" icon="bi-activity"
-                      :submit="$editingId ? 'Actualizar' : 'Guardar'"
-                      :sections="[
-                          'basic' => ['label' => 'Información básica', 'icon' => 'bi-activity', 'error' => $errors->hasAny(['exerciseTypeId', 'duration', 'calories'])],
-                          'metrics' => ['label' => 'Series y distancia', 'icon' => 'bi-bar-chart', 'error' => $errors->hasAny(['sets', 'reps', 'weight', 'distance', 'steps'])],
-                          'details' => ['label' => 'Detalles adicionales', 'icon' => 'bi-card-text'],
-                      ]">
-        <x-ui.form-dialog-section name="basic" title="Información básica">
+                      :submit="$editingId ? 'Actualizar' : 'Registrar'">
+        @if ($showForm)
             <div class="d-flex flex-column gap-3">
-                <x-ui.select name="exerciseTypeId" label="Tipo de ejercicio" placeholder="Seleccionar..." :required="true" :selected="$exerciseTypeId"
-                             :options="$exerciseTypes->mapWithKeys(fn ($type) => [$type->id => ($type->icon ?? '🏃').' '.$type->name])->all()"
-                             wire:model.live="exerciseTypeId" />
-                <div class="md-field-pair">
-                    <x-ui.field name="duration" label="Duración (min)" type="number" min="0" wire:model.live="duration" />
-                    <x-ui.field name="calories" label="Calorías" type="number" min="0" wire:model="calories" />
-                </div>
+                <x-ui.combobox name="exerciseTypeId" label="Tipo de ejercicio" placeholder="Buscar ejercicio"
+                               :options="$exerciseTypes->mapWithKeys(fn ($type) => [$type->id => ($type->icon ?? '🏃').' '.$type->name])->all()"
+                               wire:model.live="exerciseTypeId" />
+                @if ($exerciseProfile)
+                    @include('livewire.exercise.partials.metrics-fields', [
+                        'profile' => $exerciseProfile,
+                        'prefix' => '',
+                        'values' => ['duration' => $duration, 'distance' => $distance, 'sets' => $sets, 'reps' => $reps],
+                        'seriesMode' => $seriesMode,
+                        'seriesAction' => 'setSeriesMode',
+                        'preservedFields' => $editingId ? array_keys(array_filter([
+                            'distance' => $distance, 'duration' => $duration, 'weight' => $weight, 'steps' => $steps,
+                            'total_reps' => $total_reps, 'calories' => $calories, 'notes' => $notes,
+                        ], fn ($value) => $value !== null && $value !== '')) : [],
+                    ])
+                @endif
             </div>
-        </x-ui.form-dialog-section>
-
-        <x-ui.form-dialog-section name="metrics" title="Series y distancia">
-            <div class="d-flex flex-column gap-3">
-                <div class="md-field-trio">
-                    <x-ui.field name="sets" label="Series" type="number" min="0" wire:model="sets" />
-                    <x-ui.field name="reps" label="Reps" type="number" min="0" wire:model="reps" />
-                    <x-ui.field name="weight" label="Peso (kg)" type="number" min="0" step="0.5" wire:model="weight" />
-                </div>
-                <div class="md-field-pair">
-                    <x-ui.field name="distance" label="Distancia (km)" type="number" min="0" step="0.1" wire:model="distance" />
-                    <x-ui.field name="steps" label="Pasos" type="number" min="0" wire:model="steps" />
-                </div>
-            </div>
-        </x-ui.form-dialog-section>
-
-        <x-ui.form-dialog-section name="details" title="Detalles adicionales">
-            <x-ui.textarea name="notes" label="Notas (opcional)" rows="3" wire:model="notes" />
-        </x-ui.form-dialog-section>
+        @endif
     </x-ui.form-dialog>
 </x-module-shell>

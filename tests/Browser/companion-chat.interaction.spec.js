@@ -241,3 +241,47 @@ test('las acciones del chat abren su formulario en módulos y detalles con datos
     }
     expect(errors).toEqual([]);
 });
+
+for (const width of [390, 1280]) {
+    test(`Ejercicio y Hábitos muestran métricas según la actividad a ${width}px`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await login(page);
+        await page.goto('/exercise');
+        await page.locator('body > .lt-chat-host .lt-chat__launcher').click();
+        await chatPanel(page).getByRole('button', { name: 'Abrir registro de Trotar' }).click();
+
+        const exercise = page.getByRole('dialog', { name: 'Registrar ejercicio' });
+        await expect(exercise.getByRole('combobox')).toHaveValue(/Trotar/);
+        await expect(exercise.getByText('Calorías (kcal)')).toBeHidden();
+        const distance = exercise.getByLabel('Distancia (km)', { exact: true });
+        await distance.fill('5');
+        await distance.press('Tab');
+        const duration = exercise.getByLabel('Duración (min)', { exact: true });
+        await duration.fill('28');
+        await duration.press('Tab');
+        await expect(exercise.getByRole('status')).toHaveText('Ritmo calculado · 5:36 min/km');
+        await exercise.getByRole('button', { name: 'Registrar', exact: true }).click();
+        await expect(exercise).toBeHidden();
+        await expect(page.getByRole('cell', { name: /5:36 min\/km/ }).first()).toBeVisible();
+
+        await page.goto('/habits');
+        await page.locator(`[wire\\:click="toggleHabit(${fixture.exerciseHabit})"]`).click();
+        const habit = page.getByRole('dialog', { name: 'Completaste «Flexiones de la mañana»' });
+        await expect(habit.getByLabel('Repeticiones totales')).toBeVisible();
+        await expect(habit.getByLabel('Duración (min)')).toBeHidden();
+        await habit.getByText('Más detalle', { exact: true }).press('Enter');
+        await habit.getByRole('button', { name: 'Registrar por series' }).click();
+        await habit.getByLabel('Series', { exact: true }).fill('3');
+        await habit.getByLabel('Repeticiones por serie').fill('10');
+        await habit.getByLabel('Repeticiones por serie').press('Tab');
+        await expect(habit.getByRole('status')).toHaveText('30 repeticiones en total');
+        await habit.getByRole('button', { name: 'Registrar', exact: true }).click();
+        await expect(habit).toBeHidden();
+        await page.goto('/exercise');
+        await expect(page.getByText(/3 × 10 · 30 repeticiones/)).toBeVisible();
+        await page.goto('/habits');
+        await page.locator(`[wire\\:click="toggleHabit(${fixture.exerciseHabit})"]`).click();
+        await expect(habit).toBeHidden();
+
+    });
+}

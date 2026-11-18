@@ -47,6 +47,21 @@ class LifeTrackerExerciseWaterMcpTest extends TestCase
         $this->assertSame(250, $log->calories);
     }
 
+    public function test_log_exercise_tool_preserves_total_repetitions_without_duration(): void
+    {
+        $user = User::factory()->create();
+        $user->exerciseTypes()->create(['name' => 'Sentadillas', 'calories_per_hour' => 400]);
+
+        LifeTrackerServer::actingAs($user)
+            ->tool(LogExerciseTool::class, ['exercise_type_name' => 'Sentadillas', 'total_reps' => 30])
+            ->assertOk();
+
+        $log = ExerciseLog::where('user_id', $user->id)->sole();
+        $this->assertSame(30, $log->totalRepetitions());
+        $this->assertNull($log->calories);
+        $this->assertNull($log->sets);
+    }
+
     public function test_log_water_intake_tool_records_intake_and_reports_progress(): void
     {
         $user = User::factory()->create(['daily_water_goal' => 2000]);
