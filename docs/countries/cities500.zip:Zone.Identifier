@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://download.geonames.org/export/dump/
+HostUrl=https://download.geonames.org/export/dump/cities500.zip
