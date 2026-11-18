@@ -44,9 +44,13 @@ class HabitTracker extends Component
         );
     }
 
-    public function startRoutine(string $period): void
+    public function startRoutine(string $period, ?int $habitId = null): void
     {
         $today = now()->toDateString();
+        if ($habitId !== null && $this->selectedDate !== $today) {
+            return;
+        }
+
         $doneIds = HabitCompletion::whereDate('date', $today)->where('completed', true)->pluck('habit_id')->all();
         $queue = HabitDefinition::query()
             ->where('time_of_day', $period)
@@ -55,7 +59,8 @@ class HabitTracker extends Component
             ->pluck('id')
             ->all();
 
-        if ($queue === []) {
+        $index = $habitId === null ? 0 : array_search($habitId, $queue, true);
+        if ($queue === [] || $index === false) {
             return;
         }
 
@@ -63,7 +68,7 @@ class HabitTracker extends Component
         $this->routine = [
             'period' => $period,
             'queue' => $queue,
-            'index' => 0,
+            'index' => $index,
             'status' => array_fill_keys(array_map('strval', $queue), 'pending'),
             'companion' => $this->routineCompanion(),
         ];

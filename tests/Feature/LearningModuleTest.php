@@ -64,6 +64,64 @@ class LearningModuleTest extends TestCase
         $this->assertDatabaseCount('learning_formations', 0);
     }
 
+    public function test_subject_can_change_semester_from_the_shared_editor(): void
+    {
+        $owner = User::factory()->create();
+        $other = User::factory()->create();
+        $this->actingAs($owner);
+        $service = app(LearningRecords::class);
+        $formation = $service->saveFormation($owner->id, null, ['title' => 'Ingeniería', 'type' => 'degree', 'status' => 'in_progress', 'institution' => 'Universidad Central']);
+        $another = $service->saveFormation($owner->id, null, ['title' => 'Otro pregrado', 'type' => 'degree', 'status' => 'pending']);
+        $foreign = $service->saveFormation($other->id, null, ['title' => 'Otro usuario', 'type' => 'degree', 'status' => 'pending']);
+        $period = ['title' => 'Semestre 1', 'status' => 'pending'];
+        $first = $service->saveUnit($owner->id, $formation->id, null, null, 'period', $period);
+        $second = $service->saveUnit($owner->id, $formation->id, null, null, 'period', ['title' => 'Semestre 2'] + $period);
+        $outside = $service->saveUnit($owner->id, $another->id, null, null, 'period', $period);
+        $private = $service->saveUnit($other->id, $foreign->id, null, null, 'period', $period);
+        $subject = $service->saveUnit($owner->id, $formation->id, null, null, 'subject', ['title' => 'Matemáticas', 'status' => 'pending']);
+        $service->saveUnit($owner->id, $formation->id, null, $first->id, 'subject', ['title' => 'Física', 'status' => 'pending']);
+        $topic = $service->saveUnit($owner->id, $formation->id, null, $subject->id, 'topic', ['title' => 'Álgebra', 'status' => 'pending']);
+        $service->pin($owner->id, 'unit', $subject->id, true);
+
+        $this->get(route('learning'))->assertSeeInOrder(['Ingeniería', 'Universidad Central']);
+        $list = Livewire::test(LearningPage::class, ['formation' => $formation->id])
+            ->assertSee('Cambiar semestre')
+            ->call('openSemester', $subject->id)
+            ->assertSet('formSection', 'organization')
+            ->assertSet('draft.semester', '');
+
+        foreach ([$outside->id, $private->id, $subject->id, (string) \Illuminate\Support\Str::uuid()] as $invalid) {
+            $list->set('draft.semester', $invalid)->call('save')
+                ->assertHasErrors('draft.semester')->assertSet('showForm', true);
+        }
+        $this->assertNull($subject->refresh()->parent_id);
+        $list->set('draft.semester', $first->id)->call('closeForm');
+        $this->assertNull($subject->refresh()->parent_id);
+
+        $list->call('openSemester', $subject->id)->set('draft.semester', $first->id)->call('save')
+            ->assertHasNoErrors()->assertSee('Nueva ubicación: Semestre 1.');
+        $this->assertSame($first->id, $subject->refresh()->parent_id);
+        $this->assertSame(2, (int) $subject->position);
+
+        Livewire::test(LearningPage::class, ['formation' => $formation->id, 'unit' => $subject->id])
+            ->assertSee('Cambiar semestre')
+            ->call('openUnit', '', $subject->id)
+            ->assertSet('draft.semester', $first->id)
+            ->set('draft.semester', $second->id)->call('save')
+            ->assertHasNoErrors()->assertRedirect(route('learning.units.show', [$formation->id, $subject->id]));
+
+        $this->get(route('learning.units.show', [$formation->id, $subject->id]))
+            ->assertSee('Volver a Semestre 2')->assertSee('Nueva ubicación: Semestre 2.');
+
+        Livewire::test(LearningPage::class, ['formation' => $formation->id, 'unit' => $subject->id])
+            ->call('openSemester', $subject->id)
+            ->set('draft.semester', '')->call('save')->assertHasNoErrors();
+
+        $this->assertNull($subject->refresh()->parent_id);
+        $this->assertSame($subject->id, $topic->refresh()->parent_id);
+        $this->assertDatabaseHas('learning_shortcuts', ['target_id' => $subject->id]);
+    }
+
     public function test_validation_cancel_filters_and_leaf_actions(): void
     {
         $user = User::factory()->create();

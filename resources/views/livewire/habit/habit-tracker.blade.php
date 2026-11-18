@@ -81,31 +81,42 @@
 
                     @foreach ($groupedHabits[$timeOfDay] as $habit)
                         @php $isCompleted = !empty($completions[$habit->id]); @endphp
-                        <button type="button"
-                             id="habit-item-{{ $habit->id }}"
-                             wire:click="toggleHabit({{ $habit->id }})"
-                             wire:loading.attr="disabled"
-                             wire:target="toggleHabit({{ $habit->id }})"
-                             aria-pressed="{{ $isCompleted ? 'true' : 'false' }}"
-                             x-optimistic-toggle
-                             class="md-list-item habit-list-action w-100 text-start {{ $isCompleted ? 'md-list-item--completed' : '' }}"
-                             style="{{ $isCompleted ? 'background: color-mix(in srgb, var(--md-custom-color-success) 8%, transparent);' : '' }}"
-                             wire:key="habit-{{ $selectedDate }}-{{ $habit->id }}">
-                            <div class="md-list-item-leading">
-                                <div class="md-list-checkbox {{ $isCompleted ? 'checked' : '' }}" style="{{ $isCompleted ? 'background: var(--md-custom-color-success); border-color: var(--md-custom-color-success);' : '' }}">
-                                    @if ($isCompleted)
-                                        <i class="bi bi-check-lg" style="color: var(--md-custom-color-on-success);"></i>
-                                    @endif
+                        <div class="habit-list-row" wire:key="habit-{{ $selectedDate }}-{{ $habit->id }}">
+                            <button type="button"
+                                 id="habit-item-{{ $habit->id }}"
+                                 wire:click="toggleHabit({{ $habit->id }})"
+                                 wire:loading.attr="disabled"
+                                 wire:target="toggleHabit({{ $habit->id }})"
+                                 aria-pressed="{{ $isCompleted ? 'true' : 'false' }}"
+                                 x-optimistic-toggle
+                                 class="md-list-item habit-list-action text-start {{ $isCompleted ? 'md-list-item--completed' : '' }}"
+                                 style="{{ $isCompleted ? 'background: color-mix(in srgb, var(--md-custom-color-success) 8%, transparent);' : '' }}">
+                                <div class="md-list-item-leading">
+                                    <div class="md-list-checkbox {{ $isCompleted ? 'checked' : '' }}" style="{{ $isCompleted ? 'background: var(--md-custom-color-success); border-color: var(--md-custom-color-success);' : '' }}">
+                                        @if ($isCompleted)
+                                            <i class="bi bi-check-lg" style="color: var(--md-custom-color-on-success);"></i>
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="habit-list-action__content">
-                                <span style="font-size: 1.25rem;">{{ $habit->icon }}</span>
-                                <div class="md-list-item-content">
-                                    <div class="md-list-item-headline">{{ $habit->name }}</div>
-                                    <div class="md-list-item-supporting">{{ $habit->goal_duration }} · {{ $habit->base_time }}</div>
+                                <div class="habit-list-action__content">
+                                    <span style="font-size: 1.25rem;">{{ $habit->icon }}</span>
+                                    <div class="md-list-item-content">
+                                        <div class="md-list-item-headline">{{ $habit->name }}</div>
+                                        <div class="md-list-item-supporting">{{ $habit->goal_duration }} · {{ $habit->base_time }}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
+                            </button>
+                            @if ($isToday && ! $isCompleted)
+                                <x-ui.icon-action
+                                    icon="bi-play-fill"
+                                    :label="'Empezar rutina en '.$habit->name"
+                                    class="habit-list-play"
+                                    wire:click="startRoutine('{{ $timeOfDay }}', {{ $habit->id }})"
+                                    wire:loading.attr="disabled"
+                                    wire:target="startRoutine"
+                                />
+                            @endif
+                        </div>
                     @endforeach
                 </div>
             </div>

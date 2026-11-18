@@ -199,7 +199,7 @@ return [
     'tasks' => [
         'archetype' => 'list',
         'title' => 'Tareas', 'subtitle' => 'Decide, ordena y completa el trabajo con claridad.', 'icon' => 'bi-list-check',
-        'patterns' => ['tasks*'], 'preserve' => ['date', 'status', 'category', 'priority', 'size', 'q'],
+        'patterns' => ['tasks*'], 'preserve' => [],
         // Atajos de la barra de estado: action = focus | route:<nombre> | dispatch:<evento>.
         'status' => [
             ['label' => 'Iniciar foco', 'icon' => 'bi-play-circle', 'action' => 'focus', 'title' => 'Inicia un Pomodoro de trabajo'],

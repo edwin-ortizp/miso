@@ -15,8 +15,10 @@
 .habit-period__toggle:focus-visible { outline: 2px solid var(--md-sys-color-primary); outline-offset: 2px; border-radius: 8px; }
 .habit-period__body { border-top: 1px solid var(--md-sys-color-outline-variant); }
 .habit-period__body > .habit-routine-start { margin: 12px 16px; min-height: 44px; }
-.habit-period .habit-list-action { min-height: 64px; border-top: 0; }
-.habit-period .habit-list-action + .habit-list-action { border-top: 1px solid var(--md-sys-color-outline-variant); }
+.habit-list-row { display: flex; align-items: center; }
+.habit-period .habit-list-action { flex: 1; min-width: 0; min-height: 64px; border-top: 0; }
+.habit-list-play.md-btn-icon { flex: 0 0 44px; width: 44px; height: 44px; margin-inline-end: 8px; }
+.habit-list-row + .habit-list-row { border-top: 1px solid var(--md-sys-color-outline-variant); }
 .habit-list-action__content { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; }
 .habit-list-action__content .md-list-item-content { min-width: 0; overflow-wrap: anywhere; }
 .habit-tracker .game-guardian--rail { gap: 12px; }

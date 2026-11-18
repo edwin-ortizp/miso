@@ -48,6 +48,7 @@ class TaskOverdueTest extends TestCase
         $other->tasks()->create(['title' => 'Foreign overdue', 'end_date' => '2026-10-23 00:00:00']);
         $this->assertEqualsCanonicalizing($expected, Task::query()->overdue()->pluck('id')->all());
         Livewire::test(TaskList::class)
+            ->set('search', '')
             ->assertViewHas('overdueCount', count($expected))
             ->set('dateFilter', ['vencidas'])
             ->assertViewHas('tasks', fn ($tasks) => $tasks->total() === count($expected)

@@ -89,6 +89,16 @@ class LearningRecords
             if (! in_array($kind, self::children($parent?->kind ?? $formation->kind), true)) {
                 throw ValidationException::withMessages(['kind' => 'Este tipo de contenido no corresponde a esta ubicación.']);
             }
+            if (array_key_exists('semester', $data)) {
+                $destination = $data['semester'] ?? '';
+                $period = is_string($destination) && $destination !== ''
+                    ? LearningUnit::withoutGlobalScopes()->where('user_id', $userId)->where('formation_id', $formationId)->where('kind', 'period')->find($destination)
+                    : null;
+                if (! $record->exists || $kind !== 'subject' || $formation->kind !== 'academic' || ($destination !== '' && ! $period)) {
+                    throw ValidationException::withMessages(['semester' => 'Elige un semestre disponible de esta formación.']);
+                }
+                $parentId = $period?->id;
+            }
             $values = $this->fields($data);
             $credits = Validator::make(['credits' => ($data['credits'] ?? '') === '' ? null : $data['credits']], ['credits' => ['nullable', 'numeric', 'between:0,100', 'multiple_of:0.5']])->validate()['credits'];
             if ($kind !== 'subject' && $credits !== null) {
@@ -97,8 +107,10 @@ class LearningRecords
             }
             if (! $record->exists) {
                 $record->formation_id = $formationId;
-                $record->parent_id = $parentId;
                 $record->kind = $kind;
+            }
+            if (! $record->exists || $record->parent_id !== $parentId) {
+                $record->parent_id = $parentId;
                 $record->position = 1 + (int) LearningUnit::withoutGlobalScopes()->where('user_id', $userId)->where('formation_id', $formationId)->where('parent_id', $parentId)->max('position');
             }
             $record->fill($values + ['credits' => $credits]);

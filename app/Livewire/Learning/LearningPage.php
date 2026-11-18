@@ -63,6 +63,7 @@ class LearningPage extends Component
         $this->formationId = $formation;
         $this->unitId = $unit;
         $this->context();
+        $this->message = session('learning-feedback', '');
     }
 
     private function records(): LearningRecords
@@ -119,7 +120,18 @@ class LearningPage extends Component
         $this->editorParent = $parentId;
         $this->editorKind = $kind;
         $this->draft = $record ? $this->draftFor($record) : ['title' => '', 'description' => '', 'status' => 'pending', 'start_date' => '', 'end_date' => '', 'credits' => ''];
+        if ($record && $kind === 'subject' && $formation->kind === 'academic') {
+            $this->draft['semester'] = $parentId ?? '';
+        }
         $this->showForm = true;
+    }
+
+    public function openSemester(string $id): void
+    {
+        $this->openUnit(id: $id);
+        abort_unless(array_key_exists('semester', $this->draft), 422);
+        $this->formSection = 'organization';
+        $this->dispatch('learning-form-section', section: 'organization');
     }
 
     private function draftFor($record): array
@@ -147,23 +159,35 @@ class LearningPage extends Component
     public function save(): void
     {
         abort_unless($this->showForm, 422);
+        $feedback = 'Formación guardada.';
+        $refreshDetail = false;
         try {
             if ($this->editor === 'formation') {
                 $this->records()->saveFormation((int) auth()->id(), $this->editingId, $this->draft);
             } else {
-                $this->records()->saveUnit((int) auth()->id(), $this->formationId, $this->editingId, $this->editorParent, $this->editorKind, $this->draft);
+                $saved = $this->records()->saveUnit((int) auth()->id(), $this->formationId, $this->editingId, $this->editorParent, $this->editorKind, $this->draft);
+                if ($saved->parent_id !== $this->editorParent) {
+                    $refreshDetail = $saved->id === $this->unitId;
+                    $feedback = $saved->parent_id
+                        ? 'Nueva ubicación: '.$this->records()->unit((int) auth()->id(), $this->formationId, $saved->parent_id)->title.'.'
+                        : 'Nueva ubicación: '.$this->records()->formation((int) auth()->id(), $this->formationId)->title.'.';
+                }
             }
         } catch (ValidationException $e) {
             foreach ($e->errors() as $field => $messages) {
                 $this->addError('draft.'.$field, $messages[0]);
             }
             $this->formSection = count(array_intersect(array_keys($e->errors()), ['title', 'description', 'type', 'kind', 'status'])) ? 'basic' : 'organization';
-            $this->dispatch('learning-form-invalid', section: $this->formSection);
+            $this->dispatch('learning-form-section', section: $this->formSection);
 
             return;
         }
         $this->closeForm();
-        $this->message = 'Formación guardada.';
+        $this->message = $feedback;
+        if ($refreshDetail) {
+            session()->flash('learning-feedback', $feedback);
+            $this->redirectRoute('learning.units.show', [$this->formationId, $this->unitId], navigate: true);
+        }
     }
 
     public function deleteRecord(string $formation, ?string $unit = null): void
@@ -226,6 +250,8 @@ class LearningPage extends Component
 
         $editorParentLabel = $this->editorParent ? $allUnits->firstWhere('id', $this->editorParent)?->title : null;
 
-        return view('livewire.learning.page', compact('formation', 'unit', 'records', 'paginator', 'categories', 'path', 'shortcuts', 'pinKeys', 'childKinds', 'back', 'typeLocked', 'editorParentLabel'));
+        $semesters = $allUnits->where('kind', 'period')->pluck('title', 'id')->all();
+
+        return view('livewire.learning.page', compact('semesters', 'formation', 'unit', 'records', 'paginator', 'categories', 'path', 'shortcuts', 'pinKeys', 'childKinds', 'back', 'typeLocked', 'editorParentLabel'));
     }
 }

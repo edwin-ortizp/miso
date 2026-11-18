@@ -4,6 +4,7 @@
     $vocab = app(\App\Services\Learning\LearningVocabulary::class);
     $uid = (int) auth()->id();
     $ftype = $formation?->type;
+    $semesterLabel = $formation?->kind === 'academic' ? $vocab->label($uid, $ftype, 'period') : '';
     $current = $unit ?? $formation;
     $currentType = $unit ? 'unit' : 'formation';
     $currentPinned = $current && in_array($currentType.':'.$current->id, $pinKeys, true);
@@ -74,6 +75,9 @@
                     @endforeach
                     @if ($addActions)<x-ui.menu-divider />@endif
                     <x-ui.menu-item icon="bi-pencil" :wire:click="$currentEditAction" x-on:click="$el.closest('.md-menu').querySelector('button').focus()">Editar</x-ui.menu-item>
+                    @if ($semesterLabel && $semesters && $unit?->kind === 'subject')
+                        <x-ui.menu-item icon="bi-arrow-left-right" wire:click="openSemester('{{ $unit->id }}')" x-on:click="$el.closest('.md-menu').querySelector('button').focus()">Cambiar {{ mb_strtolower($semesterLabel) }}</x-ui.menu-item>
+                    @endif
                     <x-ui.menu-item icon="bi-trash" tone="danger" :wire:click="$currentDeleteAction" :wire:confirm="'¿Eliminar «'.$current->title.'»? Se quitará también su acceso directo.'">Eliminar</x-ui.menu-item>
                 </x-ui.menu>
             </div>
@@ -115,7 +119,12 @@
                                     $consultAction = 'Livewire.navigate('.json_encode($href).')';
                                 @endphp
                                 <tr wire:key="learning-{{ $recordType }}-{{ $record->id }}">
-                                    <td><a href="{{ $href }}" wire:navigate>{{ $record->title }}</a></td>
+                                    <td>
+                                        <a href="{{ $href }}" wire:navigate>{{ $record->title }}</a>
+                                        @if (!$isUnit && filled($record->institution))
+                                            <div class="md-body-small">{{ $record->institution }}</div>
+                                        @endif
+                                    </td>
                                     <td>{{ $isUnit ? $vocab->label($uid, $ftype, $record->kind) : $vocab->typeLabel($record->type) }}</td>
                                     <td>{{ LearningFormation::STATES[$record->status] }}</td>
                                     @unless($formation)<td>{{ $categories[$record->category] ?? 'Sin categoría' }}</td>@endunless
@@ -124,6 +133,9 @@
                                             <x-slot:primary :x-on:click="$consultAction">Consultar</x-slot:primary>
                                             <x-ui.menu-item icon="bi-pencil" :wire:click="$editAction" x-on:click="$el.closest('.md-row-actions').querySelector('.md-row-actions__more').focus()">Editar</x-ui.menu-item>
                                             <x-ui.menu-item icon="bi-pin-angle" wire:click="setPin('{{ $recordType }}', '{{ $record->id }}', {{ $pinned ? 'false' : 'true' }})">{{ $pinned ? 'Quitar de accesos directos' : 'Fijar en accesos directos' }}</x-ui.menu-item>
+                                            @if ($semesterLabel && $semesters && $isUnit && $record->kind === 'subject')
+                                                <x-ui.menu-item icon="bi-arrow-left-right" wire:click="openSemester('{{ $record->id }}')" x-on:click="$el.closest('.md-row-actions').querySelector('.md-row-actions__more').focus()">Cambiar {{ mb_strtolower($semesterLabel) }}</x-ui.menu-item>
+                                            @endif
                                             @if ($isUnit)
                                                 @unless ($loop->first)<x-ui.menu-item icon="bi-arrow-up" wire:click="move('{{ $record->id }}', -1)">Subir</x-ui.menu-item>@endunless
                                                 @unless ($loop->last)<x-ui.menu-item icon="bi-arrow-down" wire:click="move('{{ $record->id }}', 1)">Bajar</x-ui.menu-item>@endunless

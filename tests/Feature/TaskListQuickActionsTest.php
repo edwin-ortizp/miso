@@ -21,6 +21,68 @@ class TaskListQuickActionsTest extends TestCase
         $this->actingAs(User::factory()->create());
     }
 
+    public function test_quick_dates_assign_and_move_dates_without_changing_the_existing_time(): void
+    {
+        $task = Task::create(['title' => 'Cambiar fechas',
+            'user_id' => auth()->id(), 'start_date' => '2026-10-26 14:30:00',
+            'start_is_date' => false, 'end_date' => null,
+        ]);
+
+        Livewire::test(TaskList::class)
+            ->call('openQuickDates', $task->id)
+            ->assertSet('quickStartDate', '2026-10-26')
+            ->set('quickStartDate', '2026-10-28')
+            ->set('quickEndDate', '2026-10-27')
+            ->call('saveQuickDates')
+            ->assertHasErrors('quickEndDate')
+            ->set('quickEndDate', '2026-10-29')
+            ->call('saveQuickDates')
+            ->assertHasNoErrors()
+            ->assertSet('dateTaskId', null);
+
+        $task->refresh();
+        $this->assertSame('2026-10-28 14:30:00', $task->start_date->toDateTimeString());
+        $this->assertSame('2026-10-29', $task->end_date->toDateString());
+        $this->assertTrue($task->end_is_date);
+    }
+
+    public function test_quick_dates_reject_a_concurrent_schedule_change(): void
+    {
+        $task = Task::create(['title' => 'Cambiar fechas', 'user_id' => auth()->id()]);
+        $editor = Livewire::test(TaskList::class)->call('openQuickDates', $task->id);
+        $task->update(['end_date' => '2026-10-30']);
+
+        $editor->set('quickEndDate', '2026-11-01')
+            ->call('saveQuickDates')
+            ->assertHasErrors('quickEndDate');
+
+        $this->assertSame('2026-10-30', $task->fresh()->end_date->toDateString());
+    }
+
+    public function test_quick_dates_respect_reminders_fixed_schedules_and_ownership(): void
+    {
+        $task = Task::create(['title' => 'Con aviso', 'end_date' => '2026-11-15', 'end_is_date' => true]);
+        app(\App\Services\Notifications\ManageReminders::class)->sync($task, [['amount' => 1, 'unit' => 'days']]);
+
+        Livewire::test(TaskList::class)
+            ->call('openQuickDates', $task->id)
+            ->set('quickEndDate', null)
+            ->call('saveQuickDates')
+            ->assertHasErrors('quickEndDate')
+            ->call('closeQuickDates')
+            ->assertHasNoErrors();
+
+        $this->assertSame('2026-11-15', $task->fresh()->end_date->toDateString());
+        $task->update(['schedule_locked' => true]);
+        Livewire::test(TaskList::class)
+            ->call('openQuickDates', $task->id)
+            ->assertSet('dateTaskId', null)
+            ->assertSee('Esta tarea tiene horario fijo');
+
+        $foreign = User::factory()->create()->tasks()->create(['title' => 'Ajena']);
+        Livewire::test(TaskList::class)->call('openQuickDates', $foreign->id)->assertNotFound();
+    }
+
     public function test_completion_skips_open_states_and_cannot_reopen_a_completed_task(): void
     {
         foreach (TaskStatus::ensureFor(auth()->id())->where('type', '!=', TaskStatus::DONE) as $status) {

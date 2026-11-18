@@ -9,13 +9,13 @@ use Livewire\Attributes\Url;
 
 /**
  * Filtros compartidos de las vistas de tareas (Lista, Gantt, Planificación, Kanban y Flujo):
- * cuándo, estado, categoría, prioridad, tamaño y búsqueda. Viven en la URL con los mismos alias
- * para que la cabecera del módulo los conserve al cambiar de pestaña.
+ * cuándo, estado, categoría, prioridad, tamaño y búsqueda. La URL comparte la selección
+ * y la sesión recuerda la última selección de cada vista.
  * Requiere LoadsTaskCategories para validar y rotular las categorías.
  */
 trait FiltersTasks
 {
-    public const FILTER_DATES = ['hoy' => 'Hoy', 'vencidas' => 'Vencidas', 'proximas' => 'Próximas', 'sin-fecha' => 'Sin fecha'];
+    public const FILTER_DATES = ['hoy' => 'Hoy', 'manana' => 'Mañana', 'vencidas' => 'Vencidas', 'proximas' => 'Próximas', 'sin-fecha' => 'Sin fecha'];
 
     public const FILTER_PRIORITIES = [
         'urgent-important' => '🔴 Urgente e Importante',
@@ -47,10 +47,44 @@ trait FiltersTasks
     #[Url(as: 'q', history: true, keep: true)]
     public string $search = '';
 
+    private const FILTER_QUERY_PROPERTIES = [
+        'status' => 'statusQuery',
+        'category' => 'categoryFilter',
+        'priority' => 'priorityFilter',
+        'date' => 'dateFilter',
+        'size' => 'sizeFilter',
+        'q' => 'search',
+    ];
+
     public function mountFiltersTasks(): void
     {
+        if (auth()->check() && ! array_intersect_key(request()->query(), self::FILTER_QUERY_PROPERTIES)) {
+            foreach (session()->get($this->taskFilterSessionKey(), []) as $property => $value) {
+                $this->{$property} = $value;
+            }
+        }
+
         $this->filter = $this->statusQuery ?? $this->defaultStatusFilter();
         $this->normalizeFilters();
+    }
+
+    private function taskFilterSessionKey(): string
+    {
+        return 'task_filters.'.auth()->id().'.'.static::class;
+    }
+
+    private function rememberTaskFilters(): void
+    {
+        if (! auth()->check()) {
+            return;
+        }
+
+        $filters = [];
+        foreach (self::FILTER_QUERY_PROPERTIES as $property) {
+            $filters[$property] = $this->{$property};
+        }
+
+        session()->put($this->taskFilterSessionKey(), $filters);
     }
 
     /** Estado con el que abre la vista cuando la URL no trae uno. */
@@ -71,6 +105,7 @@ trait FiltersTasks
             $this->filter = $this->statusQuery;
         }
         $this->normalizeFilters();
+        $this->rememberTaskFilters();
         $this->filtersChanged();
     }
 
@@ -79,6 +114,7 @@ trait FiltersTasks
         $this->filter = $this->defaultStatusFilter();
         $this->reset('dateFilter', 'categoryFilter', 'priorityFilter', 'sizeFilter');
         $this->normalizeFilters();
+        $this->rememberTaskFilters();
         $this->filtersChanged();
     }
 
@@ -93,6 +129,7 @@ trait FiltersTasks
             default => null,
         };
         $this->normalizeFilters();
+        $this->rememberTaskFilters();
         $this->filtersChanged();
     }
 
@@ -181,7 +218,7 @@ trait FiltersTasks
                     $q->orWhere(fn ($q2) => match ($date) {
                         'sin-fecha' => $q2->whereNull('start_date')->whereNull('end_date'),
                         'vencidas' => $q2->overdue(),
-                        'hoy' => $q2->whereDate('start_date', today())->orWhereDate('end_date', today()),
+                        'hoy', 'manana' => $this->filterTaskDay($q2, $date),
                         'proximas' => $q2->where('start_date', '>', now())
                             ->orWhere(fn ($q3) => $q3->whereNull('start_date')->where('end_date', '>', now())),
                     });
@@ -199,6 +236,13 @@ trait FiltersTasks
         }
 
         return $query;
+    }
+
+    private function filterTaskDay(Builder $query, string $option): Builder
+    {
+        $day = today()->addDays($option === 'manana' ? 1 : 0);
+
+        return $query->whereDate('start_date', $day)->orWhereDate('end_date', $day);
     }
 
     protected function normalizeFilters(): void

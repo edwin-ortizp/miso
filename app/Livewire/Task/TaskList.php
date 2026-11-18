@@ -39,6 +39,114 @@ class TaskList extends Component
     use \App\Livewire\Task\Concerns\HandlesTaskRowActions;
     use \App\Livewire\Task\Concerns\InteractsWithTaskChat;
 
+    #[\Livewire\Attributes\Locked]
+    public ?string $dateTaskId = null;
+
+    #[\Livewire\Attributes\Locked]
+    public array $dateTaskSnapshot = [];
+
+    #[\Livewire\Attributes\Locked]
+    public string $dateTaskTitle = '';
+
+    public ?string $quickStartDate = null;
+
+    public ?string $quickEndDate = null;
+
+    public function openQuickDates(string $id): void
+    {
+        $task = $this->quickDateTask($id)->firstOrFail();
+        if ($task->schedule_locked) {
+            $this->lockedNotice = self::LOCKED_MESSAGE;
+
+            return;
+        }
+
+        $this->resetValidation(['quickStartDate', 'quickEndDate']);
+        $this->dateTaskId = $task->id;
+        $this->dateTaskTitle = $task->title;
+        $this->dateTaskSnapshot = $this->quickDateSnapshot($task);
+        $this->quickStartDate = $task->start_date?->toDateString();
+        $this->quickEndDate = $task->end_date?->toDateString();
+    }
+
+    public function closeQuickDates(): void
+    {
+        $id = $this->dateTaskId;
+        $this->reset('dateTaskId', 'dateTaskTitle', 'dateTaskSnapshot', 'quickStartDate', 'quickEndDate');
+        $this->resetValidation(['quickStartDate', 'quickEndDate']);
+        $this->dispatch('task-quick-dates-closed', id: $id);
+    }
+
+    public function saveQuickDates(): void
+    {
+        abort_if($this->dateTaskId === null, 404);
+        $this->validate([
+            'quickStartDate' => ['nullable', 'date_format:Y-m-d'],
+            'quickEndDate' => ['nullable', 'date_format:Y-m-d'],
+        ], [], ['quickStartDate' => 'inicio', 'quickEndDate' => 'fin']);
+
+        $saved = DB::transaction(function (): bool {
+            $task = $this->quickDateTask($this->dateTaskId)->lockForUpdate()->firstOrFail();
+            if ($task->schedule_locked || $this->dateTaskSnapshot !== $this->quickDateSnapshot($task)) {
+                $this->addError('quickEndDate', $task->schedule_locked
+                    ? self::LOCKED_MESSAGE
+                    : 'Las fechas cambiaron. Cierra y vuelve a abrir para ver las fechas actuales.');
+
+                return false;
+            }
+
+            $start = $this->quickDateWithExistingTime($this->quickStartDate, $task->start_date, $task->start_is_date);
+            $end = $this->quickDateWithExistingTime($this->quickEndDate, $task->end_date, $task->end_is_date);
+            if ($start && $end && $end->lessThan($start)) {
+                $this->addError('quickEndDate', 'El fin debe ser igual o posterior al inicio.');
+
+                return false;
+            }
+            if (! $end && app(\App\Services\Notifications\ManageReminders::class)->rows($task)) {
+                $this->addError('quickEndDate', 'Conserva una fecha de fin o quita los recordatorios desde Editar.');
+
+                return false;
+            }
+
+            $task->fill([
+                'start_date' => $start,
+                'end_date' => $end,
+                'start_is_date' => ! $start || ! $task->start_date || $task->start_is_date,
+                'end_is_date' => ! $end || ! $task->end_date || $task->end_is_date,
+            ]);
+            if ($task->isDirty()) {
+                $task->save();
+            }
+
+            return true;
+        });
+
+        if ($saved) {
+            $this->closeQuickDates();
+        }
+    }
+
+    private function quickDateTask(string $id): \Illuminate\Database\Eloquent\Builder
+    {
+        abort_unless(auth()->check(), 404);
+
+        return Task::query()->where('user_id', auth()->id())->whereKey($id);
+    }
+
+    private function quickDateSnapshot(Task $task): array
+    {
+        return [$task->getRawOriginal('start_date'), $task->getRawOriginal('end_date'), $task->start_is_date, $task->end_is_date];
+    }
+
+    private function quickDateWithExistingTime(?string $date, ?Carbon $existing, ?bool $dateOnly): ?Carbon
+    {
+        if (! filled($date)) {
+            return null;
+        }
+
+        return Carbon::parse($date.' '.($existing && ! $dateOnly ? $existing->format('H:i:s') : '00:00:00'));
+    }
+
     public const SORTS = [
         'updated' => 'Última actualización',
         'chronological' => 'Cronológico',

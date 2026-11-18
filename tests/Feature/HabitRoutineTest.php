@@ -49,6 +49,48 @@ class HabitRoutineTest extends TestCase
             ->assertSee('02:00');
     }
 
+    public function test_row_play_opens_the_routine_at_the_selected_pending_habit(): void
+    {
+        $first = $this->habit('Lavarme los dientes', '20:00', '2 min');
+        $second = $this->habit('Seda Dental', '20:15', '3 min');
+
+        Livewire::test(HabitTracker::class)
+            ->assertSeeHtml('aria-label="Empezar rutina en Seda Dental"')
+            ->call('startRoutine', 'night', $second->id)
+            ->assertSet('routine.queue', [$first->id, $second->id])
+            ->assertSet('routine.index', 1)
+            ->assertSee('Noche · 2 de 2')
+            ->assertSee('03:00')
+            ->call('routinePrevious')
+            ->assertSet('routine.index', 0);
+
+        $this->assertDatabaseCount('habit_completions', 0);
+    }
+
+    public function test_row_play_requires_a_pending_habit_in_the_users_period_today(): void
+    {
+        $pending = $this->habit('Seda Dental', '20:15', '3 min');
+        $done = $this->habit('Diario', '20:30', '10 min');
+        HabitCompletion::create(['habit_id' => $done->id, 'date' => '2026-07-13', 'completed' => true]);
+        $user = auth()->user();
+        $this->actingAs(User::factory()->create());
+        $other = $this->habit('Ajeno', '20:30', '10 min');
+        $this->actingAs($user);
+
+        Livewire::test(HabitTracker::class)
+            ->assertDontSee('Empezar rutina en Diario')
+            ->call('startRoutine', 'night', $done->id)
+            ->assertSet('routine', null)
+            ->call('startRoutine', 'night', $other->id)
+            ->assertSet('routine', null)
+            ->call('startRoutine', 'morning', $pending->id)
+            ->assertSet('routine', null)
+            ->call('previousDay')
+            ->assertDontSee('Empezar rutina en Seda Dental')
+            ->call('startRoutine', 'night', $pending->id)
+            ->assertSet('routine', null);
+    }
+
     public function test_routine_shows_music_toggle(): void
     {
         $this->habit('Lavarme los dientes', '20:00', '2 min');

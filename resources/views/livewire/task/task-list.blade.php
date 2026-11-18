@@ -1,4 +1,5 @@
-<div data-module="tasks" class="lt-page" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+<div data-module="tasks" class="lt-page" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }"
+     x-on:task-quick-dates-closed.window="requestAnimationFrame(() => (document.getElementById('task-date-' + $event.detail.id) ?? document.getElementById('task-list-focus'))?.focus())">
     @if ($lockedNotice)
         <x-ui.snackbar wire:key="locked-notice">
             {{ $lockedNotice }}
@@ -46,9 +47,11 @@
                        wire:target="filter,categoryFilter,priorityFilter,dateFilter,sizeFilter,search,gotoPage,previousPage,nextPage" />
 
         <div wire:loading.delay.remove wire:target="filter,categoryFilter,priorityFilter,dateFilter,sizeFilter,search,gotoPage,previousPage,nextPage">
+        <div id="task-list-focus" tabindex="-1" role="group" aria-label="Lista de tareas">
         @forelse ($tasks as $task)
                 <div class="md-list-item task-row {{ $task->completed ? 'md-list-item--completed' : '' }}" wire:key="task-row-{{ $task->id }}">
-                <button x-on:click.stop="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-list-item-content md-task-open-button" aria-label="Abrir tarea: {{ $task->title }}">
+                <div class="md-list-item-content">
+                <button x-on:click.stop="$dispatch('task-editor', {action: 'openForm', id: '{{ $task->id }}'})" class="md-task-open-button w-100" aria-label="Abrir tarea: {{ $task->title }}">
                     <div class="d-flex align-items-center gap-2">
                         <span class="md-list-item-headline {{ $task->completed ? '' : 'fw-medium' }}">
                             <x-ui.task-code :code="$task->code" /> {{ $task->title }}
@@ -60,6 +63,7 @@
                     @if ($preview = $task->descriptionPreview())
                         <div class="md-list-item-supporting text-truncate">{{ $preview }}</div>
                     @endif
+                </button>
                     <div class="d-flex flex-wrap gap-1 mt-1">
                         @if ($task->priority)
                             @php
@@ -95,19 +99,16 @@
                             @endphp
                             <span class="md-chip-tonal"><i class="bi bi-arrow-repeat" style="font-size: 0.625rem;"></i> {{ $recurrenceLabel }}</span>
                         @endif
-                        @if (!$task->start_date && !$task->end_date)
-                            <span class="md-chip-tonal">Sin fecha</span>
-                        @else
-                            {{-- CHG-136: una sola etiqueta para la fecha; si está vencida lo dice ahí mismo. --}}
-                            @if ($task->isOverdue())
-                                <span class="md-chip-tonal md-chip-tonal--error"><i class="bi bi-exclamation-circle task-row__chip-icon" aria-hidden="true"></i> Vencida · {{ $task->scheduleLabel() }}</span>
-                            @else
-                                <span class="md-chip-tonal"><i class="bi bi-calendar task-row__chip-icon" aria-hidden="true"></i> {{ $task->scheduleLabel() }}</span>
-                            @endif
-                        @endif
+                        <button type="button" id="task-date-{{ $task->id }}"
+                                class="md-chip-tonal {{ $task->isOverdue() ? 'md-chip-tonal--error' : '' }}"
+                                aria-haspopup="dialog" aria-label="Cambiar fechas de {{ $task->title }}: {{ $task->isOverdue() ? 'Vencida · ' : '' }}{{ $task->scheduleLabel() ?: 'Sin fecha' }}"
+                                wire:click="openQuickDates('{{ $task->id }}')">
+                            <i class="bi {{ $task->isOverdue() ? 'bi-exclamation-circle' : 'bi-calendar' }} task-row__chip-icon" aria-hidden="true"></i>
+                            <span>{{ $task->isOverdue() ? 'Vencida · ' : '' }}{{ $task->scheduleLabel() ?: 'Sin fecha' }}</span>
+                        </button>
                         @if ($task->estimated_time)<span class="md-chip-tonal"><i class="bi bi-clock" style="font-size: 0.625rem;"></i> {{ $task->estimated_time_label }}</span>@endif
                     </div>
-                </button>
+                </div>
                 <div class="task-row__status">
                     @if ($task->status)
                         <x-ui.catalog-chip :color="$task->status->color" tone="accent" :icon="$task->status->icon" title="Estado">{{ $task->status->name }}</x-ui.catalog-chip>
@@ -148,6 +149,7 @@
                 @endif
             </div>
         @endforelse
+        </div>
         </div>
     </x-ui.management-card>
     </div>
@@ -263,6 +265,13 @@
     <livewire:task.task-editor :edit-task="$editTask" />
     <livewire:task.find-slot />
     <livewire:task.task-bulk-editor />
+
+    <x-ui.form-dialog module="tasks" :open="$dateTaskId !== null" close="closeQuickDates"
+                      submit-action="saveQuickDates" id="task-quick-dates-dialog" title="Cambiar fechas" icon="bi-calendar">
+        <p>{{ $dateTaskTitle }}</p>
+        <x-ui.field label="Inicio" name="quickStartDate" type="date" wire:model="quickStartDate" />
+        <x-ui.field label="Fin" name="quickEndDate" type="date" wire:model="quickEndDate" />
+    </x-ui.form-dialog>
 
     @include('livewire.task.partials.recurring-completion-dialog')
 </div>

@@ -13,7 +13,56 @@
                 <span x-text="copied ? 'Copiada' : 'Copiar'">Copiar</span>
             </x-ui.action>
         </div>
-        <p class="md-body-small">Agrégala como conector personalizado en tu cliente de IA y autoriza el acceso por OAuth, o usa un token de IA.</p>
+        <h3 class="md-title-small">Conecta MiSo con tu asistente</h3>
+        @php
+            $clientCommands = [
+                'Codex' => [
+                    ['codex mcp add miso --url '.$mcpUrl, 'Autoriza el acceso en el navegador. Si necesitas iniciar sesión manualmente, ejecuta el siguiente comando.'],
+                    ['codex mcp login miso', null],
+                ],
+                'Claude Code' => [
+                    ['claude mcp add --transport http miso '.$mcpUrl, 'Dentro de Claude Code, abre /mcp, selecciona miso y autoriza el acceso.'],
+                ],
+                'OpenCode' => [
+                    ['opencode mcp add miso --url '.$mcpUrl, 'Si tu versión usa un asistente, ejecuta opencode mcp add, elige servidor remoto e ingresa miso y la URL de arriba.'],
+                    ['opencode mcp auth miso', 'Autoriza el acceso en el navegador.'],
+                ],
+                'Cursor' => [
+                    [json_encode(['mcpServers' => ['miso' => ['url' => $mcpUrl]]], JSON_UNESCAPED_SLASHES), 'Agrega la entrada miso a mcpServers en ~/.cursor/mcp.json. Autoriza la conexión cuando Cursor lo solicite.'],
+                ],
+            ];
+        @endphp
+        @foreach ($clientCommands as $client => $steps)
+            <details class="settings-details">
+                <summary>{{ $client }}</summary>
+                @foreach ($steps as [$snippet, $instruction])
+                    <div class="settings-copy" x-data="{ copied: false, text: @js($snippet) }">
+                        <code class="md-secret__value">{{ $snippet }}</code>
+                        <x-ui.action variant="tonal" icon="bi-clipboard"
+                                     aria-label="Copiar configuración de {{ $client }}, paso {{ $loop->iteration }}"
+                                     x-on:click="await navigator.clipboard.writeText(text); copied = true; setTimeout(() => copied = false, 2000)">
+                            <span x-text="copied ? 'Copiado' : 'Copiar'">Copiar</span>
+                        </x-ui.action>
+                    </div>
+                    @if ($instruction)
+                        <p class="md-body-small">{{ $instruction }}</p>
+                    @endif
+                @endforeach
+            </details>
+        @endforeach
+        <details class="settings-details">
+            <summary>VS Code con GitHub Copilot</summary>
+            <p class="md-body-small">En la paleta de comandos, abre <code>MCP: Add Server</code>. Elige HTTP, pega la URL de arriba, escribe <code>miso</code> como nombre y autoriza el acceso cuando se solicite.</p>
+        </details>
+        <details class="settings-details">
+            <summary>Claude web y escritorio</summary>
+            <p class="md-body-small">En Conectores, agrega un conector personalizado con el nombre MiSo y la URL pública de arriba. Para OAuth, elige el registro automático del cliente y autoriza el acceso.</p>
+        </details>
+        <details class="settings-details">
+            <summary>ChatGPT web</summary>
+            <p class="md-body-small">En Plugins, agrega un servidor MCP personalizado con el nombre MiSo. Pega la URL pública de arriba y elige OAuth. La opción depende del plan y de los permisos de tu espacio de trabajo.</p>
+        </details>
+        <p class="md-body-small">En otros clientes con MCP remoto por Streamable HTTP, usa la misma URL y elige OAuth. Si el cliente admite encabezados personalizados, también puedes autenticarte con un token de IA mediante <code>Authorization: Bearer &lt;TU_TOKEN_DE_IA&gt;</code>.</p>
         <dl class="md-context-list">
             <div><dt>Transporte</dt><dd>HTTP (streamable)</dd></div>
             <div><dt>Autenticación</dt><dd>OAuth 2.1 o token lt_ai_…</dd></div>

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\Task\TaskKanban;
 use App\Livewire\Task\TaskList;
 use App\Models\Task;
 use App\Models\TaskStatus;
@@ -98,6 +99,52 @@ class TaskListFiltersTest extends TestCase
             ->assertSet('dateFilter', ['proximas']);
 
         Livewire::withQueryParams(['date' => 'hoy'])->test(TaskList::class)->assertSet('dateFilter', ['hoy']);
+    }
+
+    public function test_filters_are_remembered_per_view_and_user_with_explicit_url_precedence(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+
+        Livewire::test(TaskList::class)->set('dateFilter', ['hoy'])->set('search', 'pendiente');
+        Livewire::test(TaskKanban::class)->assertSet('dateFilter', [])->set('dateFilter', ['manana']);
+
+        $this->get(route('tasks.kanban', ['date' => 'manana']))
+            ->assertOk()
+            ->assertSee('href="'.route('tasks.list').'"', false);
+        $this->get(route('tasks.list'))->assertOk()->assertSee('Cuándo: Hoy');
+
+        Livewire::withQueryParams(['date' => 'sin-fecha'])->test(TaskList::class)
+            ->assertSet('dateFilter', ['sin-fecha'])->assertSet('search', '');
+        Livewire::withQueryParams([])->test(TaskList::class)
+            ->assertSet('dateFilter', ['hoy'])->assertSet('search', 'pendiente')->call('clearFilters');
+        Livewire::test(TaskList::class)->assertSet('dateFilter', [])->assertSet('search', 'pendiente');
+        Livewire::test(TaskKanban::class)->assertSet('dateFilter', ['manana']);
+
+        $this->actingAs(User::factory()->create());
+        Livewire::test(TaskList::class)->assertSet('search', '');
+        $this->actingAs($user);
+        session()->flush();
+        Livewire::test(TaskList::class)->assertSet('search', '');
+    }
+
+    public function test_remembered_relative_dates_follow_the_current_day(): void
+    {
+        $this->actingAs(User::factory()->create());
+        $this->travelTo(today()->setDate(2026, 11, 17)->addHours(12));
+
+        Task::create(['title' => 'Inicio 18', 'start_date' => '2026-11-18']);
+        Task::create(['title' => 'Vence 18', 'end_date' => '2026-11-18']);
+        Task::create(['title' => 'Inicio 19', 'start_date' => '2026-11-19']);
+
+        Livewire::test(TaskList::class)->set('dateFilter', ['manana'])
+            ->assertSee('Cuándo: Mañana')->assertViewHas('tasks', fn ($tasks) => $tasks->total() === 2)
+            ->set('dateFilter', ['hoy'])->assertViewHas('tasks', fn ($tasks) => $tasks->total() === 0);
+
+        $this->travel(1)->day();
+        Livewire::test(TaskList::class)->assertSet('dateFilter', ['hoy'])
+            ->assertViewHas('tasks', fn ($tasks) => $tasks->total() === 2);
+        Livewire::test(TaskList::class)->set('dateFilter', ['manana'])
+            ->assertViewHas('tasks', fn ($tasks) => $tasks->pluck('title')->all() === ['Inicio 19']);
     }
 
     public function test_status_options_and_filter_ids_are_user_scoped(): void

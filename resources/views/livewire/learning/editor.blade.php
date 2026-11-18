@@ -1,6 +1,6 @@
 <x-ui.form-dialog module="learning" :open="$showForm" close="closeForm" submit-action="save" id="learning-editor" :title="($editingId ? 'Editar ' : 'Agregar ').mb_strtolower($dialogLabel)" icon="bi-mortarboard"
-    :sections="['basic' => ['label' => 'Información básica', 'icon' => 'bi-mortarboard', 'error' => $errors->hasAny(['draft.title', 'draft.type', 'draft.description', 'draft.status', 'draft.kind'])], 'organization' => ['label' => 'Organización', 'icon' => 'bi-diagram-3', 'error' => $errors->hasAny(['draft.category', 'draft.institution', 'draft.start_date', 'draft.end_date', 'draft.credits'])]]">
-    <div class="learning-editor" x-init="section = @js($formSection)" @learning-form-invalid.window="section = $event.detail.section; $nextTick(() => $el.querySelector('[aria-invalid=true]')?.focus())">
+    :sections="['basic' => ['label' => 'Información básica', 'icon' => 'bi-mortarboard', 'error' => $errors->hasAny(['draft.title', 'draft.type', 'draft.description', 'draft.status', 'draft.kind'])], 'organization' => ['label' => 'Organización', 'icon' => 'bi-diagram-3', 'error' => $errors->hasAny(['draft.category', 'draft.institution', 'draft.start_date', 'draft.end_date', 'draft.credits', 'draft.semester'])]]">
+    <div class="learning-editor" x-init="section = @js($formSection)" @learning-form-section.window="section = $event.detail.section; $nextTick(() => $el.querySelector('[aria-invalid=true]')?.focus())">
         <x-ui.form-dialog-section name="basic" title="Información básica">
             <div class="learning-fields">
                 @if ($editor === 'formation')
@@ -20,6 +20,10 @@
                     <x-ui.category-select name="draft.category" label="Categoría" placeholder="Sin categoría" :options="$categories" wire:model="draft.category" />
                     <p>La categoría agrupa formaciones. Dentro de cada una agregas {{ $vocab->plurals($uid, $draft['type'] ?? null, \App\Services\Learning\LearningRecords::children(in_array($draft['type'] ?? '', ['course', 'personal'], true) ? $draft['type'] : 'academic')) }}.</p>
                     <x-ui.field name="draft.institution" label="Institución o plataforma" maxlength="255" wire:model="draft.institution" />
+                @endif
+                @if (array_key_exists('semester', $draft))
+                    <x-ui.select name="draft.semester" :label="$semesterLabel" :options="['' => 'Sin '.mb_strtolower($semesterLabel)] + $semesters" wire:model="draft.semester" :disabled="!$semesters"
+                        :help="$semesters ? null : 'Agrega '.$vocab->indefinite($uid, $ftype, 'period').' a esta formación para poder mover '.$vocab->demonstrative($uid, $ftype, 'subject').'.'" />
                 @endif
                 <div class="md-field-pair">
                     <x-ui.field name="draft.start_date" label="Fecha de inicio" type="date" wire:model="draft.start_date" />
