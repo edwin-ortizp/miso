@@ -1,5 +1,5 @@
 {{-- Sección «Categorías» de los ajustes de un módulo. Requiere el trait ManagesUserCategories. --}}
-<x-ui.management-card :id="'category-catalog-'.$categoryDomain" :title="'Categorías · '.$categoryLabel" icon="bi-diagram-3"
+<x-ui.management-card :id="'category-catalog-'.$categoryDomain" :create-actions="[$createAction]" :title="'Categorías · '.$categoryLabel" icon="bi-diagram-3"
                       :count="'('.$categoryRecords->count().')'" search="categorySearch" search-placeholder="Buscar categorías">
     @if ($categoryRecords->isEmpty())
         <x-ui.state variant="empty" icon="bi-diagram-3" title="Aún no hay categorías"

@@ -2,10 +2,11 @@
     use App\Models\ShoppingItemPrice;
     $money = fn ($value) => '$'.number_format((float) $value, 0, ',', '.');
     $perBaseMoney = fn ($value) => '$'.number_format((float) $value, $value < 100 ? 2 : 0, ',', '.');
+    $createAction = ['label' => 'Registrar precio', 'icon' => 'bi-receipt', 'action' => 'openForm'];
 @endphp
 <x-module-shell module="meals">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar precio', 'icon' => 'bi-receipt', 'action' => 'openForm']"
+        <x-module-actions :primary="$createAction"
                           :secondary="[['label' => 'Tiendas', 'icon' => 'bi-shop', 'event' => 'open-store-catalog']]" />
         <livewire:meal.store-catalog />
     </x-slot:actions>
@@ -22,7 +23,7 @@
         </span>
     </div>
 
-    <x-ui.management-card id="meal-compare" title="Comparación" icon="bi-bar-chart-steps" :count="'('.$comparable->count().')'"
+    <x-ui.management-card id="meal-compare" :create-actions="[$createAction]" title="Comparación" icon="bi-bar-chart-steps" :count="'('.$comparable->count().')'"
                           :active-filters="collect([$storeFilter, $brandFilter])->filter()->count()" alpine="openMenu: null">
         @if ($stores->isNotEmpty() || $brands->isNotEmpty())
             <x-slot:filters>

@@ -1,5 +1,9 @@
+@php
+    $createAction = ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm'];
+@endphp
+
 <x-module-shell :module="$module" :title="'Categorías · '.$categoryLabel" archetype="settings">
-    <x-slot:actions><x-ui.fab label="Crear categoría" icon="bi-plus-lg" action="openCategoryForm" :module="$module" /></x-slot:actions>
+    <x-slot:actions><x-ui.fab :label="$createAction['label']" :icon="$createAction['icon']" :action="$createAction['action']" :module="$module" /></x-slot:actions>
     <nav aria-label="Catálogos de categorías">
         @foreach (\App\Support\CategoryCatalog::DOMAINS as $key => $definition)
             @if ($definition[2] === $module)

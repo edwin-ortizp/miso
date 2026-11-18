@@ -1,13 +1,17 @@
+@php
+    $createAction = ['label' => 'Nuevo hábito', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
+@endphp
+
 <x-module-shell module="habits" archetype="settings">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Nuevo hábito', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     @if ($message)
         <div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message }}</div>
     @endif
 
-    <x-ui.management-card id="habit-definitions" title="Tus hábitos" icon="bi-check2-square"
+    <x-ui.management-card id="habit-definitions" :create-actions="[$createAction]" title="Tus hábitos" icon="bi-check2-square"
                           :count="'('.$habits->total().' / '.$totalCount.')'"
                           search="search" search-placeholder="Buscar hábito"
                           :active-filters="$timeFilter !== '' ? 1 : 0" :paginator="$habits" noun="hábitos">

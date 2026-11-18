@@ -1,12 +1,16 @@
+@php
+    $createAction = ['label' => 'Agregar ingrediente', 'icon' => 'bi-basket', 'action' => 'openForm'];
+@endphp
+
 <x-module-shell module="meals">
     <x-slot:actions>
         <livewire:meal.bulk-ingredient-assistant context="ingredients" />
-        <x-module-actions :primary="['label' => 'Agregar ingrediente', 'icon' => 'bi-basket', 'action' => 'openForm']"
+        <x-module-actions :primary="$createAction"
                           :secondary="[['label' => 'Tiendas', 'icon' => 'bi-shop', 'event' => 'open-store-catalog']]" />
         <livewire:meal.store-catalog />
     </x-slot:actions>
 
-    <x-ui.management-card id="meal-ingredients" title="Catálogo de ingredientes" icon="bi-basket" :count="'('.$ingredients->total().' / '.$catalogTotal.')'"
+    <x-ui.management-card id="meal-ingredients" :create-actions="[$createAction]" title="Catálogo de ingredientes" icon="bi-basket" :count="'('.$ingredients->total().' / '.$catalogTotal.')'"
                           search="search" search-placeholder="Buscar ingredientes" :active-filters="$activeFilters"
                           :paginator="$ingredients" noun="ingredientes" alpine="openMenu: null">
         <x-slot:filters>

@@ -11,7 +11,7 @@
     ];
 @endphp
 
-<x-ui.management-card id="task-settings-statuses" title="Estados de tareas" icon="bi-kanban"
+<x-ui.management-card id="task-settings-statuses" :create-actions="[$createAction]" title="Estados de tareas" icon="bi-kanban"
                       :count="$paginator->total()" search="q" search-placeholder="Buscar estado"
                       :paginator="$paginator" noun="estados">
     @if ($state === DataState::CONTENT)

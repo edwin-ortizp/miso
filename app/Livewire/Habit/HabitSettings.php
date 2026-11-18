@@ -54,6 +54,8 @@ class HabitSettings extends Component
 
     public string $baseTime = '';
 
+    public bool $showInCalendar = false;
+
     /** Clave de la acción elegida; vacío significa «solo marcarlo». */
     public string $actionKey = '';
 
@@ -74,6 +76,7 @@ class HabitSettings extends Component
         $this->timeOfDay = 'morning';
         $this->goalDuration = '';
         $this->baseTime = '';
+        $this->showInCalendar = false;
         $this->actionKey = '';
         $this->actionMode = HabitAction::MODE_AUTO;
         $this->actionConfig = [];
@@ -85,6 +88,7 @@ class HabitSettings extends Component
             $this->timeOfDay = $habit->time_of_day ?: 'anytime';
             $this->goalDuration = $habit->goal_duration ?? '';
             $this->baseTime = $habit->base_time ?? '';
+            $this->showInCalendar = (bool) $habit->show_in_calendar;
 
             if ($habit->action && $this->registry()->has($habit->action->action_key)) {
                 $this->actionKey = $habit->action->action_key;
@@ -133,6 +137,7 @@ class HabitSettings extends Component
                 'time_of_day' => $validated['timeOfDay'],
                 'goal_duration' => $validated['goalDuration'] ?: null,
                 'base_time' => $validated['baseTime'] ?: null,
+                'show_in_calendar' => $this->showInCalendar,
             ];
 
             $habit = $habit ? tap($habit)->update($payload) : HabitDefinition::create($payload);

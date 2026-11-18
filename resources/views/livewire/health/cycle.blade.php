@@ -4,16 +4,19 @@
 
     $dateLabel = fn ($date) => $date->translatedFormat('j M');
     $titles = ['start' => 'Empezó mi periodo', 'end' => 'Terminó mi periodo', 'day' => 'Registrar el día', 'edit' => 'Editar periodo'];
+    $createAction = ['label' => $openCycle ? 'Terminó mi periodo' : 'Empezó mi periodo', 'icon' => 'bi-droplet', 'action' => $openCycle ? 'quickEnd' : 'quickStart'];
+    $recordCycleAction = ['label' => $openCycle ? 'Terminó en otra fecha' : 'Empezó en otra fecha', 'icon' => 'bi-calendar-event', 'action' => $openCycle ? 'openEnd' : 'openStart', 'create' => true];
+    $otherCreateActions = [
+        ['label' => 'Registrar el día', 'icon' => 'bi-journal-plus', 'action' => 'openDay', 'create' => true],
+        $recordCycleAction,
+    ];
 @endphp
 
 <x-module-shell module="health">
     <livewire:game.guardian-card module="health" variant="top" :section-context="$guardianContext" />
     <x-slot:actions>
-        <x-module-actions :primary="['label' => $openCycle ? 'Terminó mi periodo' : 'Empezó mi periodo', 'icon' => 'bi-droplet', 'action' => $openCycle ? 'quickEnd' : 'quickStart']"
-            :secondary="[
-                ['label' => 'Registrar el día', 'icon' => 'bi-journal-plus', 'action' => 'openDay', 'create' => true],
-                ['label' => $openCycle ? 'Terminó en otra fecha' : 'Empezó en otra fecha', 'icon' => 'bi-calendar-event', 'action' => $openCycle ? 'openEnd' : 'openStart', 'create' => true],
-            ]" />
+        <x-module-actions :primary="$createAction"
+            :secondary="$otherCreateActions" />
     </x-slot:actions>
 
     <p class="md-body-small md-cycle-notice" id="cycle-notice"><i class="bi bi-shield-lock" aria-hidden="true"></i> MiSo registra tu ciclo y muestra su evolución. No es un dispositivo médico ni un método anticonceptivo. Tus datos de ciclo son privados.</p>
@@ -110,7 +113,7 @@
     @endif
 
     @if ($cycles->isNotEmpty())
-        <x-ui.management-card id="cycle-history" title="Historial de ciclos" icon="bi-droplet"
+        <x-ui.management-card id="cycle-history" :create-actions="$openCycle ? [] : [$recordCycleAction]" title="Historial de ciclos" icon="bi-droplet"
                               :count="'('.$cycles->count().')'" :paginator="$historyPage" noun="ciclos">
             <table class="md-table md-table--stack">
                 <thead>

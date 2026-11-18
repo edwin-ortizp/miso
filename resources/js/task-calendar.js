@@ -16,20 +16,28 @@ function loadFullCalendar() {
 
 const compact = () => matchMedia('(max-width: 767.98px)').matches;
 const layerStorageKey = 'miso.task-calendar.layers.v1';
-const defaultLayers = () => ({ tasks: true, plans: true, birthdays: true, meals: true });
+const labels = { tasks: 'Tareas', plans: 'Planes', birthdays: 'Cumpleaños', meals: 'Comidas', habits: 'Hábitos', reservations: 'Reservas', health: 'Salud' };
+const defaultLayers = () => ({ tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, health: false });
 
-export function readCalendarLayers() {
+export function readCalendarLayers(account = null) {
     try {
-        const value = JSON.parse(localStorage.getItem(layerStorageKey));
+        const stored = account && localStorage.getItem(`${layerStorageKey}:${account}`);
+        const legacy = !stored;
+        const value = JSON.parse(stored || localStorage.getItem(layerStorageKey));
+        if (legacy && value) {
+            delete value.health;
+            delete value.habits;
+            delete value.reservations;
+        }
         if (value && ['tasks', 'plans', 'birthdays'].every(key => typeof value[key] === 'boolean')) {
-            return Object.fromEntries(Object.keys(defaultLayers()).map(key => [key, typeof value[key] === 'boolean' ? value[key] : true]));
+            return Object.fromEntries(Object.keys(defaultLayers()).map(key => [key, typeof value[key] === 'boolean' ? value[key] : defaultLayers()[key]]));
         }
     } catch { /* El calendario funciona también sin almacenamiento local. */ }
     return defaultLayers();
 }
 
 export function registerTaskCalendar(Alpine) {
-    Alpine.data('taskCalendar', (wire) => ({
+    Alpine.data('taskCalendar', (wire, account) => ({
         calendar: null,
         actionEvent: null,
         actionTrigger: null,
@@ -117,14 +125,16 @@ export function registerTaskCalendar(Alpine) {
             host.classList.add('md-calendar-action-host');
             host.append(trigger);
         },
-        layers: readCalendarLayers(),
+        layers: readCalendarLayers(account),
+        requestedLayers: [],
+        requestVersion: 0,
+        resetDraftLayers() { this.draftLayers = defaultLayers(); },
         draftLayers: defaultLayers(),
         filtersOpen: false,
-        get hasLayerFilter() { return Object.keys(defaultLayers()).some(key => this.layers[key] === false); },
+        get hasLayerFilter() { return Object.keys(defaultLayers()).some(key => (this.layers[key] ?? defaultLayers()[key]) !== defaultLayers()[key]); },
         get layerFilterLabel() {
-            const labels = { tasks: 'Tareas', plans: 'Planes', birthdays: 'Cumpleaños', meals: 'Comidas' };
-            const hidden = Object.keys(labels).filter(key => this.layers[key] === false).map(key => labels[key]);
-            return hidden.length ? `Ocultos: ${hidden.join(', ')}` : '';
+            const hidden = Object.keys(labels).filter(key => defaultLayers()[key] && this.layers[key] === false).map(key => labels[key]);
+            return [hidden.length ? `Ocultos: ${hidden.join(', ')}` : '', this.layers.health ? 'Salud visible' : ''].filter(Boolean).join(' · ');
         },
         openFilters() {
             this.draftLayers = { ...this.layers };
@@ -132,10 +142,11 @@ export function registerTaskCalendar(Alpine) {
         },
         applyLayers() {
             this.layers = { ...this.draftLayers };
-            try { localStorage.setItem(layerStorageKey, JSON.stringify(this.layers)); } catch { /* Solo memoria. */ }
+            try { localStorage.setItem(`${layerStorageKey}:${account}`, JSON.stringify(this.layers)); } catch { /* Solo memoria. */ }
             this.calendar?.batchRendering(() => {
                 for (const event of this.calendar.getEvents()) event.setProp('display', this.layers[event.extendedProps.type] ? 'auto' : 'none');
             });
+            if (Object.keys(this.layers).some(key => this.layers[key] && !this.requestedLayers.includes(key))) this.calendar?.refetchEvents();
             this.filtersOpen = false;
             this.fitCalendar();
             this.$nextTick(() => this.$refs.filterTrigger?.focus());
@@ -145,6 +156,13 @@ export function registerTaskCalendar(Alpine) {
             this.applyLayers();
         },
         async persistEvent(info) {
+            if (info.event.extendedProps.type === 'reservations') {
+                try {
+                    await wire.moveReservation(info.event.extendedProps.reservation, info.event.extendedProps.occurrence, info.event.startStr, info.event.endStr);
+                    this.calendar.refetchEvents();
+                } catch { info.revert(); }
+                return;
+            }
             if (info.event.extendedProps.type !== 'tasks') {
                 info.revert();
                 return;
@@ -159,6 +177,10 @@ export function registerTaskCalendar(Alpine) {
             if (info.jsEvent?.target?.closest('.md-calendar-task-actions')) return;
             this.closeActions(false);
             if (info.event.extendedProps.type === 'tasks') this.$dispatch('task-editor', { action: 'openForm', id: info.event.id });
+            else if (info.event.extendedProps.type === 'reservations') {
+                const { reservation, occurrence } = info.event.extendedProps;
+                this.$dispatch('study-reservation-edit', { reservation, occurrence });
+            }
             else if (info.event.extendedProps.detailUrl) {
                 window.location.assign(info.event.extendedProps.detailUrl);
             }
@@ -242,9 +264,17 @@ export function registerTaskCalendar(Alpine) {
                 },
                 editable: true,
                 dayMaxEvents: 3,
-                events: (info, success, failure) => wire.events(info.startStr, info.endStr).then(events => {
-                    success(events.map(event => ({ ...event, display: this.layers[event.extendedProps.type] ? 'auto' : 'none' })));
-                }, failure),
+                events: (info, success, failure) => {
+                    const requestVersion = ++this.requestVersion;
+                    const requested = Object.keys(this.layers).filter(key => this.layers[key]);
+                    this.requestedLayers = requested;
+                    wire.events(info.startStr, info.endStr, requested).then(events => {
+                        success(events.map(event => ({ ...event, display: this.layers[event.extendedProps.type] ? 'auto' : 'none' })));
+                    }, error => {
+                        if (this.requestVersion === requestVersion) this.requestedLayers = [];
+                        failure(error);
+                    });
+                },
                 eventClick: (info) => this.clickEvent(info),
                 // El clic en otro evento no debe contar como «clic afuera» del popover abierto.
                 eventDidMount: (info) => { this.mountActionTrigger(info); if (info.event.extendedProps.locked) { const lock = document.createElement('i'); lock.className = 'bi bi-lock-fill md-calendar-lock'; lock.setAttribute('role', 'img'); lock.setAttribute('aria-label', 'Horario fijo'); lock.title = 'Horario fijo'; (info.el.querySelector('.fc-event-title') ?? info.el).prepend(lock); } info.el.dataset.popoverTrigger = ''; if (info.event.extendedProps.type === 'tasks') { const color = info.event.extendedProps.categoryColor; if (['gray', 'blue', 'indigo', 'violet', 'pink', 'red', 'orange', 'yellow', 'green', 'teal'].includes(color)) info.el.classList.add(`md-catalog-chip--${color}`); } if (info.event.extendedProps.type === 'meals') { info.el.title = `${info.event.extendedProps.timeLabel} · ${info.event.title}`; info.el.setAttribute('aria-label', info.el.title); } },

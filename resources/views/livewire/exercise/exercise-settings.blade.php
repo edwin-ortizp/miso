@@ -1,12 +1,13 @@
 @php
     use App\Support\DefaultExerciseTypes;
+    $createAction = $section === 'categories'
+            ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
+            : ['label' => 'Nuevo tipo', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
 @endphp
 
 <x-module-shell module="exercise" archetype="settings">
     <x-slot:actions>
-        <x-module-actions :primary="$section === 'categories'
-            ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
-            : ['label' => 'Nuevo tipo', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     @if ($message || $categoryMessage)
@@ -18,7 +19,7 @@
         @if ($section === 'categories')
             @include('livewire.category.partials.section')
         @else
-    <x-ui.management-card id="exercise-types" title="Tipos de ejercicio" icon="bi-tags" :count="'('.$types->total().' / '.$totalCount.')'"
+    <x-ui.management-card id="exercise-types" :create-actions="[$createAction]" title="Tipos de ejercicio" icon="bi-tags" :count="'('.$types->total().' / '.$totalCount.')'"
                           search="search" search-placeholder="Buscar tipo de ejercicio" :active-filters="$category !== '' ? 1 : 0"
                           :paginator="$types" noun="tipos">
         <x-slot:filters>

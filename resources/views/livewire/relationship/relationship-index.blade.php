@@ -1,9 +1,13 @@
+@php
+    $createAction = ['label' => 'Agregar persona', 'icon' => 'bi-person-plus', 'action' => 'openForm'];
+@endphp
+
 <x-module-shell module="relationships">
 
     <livewire:game.guardian-card module="relationships" variant="top" />
     <x-slot:actions>
         <x-module-actions
-            :primary="['label' => 'Agregar persona', 'icon' => 'bi-person-plus', 'action' => 'openForm']"
+            :primary="$createAction"
             :secondary="[
                 ['label' => 'Agregar círculo', 'icon' => 'bi-plus-circle', 'action' => 'openCircleForm', 'create' => true],
                 ['label' => 'Agregar etiqueta', 'icon' => 'bi-tag', 'action' => 'openTagForm', 'create' => true],
@@ -15,7 +19,7 @@
     @php
         $activeFilterCount = collect([$showArchived, $circleFilter, $tagFilter])->filter()->count();
     @endphp
-    <x-ui.management-card id="relationship-people" title="Personas" icon="bi-people" :count="'('.$relationships->total().' / '.($activeCount + $archivedCount).')'"
+    <x-ui.management-card id="relationship-people" :create-actions="[$createAction]" title="Personas" icon="bi-people" :count="'('.$relationships->total().' / '.($activeCount + $archivedCount).')'"
                           search="search" search-placeholder="Buscar por nombre, apodo, teléfono o correo" :active-filters="$activeFilterCount"
                           :paginator="$relationships" noun="personas" alpine="openMenu: null"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort">

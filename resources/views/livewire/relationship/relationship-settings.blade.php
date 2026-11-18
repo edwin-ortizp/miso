@@ -1,6 +1,10 @@
+@php
+    $createAction = ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm'];
+@endphp
+
 <x-module-shell module="relationships" title="Ajustes de relaciones" archetype="settings">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     @if ($categoryMessage)

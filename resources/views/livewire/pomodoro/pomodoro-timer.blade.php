@@ -7,6 +7,7 @@
     $hoursMinutes = fn (int $seconds) => intdiv($seconds, 3600).' h '.intdiv($seconds % 3600, 60).' min';
     $minutesLabel = fn (int $minutes) => intdiv($minutes, 60).' h '.($minutes % 60).' min';
     $timezone = config('app.timezone');
+    $createAction = ['label' => 'Registrar tiempo', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
 @endphp
 
 <x-module-shell module="pomodoro" class="pomodoro-page" x-data="pomodoroTimer({
@@ -17,7 +18,7 @@
     saveSession: (startedAt, endedAt, description, clientToken, taskId) => $wire.saveSession(startedAt, endedAt, description, clientToken, taskId)
 })">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar tiempo', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     <x-slot:controls>
@@ -114,7 +115,7 @@
         </div>
     </x-ui.card>
 
-    <x-ui.management-card id="pomodoro-sessions" title="Sesiones" icon="bi-clock-history"
+    <x-ui.management-card id="pomodoro-sessions" :create-actions="[$createAction]" title="Sesiones" icon="bi-clock-history"
                           :count="'('.$sessions->total().' / '.$totalSessions.')'" search="search" search-placeholder="Buscar por descripción"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
                           :active-filters="count($activeFilters)" :paginator="$sessions" noun="sesiones"

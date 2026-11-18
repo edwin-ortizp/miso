@@ -1,8 +1,12 @@
+@php
+    $createAction = ['label'=>$section === 'categories' ? 'Crear categoría' : 'Crear tag','icon'=>'bi-plus-lg','action'=>'openForm'];
+@endphp
+
 <x-module-shell module="plans" archetype="settings" active-route="plans.settings" :navigation-query="[]">
-    <x-slot:actions><x-module-actions :primary="['label'=>$section === 'categories' ? 'Crear categoría' : 'Crear tag','icon'=>'bi-plus-lg','action'=>'openForm']" /></x-slot:actions>
+    <x-slot:actions><x-module-actions :primary="$createAction" /></x-slot:actions>
     @if ($message)<p role="status" class="plans-notice">{{ $message }}</p>@endif
     <div class="module-settings-workspace">
-        <x-ui.management-card id="plan-settings" :title="$section === 'categories' ? 'Categorías de planes' : 'Tags de planes'" :icon="$section === 'categories' ? 'bi-grid' : 'bi-tags'" search="q" search-placeholder="Buscar por nombre" :paginator="$records" :count="$records->total()">
+        <x-ui.management-card id="plan-settings" :create-actions="[$createAction]" :title="$section === 'categories' ? 'Categorías de planes' : 'Tags de planes'" :icon="$section === 'categories' ? 'bi-grid' : 'bi-tags'" search="q" search-placeholder="Buscar por nombre" :paginator="$records" :count="$records->total()">
             @if ($records->isEmpty())<x-ui.state variant="empty" title="No hay resultados" message="Prueba otra búsqueda o crea un elemento desde el botón flotante." icon="bi-tags" />
             @else
             <table class="md-table md-table--stack" aria-label="Catálogo de planes"><thead><tr><th scope="col">Nombre</th><th scope="col">Planes</th><th scope="col" class="md-table__actions">Acciones</th></tr></thead><tbody>

@@ -4,11 +4,12 @@
     $logsState = $logs->count() > 0
         ? DataState::CONTENT
         : ($totalLogs > 0 && (count($activeFilters) > 0 || trim($search) !== '') ? DataState::FILTERED_EMPTY : DataState::EMPTY);
+    $createAction = ['label' => 'Registrar ejercicio', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
 @endphp
 
 <x-module-shell module="exercise">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar ejercicio', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
+        <x-module-actions :primary="$createAction"
             :greeting="config('companion_chat.exercise.greeting')"
             :quick="$quickExercises->map(fn ($type) => [
                 'type' => 'tap', 'id' => 'exercise-'.$type->id, 'emoji' => $type->icon ?? '🏃', 'label' => $type->name.' · 30 min',
@@ -24,7 +25,7 @@
 
     <livewire:game.guardian-card module="exercise" variant="top" />
 
-    <x-ui.management-card id="exercise-day-logs" title="Actividades del día" icon="bi-list-ul"
+    <x-ui.management-card id="exercise-day-logs" :create-actions="[$createAction]" title="Actividades del día" icon="bi-list-ul"
                           :count="'('.$logs->total().' / '.$totalLogs.')'" search="search" search-placeholder="Buscar actividades"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
                           :active-filters="count($activeFilters)" :paginator="$logs" noun="registros"

@@ -52,23 +52,37 @@ class TaskCalendar extends Component
     /**
      * Eventos de FullCalendar para el rango visible [$start, $end).
      */
-    public function events(string $start, string $end): array
+    public function events(string $start, string $end, array $layers = ['tasks', 'plans', 'birthdays', 'meals', 'habits', 'reservations']): array
     {
         abort_unless(auth()->check(), 403);
-        $rangeStart = Carbon::parse($start);
-        $rangeEnd = Carbon::parse($end);
+        try {
+            abort_unless(preg_match('/^\d{4}-\d{2}-\d{2}(?:T[\d:+Z.-]+)?$/', $start)
+                && preg_match('/^\d{4}-\d{2}-\d{2}(?:T[\d:+Z.-]+)?$/', $end), 422);
+            $rangeStart = Carbon::parse($start);
+            $rangeEnd = Carbon::parse($end);
+        } catch (\Carbon\Exceptions\InvalidFormatException) {
+            abort(422);
+        }
+        abort_unless($rangeStart->lt($rangeEnd) && $rangeStart->diffInDays($rangeEnd) <= 732, 422);
+        validator(['layers' => $layers], [
+            'layers' => 'array|max:7',
+            'layers.*' => 'string|in:tasks,plans,birthdays,meals,habits,health,reservations',
+        ])->validate();
 
-        $categories = TaskCategory::where('user_id', auth()->id())->get(['key', 'name', 'color'])->keyBy('key');
-        $events = Task::query()->where('user_id', auth()->id())->with('status')
-            ->where(fn ($query) => $query->whereNotNull('start_date')->orWhereNotNull('end_date'))
-            ->where(fn ($query) => $query->whereRaw('COALESCE(start_date, end_date) < ?', [$rangeEnd])
-                ->whereRaw('COALESCE(end_date, start_date) >= ?', [$rangeStart->copy()->startOfDay()]))
-            ->get()
-            ->map(fn (Task $task) => $this->toEvent($task, $categories->get($task->category)))
-            ->values()
-            ->all();
+        $events = [];
+        if (in_array('tasks', $layers, true)) {
+            $categories = TaskCategory::where('user_id', auth()->id())->get(['key', 'name', 'color'])->keyBy('key');
+            $events = Task::query()->where('user_id', auth()->id())->with('status')
+                ->where(fn ($query) => $query->whereNotNull('start_date')->orWhereNotNull('end_date'))
+                ->where(fn ($query) => $query->whereRaw('COALESCE(start_date, end_date) < ?', [$rangeEnd])
+                    ->whereRaw('COALESCE(end_date, start_date) >= ?', [$rangeStart->copy()->startOfDay()]))
+                ->get()
+                ->map(fn (Task $task) => $this->toEvent($task, $categories->get($task->category)))
+                ->values()
+                ->all();
+        }
 
-        $plans = Plan::where('user_id', auth()->id())->whereNotNull('scheduled_on')
+        $plans = ! in_array('plans', $layers, true) ? [] : Plan::where('user_id', auth()->id())->whereNotNull('scheduled_on')
             ->where('scheduled_on', '<', $rangeEnd->toDateString())
             ->whereRaw('COALESCE(ends_on, scheduled_on) >= ?', [$rangeStart->toDateString()])
             ->get();
@@ -86,7 +100,7 @@ class TaskCalendar extends Component
             ];
         }
 
-        $people = Relationship::where('user_id', auth()->id())->active()->withBirthday()->get();
+        $people = ! in_array('birthdays', $layers, true) ? [] : Relationship::where('user_id', auth()->id())->active()->withBirthday()->get();
         foreach ($people as $person) {
             $birthday = $person->birthday();
             if (! $birthday) {
@@ -111,7 +125,26 @@ class TaskCalendar extends Component
             }
         }
 
-        return array_merge($events, app(\App\Services\Meal\MealSchedule::class)->events((int) auth()->id(), $rangeStart, $rangeEnd));
+        $user = (int) auth()->id();
+        $personal = app(\App\Services\Calendar\PersonalCalendar::class);
+        return array_merge($events,
+            in_array('meals', $layers, true) ? app(\App\Services\Meal\MealSchedule::class)->events($user, $rangeStart, $rangeEnd) : [],
+            in_array('habits', $layers, true) ? $personal->habits($user, $rangeStart, $rangeEnd) : [],
+            in_array('reservations', $layers, true) ? app(\App\Services\Calendar\StudySchedule::class)->events($user, $rangeStart, $rangeEnd) : [],
+            in_array('health', $layers, true) ? $personal->health($user, $rangeStart, $rangeEnd) : [],
+        );
+    }
+
+    public function moveReservation(string $id, string $occurrence, string $start, string $end): void
+    {
+        abort_unless(auth()->check(), 403);
+        validator(compact('occurrence', 'start', 'end'), [
+            'occurrence' => 'required|date_format:Y-m-d', 'start' => 'required|date', 'end' => 'required|date',
+        ])->validate();
+        \Illuminate\Support\Facades\DB::transaction(function () use ($id, $occurrence, $start, $end) {
+            $series = \App\Models\StudyReservation::where('user_id', auth()->id())->lockForUpdate()->findOrFail($id);
+            app(\App\Services\Calendar\StudySchedule::class)->move($series, $occurrence, Carbon::parse($start), Carbon::parse($end));
+        });
     }
 
     public function calendarAction(string $id, string $action, TaskGamificationService $gamification): void

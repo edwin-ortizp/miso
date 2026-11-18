@@ -4,15 +4,16 @@
         'categories' => ['title' => 'Categorías de productos', 'icon' => 'bi-tags', 'noun' => 'categorías', 'one' => 'categoría', 'create' => 'Crear categoría', 'search' => 'Buscar categorías'],
         'locations' => ['title' => 'Ubicaciones', 'icon' => 'bi-geo-alt', 'noun' => 'ubicaciones', 'one' => 'ubicación', 'create' => 'Crear ubicación', 'search' => 'Buscar ubicaciones'],
     ][$section];
+    $createAction = ['label' => $labels['create'], 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
 @endphp
 <x-module-shell module="meals" title="Ajustes de Comidas" archetype="settings">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => $labels['create'], 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
     @if ($message)<div class="md-card-filled mb-3 py-3" role="status" aria-live="polite">{{ $message }}</div>@endif
     <div class="module-settings-workspace">
         <div>
-            <x-ui.management-card id="meal-settings-catalog" :title="$labels['title']" :icon="$labels['icon']"
+            <x-ui.management-card id="meal-settings-catalog" :create-actions="[$createAction]" :title="$labels['title']" :icon="$labels['icon']"
                                   :count="'('.$records->total().')'" search="search" :search-placeholder="$labels['search']" :paginator="$records" :noun="$labels['noun']">
                 @if ($section === 'locations')
                     <div class="d-flex gap-2 mb-3" role="group" aria-label="Estado de las ubicaciones">

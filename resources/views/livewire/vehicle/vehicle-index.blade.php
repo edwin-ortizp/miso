@@ -1,7 +1,11 @@
+@php
+    $createAction = ['label' => 'Añadir vehículo', 'icon' => 'bi-plus-lg', 'action' => 'openVehicleForm'];
+@endphp
+
 <x-module-shell module="vehicles">
     <livewire:game.guardian-card module="vehicles" variant="top" />
 
-    <x-ui.management-card id="vehicle-garage" title="Garaje" icon="bi-car-front" :count="'('.$vehicles->total().')'" :paginator="$vehicles" noun="vehículos">
+    <x-ui.management-card id="vehicle-garage" :create-actions="[$createAction]" title="Garaje" icon="bi-car-front" :count="'('.$vehicles->total().')'" :paginator="$vehicles" noun="vehículos">
         <x-slot:menu>
             <x-ui.menu-item icon="bi-tools" :href="route('vehicles.catalog')">Catálogo de mantenimientos</x-ui.menu-item>
         </x-slot:menu>
@@ -37,7 +41,7 @@
 
     <div class="lt-fab-zone">
         <x-module-actions fab-always
-            :primary="['label' => 'Añadir vehículo', 'icon' => 'bi-plus-lg', 'action' => 'openVehicleForm']"
+            :primary="$createAction"
             :secondary="[['label' => 'Catálogo de mantenimientos', 'icon' => 'bi-tools', 'href' => route('vehicles.catalog')]]" />
     </div>
     {{-- CHG-064: panel lateral con el guardián (solo si hay guardián). --}}

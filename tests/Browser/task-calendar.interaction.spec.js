@@ -3,7 +3,7 @@ import { spawn, execFileSync } from 'node:child_process';
 import { mkdirSync, closeSync, openSync } from 'node:fs';
 import path from 'node:path';
 
-const PORT = 8033;
+const PORT = Number(process.env.MISO_TASK_CALENDAR_TEST_PORT ?? 8033);
 test.use({ baseURL: `http://127.0.0.1:${PORT}` });
 let server;
 
@@ -12,7 +12,7 @@ test.beforeAll(async () => {
     const directory = path.resolve('storage/framework/testing');
     const output = path.join(directory, 'playwright', 'tasks-calendar');
     mkdirSync(output, { recursive: true });
-    const database = path.join(directory, 'tasks-calendar-browser.sqlite');
+    const database = path.join(directory, `tasks-calendar-browser-${PORT}.sqlite`);
     closeSync(openSync(database, 'a'));
     const env = {
         ...process.env, APP_ENV: 'testing', DB_CONNECTION: 'sqlite', DB_DATABASE: database, DB_URL: '',
@@ -50,7 +50,7 @@ for (const width of [1440, 768, 390]) {
             await expect(toolbar.getByRole('group', { name: 'Vista del calendario' })).toBeVisible();
             await expect(toolbar.getByRole('button', { name: 'Semana', exact: true })).toBeVisible();
         } else {
-            await expect(toolbar.getByLabel('Vista', { exact: true })).toBeVisible();
+            await expect(toolbar.getByLabel('Vista:', { exact: true })).toBeVisible();
         }
         await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
         const trigger = page.getByRole('button', { name: 'Más acciones de Calendar recurring task', exact: true }).first();
@@ -72,7 +72,7 @@ for (const width of [1440, 768, 390]) {
         await expect(trigger).toBeFocused();
         for (const [view, label] of [['dayGridMonth', 'Mes'], ['listWeek', 'Agenda'], ['timeGridDay', 'Día'], ['timeGridWeek', 'Semana']]) {
             if (width >= 768) await toolbar.getByRole('button', { name: label, exact: true }).click();
-            else await toolbar.getByLabel('Vista', { exact: true }).selectOption(view);
+            else await toolbar.getByLabel('Vista:', { exact: true }).selectOption(view);
             const action = page.getByRole('button', { name: 'Más acciones de Calendar recurring task', exact: true }).first();
             await action.focus();
             await page.keyboard.press('Enter');
@@ -120,5 +120,43 @@ for (const width of [1440, 768, 390]) {
         await expect(navigation.getByRole('link', { name: 'Calendario', exact: true })).toBeAttached();
         await expect(navigation.getByRole('link')).toHaveCount(8);
         await page.screenshot({ path: testInfo.outputPath('task-list.png') });
+    });
+}
+
+for (const width of [1440, 390]) {
+    test(`personal calendar filters and reservation editor ${width}`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto('/login');
+        await page.locator('input[type=email]').fill('tasks-calendar-browser@example.test');
+        await page.locator('input[type=password]').fill('browser-test-password');
+        await page.locator('button[type=submit]').click();
+        await page.waitForURL(url => !url.pathname.includes('/login'));
+        await page.goto('/tasks/calendar');
+
+        const filter = page.getByRole('button', { name: /^Filtros/ });
+        await filter.click();
+        const health = page.getByRole('checkbox', { name: 'Salud', exact: true });
+        await expect(health).not.toBeChecked();
+        await health.check();
+        await page.getByRole('button', { name: 'Filtrar', exact: true }).click();
+        await expect(filter).toBeFocused();
+        await page.reload();
+        await filter.click();
+        await expect(health).toBeChecked();
+        await page.getByRole('button', { name: 'Limpiar', exact: true }).click();
+        await page.getByRole('button', { name: 'Filtrar', exact: true }).click();
+
+        await page.getByRole('button', { name: width >= 768 ? 'Más acciones de creación' : 'Nueva tarea', exact: true }).click();
+        await page.getByRole('menuitem', { name: 'Reservar tiempo de estudio', exact: true }).click();
+        const dialog = page.getByRole('dialog', { name: 'Reservar tiempo de estudio' });
+        await expect(dialog).toBeVisible();
+        await dialog.getByLabel('Título').fill(`Reserva de prueba ${width}`);
+        await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+        await expect(dialog).toBeHidden();
+        const reservation = page.locator('.md-calendar-reservation').filter({ hasText: `Reserva de prueba ${width}` });
+        await expect(reservation).toBeVisible();
+        await reservation.click();
+        await expect(page.getByRole('dialog', { name: 'Editar reserva' })).toBeVisible();
+        await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     });
 }

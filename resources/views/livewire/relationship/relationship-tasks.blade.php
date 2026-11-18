@@ -1,10 +1,14 @@
+@php
+    $createAction = ['label' => 'Agregar tarea', 'icon' => 'bi-check2-square', 'action' => 'openTaskForm'];
+@endphp
+
 <x-module-shell module="relationships" :title="$relationship->full_name"
                 :tabs="\App\Support\Ui\Tabs\PersonTabs::for($relationship)" :back="\App\Support\Ui\Tabs\PersonTabs::back()">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Agregar tarea', 'icon' => 'bi-check2-square', 'action' => 'openTaskForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
-    <x-ui.management-card id="relationship-tasks" title="Tareas relacionadas" icon="bi-list-check"
+    <x-ui.management-card id="relationship-tasks" :create-actions="[$createAction]" title="Tareas relacionadas" icon="bi-list-check"
                           :count="'('.$tasks->total().' / '.$counts['all'].')'" search="search" search-placeholder="Buscar tareas"
                           :active-filters="$status !== 'pending' ? 1 : 0" :paginator="$tasks" noun="tareas">
         <x-slot:filters>

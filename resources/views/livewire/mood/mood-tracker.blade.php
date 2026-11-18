@@ -3,16 +3,19 @@
 
     $moodState = DataState::resolve(visible: $moodEntries->count(), total: $moodEntries->count());
     $energyState = DataState::resolve(visible: $energyEntries->count(), total: $energyEntries->count());
+    $createAction = ['label' => 'Registrar estado', 'icon' => 'bi-emoji-smile', 'action' => 'openMoodCatalog'];
+    $registerEnergyAction = ['label' => 'Registrar energía', 'icon' => 'bi-lightning-charge', 'action' => 'openEnergyForm', 'create' => true];
+    $otherCreateActions = [
+        $registerEnergyAction,
+        ['label' => 'Escribir en el diario', 'icon' => 'bi-journal-text', 'href' => route('journal', ['date' => $selectedDate])],
+    ];
 @endphp
 
 <x-module-shell module="mood">
     <x-slot:actions>
         <x-module-actions
-            :primary="['label' => 'Registrar estado', 'icon' => 'bi-emoji-smile', 'action' => 'openMoodCatalog']"
-            :secondary="[
-                ['label' => 'Registrar energía', 'icon' => 'bi-lightning-charge', 'action' => 'openEnergyForm', 'create' => true],
-                ['label' => 'Escribir en el diario', 'icon' => 'bi-journal-text', 'href' => route('journal', ['date' => $selectedDate])],
-            ]"
+            :primary="$createAction"
+            :secondary="$otherCreateActions"
             :greeting="config('companion_chat.mood.greeting')"
             :quick="$prioritizedStates->take(\App\Support\MoodLogger::CHAT_QUICK_SIZE)->map(fn ($state) => [
                 'type' => 'tap', 'id' => 'mood-'.$state->id, 'emoji' => $state->emoji, 'label' => $state->text,
@@ -69,7 +72,7 @@
         </x-ui.metric-grid>
     </x-ui.section>
 
-    <x-ui.management-card id="mood-day-entries" title="Estados del día" icon="bi-emoji-smile" :count="'('.$moodEntries->total().')'" :paginator="$moodEntries" noun="registros"
+    <x-ui.management-card id="mood-day-entries" :create-actions="[$createAction]" title="Estados del día" icon="bi-emoji-smile" :count="'('.$moodEntries->total().')'" :paginator="$moodEntries" noun="registros"
                           sort-model="moodSort" :sort-options="$moodSorts" :sort-value="$moodSort">
         @if ($moodState === DataState::CONTENT)
             <x-ui.list label="Estados del día">
@@ -122,7 +125,7 @@
         @endif
     </x-ui.management-card>
 
-    <x-ui.management-card id="energy-day-entries" title="Energía del día" icon="bi-lightning-charge" :count="'('.$energyEntries->total().')'" :paginator="$energyEntries" noun="registros"
+    <x-ui.management-card id="energy-day-entries" :create-actions="[$registerEnergyAction]" title="Energía del día" icon="bi-lightning-charge" :count="'('.$energyEntries->total().')'" :paginator="$energyEntries" noun="registros"
                           sort-model="energySort" :sort-options="$energySorts" :sort-value="$energySort">
         @if ($energyState === DataState::CONTENT)
             <x-ui.list label="Energía del día">

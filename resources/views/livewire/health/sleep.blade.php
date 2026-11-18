@@ -7,12 +7,13 @@
         ? DataState::CONTENT
         : ($totalLogs > 0 && count($activeFilters) > 0 ? DataState::FILTERED_EMPTY : DataState::EMPTY);
     $goalText = SleepLog::formatMinutes($goal);
+    $createAction = ['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
 @endphp
 
 <x-module-shell module="health">
     <livewire:game.guardian-card module="health" variant="top" :section-context="$guardianContext" />
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
+        <x-module-actions :primary="$createAction"
             :secondary="[['label' => 'Meta de horas', 'icon' => 'bi-bullseye', 'action' => 'openGoal']]" />
     </x-slot:actions>
 
@@ -54,7 +55,7 @@
         </x-ui.section>
     @endif
 
-    <x-ui.management-card id="sleep-history" title="Historial" icon="bi-clock-history"
+    <x-ui.management-card id="sleep-history" :create-actions="[$createAction]" title="Historial" icon="bi-clock-history"
                           :count="'('.$history->total().' / '.$totalLogs.')'"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
                           :active-filters="count($activeFilters)" :paginator="$history" noun="registros"

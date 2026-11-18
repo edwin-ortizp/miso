@@ -16,6 +16,7 @@ foreach ([
 }
 
 \App\Models\DrinkType::create(['name' => 'Agua de prueba', 'hydration_factor' => 1, 'icon' => '💧']);
+\App\Models\ExerciseType::create(['name' => 'Caminata de prueba', 'calories_per_hour' => 150, 'steps_equivalent' => 0]);
 \App\Models\MoodState::create(['text' => 'Calma de prueba', 'emoji' => '🙂', 'value' => 3, 'is_active' => true, 'is_pinned' => true, 'sort_order' => 0]);
 
 // CHG-113: pantallas de detalle con datos propios (vehículo y relación).

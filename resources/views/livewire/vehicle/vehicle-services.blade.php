@@ -23,7 +23,7 @@
         <article class="md-card-outlined"><span>Último servicio</span><strong>{{ $latestService ? \Illuminate\Support\Carbon::parse($latestService)->translatedFormat('d M Y') : '—' }}</strong><small>{{ $latestService ? \Illuminate\Support\Carbon::parse($latestService)->diffForHumans() : 'Sin servicios registrados' }}</small></article>
     </section>
 
-    <x-ui.management-card clear="clearServiceFilters" id="vehicle-maintenance-history" title="Historial de servicios" icon="bi-clock-history"
+    <x-ui.management-card clear="clearServiceFilters" id="vehicle-maintenance-history" :create-actions="$planOptions === [] ? [] : [$fabAction]" title="Historial de servicios" icon="bi-clock-history"
                           :count="'('.$maintenanceLogs->total().' / '.$totalCount.')'" search="serviceSearch" search-placeholder="Buscar servicio, taller o nota"
                           :active-filters="$serviceActive" :paginator="$maintenanceLogs" sort-model="serviceSort" :sort-options="$sorts" :sort-value="$serviceSort" noun="servicios" alpine="openMenu: null" class="vehicle-history-section" flush>
         <x-slot:filters>

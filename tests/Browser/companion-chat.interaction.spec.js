@@ -88,6 +88,25 @@ async function openChat(page) {
     await expect(chatPanel(page).locator('textarea')).toBeFocused();
 }
 
+test('saluda por nombre, conserva el hilo y cambia de contexto al navegar', async ({ page }) => {
+    await login(page);
+    await openChat(page);
+    const launcher = page.locator('body > .lt-chat-host .lt-chat__launcher');
+    const greeting = chatPanel(page).getByText('Hola, Cuenta. ¿Qué tarea tienes en mente?', { exact: true });
+    await expect(greeting).toBeVisible();
+    await page.keyboard.press('Escape');
+    await launcher.click();
+    await expect(greeting).toHaveCount(1);
+
+    await page.goto('/meals/recipes');
+    await launcher.click();
+    await expect(chatPanel(page).getByText('Hola, Cuenta. ¿Qué receta quieres guardar?', { exact: true })).toBeVisible();
+    await page.getByRole('link', { name: 'Compras', exact: true }).first().click();
+    await expect(page).toHaveURL(/meals\/shopping/);
+    await launcher.click();
+    await expect(chatPanel(page).getByText('Hola, Cuenta. ¿Qué falta comprar?', { exact: true })).toBeVisible();
+});
+
 test('ver y ordenar conserva el chat y comparte los filtros del listado', async ({page}) => {
     await login(page);await openChat(page);
     await chip(page,'Ver tareas').click();await chip(page,'Hoy').click();
@@ -100,7 +119,7 @@ test('ver y ordenar conserva el chat y comparte los filtros del listado', async 
     await chip(page,'Quitar filtro de fecha').click();
     await expect(page.locator('.task-row').filter({hasText:'Chat fixture vencida'})).toBeVisible();
     await chip(page,'Inicio').click();await chip(page,'¿Qué sigue?').click();
-    await expect(chatPanel(page).getByText('Tu siguiente: Chat fixture vencida.',{exact:true})).toBeVisible();
+    await expect(chatPanel(page).getByText('Puedes seguir con esta: Chat fixture vencida.',{exact:true})).toBeVisible();
     await chip(page,'Abrir').click();
     const editor=page.getByRole('dialog',{name:'Editar tarea',exact:true});
     await expect(editor).toBeVisible();await expect(chatPanel(page)).toBeHidden();
@@ -157,24 +176,28 @@ test('chat accesible y responsive con y sin movimiento', async ({page}) => {
     await page.emulateMedia({reducedMotion:'reduce'});await page.setViewportSize({width:375,height:500});await openChat(page);
     const smallEntry=chatPanel(page).locator('textarea'),send=chatPanel(page).locator('button[type=submit]');
     await smallEntry.fill('Tarea con teclado móvil');const sendBox=await send.boundingBox();expect(sendBox.y).toBeGreaterThanOrEqual(0);expect(sendBox.y+sendBox.height).toBeLessThanOrEqual(500);
-    await smallEntry.press('Enter');await expect(chatPanel(page).getByText('¡Anotada! Ya tiene su lugar.',{exact:true})).toBeVisible();
+    await smallEntry.press('Enter');await expect(chatPanel(page).getByText('Listo, ya quedó en tu lista.',{exact:true})).toBeVisible();
     await page.screenshot({path:'storage/framework/testing/playwright/companion-chat/tasks-keyboard-375.png',fullPage:true});
     expect(errors).toEqual([]);
 });
 
 
-test('Agua y Ánimo mantienen sus registros rápidos después de ampliar Tareas', async ({page}) => {
+test('Agua, Ejercicio y Ánimo mantienen sus registros rápidos', async ({page}) => {
     await page.setViewportSize({width:375,height:900});await login(page);
     await page.goto('/water/daily');await page.locator('body > .lt-chat-host .lt-chat__launcher').click();
     await chatPanel(page).getByRole('button',{name:'Registrar 250 ml de Agua de prueba',exact:true}).click();
-    await expect(chatPanel(page).getByText(/Vas por 250 ml hoy/)).toBeVisible();
+    await expect(chatPanel(page).getByText(/El total de ese día va en 250 ml/)).toBeVisible();
     await expect(chatPanel(page)).toBeVisible();
     await page.screenshot({path:'storage/framework/testing/playwright/companion-chat/water-375.png',fullPage:true});
+    await page.goto('/exercise');
+    await page.locator('body > .lt-chat-host .lt-chat__launcher').click();
+    await chatPanel(page).getByRole('button', { name: 'Registrar 30 minutos de Caminata de prueba', exact: true }).click();
+    await expect(chatPanel(page).getByText('¡Listo! Sumé 30 min de Caminata de prueba.', { exact: true })).toBeVisible();
     await page.goto('/mood');await page.locator('body > .lt-chat-host .lt-chat__launcher').click();
     await chatPanel(page).getByRole('button',{name:'Registrar Calma de prueba',exact:true}).click();
-    await expect(chatPanel(page).getByText('¿Y cómo está tu energía?',{exact:true})).toBeVisible();
+    await expect(chatPanel(page).getByText('¿Y cómo anda tu energía?',{exact:true})).toBeVisible();
     await chatPanel(page).getByRole('button',{name:/Energía 4 de 5/}).click();
-    await expect(chatPanel(page).getByText(/Anotado. Cuídate mucho/)).toBeVisible();
+    await expect(chatPanel(page).getByText(/Ya quedó registrada tu energía/)).toBeVisible();
     await expect(chatPanel(page)).toBeVisible();
     await page.screenshot({path:'storage/framework/testing/playwright/companion-chat/mood-375.png',fullPage:true});
 });

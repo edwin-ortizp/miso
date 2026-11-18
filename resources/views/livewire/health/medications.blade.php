@@ -5,16 +5,19 @@
         ? DataState::CONTENT
         : ($totalHistory > 0 && count($activeFilters) > 0 ? DataState::FILTERED_EMPTY : DataState::EMPTY);
     $pendingToday = $today->whereIn('state', ['pending', 'overdue'])->count();
+    $createAction = ['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
+    $registerIntakeAction = ['label' => 'Toma puntual', 'icon' => 'bi-check2-circle', 'action' => 'openAdHoc', 'create' => true];
+    $otherCreateActions = [
+        ['label' => 'Medicamento', 'icon' => 'bi-capsule', 'action' => 'openForm', 'create' => true],
+        $registerIntakeAction,
+    ];
 @endphp
 
 <x-module-shell module="health">
     <livewire:game.guardian-card module="health" variant="top" :section-context="$guardianContext" />
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
-            :secondary="[
-                ['label' => 'Medicamento', 'icon' => 'bi-capsule', 'action' => 'openForm', 'create' => true],
-                ['label' => 'Toma puntual', 'icon' => 'bi-check2-circle', 'action' => 'openAdHoc', 'create' => true],
-            ]" />
+        <x-module-actions :primary="$createAction"
+            :secondary="$otherCreateActions" />
     </x-slot:actions>
 
     <p class="md-body-medium" id="medications-notice">MiSo no sustituye la indicación de tu profesional de salud.</p>
@@ -96,7 +99,7 @@
         </x-ui.section>
     @endif
 
-    <x-ui.management-card id="medication-history" title="Historial" icon="bi-clock-history"
+    <x-ui.management-card id="medication-history" :create-actions="[$registerIntakeAction]" title="Historial" icon="bi-clock-history"
                           :count="'('.$history->total().' / '.$totalHistory.')'"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
                           :active-filters="count($activeFilters)" :paginator="$history" noun="tomas"

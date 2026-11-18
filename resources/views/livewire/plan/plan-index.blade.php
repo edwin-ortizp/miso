@@ -1,11 +1,15 @@
+@php
+    $createAction = ['label' => 'Agregar plan', 'icon' => 'bi-plus-lg', 'action' => 'openPlanForm'];
+@endphp
+
 <x-module-shell module="plans" class="plans-page" :active-route="$scheduled ? 'plans.scheduled' : 'plans'" :navigation-query="['q'=>$q,'group'=>$group,'status'=>$status,'sort'=>$sort,'city'=>$city,'types'=>$types,'circles'=>$circles,'people'=>$people,'tags'=>$tags,'category'=>$category]">
 
     <livewire:game.guardian-card module="plans" variant="top" />
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Agregar plan', 'icon' => 'bi-plus-lg', 'action' => 'openPlanForm']" :fab-always="true" />
+        <x-module-actions :primary="$createAction" :fab-always="true" />
     </x-slot:actions>
 
-    <x-ui.management-card id="plans" :title="$scheduled ? 'Programados' : 'Tus planes'" icon="bi-map" :count="'('.$plans->total().' / '.$total.')'"
+    <x-ui.management-card id="plans" :create-actions="[$createAction]" :title="$scheduled ? 'Programados' : 'Tus planes'" icon="bi-map" :count="'('.$plans->total().' / '.$total.')'"
                           search="q" search-placeholder="Buscar planes" :active-filters="count($activeFilters)"
                           :paginator="$plans" noun="planes" class="plans-section"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort">

@@ -1,3 +1,8 @@
+@php
+    $createAction = ['label' => 'Nueva tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']];
+    $otherCreateActions = [['label' => 'Crear múltiples tareas', 'icon' => 'bi-list-task', 'event' => 'task-bulk-editor', 'detail' => ['action' => 'openForm'], 'create' => true]];
+@endphp
+
 <div data-module="tasks" class="lt-page" x-data="{ showDialog: $wire.entangle('showForm'), showRecurringDialog: $wire.entangle('showRecurringCompletion') }"
      x-on:task-quick-dates-closed.window="requestAnimationFrame(() => (document.getElementById('task-date-' + $event.detail.id) ?? document.getElementById('task-list-focus'))?.focus())">
     @if ($lockedNotice)
@@ -18,7 +23,7 @@
     @php
         $activeFilterCount = collect([$dateFilter, $categoryFilter, $priorityFilter, $sizeFilter, $filter])->filter()->count();
     @endphp
-    <x-ui.management-card id="task-list" title="Tareas" icon="bi-list-task" :count="'('.$tasks->total().')'"
+    <x-ui.management-card id="task-list" :create-actions="[$createAction, ...$otherCreateActions]" title="Tareas" icon="bi-list-task" :count="'('.$tasks->total().')'"
                           search="search" search-placeholder="Buscar tareas" :active-filters="$activeFilterCount"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
                           :paginator="$tasks" noun="tareas" flush>
@@ -256,8 +261,8 @@
 
     <div class="lt-fab-zone">
         <x-module-actions fab-always :split="true"
-            :primary="['label' => 'Nueva tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']]"
-            :secondary="[['label' => 'Crear múltiples tareas', 'icon' => 'bi-list-task', 'event' => 'task-bulk-editor', 'detail' => ['action' => 'openForm'], 'create' => true]]"
+            :primary="$createAction"
+            :secondary="$otherCreateActions"
             :greeting="config('companion_chat.tasks.greeting')"
             :quick="$chatActions" />
     </div>

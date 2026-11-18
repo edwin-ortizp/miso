@@ -1,14 +1,15 @@
 @php
     $activeFilters = ($type !== '' ? 1 : 0) + ($category !== '' ? 1 : 0) + ($archived ? 1 : 0);
+    $createAction = ['label' => 'Registrar acontecimiento', 'icon' => 'bi-calendar-plus', 'action' => 'openEventForm'];
 @endphp
 
 <x-module-shell module="relationships" :title="$relationship->full_name"
                 :tabs="\App\Support\Ui\Tabs\PersonTabs::for($relationship)" :back="\App\Support\Ui\Tabs\PersonTabs::back()">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar acontecimiento', 'icon' => 'bi-calendar-plus', 'action' => 'openEventForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
-    <x-ui.management-card id="relationship-history" title="Historial" icon="bi-clock-history"
+    <x-ui.management-card id="relationship-history" :create-actions="[$createAction]" title="Historial" icon="bi-clock-history"
                           :count="'('.$entries->total().' / '.$total.')'" search="search" search-placeholder="Buscar por título o notas"
                           :active-filters="$activeFilters" :paginator="$entries" noun="registros">
         <x-slot:filters>

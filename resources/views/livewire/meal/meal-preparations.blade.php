@@ -1,7 +1,11 @@
+@php
+    $createAction = ['label' => 'Cocinar preparación', 'icon' => 'bi-egg-fried', 'action' => 'openForm'];
+@endphp
+
 <x-module-shell module="meals">
-    <x-slot:actions><x-module-actions :primary="['label' => 'Cocinar preparación', 'icon' => 'bi-egg-fried', 'action' => 'openForm']" /></x-slot:actions>
+    <x-slot:actions><x-module-actions :primary="$createAction" /></x-slot:actions>
     @if ($errors->any())<div role="alert" class="md-form-notice">@foreach ($errors->all() as $message)<p>{{ $message }}</p>@endforeach</div>@endif
-    <x-ui.management-card title="Preparaciones" icon="bi-egg-fried" id="meal-preparations" search="search" :paginator="$preparations" :count="$preparations->total()" noun="preparaciones">
+    <x-ui.management-card title="Preparaciones" icon="bi-egg-fried" id="meal-preparations" :create-actions="[$createAction]" search="search" :paginator="$preparations" :count="$preparations->total()" noun="preparaciones">
         <x-ui.list label="Preparaciones disponibles">
                     @forelse ($preparations as $preparation)
                         @php $summary = $preparation->summary(); @endphp

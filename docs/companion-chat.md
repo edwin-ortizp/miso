@@ -67,3 +67,7 @@ La prueba de navegador recorre Agua, Pomodoro, Vehículos (índice, detalle, com
 
 ## Favoritos primero (CHG-150)
 Los chips rápidos de Hidratación y Ejercicio muestran primero los favoritos de la persona y completan con los más usados (`CatalogPicker::quick`). Ejercicio ofrece chips de 30 min con textos en `config/companion_chat.php`. Ver `docs/catalog-favorites.md`.
+
+## Saludo por pantalla
+
+El componente compartido saluda por el primer nombre de la cuenta y añade una pregunta. El orden de selección es la pregunta rápida de la pantalla, el texto de su ruta en `config/companion_chat.php` y la etiqueta de la acción principal. Esta última opción cubre pantallas con vocabulario configurable o acciones que cambian según el contexto. Al cerrar y reabrir el compañero se conserva el hilo.

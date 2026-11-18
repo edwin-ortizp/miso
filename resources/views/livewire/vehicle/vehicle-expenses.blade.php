@@ -4,11 +4,12 @@
     $expenseActive = count(array_filter([$expensePeriod, $expenseCategory], static fn ($value) => $value !== ''));
     $expenseState = DataState::resolve(visible: $expenses->count(), total: $totalCount);
     $periodLabel = $periodOptions[$expensePeriod] ?? 'Todo el historial';
+    $createAction = ['label' => 'Registrar gasto', 'icon' => 'bi-plus-lg', 'action' => 'openExpenseForm'];
 @endphp
 
 <x-module-shell module="vehicles" :title="$vehicle->name" subtitle="Seguros, llantas, pintura y otros gastos" icon="bi-wallet2" :tabs="\App\Support\Ui\Tabs\VehicleTabs::for($vehicle, $energyUi)" :back="\App\Support\Ui\Tabs\VehicleTabs::back()">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar gasto', 'icon' => 'bi-plus-lg', 'action' => 'openExpenseForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     @if ($expenseMessage)
@@ -21,7 +22,7 @@
         <article class="md-card-outlined"><span>Registros</span><strong>{{ number_format($expenses->total(), 0, ',', '.') }}</strong><small>El combustible y los servicios se registran en sus pestañas</small></article>
     </section>
 
-    <x-ui.management-card clear="clearExpenseFilters" id="vehicle-expense-history" title="Historial de gastos" icon="bi-receipt"
+    <x-ui.management-card clear="clearExpenseFilters" id="vehicle-expense-history" :create-actions="[$createAction]" title="Historial de gastos" icon="bi-receipt"
                           :count="'('.$expenses->total().' / '.$totalCount.')'" search="expenseSearch" search-placeholder="Buscar descripción o proveedor"
                           :active-filters="$expenseActive" :paginator="$expenses" sort-model="expenseSort" :sort-options="$sorts" :sort-value="$expenseSort" noun="gastos" alpine="openMenu: null" class="vehicle-history-section" flush>
         <x-slot:filters>

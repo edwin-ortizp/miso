@@ -3,18 +3,20 @@
     $alias = $relationship->nickname ?: $relationship->aliases->first()?->alias;
     $identity = collect([$alias ? '“'.$alias.'”' : null, $relationship->circle?->name])->filter()->implode(' · ');
     $toneClass = fn (string $tone) => 'md-chip-tonal'.($tone === 'neutral' ? '' : ' md-chip-tonal--'.($tone === 'danger' ? 'error' : $tone));
+    $createAction = ['label' => 'Registrar acontecimiento', 'icon' => 'bi-calendar-plus', 'action' => 'openEventForm'];
+    $createTaskAction = ['label' => 'Agregar tarea', 'icon' => 'bi-check2-square', 'action' => 'openTaskForm', 'create' => true];
 @endphp
 
 <x-module-shell module="relationships" :title="$relationship->full_name"
                 :tabs="\App\Support\Ui\Tabs\PersonTabs::for($relationship)" :back="\App\Support\Ui\Tabs\PersonTabs::back()">
     <x-slot:actions>
         <x-module-actions
-            :primary="['label' => 'Registrar acontecimiento', 'icon' => 'bi-calendar-plus', 'action' => 'openEventForm']"
-            :secondary="[['label' => 'Agregar tarea', 'icon' => 'bi-check2-square', 'action' => 'openTaskForm', 'create' => true]]" />
+            :primary="$createAction"
+            :secondary="[$createTaskAction]" />
     </x-slot:actions>
 
     <div class="md-relationship-home">
-        <x-ui.management-card id="relationship-agenda" title="Pendientes y próximos" icon="bi-list-check">
+        <x-ui.management-card id="relationship-agenda" :create-actions="[$createTaskAction, $createAction]" title="Pendientes y próximos" icon="bi-list-check">
             <x-slot:headerAction>
                 <a href="{{ route('relationships.tasks', $relationship) }}" class="md-btn-text" wire:navigate>Ver todas</a>
             </x-slot:headerAction>
@@ -87,7 +89,7 @@
             @endif
         </x-ui.management-card>
 
-        <x-ui.management-card id="relationship-recent-history" title="Historial reciente" icon="bi-clock-history">
+        <x-ui.management-card id="relationship-recent-history" :create-actions="[$createAction]" title="Historial reciente" icon="bi-clock-history">
             <x-slot:headerAction>
                 <a href="{{ route('relationships.history', $relationship) }}" class="md-btn-text" wire:navigate>Ver historial completo</a>
             </x-slot:headerAction>

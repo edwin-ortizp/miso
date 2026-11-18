@@ -1,10 +1,14 @@
+@php
+    $createAction = ['label' => 'Crear receta', 'icon' => 'bi-book', 'action' => 'openForm'];
+@endphp
+
 <x-module-shell module="meals">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Crear receta', 'icon' => 'bi-book', 'action' => 'openForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     @php $recipeFilterCount = collect([$favoriteFilter, $mealTypeFilter, $difficultyFilter])->filter()->count(); @endphp
-    <x-ui.management-card id="meal-recipes" title="Recetas" icon="bi-book" :count="'('.$recipes->total().')'"
+    <x-ui.management-card id="meal-recipes" :create-actions="[$createAction]" title="Recetas" icon="bi-book" :count="'('.$recipes->total().')'"
                           search="search" search-placeholder="Buscar recetas" :active-filters="$recipeFilterCount"
                           :paginator="$recipes" noun="recetas" alpine="openMenu: null">
         <x-slot:filters>

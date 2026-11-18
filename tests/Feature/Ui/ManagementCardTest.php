@@ -51,6 +51,42 @@ class ManagementCardTest extends TestCase
         $this->assertStringContainsString('Lista', $html);
     }
 
+    public function test_create_actions_use_the_table_menu_and_keep_the_existing_actions(): void
+    {
+        $html = Blade::render(<<<'BLADE'
+            <x-ui.management-card title="Tareas" icon="bi-list-task" :create-actions="$actions">
+                <x-slot:menu><x-ui.menu-item>Exportar</x-ui.menu-item></x-slot:menu>
+                Filas
+            </x-ui.management-card>
+            <x-ui.management-card title="Historial" icon="bi-clock">
+                Filas
+            </x-ui.management-card>
+            BLADE, ['actions' => [
+                ['label' => 'Nueva tarea', 'action' => 'openForm'],
+                ['label' => 'Crear múltiples tareas', 'event' => 'task-bulk-editor', 'detail' => ['action' => 'openForm']],
+            ]]);
+
+        $this->assertStringContainsString('wire:click="openForm"', $html);
+        $this->assertStringContainsString('x-on:click="$dispatch(', $html);
+        $this->assertStringContainsString('task-bulk-editor', $html);
+        $this->assertMatchesRegularExpression('/Nueva tarea.*Crear múltiples tareas.*Actualizar tabla.*Exportar/su', $html);
+        $this->assertSame(1, substr_count($html, 'Nueva tarea'));
+    }
+
+    public function test_create_actions_can_open_a_menu_without_refresh(): void
+    {
+        $html = Blade::render(<<<'BLADE'
+            <x-ui.management-card title="Tareas sin fecha" icon="bi-list-task" :refreshable="false"
+                :create-actions="[['label' => 'Nueva tarea', 'action' => 'openForm']]">
+                Filas
+            </x-ui.management-card>
+            BLADE);
+
+        $this->assertStringContainsString('Nueva tarea', $html);
+        $this->assertStringNotContainsString('Actualizar tabla', $html);
+        $this->assertStringNotContainsString('md-menu__divider', $html);
+    }
+
     public function test_the_last_page_disables_next(): void
     {
         $html = Blade::render('<x-ui.management-card title="Planes" icon="bi-map" :paginator="$p">x</x-ui.management-card>', ['p' => $this->paginator(58, 25, 3)]);

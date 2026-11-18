@@ -5,14 +5,15 @@
     $typesState = $section !== 'drinks' ? null : ($drinkTypes->count() > 0
         ? DataState::CONTENT
         : ($totalTypes > 0 && $isFiltered ? DataState::FILTERED_EMPTY : DataState::EMPTY));
+    $createAction = $section === 'categories'
+                ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
+                : ['label' => 'Nueva bebida', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
 @endphp
 
 <x-module-shell module="water" title="Ajustes de hidratación" archetype="settings">
     @if ($section !== 'goal')
         <x-slot:actions>
-            <x-module-actions :primary="$section === 'categories'
-                ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
-                : ['label' => 'Nueva bebida', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+            <x-module-actions :primary="$createAction" />
         </x-slot:actions>
     @endif
 
@@ -36,7 +37,7 @@
                 </form>
             </x-context-widget>
         @else
-    <x-ui.management-card id="water-drink-types" title="Tipos de bebida" icon="bi-cup-straw"
+    <x-ui.management-card id="water-drink-types" :create-actions="[$createAction]" title="Tipos de bebida" icon="bi-cup-straw"
                           :count="'('.$drinkTypes->total().' / '.$totalTypes.')'" search="search" search-placeholder="Buscar bebida"
                           :active-filters="count($activeFilters)" :paginator="$drinkTypes" noun="bebidas"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"

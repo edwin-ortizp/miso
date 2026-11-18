@@ -10,12 +10,13 @@
         visible: $catalogTemplates->count(),
         total: $catalogFilters === [] ? $catalogTemplates->total() : 1,
     );
+    $createAction = $section === 'categories'
+        ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
+        : ['label' => 'Nueva plantilla', 'icon' => 'bi-plus-lg', 'action' => 'openTemplateForm'];
 @endphp
 
 <x-module-shell module="vehicles" title="Catálogo de mantenimientos" subtitle="Plantillas base y personales para tu garaje." icon="bi-tools" archetype="list" :back="\App\Support\Ui\Tabs\VehicleTabs::back()">
-    <x-slot:actions><x-module-actions mobile-style="inline" :primary="$section === 'categories'
-        ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
-        : ['label' => 'Nueva plantilla', 'icon' => 'bi-plus-lg', 'action' => 'openTemplateForm']" /></x-slot:actions>
+    <x-slot:actions><x-module-actions mobile-style="inline" :primary="$createAction" /></x-slot:actions>
 
 
     @if ($catalogMessage || $categoryMessage)
@@ -30,7 +31,7 @@
         @if ($section === 'categories')
             @include('livewire.category.partials.section')
         @else
-    <x-ui.management-card clear="clearCatalogFilters" id="vehicle-catalog" title="Plantillas" icon="bi-tools" :count="'('.$catalogTemplates->total().')'"
+    <x-ui.management-card clear="clearCatalogFilters" id="vehicle-catalog" :create-actions="[$createAction]" title="Plantillas" icon="bi-tools" :count="'('.$catalogTemplates->total().')'"
                           search="catalogSearch" search-placeholder="Buscar nombre o descripción" :active-filters="$catalogActive"
                           :paginator="$catalogTemplates" noun="plantillas" alpine="openMenu: null">
         <x-slot:filters>

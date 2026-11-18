@@ -12,7 +12,10 @@ require __DIR__.'/../../../vendor/autoload.php';
 $app = require __DIR__.'/../../../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 $path = str_replace('\\', '/', (string) config('database.connections.sqlite.database'));
-if (config('database.default') !== 'sqlite' || ! str_ends_with($path, '/storage/framework/testing/tasks-calendar-browser.sqlite')) {
+$port = (int) (getenv('MISO_TASK_CALENDAR_TEST_PORT') ?: 8033);
+$expected = '/storage/framework/testing/tasks-calendar-browser-'.$port.'.sqlite';
+if (config('database.default') !== 'sqlite'
+    || (! str_ends_with($path, $expected) && ! str_ends_with($path, '/storage/framework/testing/tasks-calendar-browser.sqlite'))) {
     throw new RuntimeException('Dedicated tasks settings browser SQLite required');
 }
 Artisan::call('migrate:fresh', ['--force' => true]);

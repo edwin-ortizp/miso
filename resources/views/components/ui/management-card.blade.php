@@ -18,6 +18,7 @@
     'sortOptions' => [],
     'sortValue' => null,
     'refreshable' => true,
+    'createActions' => [],
     'clear' => 'clearFilters',
 ])
 
@@ -25,11 +26,13 @@
     /*
      * Card de gestión (estándar transversal para vistas que consultan y administran varios registros).
      * Header: ícono, título, contador | búsqueda, Filtros | ⋮. Contenido. Footer: rango, filas por página y paginación.
-     * Las acciones de creación NO van aquí: usan x-module-actions / x-ui.fab.
+     * El menú puede ofrecer accesos a los mismos formularios que el FAB.
      */
     $cardId = $id ?? 'mcard-'.\Illuminate\Support\Str::slug($title);
     $hasFilters = isset($filters);
-    $hasMenu = $refreshable || isset($menu);
+        $createActions = array_filter($createActions, static fn ($action) => $action
+        && empty($action['href']) && (filled($action['event'] ?? null) || filled($action['action'] ?? null)));
+    $hasMenu = $createActions !== [] || $refreshable || isset($menu);
     $hasHeaderAction = isset($headerAction);
     $hasSort = filled($sortModel) && $sortOptions !== [];
     $sortLabel = $sortOptions[$sortValue] ?? reset($sortOptions);
@@ -113,6 +116,22 @@
                         <span class="md-mcard__divider" aria-hidden="true"></span>
                     @endif
                     <x-ui.menu :label="'Más acciones de '.\Illuminate\Support\Str::lower($title)">
+                        @foreach ($createActions as $action)
+                            @if (filled($action['event'] ?? null))
+                                <x-ui.menu-item :icon="$action['icon'] ?? 'bi-plus-lg'"
+                                                :x-on:click="'$dispatch('.\Illuminate\Support\Js::from($action['event']).', '.\Illuminate\Support\Js::from($action['detail'] ?? (object) []).')'">
+                                    {{ $action['label'] }}
+                                </x-ui.menu-item>
+                            @else
+                                <x-ui.menu-item :icon="$action['icon'] ?? 'bi-plus-lg'"
+                                                :wire:click="$action['action']">
+                                    {{ $action['label'] }}
+                                </x-ui.menu-item>
+                            @endif
+                        @endforeach
+                        @if ($createActions !== [] && ($refreshable || isset($menu)))
+                            <x-ui.menu-divider />
+                        @endif
                         @if ($refreshable)
                             <x-ui.menu-item icon="bi-arrow-clockwise" wire:click="$refresh" wire:loading.attr="disabled" wire:target="$refresh">Actualizar tabla</x-ui.menu-item>
                         @endif

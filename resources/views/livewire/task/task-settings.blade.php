@@ -1,9 +1,13 @@
+@php
+    $createAction = $section === 'statuses'
+                ? ['label' => 'Nuevo estado', 'icon' => 'bi-plus-lg', 'action' => 'openForm']
+                : ['label' => 'Nueva categoría', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
+@endphp
+
 <x-module-shell module="tasks" archetype="settings">
     <x-slot:actions>
         @if ($section !== 'planning')
-            <x-module-actions :primary="$section === 'statuses'
-                ? ['label' => 'Nuevo estado', 'icon' => 'bi-plus-lg', 'action' => 'openForm']
-                : ['label' => 'Nueva categoría', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+            <x-module-actions :primary="$createAction" />
         @endif
     </x-slot:actions>
 

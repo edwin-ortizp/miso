@@ -1,14 +1,24 @@
+@php
+    $createAction = ['label' => 'Agregar a compras', 'icon' => 'bi-cart-plus', 'action' => 'openForm'];
+    $generateShoppingAction = ['label' => 'Generar compras del plan', 'icon' => 'bi-cart-plus', 'event' => 'meal-shopping-preview', 'create' => true];
+    $otherCreateActions = [
+        ['label' => 'Registrar compra', 'icon' => 'bi-receipt', 'event' => 'open-purchase-editor', 'create' => true],
+        $generateShoppingAction,
+        ['label' => 'Tiendas', 'icon' => 'bi-shop', 'event' => 'open-store-catalog'],
+    ];
+@endphp
+
 <x-module-shell module="meals">
     <x-slot:actions>
         <livewire:meal.bulk-ingredient-assistant context="shopping" />
-        <x-module-actions :primary="['label' => 'Agregar a compras', 'icon' => 'bi-cart-plus', 'action' => 'openForm']"
-                          :split="true" :secondary="[['label' => 'Registrar compra', 'icon' => 'bi-receipt', 'event' => 'open-purchase-editor', 'create' => true], ['label' => 'Generar compras del plan', 'icon' => 'bi-cart-plus', 'event' => 'meal-shopping-preview', 'create' => true], ['label' => 'Tiendas', 'icon' => 'bi-shop', 'event' => 'open-store-catalog']]" />
+        <x-module-actions :primary="$createAction"
+                          :split="true" :secondary="$otherCreateActions" />
         <livewire:meal.store-catalog />
         <livewire:meal.purchase-editor :key="'purchase-editor-shopping'" />
         <livewire:meal.meal-plan-shopping-editor :key="'meal-plan-shopping-editor'" />
     </x-slot:actions>
 
-    <x-ui.management-card id="meal-shopping" title="Por comprar" icon="bi-cart3" :count="'('.$totalItems.')'"
+    <x-ui.management-card id="meal-shopping" :create-actions="[$createAction, $generateShoppingAction]" title="Por comprar" icon="bi-cart3" :count="'('.$totalItems.')'"
                           search="search" search-placeholder="Buscar en lista de compras" :active-filters="$placeFilter !== '' ? 1 : 0"
                           :paginator="$items" noun="artículos" alpine="openMenu: null">
         <x-slot:filters>

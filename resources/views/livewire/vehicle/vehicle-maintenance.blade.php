@@ -3,18 +3,19 @@
 
     $planState = DataState::resolve(visible: $plans->count(), total: $totalPlans);
     $planActive = $planStatus !== '' ? 1 : 0;
+    $createAction = ['label' => 'Activar plan', 'icon' => 'bi-plus-lg', 'action' => 'openPlanForm'];
 @endphp
 
 <x-module-shell module="vehicles" :title="$vehicle->name" subtitle="Plan de mantenimiento recomendado" icon="bi-calendar2-check" :tabs="\App\Support\Ui\Tabs\VehicleTabs::for($vehicle, $energyUi)" :back="\App\Support\Ui\Tabs\VehicleTabs::back()">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Activar plan', 'icon' => 'bi-plus-lg', 'action' => 'openPlanForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     @if ($maintenanceMessage)
         <x-ui.snackbar>{{ $maintenanceMessage }}</x-ui.snackbar>
     @endif
 
-    <x-ui.management-card clear="clearPlanFilters" id="vehicle-care-plans" title="Plan de mantenimiento" icon="bi-calendar2-check" :count="'('.$plans->count().' / '.$totalPlans.')'"
+    <x-ui.management-card clear="clearPlanFilters" id="vehicle-care-plans" :create-actions="[$createAction]" title="Plan de mantenimiento" icon="bi-calendar2-check" :count="'('.$plans->count().' / '.$totalPlans.')'"
                           search="planSearch" search-placeholder="Buscar mantenimiento" :active-filters="$planActive" alpine="openMenu: null" class="vehicle-plans-section">
         <x-slot:filters>
             <div class="md-chip-rail md-mcard__filter-chips" role="group" aria-label="Filtros del plan" @click.outside="openMenu = null">

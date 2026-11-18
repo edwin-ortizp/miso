@@ -4,12 +4,13 @@
     $listState = $measurements->count() > 0
         ? DataState::CONTENT
         : ($totalMeasurements > 0 && count($activeFilters) > 0 ? DataState::FILTERED_EMPTY : DataState::EMPTY);
+    $createAction = ['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
 @endphp
 
 <x-module-shell module="health">
     <livewire:game.guardian-card module="health" variant="top" :section-context="$guardianContext" />
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     <p class="md-body-medium" id="health-measurements-notice">
@@ -41,7 +42,7 @@
         </x-ui.section>
     @endif
 
-    <x-ui.management-card id="health-measurements-history" title="Historial" icon="bi-clock-history"
+    <x-ui.management-card id="health-measurements-history" :create-actions="[$createAction]" title="Historial" icon="bi-clock-history"
                           :count="'('.$measurements->total().' / '.$totalMeasurements.')'"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
                           :active-filters="count($activeFilters)" :paginator="$measurements" noun="mediciones"

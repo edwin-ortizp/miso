@@ -68,27 +68,11 @@ class FavoriteCompanion
             'type_class' => CompanionProgress::typeClass($type),
             'image' => $this->images->url($species),
             'favorite' => $isFavorite,
-            'greeting' => self::greeting(now()),
-            'salute' => self::greeting(now(), 'salute'),
         ];
     }
 
     public function flush(): void
     {
         $this->resolved = [];
-    }
-
-    /** Saludo breve según la hora del día. */
-    public static function greeting(\Carbon\CarbonInterface $now, string $set = 'greeting'): string
-    {
-        $hour = (int) $now->format('G');
-
-        $key = match (true) {
-            $hour < 12 => 'morning',
-            $hour < 19 => 'afternoon',
-            default => 'night',
-        };
-
-        return (string) config("companion_chat.{$set}.{$key}");
     }
 }

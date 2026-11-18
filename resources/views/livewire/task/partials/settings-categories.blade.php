@@ -8,7 +8,7 @@
     $state = DataState::resolve($paginator->total(), $catalogTotal);
 @endphp
 
-<x-ui.management-card id="task-settings-categories" title="Categorías de tareas" icon="bi-tags"
+<x-ui.management-card id="task-settings-categories" :create-actions="[$createAction]" title="Categorías de tareas" icon="bi-tags"
                       :count="$paginator->total()" search="q" search-placeholder="Buscar categoría"
                       :paginator="$paginator" noun="categorías">
     @if ($state === DataState::CONTENT)

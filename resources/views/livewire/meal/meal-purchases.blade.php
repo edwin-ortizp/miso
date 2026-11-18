@@ -1,8 +1,12 @@
+@php
+    $createAction = ['label' => 'Registrar compra', 'icon' => 'bi-receipt', 'event' => 'open-purchase-editor'];
+@endphp
+
 <x-module-shell module="meals">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar compra', 'icon' => 'bi-receipt', 'event' => 'open-purchase-editor']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
-    <x-ui.management-card id="purchase-history" title="Compras realizadas" icon="bi-receipt" :count="'('.$purchases->total().' / '.$totalPurchases.')'" search="search" search-placeholder="Buscar compras" :paginator="$purchases" noun="compras" :active-filters="(int) filled($from) + (int) filled($to) + (int) filled($storeId) + (int) filled($itemId)">
+    <x-ui.management-card id="purchase-history" :create-actions="[$createAction]" title="Compras realizadas" icon="bi-receipt" :count="'('.$purchases->total().' / '.$totalPurchases.')'" search="search" search-placeholder="Buscar compras" :paginator="$purchases" noun="compras" :active-filters="(int) filled($from) + (int) filled($to) + (int) filled($storeId) + (int) filled($itemId)">
         <x-slot:filters>
             <div class="d-flex flex-column gap-3">
                 <div class="md-field-pair">

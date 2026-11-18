@@ -88,7 +88,17 @@
     </section>
 
     @if ($showToday)
-        <x-ui.management-card id="meal-today" :title="'Hoy · '.now()->translatedFormat('l j')" icon="bi-sun" :refreshable="false">
+        @php
+            $todayDate = now()->toDateString();
+            $plannedTypes = $todayEntries->pluck('meal_type')->all();
+            $todayCreateActions = collect($mealTypes)
+                ->except($plannedTypes)
+                ->map(fn ($label, $type) => [
+                    'label' => 'Planear '.\Illuminate\Support\Str::lower($label),
+                    'action' => "openForm('$todayDate', '$type')",
+                ])->all();
+        @endphp
+        <x-ui.management-card id="meal-today" :create-actions="$todayCreateActions" :title="'Hoy · '.now()->translatedFormat('l j')" icon="bi-sun" :refreshable="false">
             @if ($todayEntries->isEmpty())
                 <x-ui.state variant="empty" icon="bi-egg-fried" title="Nada planeado para hoy" message="Toca una comida del calendario para planearla." />
             @else

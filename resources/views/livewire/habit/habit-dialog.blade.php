@@ -15,6 +15,7 @@
                 <x-ui.select name="timeOfDay" label="Momento del día" :required="true"
                              :selected="$timeOfDay" :options="$timesOfDay" wire:model="timeOfDay" />
                 <div class="md-field-pair">
+                    <label class="md-checkbox"><input type="checkbox" wire:model="showInCalendar"> Mostrar en el calendario</label>
                     <x-ui.field name="baseTime" label="Hora base" type="time" wire:model="baseTime"
                                 help="Ordena el hábito dentro de su bloque." />
                     <x-ui.field name="goalDuration" label="Duración objetivo" maxlength="30" wire:model="goalDuration"

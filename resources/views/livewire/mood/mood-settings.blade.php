@@ -1,8 +1,12 @@
+@php
+    $createAction = $section === 'categories'
+            ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
+            : ['label' => 'Nueva emoción', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
+@endphp
+
 <x-module-shell module="mood" archetype="settings">
     <x-slot:actions>
-        <x-module-actions :primary="$section === 'categories'
-            ? ['label' => 'Crear categoría', 'icon' => 'bi-plus-lg', 'action' => 'openCategoryForm']
-            : ['label' => 'Nueva emoción', 'icon' => 'bi-plus-lg', 'action' => 'openForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     @if ($message || $categoryMessage)
@@ -17,7 +21,7 @@
         @if ($section === 'categories')
             @include('livewire.category.partials.section')
         @else
-    <x-ui.management-card id="mood-catalog" title="Catálogo de emociones" icon="bi-emoji-smile" :count="'('.$states->total().' / '.$totalCount.')'"
+    <x-ui.management-card id="mood-catalog" :create-actions="[$createAction]" title="Catálogo de emociones" icon="bi-emoji-smile" :count="'('.$states->total().' / '.$totalCount.')'"
                           search="search" search-placeholder="Buscar una emoción" :active-filters="$moodFilterCount"
                           :paginator="$states" noun="emociones" alpine="openMenu: null" flush>
         <x-slot:filters>

@@ -1,10 +1,14 @@
+@php
+    $createAction = ['label' => 'Agregar plan', 'icon' => 'bi-plus-lg', 'action' => 'openPlanForm'];
+@endphp
+
 <x-module-shell module="relationships" :title="$relationship->full_name" class="plans-page"
                 :tabs="\App\Support\Ui\Tabs\PersonTabs::for($relationship)" :back="\App\Support\Ui\Tabs\PersonTabs::back()">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Agregar plan', 'icon' => 'bi-plus-lg', 'action' => 'openPlanForm']" :fab-always="true" />
+        <x-module-actions :primary="$createAction" :fab-always="true" />
     </x-slot:actions>
 
-    <x-ui.management-card id="relationship-plans" :title="'Planes con '.$firstName" icon="bi-map" :count="'('.$plans->total().' / '.$total.')'"
+    <x-ui.management-card id="relationship-plans" :create-actions="[$createAction]" :title="'Planes con '.$firstName" icon="bi-map" :count="'('.$plans->total().' / '.$total.')'"
                           :active-filters="$status !== '' ? 1 : 0" :paginator="$plans" noun="planes" class="plans-section">
         <x-slot:filters>
             <div class="md-chip-rail md-mcard__filter-chips" role="group" aria-label="Estado de los planes">

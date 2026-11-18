@@ -5,11 +5,12 @@
         ? DataState::CONTENT
         : ($totalLogs > 0 && (count($activeFilters) > 0 || trim($search) !== '') ? DataState::FILTERED_EMPTY : DataState::EMPTY);
     $drinksState = DataState::resolve(visible: $drinkTypes->count(), total: $drinkTypes->count());
+    $createAction = ['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm'];
 @endphp
 
 <x-module-shell module="water">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar', 'icon' => 'bi-plus-lg', 'action' => 'openForm']"
+        <x-module-actions :primary="$createAction"
             :greeting="config('companion_chat.water.greeting')"
             :quick="$quickDrinks->take(4)->map(fn ($type) => [
                 'type' => 'tap', 'id' => 'drink-'.$type->id, 'emoji' => $type->icon ?? '💧', 'label' => $type->name.' · 250 ml',
@@ -25,7 +26,7 @@
 
     <livewire:game.guardian-card module="water" variant="top" />
 
-    <x-ui.management-card id="water-day-logs" title="Registro del día" icon="bi-clock-history"
+    <x-ui.management-card id="water-day-logs" :create-actions="[$createAction]" title="Registro del día" icon="bi-clock-history"
                           :count="'('.$logs->total().' / '.$totalLogs.')'" search="search" search-placeholder="Buscar registros"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort"
                           :active-filters="count($activeFilters)" :paginator="$logs" noun="registros"

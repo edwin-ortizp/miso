@@ -163,6 +163,11 @@ _Última actualización: 2026-11-17_
 | CHG-157 | S | Recordar filtros de Tareas y agregar Mañana | in-progress | En verificación | 1/1 |
 | CHG-158 | S | Editar fechas desde la lista de tareas | in-progress | En verificación | 1/1 |
 | CHG-159 | S | Mostrar institución y cambiar semestre de materias | in-progress | En verificación | 1/1 |
+| CHG-160 | M | Accesos de creación en los menús de tablas | in-progress | En verificación | 1/1 |
+| CHG-161 | M | Hábitos elegidos en calendario | in-progress | En verificación | 1/1 |
+| CHG-162 | M | Salud privada en calendario | in-progress | En verificación | 1/1 |
+| CHG-163 | M | Reservas de estudio en calendario | in-progress | En verificación | 1/1 |
+| CHG-164 | M | Personalizar la conversación del compañero por pantalla | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

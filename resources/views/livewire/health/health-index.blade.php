@@ -4,18 +4,19 @@
     $eventIcons = ['appointment' => 'bi-hospital', 'checkup' => 'bi-clipboard2-pulse', 'procedure' => 'bi-bandaid', 'symptom' => 'bi-activity', 'illness' => 'bi-thermometer-half', 'vaccination' => 'bi-shield-plus'];
     $intensityOptions = array_combine(range(1, 10), range(1, 10));
     $days = fn (int $count) => $count.' '.($count === 1 ? 'día' : 'días');
+    $createAction = ['label' => 'Registrar evento', 'icon' => 'bi-plus-lg', 'event' => 'health-editor', 'detail' => ['action' => 'openForm']];
 @endphp
 
 <x-module-shell module="health" class="health-page">
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar evento', 'icon' => 'bi-plus-lg', 'event' => 'health-editor', 'detail' => ['action' => 'openForm']]"
+        <x-module-actions :primary="$createAction"
                           :secondary="[['label' => 'Nuevo pendiente de salud', 'icon' => 'bi-list-check', 'event' => 'health-editor', 'detail' => ['action' => 'openTaskForm', 'id' => null], 'create' => true]]"
                           :split="true" />
     </x-slot:actions>
 
     <livewire:game.guardian-card module="health" variant="top" />
 
-    <x-ui.management-card id="health-timeline" title="Cronología de salud" icon="bi-clock-history" class="health-timeline-section"
+    <x-ui.management-card id="health-timeline" :create-actions="[$createAction]" title="Cronología de salud" icon="bi-clock-history" class="health-timeline-section"
                           :count="'('.$events->total().' / '.$totalCount.')'" search="search" search-placeholder="Buscar eventos"
                           :active-filters="count($activeFilters)" :paginator="$events" noun="eventos"
                           alpine="draftRange: 'all', draftStatus: 'all', draftTypes: []"

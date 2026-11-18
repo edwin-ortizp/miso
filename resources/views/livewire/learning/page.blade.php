@@ -16,7 +16,9 @@
         foreach ($childKinds as $key) $createActions[] = ['label' => $vocab->addLabel($uid, $ftype, $key), 'action' => "openUnit('$key')", 'icon' => 'bi-plus-lg', 'create' => true];
         $primary = array_shift($createActions);
     }
-    $secondary = $createActions;
+    $reservationAction = ['label' => 'Reservar tiempo de estudio', 'icon' => 'bi-calendar-plus', 'event' => 'study-reservation-create', 'create' => true];
+    $secondary = $primary ? [...$createActions, $reservationAction] : [];
+    $primary ??= $reservationAction;
     $addActions = $formation ? array_map(fn ($key) => ['label' => $vocab->addLabel($uid, $ftype, $key), 'action' => "openUnit('$key')"], $childKinds) : [];
     $currentEditAction = $unit ? "openUnit('', '$unit->id')" : ($formation ? "openFormation('$formation->id')" : '');
     $currentDeleteAction = $formation ? "deleteRecord('$formation->id', ".($unit ? "'$unit->id'" : 'null').")" : '';
@@ -85,7 +87,7 @@
     @endif
 
     @if (!$formation || $childKinds || $records->count())
-        <x-ui.management-card id="learning-records" :title="$formation ? 'Contenido' : 'Formaciones'" icon="bi-mortarboard" :count="(string)($paginator?->total() ?? $records->count())" :search="$formation ? null : 'search'" search-placeholder="Buscar formaciones" :paginator="$paginator" noun="formaciones" :portal-filters="true" :active-filters="(int)($typeFilter !== '') + (int)($statusFilter !== '') + (int)($categoryFilter !== '')">
+        <x-ui.management-card id="learning-records" :create-actions="[$primary, ...$secondary]" :title="$formation ? 'Contenido' : 'Formaciones'" icon="bi-mortarboard" :count="(string)($paginator?->total() ?? $records->count())" :search="$formation ? null : 'search'" search-placeholder="Buscar formaciones" :paginator="$paginator" noun="formaciones" :portal-filters="true" :active-filters="(int)($typeFilter !== '') + (int)($statusFilter !== '') + (int)($categoryFilter !== '')">
             @unless ($formation)
                 <x-slot:filters>
                     <x-ui.select label="Tipo de formación" name="typeFilter" wire:model.live="typeFilter" :options="$vocab->typeLabels()" placeholder="Todos los tipos" />
@@ -161,4 +163,6 @@
         <p>{{ $unit ? $vocab->demonstrative($uid, $ftype, $unit->kind) : 'Esta formación' }} todavía no tiene registros adicionales.</p>
     @endif
     @include('livewire.learning.editor')
+    <livewire:learning.study-reservation-editor :formation="$formation?->id" :unit="$unit?->id"
+        :key="'study-reservation-editor-'.($current?->id ?? 'index')" />
 </x-module-shell>

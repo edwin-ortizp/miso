@@ -15,6 +15,7 @@ class HabitDefinition extends Model
         'time_of_day',
         'goal_duration',
         'base_time',
+        'show_in_calendar',
     ];
 
     public function goals(): \Illuminate\Database\Eloquent\Relations\BelongsToMany

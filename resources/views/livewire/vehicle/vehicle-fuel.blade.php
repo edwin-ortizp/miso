@@ -3,12 +3,13 @@
 
     $fuelActive = count(array_filter([$fuelPeriod, $fuelFill, $fuelSource], static fn ($value) => $value !== ''));
     $fuelState = DataState::resolve(visible: $energyLogs->count(), total: $totalCount);
+    $createAction = ['label' => $energyUi['action'], 'icon' => 'bi-plus-lg', 'action' => 'openEnergyForm'];
 @endphp
 
 <x-module-shell module="vehicles" :title="$vehicle->name" :subtitle="$energyUi['heading']" icon="bi-fuel-pump" :tabs="\App\Support\Ui\Tabs\VehicleTabs::for($vehicle, $energyUi)" :back="\App\Support\Ui\Tabs\VehicleTabs::back()">
     <x-slot:actions>
         <x-module-actions
-            :primary="['label' => $energyUi['action'], 'icon' => 'bi-plus-lg', 'action' => 'openEnergyForm']" />
+            :primary="$createAction" />
     </x-slot:actions>
 
     <section class="vehicle-metrics-grid">
@@ -17,7 +18,7 @@
         <article class="md-card-outlined"><span>Rendimiento</span><strong>{{ $energyAnalytics['latest_efficiency'] ? number_format($energyAnalytics['latest_efficiency']['efficiency'], 1, ',', '.') : '—' }}</strong><small>{{ $energyAnalytics['latest_efficiency'] ? $vehicle->usage_unit.'/'.$energyAnalytics['unit'] : 'Requiere dos llenados completos' }}</small></article>
     </section>
 
-    <x-ui.management-card clear="clearFuelFilters" id="vehicle-energy-history" :title="'Historial de '.strtolower($energyUi['tab'])" icon="bi-fuel-pump"
+    <x-ui.management-card clear="clearFuelFilters" id="vehicle-energy-history" :create-actions="[$createAction]" :title="'Historial de '.strtolower($energyUi['tab'])" icon="bi-fuel-pump"
                           :count="'('.$energyLogs->total().' / '.$totalCount.')'" search="fuelSearch" search-placeholder="Buscar estación o nota"
                           :active-filters="$fuelActive" :paginator="$energyLogs" sort-model="fuelSort" :sort-options="$sorts" :sort-value="$fuelSort" noun="registros" alpine="openMenu: null" class="vehicle-history-section" flush>
         <x-slot:filters>

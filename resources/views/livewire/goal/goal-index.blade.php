@@ -7,13 +7,14 @@
     );
 
     $statusLabels = ['active' => 'Activos', 'completed' => 'Completados', 'abandoned' => 'Abandonados', 'all' => 'Todos'];
+    $createAction = ['label' => 'Agregar objetivo', 'icon' => 'bi-flag', 'action' => 'openForm'];
 @endphp
 
 <x-module-shell module="goals">
 
     <livewire:game.guardian-card module="goals" variant="top" />
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Agregar objetivo', 'icon' => 'bi-flag', 'action' => 'openForm']" />
+        <x-module-actions :primary="$createAction" />
     </x-slot:actions>
 
     <x-ui.metric-grid label="Resumen de objetivos">
@@ -21,7 +22,7 @@
         <x-ui.metric label="Completados" icon="bi-check-circle-fill" tone="success" :value="$completedCount" />
     </x-ui.metric-grid>
 
-    <x-ui.management-card id="goals" title="Objetivos" :portal-filters="true" icon="bi-flag" :count="'('.$goals->total().')'"
+    <x-ui.management-card id="goals" :create-actions="[$createAction]" title="Objetivos" :portal-filters="true" icon="bi-flag" :count="'('.$goals->total().')'"
                           :active-filters="$statusFilter !== 'all' ? 1 : 0" :paginator="$goals" noun="objetivos"
                           sort-model="sort" :sort-options="$sorts" :sort-value="$sort">
         <x-slot:filters>

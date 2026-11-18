@@ -1,3 +1,7 @@
+@php
+    $createAction = ['label' => 'Nueva tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']];
+@endphp
+
 <x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
     @if ($lockedNotice)
         <x-ui.snackbar wire:key="locked-notice">
@@ -7,7 +11,7 @@
             </x-slot:actions>
         </x-ui.snackbar>
     @endif
-    <section class="md-card-elevated md-task-calendar" aria-label="Calendario de tareas, planes, cumpleaños y comidas" x-data="taskCalendar($wire)" @keydown.escape.window="if (actionEvent) { $event.preventDefault(); $event.stopPropagation(); closeActions() }" @resize.window="closeActions()" @scroll.window="closeActions(false)">
+    <section class="md-card-elevated md-task-calendar" aria-label="Calendario" x-data="taskCalendar($wire, @js(auth()->id()))" @keydown.escape.window="if (actionEvent) { $event.preventDefault(); $event.stopPropagation(); closeActions() }" @resize.window="closeActions()" @scroll.window="closeActions(false)">
         <div class="md-calendar-compact-toolbar" wire:ignore aria-label="Navegación del calendario">
             <h2 class="md-title-medium md-calendar-period" aria-live="polite"><i class="bi bi-calendar4" aria-hidden="true"></i><span x-text="mobileDate"></span></h2>
                 <div class="md-calendar-views" role="group" aria-label="Vista del calendario">
@@ -26,11 +30,11 @@
                     <x-ui.action variant="outlined" icon="bi-sliders" class="md-calendar-filter-button" x-ref="filterTrigger" data-popover-trigger @click="openFilters()" x-bind:aria-expanded="filtersOpen.toString()" aria-controls="calendar-filters">Filtros <x-ui.badge tone="primary" x-show="hasLayerFilter" x-cloak label="1 filtro aplicado">1</x-ui.badge></x-ui.action>
                     <x-ui.popover state="filtersOpen" title="Filtros" id="calendar-filters">
                         <fieldset><legend class="md-title-small">Tipos de elemento</legend>
-                            @foreach (['tasks' => 'Tareas', 'plans' => 'Planes', 'birthdays' => 'Cumpleaños', 'meals' => 'Comidas'] as $layer => $label)
+                            @foreach (['tasks' => 'Tareas', 'plans' => 'Planes', 'birthdays' => 'Cumpleaños', 'meals' => 'Comidas', 'habits' => 'Hábitos', 'reservations' => 'Reservas', 'health' => 'Salud'] as $layer => $label)
                                 <label class="md-checkbox"><input type="checkbox" x-model="draftLayers.{{ $layer }}"> {{ $label }}</label>
                             @endforeach
                         </fieldset>
-                        <x-slot:actions><button type="button" class="md-btn-text" @click="draftLayers = { tasks: true, plans: true, birthdays: true, meals: true }">Limpiar</button><button type="button" class="md-btn-filled" @click="applyLayers()">Filtrar</button></x-slot:actions>
+                        <x-slot:actions><button type="button" class="md-btn-text" @click="resetDraftLayers()">Limpiar</button><button type="button" class="md-btn-filled" @click="applyLayers()">Filtrar</button></x-slot:actions>
                     </x-ui.popover>
                 </div>
             </div>
@@ -60,7 +64,7 @@
 
     </section>
 
-    <x-ui.management-card id="unscheduled-tasks" title="Sin fecha" icon="bi-calendar-x" search="unscheduledSearch" search-placeholder="Buscar tareas sin fecha" :refreshable="false" :paginator="$unscheduledTasks" per-page-model="perPage" noun="tareas">
+    <x-ui.management-card id="unscheduled-tasks" :create-actions="[$createAction]" title="Sin fecha" icon="bi-calendar-x" search="unscheduledSearch" search-placeholder="Buscar tareas sin fecha" :refreshable="false" :paginator="$unscheduledTasks" per-page-model="perPage" noun="tareas">
         <div class="table-responsive">
             <table class="md-table align-middle">
                 <thead><tr><th scope="col">Tarea</th><th scope="col">Categoría</th><th scope="col">Prioridad</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
@@ -87,11 +91,13 @@
 
     <div class="lt-fab-zone">
         <x-module-actions fab-always
-            :primary="['label' => 'Nueva tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']]" />
+            :primary="$createAction" :split="true"
+            :secondary="[['label' => 'Reservar tiempo de estudio', 'icon' => 'bi-calendar-plus', 'event' => 'study-reservation-create', 'create' => true]]" />
     </div>
 
     <livewire:task.task-editor :edit-task="$editTask" />
     <livewire:task.find-slot />
+    <livewire:learning.study-reservation-editor />
 
     @include('livewire.task.partials.recurring-completion-dialog')
 

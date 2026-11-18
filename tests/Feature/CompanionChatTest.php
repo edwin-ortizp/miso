@@ -110,6 +110,24 @@ it('renderiza el chat con acciones rápidas en Agua y Ánimo', function () {
     $this->get('/mood')->assertOk()->assertSee('lt-chat__launcher', false);
 });
 
+it('personaliza la apertura por pantalla y toma solo el primer nombre de la cuenta', function () {
+    $this->user->update(['name' => "Élodie<& Pérez"]);
+    chatCompanion($this->user, 'Chispa');
+
+    $this->get(route('tasks.list'))->assertOk()
+        ->assertSee('lt-chat__launcher', false)
+        ->assertSee('Hola, Élodie\\\\u003C\\\\u0026. ¿Qué tarea tienes en mente?', false);
+});
+
+it('usa una apertura natural sin nombre y conserva el contexto de la acción', function () {
+    $this->user->update(['name' => '   ']);
+    chatCompanion($this->user, 'Chispa');
+
+    $this->get(route('meals.recipes'))->assertOk()->assertSee('Hola. ', false)->assertSee('receta quieres guardar', false);
+    $this->get(route('meals.shopping'))->assertOk()->assertSee('falta comprar', false);
+    $this->get(route('plans.settings'))->assertOk()->assertSee('Crear tag', false)->assertSee('Vamos con', false);
+});
+
 it('crea tareas rápidas para hoy o mañana con hora', function () {
     $this->travelTo(now()->setTime(10, 0));
     Livewire::test(TaskList::class)

@@ -25,9 +25,15 @@
     $items = collect($items)->reject(fn ($item) => ! empty($item['event']) && in_array($item['event'], $covered, true))->values()->all();
     $fields = collect($quick)->pluck('fields')->flatten()->filter()->unique()->values()->all();
     $voice = config('companion_chat');
+    $firstName = preg_split('/\s+/u', (string) auth()->user()?->name, 2, PREG_SPLIT_NO_EMPTY)[0] ?? '';
+    $hello = $firstName === '' ? $voice['hello'] : strtr($voice['hello_named'], ['{name}' => $firstName]);
+    $routeName = request()->route()?->getName();
+    $question = $greeting ?? $voice['screen_questions'][$routeName]
+        ?? strtr($voice['action_question'], ['{action}' => $label]);
+
     $config = [
         'module' => $moduleKey,
-        'greeting' => $greeting ? ($companion['salute'] ?? '').' '.$greeting : $companion['greeting'],
+        'greeting' => $hello.' '.$question,
         'followUp' => $voice['follow_up'],
         'error' => $voice['error'],
         'missingResult' => $voice['tasks']['missing_result'],
