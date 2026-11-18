@@ -160,7 +160,7 @@ _Última actualización: 2026-11-17_
 | CHG-154 | M | Documentar la arquitectura comun y lo que no se migra | done | Cerrado | 2/2 |
 | CHG-155 | S | Abrir rutina desde un hábito pendiente | in-progress | En verificación | 1/1 |
 | CHG-156 | XS | Agregar guías de conexión en Ajustes MCP | in-progress | En desarrollo | 0/1 |
-| CHG-157 | S | Recordar filtros de Tareas y agregar Mañana | in-progress | En desarrollo | 0/1 |
+| CHG-157 | S | Recordar filtros de Tareas y agregar Mañana | in-progress | En verificación | 1/1 |
 | CHG-158 | S | Editar fechas desde la lista de tareas | in-progress | En verificación | 1/1 |
 | CHG-159 | S | Mostrar institución y cambiar semestre de materias | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->

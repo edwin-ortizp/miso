@@ -70,6 +70,14 @@ for (const width of [375, 768, 1440]) {
         await expect(page.locator('.learning-shortcuts')).toContainText('Cálculo diferencial');
         await page.goto('/learning');
         const row = page.getByRole('row').filter({hasText: 'Ingeniería de Sistemas'});
+        const title = row.locator('.learning-record-link span').first();
+        const institution = row.locator('.md-table__meta');
+        await expect(institution).toHaveText('UNAL');
+        await page.evaluate(() => document.fonts.ready);
+        const titleBounds = await title.boundingBox();
+        const institutionBounds = await institution.boundingBox();
+        expect(Math.abs(institutionBounds.x - titleBounds.x)).toBeLessThanOrEqual(2);
+        expect(institutionBounds.y - (titleBounds.y + titleBounds.height)).toBeLessThanOrEqual(4);
         const trigger = row.getByRole('button', { name: 'Acciones de Ingeniería de Sistemas', exact: true });
         await trigger.click();
         const menu = row.locator('[role=menu]:visible');
@@ -97,6 +105,26 @@ for (const width of [375, 768, 1440]) {
             expect(audit.violations).toEqual([]);
             await page.screenshot({path:`${directory}/learning-${width}-${theme}.png`, fullPage:true});
         }
+        await page.goto(`/learning/${fixture.degree}`);
+        const subjectRow = page.getByRole('row').filter({ hasText: 'Introducción a la ingeniería' });
+        const subjectTrigger = subjectRow.getByRole('button', { name: 'Acciones de Introducción a la ingeniería' });
+        if (width === 375) {
+            const table = page.locator('.learning-table-wrap');
+            await table.evaluate(element => { element.scrollLeft = element.scrollWidth; });
+            await expect.poll(() => table.evaluate(element => element.scrollLeft)).toBeGreaterThan(0);
+        }
+        await subjectTrigger.click();
+        const subjectMenu = subjectRow.getByRole('menu');
+        await expect(subjectMenu).toBeVisible();
+        const lastAction = subjectMenu.getByRole('menuitem', { name: 'Eliminar', exact: true });
+        await expect(lastAction).toBeInViewport();
+        await lastAction.click({ trial: true });
+        await page.keyboard.press('Escape');
+        await expect(subjectMenu).toBeHidden();
+        await expect(subjectTrigger).toBeFocused();
+        await subjectTrigger.click();
+        await subjectMenu.getByRole('menuitem', { name: 'Cambiar semestre' }).click();
+        await expect(page.getByRole('dialog', { name: 'Editar materia' }).getByLabel('Semestre', { exact: true })).toBeVisible();
         expect(errors).toEqual([]);
     });
 }

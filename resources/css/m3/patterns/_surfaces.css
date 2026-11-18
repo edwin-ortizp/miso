@@ -153,6 +153,13 @@
   display: grid; min-width: 210px; padding: 6px 0;
   border-radius: 12px; background: var(--md-sys-color-surface-container-lowest); box-shadow: var(--md-sys-elevation-2);
 }
+.md-menu__surface--floating {
+  position: fixed; inset: var(--md-menu-top, 0) auto auto var(--md-menu-left, 0);
+  margin: 0; border: 0; color: inherit;
+  min-width: min(210px, calc(100vw - 16px)); max-width: calc(100vw - 16px);
+  max-height: var(--md-menu-max-height, calc(100dvh - 16px)); overflow: auto;
+}
+.md-menu__surface--floating:not(:popover-open) { display: none; }
 .md-menu--start .md-menu__surface { right: auto; left: 0; }
 .md-menu__item {
   display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 0 16px;

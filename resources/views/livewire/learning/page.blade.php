@@ -120,21 +120,23 @@
                                 @endphp
                                 <tr wire:key="learning-{{ $recordType }}-{{ $record->id }}">
                                     <td>
-                                        <a href="{{ $href }}" wire:navigate>{{ $record->title }}</a>
-                                        @if (!$isUnit && filled($record->institution))
-                                            <div class="md-body-small">{{ $record->institution }}</div>
-                                        @endif
+                                        <a class="learning-record-link" href="{{ $href }}" wire:navigate>
+                                            <span>{{ $record->title }}</span>
+                                            @if (!$isUnit && filled($record->institution))
+                                                <span class="md-table__meta">{{ $record->institution }}</span>
+                                            @endif
+                                        </a>
                                     </td>
                                     <td>{{ $isUnit ? $vocab->label($uid, $ftype, $record->kind) : $vocab->typeLabel($record->type) }}</td>
                                     <td>{{ LearningFormation::STATES[$record->status] }}</td>
                                     @unless($formation)<td>{{ $categories[$record->category] ?? 'Sin categoría' }}</td>@endunless
                                     <td class="md-table__actions">
-                                        <x-ui.row-actions :label="'Acciones de '.$record->title">
+                                        <x-ui.row-actions :floating="true" :label="'Acciones de '.$record->title">
                                             <x-slot:primary :x-on:click="$consultAction">Consultar</x-slot:primary>
-                                            <x-ui.menu-item icon="bi-pencil" :wire:click="$editAction" x-on:click="$el.closest('.md-row-actions').querySelector('.md-row-actions__more').focus()">Editar</x-ui.menu-item>
+                                            <x-ui.menu-item icon="bi-pencil" :wire:click="$editAction">Editar</x-ui.menu-item>
                                             <x-ui.menu-item icon="bi-pin-angle" wire:click="setPin('{{ $recordType }}', '{{ $record->id }}', {{ $pinned ? 'false' : 'true' }})">{{ $pinned ? 'Quitar de accesos directos' : 'Fijar en accesos directos' }}</x-ui.menu-item>
                                             @if ($semesterLabel && $semesters && $isUnit && $record->kind === 'subject')
-                                                <x-ui.menu-item icon="bi-arrow-left-right" wire:click="openSemester('{{ $record->id }}')" x-on:click="$el.closest('.md-row-actions').querySelector('.md-row-actions__more').focus()">Cambiar {{ mb_strtolower($semesterLabel) }}</x-ui.menu-item>
+                                                <x-ui.menu-item icon="bi-arrow-left-right" wire:click="openSemester('{{ $record->id }}')">Cambiar {{ mb_strtolower($semesterLabel) }}</x-ui.menu-item>
                                             @endif
                                             @if ($isUnit)
                                                 @unless ($loop->first)<x-ui.menu-item icon="bi-arrow-up" wire:click="move('{{ $record->id }}', -1)">Subir</x-ui.menu-item>@endunless

@@ -14,7 +14,8 @@
 .learning-description { margin-top: 12px; white-space: pre-wrap; }
 .learning-table-wrap { overflow-x: auto; max-width: 100%; padding-bottom: 4px; }
 .learning-table-wrap td:first-child { min-width: 160px; overflow-wrap: anywhere; }
-.learning-table-wrap td:first-child a { display: inline-flex; align-items: center; min-height: 44px; }
+.learning-record-link { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; min-height: 44px; color: var(--md-sys-color-primary); text-decoration: none; }
+.learning-record-link > span:first-child { text-decoration: underline; }
 .learning-table-wrap .md-table__actions { width: 1%; white-space: nowrap; }
 .learning-fields { display: grid; gap: 20px; }
 .learning-feedback { color: var(--md-sys-color-on-surface-variant); }
@@ -29,7 +30,6 @@
 .learning-page .game-guardian--rail { display: grid; }
 /* Tonal active navigation needs the paired foreground for AA in both themes. */
 [data-module='learning'] .md-form-dialog__nav-item[aria-current='true'] { color: var(--md-sys-color-on-primary-container); }
-.learning-page .learning-table-wrap td:first-child a,
 
 /* CHG-141: ajustes de vocabulario. */
 .learning-vocabulary__group { display: flex; flex-direction: column; gap: 12px; margin: 0; padding: 0; border: 0; min-width: 0; }

@@ -35,8 +35,12 @@ Verificar subtítulo, edición y menú, destinos válidos e inválidos, regreso 
 ## 8. Bitácora de implementación (developer)
 - 2026-11-17 — Implementados el subtítulo y el cambio de semestre. Pasaron 26 pruebas de Formación y `git diff --check`. Conformidad reportó desviaciones fuera de Formación. Pendiente revisión visual en navegador. El CLI local carece de registro automático de contexto.
 
+- 2026-11-17 — Corregidos el espaciado del título y el recorte del menú. El menú flotante se activa en Formación. Pasaron 26 pruebas PHP y 4 pruebas en Chromium, con comprobaciones a 375, 768 y 1440 px. Compilación publicada y conformidad sin hallazgos en las vistas modificadas.
+
 ## 9. Preguntas abiertas, decisiones e historial
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación
+- 2026-11-17 — Reabierto: Corregir alineación y recorte de menú detectados en verificación
 - 2026-11-17 — Implementación terminada → En verificación

@@ -1,5 +1,5 @@
 # CHG-157 · Recordar filtros de Tareas y agregar Mañana
-**Estado:** En desarrollo
+**Estado:** En verificación
 **Nivel:** S
 **Modelo sugerido:** estandar
 <!-- Estados y nivel se cambian SOLO con node .claude/team.mjs. Modelo: un perfil de docs/TEAM_MODELS.md -->
@@ -31,14 +31,18 @@ Cuándo
 
 ## 7. Tareas
 
-- [ ] T1 · Recordar filtros por vista y ofrecer Mañana — Resp: developer — Archivos: app/Livewire/Task/Concerns/FiltersTasks.php, config/modules.php, tests/Feature/TaskListFiltersTest.php — Hecho cuando: navegación, URL, limpieza y fechas relativas pasan las pruebas.
+- [x] T1 · Recordar filtros por vista y ofrecer Mañana — Resp: developer — Archivos: app/Livewire/Task/Concerns/FiltersTasks.php, config/modules.php, tests/Feature/TaskListFiltersTest.php — Hecho cuando: navegación, URL, limpieza y fechas relativas pasan las pruebas.
 
 <!-- Primero lo que cambia para el usuario; el detalle técnico después. Formato:
-- [ ] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … -->
+- [x] T1 · qué cambia (en simple) — Resp: developer — Modelo: perfil — Archivos: … — Hecho cuando: … -->
 
 ## 8. Bitácora de implementación (developer)
 
+- 2026-11-17 — T1 implementada. Pasaron 15 pruebas focalizadas con 123 aserciones. La batería ampliada reprodujo un fallo preexistente en la vista previa de descripciones. La conformidad detectó deuda en las plantillas existentes. Chromium verificó el selector Mañana y su persistencia al pasar por Kanban a 1440 y 390 px.
+
 ## 9. Preguntas abiertas, decisiones e historial
+- LECCIÓN: ninguna.
 - 2026-11-17 — Creado en to-do/ (Borrador, nivel S)
 - 2026-11-17 — Aprobado por el usuario (Compuerta 2)
 - 2026-11-17 — Movido a in-progress/ (En desarrollo)
+- 2026-11-17 — Implementación terminada → En verificación
