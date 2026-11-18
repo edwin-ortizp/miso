@@ -14,7 +14,7 @@
         </x-ui.snackbar>
     @endif
     <div data-region="navigation">
-        <x-module-tabs :tabs="config('modules.tasks.tabs')" :preserve="config('modules.tasks.preserve')" label="Vistas del módulo" />
+        <x-module-tabs :tabs="app(\App\Services\Experience\PersonalExperience::class)->tabs('tasks', config('modules.tasks.tabs'))" :preserve="config('modules.tasks.preserve')" route-name="tasks.list" label="Vistas del módulo" />
     </div>
 
     <div class="lt-cols task-list-layout">

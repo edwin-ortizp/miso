@@ -5,6 +5,7 @@ namespace App\Mcp\Tools\Plan;
 use App\Actions\SavePlan;
 use App\Mcp\Tools\Plan\Concerns\ResolvesPlanTargets;
 use App\Models\Plan;
+use App\Services\Geography\LocationCatalog;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Mcp\Request;
@@ -24,6 +25,8 @@ class CreatePlanTool extends Tool
             'type' => ['nullable', 'string', 'in:'.implode(',', array_keys(Plan::TYPES))],
             'category' => ['nullable', 'string', 'max:80'],
             'city' => ['nullable', 'string', 'max:120'],
+            'country_code' => ['nullable', 'string', 'size:2'],
+            'city_id' => ['nullable', 'integer'],
             'address' => ['nullable', 'string', 'max:255'],
             'scheduled_on' => ['nullable', 'date_format:Y-m-d'],
             'ends_on' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:scheduled_on'],
@@ -40,11 +43,14 @@ class CreatePlanTool extends Tool
 
         $user = Auth::user();
         $title = trim($data['title']);
-        $city = isset($data['city']) ? trim($data['city']) : null;
+        $location = LocationCatalog::attributes($data);
+        $city = $location['city'];
 
         $duplicate = $user->plans()
             ->whereRaw('lower(title) = ?', [mb_strtolower($title)])
-            ->when($city, fn ($query) => $query->whereRaw('lower(city) = ?', [mb_strtolower($city)]))
+            ->when($city, fn ($query) => $query->where(fn ($locationMatch) => $locationMatch
+                ->where('city_id', $location['city_id'])
+                ->orWhere(fn ($legacy) => $legacy->whereNull('city_id')->whereRaw('lower(city) = ?', [mb_strtolower($city)]))))
             ->first();
 
         if ($duplicate) {
@@ -68,7 +74,7 @@ class CreatePlanTool extends Tool
             'title' => $title,
             'type' => $data['type'] ?? 'place',
             'category' => $data['category'] ?? null,
-            'city' => $city ?: null,
+            ...$location,
             'address' => $data['address'] ?? null,
             'scheduled_on' => $data['scheduled_on'] ?? null,
             'ends_on' => $data['ends_on'] ?? null,
@@ -89,6 +95,8 @@ class CreatePlanTool extends Tool
                 ->description('Tipo de plan: restaurant (Restaurante), dessert (Postres), place (Lugar), museum (Museo), activity (Actividad), cinema (Cine), concert (Concierto), event (Evento), trip (Viaje), nature (Naturaleza), experience (Experiencia). Por defecto place.'),
             'category' => $schema->string()
                 ->description('Categoría libre. Ej. "Gastronomía", "Aire libre".'),
+            'country_code' => $schema->string()->description('Código ISO de dos letras del país, por ejemplo CO.'),
+            'city_id' => $schema->integer()->description('Identificador GeoNames de la ciudad. Requiere country_code.'),
             'city' => $schema->string()
                 ->description('Ciudad donde se hace el plan.'),
             'address' => $schema->string()

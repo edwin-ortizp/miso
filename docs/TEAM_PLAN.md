@@ -177,6 +177,11 @@ _Última actualización: 2026-11-18_
 | CHG-171 | S | Mostrar candado junto al horario fijo | in-progress | En verificación | 1/1 |
 | CHG-172 | S | Corregir carga duplicada de Livewire y Alpine | in-progress | En verificación | 1/1 |
 | CHG-173 | XS | Presentar el listado de tareas como tarjetas en desktop | in-progress | En verificación | 1/1 |
+| CHG-174 | S | Gestionar personas y enlaces desde el detalle del plan | in-progress | En verificación | 1/1 |
+| CHG-175 | M | Normalizar ubicaciones de planes y abrir mapas | in-progress | En verificación | 1/1 |
+| CHG-176 | M | Mostrar horarios opcionales de planes en el calendario | in-progress | En verificación | 1/1 |
+| CHG-177 | S | Acceso principal al calendario | in-progress | En verificación | 1/1 |
+| CHG-178 | XS | Ejemplos en los campos del formulario de planes | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

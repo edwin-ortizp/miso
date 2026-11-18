@@ -4,6 +4,7 @@
     'label',
     'id' => null,
     'value' => null,
+    'placeholder' => ' ',
     'rows' => 3,
     'help' => null,
     'error' => null,
@@ -26,7 +27,7 @@
     <textarea id="{{ $fieldId }}"
               @if ($name) name="{{ $name }}" @endif
               rows="{{ $rows }}"
-              placeholder=" "
+              placeholder="{{ $placeholder ?: ' ' }}"
               {{ $attributes->class(['md-field__control']) }}
               @required($required)
               @disabled($disabled)

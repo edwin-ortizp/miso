@@ -19,7 +19,8 @@ return [
             ['label' => 'Hábitos a evitar', 'route' => 'negative-habits', 'module' => 'negative-habits', 'icon' => 'bi-shield-check', 'active' => ['negative-habits*']],
         ]],
         'productivity' => ['label' => 'Productividad', 'icon' => 'bi-calendar-check', 'items' => [
-            ['label' => 'Tareas', 'route' => 'tasks.list', 'module' => 'tasks', 'icon' => 'bi-list-task', 'active' => ['tasks*']],
+            ['label' => 'Tareas', 'route' => 'tasks.list', 'module' => 'tasks', 'icon' => 'bi-list-task', 'active' => ['tasks*'], 'inactive' => ['tasks.calendar']],
+            ['label' => 'Calendario', 'route' => 'tasks.calendar', 'module' => 'tasks', 'feature' => 'calendar', 'icon' => 'bi-calendar3', 'active' => ['tasks.calendar']],
             ['label' => 'Pomodoro', 'route' => 'pomodoro', 'module' => 'pomodoro', 'icon' => 'bi-stopwatch', 'active' => ['pomodoro*']],
             ['label' => 'Objetivos', 'route' => 'goals', 'module' => 'goals', 'icon' => 'bi-flag', 'active' => ['goals*']],
             ['label' => 'Formación', 'route' => 'learning.study', 'module' => 'learning', 'icon' => 'bi-mortarboard', 'active' => ['learning*']],

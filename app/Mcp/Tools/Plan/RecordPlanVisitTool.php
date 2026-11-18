@@ -32,6 +32,8 @@ class RecordPlanVisitTool extends Tool
             'create_if_missing' => ['nullable', 'boolean'],
             'type' => ['nullable', 'string', 'in:'.implode(',', array_keys(Plan::TYPES))],
             'city' => ['nullable', 'string', 'max:120'],
+            'country_code' => ['nullable', 'string', 'size:2'],
+            'city_id' => ['nullable', 'integer'],
             'circle_names' => ['nullable', 'array'],
             'circle_names.*' => ['string'],
         ], [
@@ -60,7 +62,7 @@ class RecordPlanVisitTool extends Tool
             SavePlan::handle($plan, [
                 'title' => $title,
                 'type' => $data['type'] ?? 'place',
-                'city' => isset($data['city']) ? trim($data['city']) : null,
+                ...array_intersect_key($data, array_flip(['city', 'country_code', 'city_id'])),
             ], $circleIds, $people);
             $created = true;
         } elseif ($missing) {
@@ -131,6 +133,8 @@ class RecordPlanVisitTool extends Tool
             'type' => $schema->string()
                 ->enum(array_keys(Plan::TYPES))
                 ->description('Tipo del plan, solo si se crea. Por defecto place.'),
+            'country_code' => $schema->string()->description('Código ISO de dos letras del país, por ejemplo CO.'),
+            'city_id' => $schema->integer()->description('Identificador GeoNames de la ciudad. Requiere country_code.'),
             'city' => $schema->string()
                 ->description('Ciudad del plan, solo si se crea.'),
             'circle_names' => $schema->array()

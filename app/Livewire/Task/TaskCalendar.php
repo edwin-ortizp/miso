@@ -17,7 +17,7 @@ use Livewire\Component;
 use Livewire\WithPagination;
 
 #[Layout('layouts.app')]
-#[Title('Calendario de tareas')]
+#[Title('Calendario')]
 class TaskCalendar extends Component
 {
     use WithPagination;
@@ -83,17 +83,24 @@ class TaskCalendar extends Component
         }
 
         $plans = ! in_array('plans', $layers, true) ? [] : Plan::where('user_id', auth()->id())->whereNotNull('scheduled_on')
-            ->where('scheduled_on', '<', $rangeEnd->toDateString())
+            ->where('scheduled_on', '<', $rangeEnd->isStartOfDay() ? $rangeEnd->toDateString() : $rangeEnd->copy()->addDay()->toDateString())
             ->whereRaw('COALESCE(ends_on, scheduled_on) >= ?', [$rangeStart->toDateString()])
             ->get();
 
         foreach ($plans as $plan) {
+            $planStart = $plan->calendarStart();
+            $planEnd = $plan->calendarEnd();
+            if ($plan->starts_at_time && ($planStart >= $rangeEnd->format('Y-m-d\TH:i:s')
+                || ($planEnd ? $planEnd <= $rangeStart->format('Y-m-d\TH:i:s') : $planStart < $rangeStart->format('Y-m-d\TH:i:s')))) {
+                continue;
+            }
+
             $events[] = [
                 'id' => 'plan:'.$plan->id,
                 'title' => $plan->title,
-                'start' => $plan->scheduled_on->toDateString(),
-                'end' => ($plan->ends_on ?? $plan->scheduled_on)->copy()->addDay()->toDateString(),
-                'allDay' => true,
+                'start' => $planStart,
+                'end' => $planEnd,
+                'allDay' => ! $plan->starts_at_time,
                 'editable' => false,
                 'classNames' => ['md-calendar-plan'],
                 'extendedProps' => ['type' => 'plans', 'detailUrl' => route('plans.show', $plan)],

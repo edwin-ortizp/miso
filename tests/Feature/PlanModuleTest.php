@@ -10,6 +10,8 @@ use App\Livewire\Plan\PlanSettings;
 use App\Livewire\Plan\PlanShow;
 use App\Livewire\Relationship\RelationshipPlans;
 use App\Models\Circle;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\Plan;
 use App\Models\PlanCategory;
 use App\Models\PlanTag;
@@ -133,11 +135,15 @@ class PlanModuleTest extends TestCase
 
         $this->actingAs($user);
 
+        Country::create(['code' => 'CO', 'name' => 'Colombia']);
+        City::create(['id' => 3671916, 'country_code' => 'CO', 'name' => 'Popayán', 'normalized_name' => 'popayan']);
+
         Livewire::test(PlanIndex::class)
             ->call('openPlanForm')
             ->set('planTitle', 'Heladería Popsy')
             ->set('planType', 'dessert')
-            ->set('planCity', 'Popayán')
+            ->set('planCountryCode', 'CO')
+            ->set('planCityId', '3671916')
             ->set('planCircles', [$circle->id])
             ->set('planPeople', [$person->id, $foreignPerson->id])
             ->set('planLinks', [['url' => 'https://www.instagram.com/popsy', 'label' => ''], ['url' => '', 'label' => '']])

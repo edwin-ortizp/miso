@@ -33,7 +33,7 @@ class PlanShow extends Component
     public function render()
     {
         $plan = Plan::query()
-            ->with(['circles', 'relationships', 'tags', 'links', 'images', 'planCategory.parent'])
+            ->with(['circles', 'relationships', 'tags', 'links', 'images', 'planCategory.parent', 'country', 'catalogCity'])
             ->withVisitStats()
             ->findOrFail($this->planId);
 

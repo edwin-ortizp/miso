@@ -44,7 +44,11 @@
     }
     $activeModuleTitle = $activeModuleKey ? (config("modules.{$activeModuleKey}.title") ?? 'MiSo') : 'MiSo';
 
-    $searchIndex = collect(app(\App\Services\Experience\PersonalExperience::class)->navigation())
+    $experience = app(\App\Services\Experience\PersonalExperience::class);
+    $calendarVisible = $experience->featureVisible('tasks', 'calendar');
+    $isCalendar = request()->routeIs('tasks.calendar');
+    $isTasksDestination = request()->routeIs('tasks.*') && ! $isCalendar;
+    $searchIndex = collect($experience->navigation())
         ->flatMap(fn ($section) => $section['items'] ?? [])
         ->map(fn ($item) => ['label' => $item['label'], 'icon' => $item['icon'], 'href' => route($item['route'])])
         ->values();
@@ -183,13 +187,18 @@
                 <span>Hábitos</span>
             </a>
             @endif
-            @if (app(\App\Services\Experience\PersonalExperience::class)->visible('tasks'))
-            <a href="{{ route('tasks.list') }}" wire:navigate class="lt-bottom__item {{ request()->routeIs('tasks.*') ? 'is-active' : '' }}" @if(request()->routeIs('tasks.*')) aria-current="page" @endif>
+            @if ($experience->visible('tasks'))
+            <a href="{{ route('tasks.list') }}" wire:navigate class="lt-bottom__item {{ $isTasksDestination ? 'is-active' : '' }}" @if($isTasksDestination) aria-current="page" @endif>
                 <span class="lt-bottom__icon"><i class="bi bi-list-task" aria-hidden="true"></i></span>
                 <span>Tareas</span>
             </a>
             @endif
-            @if (app(\App\Services\Experience\PersonalExperience::class)->visible('statistics'))
+            @if ($calendarVisible)
+            <a href="{{ route('tasks.calendar') }}" wire:navigate class="lt-bottom__item {{ $isCalendar ? 'is-active' : '' }}" @if($isCalendar) aria-current="page" @endif>
+                <span class="lt-bottom__icon"><i class="bi bi-calendar3" aria-hidden="true"></i></span>
+                <span>Calendario</span>
+            </a>
+            @elseif ($experience->visible('statistics'))
             <a href="{{ route('statistics') }}" wire:navigate class="lt-bottom__item {{ request()->routeIs('statistics*') ? 'is-active' : '' }}" @if(request()->routeIs('statistics*')) aria-current="page" @endif>
                 <span class="lt-bottom__icon"><i class="bi bi-bar-chart" aria-hidden="true"></i></span>
                 <span>Stats</span>

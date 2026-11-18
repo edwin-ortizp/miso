@@ -43,3 +43,17 @@ PlanTag::create(['name' => 'Etiqueta de prueba']);
 for ($index = 1; $index <= 10; $index++) {
     PlanCategory::create(['name' => 'Categoría de prueba '.$index, 'normalized_name' => 'categoría de prueba '.$index]);
 }
+
+\App\Models\Country::create(['code' => 'CO', 'name' => 'Colombia']);
+for ($index = 1; $index <= 25; $index++) {
+    \App\Models\City::create(['id' => $index, 'country_code' => 'CO', 'name' => 'Ciudad '.$index, 'normalized_name' => 'ciudad '.$index, 'population' => 1000]);
+}
+\App\Models\City::create(['id' => 3671916, 'country_code' => 'CO', 'name' => 'Popayán', 'normalized_name' => 'popayan', 'region' => 'Cauca']);
+foreach ([1440, 390] as $width) {
+    Plan::factory()->for($bundleUser)->create([
+        'title' => 'Detalle de prueba '.$width,
+        'city' => 'Popayan anterior',
+        'address' => 'Calle 1 #2'.($width === 390 ? ', '.str_repeat('Referencia', 10) : ''),
+        'scheduled_on' => today()->toDateString(),
+    ]);
+}

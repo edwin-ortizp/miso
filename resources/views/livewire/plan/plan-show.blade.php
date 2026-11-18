@@ -76,9 +76,23 @@
                         </dd></div>
                     @endif
                     @if ($plan->category || $plan->planCategory)<div><dt>Categoría</dt><dd><x-ui.catalog-chip tone="accent" :icon="$plan->planCategory?->icon ?: 'bi-tag'">{{ $plan->planCategory?->path_label ?: $plan->category }}</x-ui.catalog-chip></dd></div>@endif
-                    @if ($plan->city)<div><dt>Ciudad</dt><dd>{{ $plan->city }}</dd></div>@endif
-                    @if ($plan->scheduled_on)<div><dt>Fecha</dt><dd>{{ $plan->scheduled_on->translatedFormat('j M Y') }}@if ($plan->ends_on) – {{ $plan->ends_on->translatedFormat('j M Y') }}@endif</dd></div>@endif
-                    @if ($plan->address)<div class="plan-data__full"><dt>Dirección</dt><dd>{{ $plan->address }}</dd></div>@endif
+                    @if ($plan->country)<div><dt>País</dt><dd>{{ $plan->country->name }}</dd></div>@endif
+                    @if ($plan->city)<div><dt>Ciudad</dt><dd>{{ $plan->catalogCity?->label() ?? $plan->city }}</dd></div>@endif
+                    @if ($plan->scheduled_on)<div><dt>Fecha</dt><dd>{{ $plan->scheduleLabel() }}</dd></div>@endif
+                    @if ($plan->address)
+                        @php
+                            $mapQuery = rawurlencode($plan->mapQuery());
+                        @endphp
+                        <div class="plan-data__full">
+                            <dt>Dirección</dt>
+                            <dd>
+                                <x-ui.menu class="plan-address" :label="'Abrir dirección en mapas: '.$plan->address" :trigger-text="$plan->address" icon="bi-geo-alt" align="start">
+                                    <x-ui.menu-item :href="'https://www.google.com/maps/search/?api=1&query='.$mapQuery" target="_blank" rel="noopener noreferrer">Abrir en Google Maps</x-ui.menu-item>
+                                    <x-ui.menu-item :href="'https://waze.com/ul?utm_source=miso&q='.$mapQuery" target="_blank" rel="noopener noreferrer">Abrir en Waze</x-ui.menu-item>
+                                </x-ui.menu>
+                            </dd>
+                        </div>
+                    @endif
                     @if ($plan->circles->isNotEmpty())<div class="plan-data__full"><dt>Círculos</dt><dd>{{ $plan->circles->pluck('name')->implode(', ') }}</dd></div>@endif
                     @if ($plan->notes)<div class="plan-data__full"><dt>Notas</dt><dd>{{ $plan->notes }}</dd></div>@endif
                 </dl>
@@ -89,6 +103,9 @@
             <header class="plan-card__head">
                 <i class="bi bi-people" aria-hidden="true"></i>
                 <h2 id="plan-people-title">Personas asociadas</h2>
+                <x-ui.menu label="Más opciones de personas">
+                    <x-ui.menu-item icon="bi-pencil" wire:click="openPlanForm('{{ $plan->id }}', 'people')">Gestionar personas</x-ui.menu-item>
+                </x-ui.menu>
             </header>
             <div class="plan-card__body">
                 @forelse ($people as $row)
@@ -102,6 +119,7 @@
                     </a>
                 @empty
                     <p class="plans-muted">Aún no está asociado a nadie.</p>
+                    <x-ui.action variant="outlined" icon="bi-people" wire:click="openPlanForm('{{ $plan->id }}', 'people')">Asociar personas</x-ui.action>
                 @endforelse
             </div>
         </section>
@@ -110,10 +128,15 @@
             <header class="plan-card__head">
                 <i class="bi bi-link-45deg" aria-hidden="true"></i>
                 <h2 id="plan-links-title">Enlaces</h2>
+                <x-ui.menu label="Más opciones de enlaces">
+                    <x-ui.menu-item icon="bi-pencil" wire:click="openPlanForm('{{ $plan->id }}', 'links')">Gestionar enlaces</x-ui.menu-item>
+                </x-ui.menu>
             </header>
             <div class="plan-card__body">
                 @forelse ($plan->links as $link)
-                    @php $platform = $link->platform(); @endphp
+                    @php
+                        $platform = $link->platform();
+                    @endphp
                     <a class="plan-mini" href="{{ $link->url }}" target="_blank" rel="noopener noreferrer">
                         <span class="plan-mini__icon"><i class="bi {{ $platform['icon'] }}" aria-hidden="true"></i></span>
                         <span class="plan-mini__body">
@@ -124,10 +147,8 @@
                     </a>
                 @empty
                     <p class="plans-muted">Sin enlaces.</p>
+                    <x-ui.action variant="outlined" icon="bi-link-45deg" wire:click="openPlanForm('{{ $plan->id }}', 'links')">Compartir enlace</x-ui.action>
                 @endforelse
-                <div>
-                    <x-ui.action variant="outlined" icon="bi-link-45deg" wire:click="openPlanForm('{{ $plan->id }}')">Compartir enlace</x-ui.action>
-                </div>
             </div>
         </section>
     </x-slot:rail>

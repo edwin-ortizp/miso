@@ -21,7 +21,7 @@
                 <div class="lt-nav-group">
                     <span class="lt-nav-group__label">{{ $section['label'] }}</span>
                     @foreach ($section['items'] as $item)
-                        @php($active = request()->routeIs(...$item['active']))
+                        @php($active = request()->routeIs(...$item['active']) && ! request()->routeIs(...($item['inactive'] ?? [])))
                         <a href="{{ route($item['route']) }}" wire:navigate class="lt-nav-item {{ $active ? 'is-active' : '' }}"
                            @isset($item['module']) data-module="{{ $item['module'] }}" @endisset
                            @if($active) aria-current="page" @endif

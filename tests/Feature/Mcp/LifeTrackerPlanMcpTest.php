@@ -12,6 +12,8 @@ use App\Mcp\Tools\Plan\UpdatePlanTool;
 use App\Mcp\Tools\Relationship\CreateContactTool;
 use App\Mcp\Tools\Relationship\ListCirclesTool;
 use App\Models\Circle;
+use App\Models\City;
+use App\Models\Country;
 use App\Models\Plan;
 use App\Models\PlanCategory;
 use App\Models\PlanVisit;
@@ -22,6 +24,15 @@ use Tests\TestCase;
 class LifeTrackerPlanMcpTest extends TestCase
 {
     use RefreshDatabase;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Country::create(['code' => 'CO', 'name' => 'Colombia']);
+        City::create(['id' => 3671916, 'country_code' => 'CO', 'name' => 'Popayán', 'normalized_name' => 'popayan']);
+        City::create(['id' => 3688689, 'country_code' => 'CO', 'name' => 'Bogotá', 'normalized_name' => 'bogota']);
+    }
 
     public function test_list_circles_returns_only_the_users_circles(): void
     {
@@ -57,6 +68,21 @@ class LifeTrackerPlanMcpTest extends TestCase
         $this->assertEqualsCanonicalizing(['Familia', 'Amigos'], $plan->circles->pluck('name')->all());
         $this->assertSame('pending', $plan->status);
         $this->assertCount(1, $plan->links);
+    }
+
+    public function test_plan_tools_accept_catalog_ids_and_reject_unknown_city_text(): void
+    {
+        $server = LifeTrackerServer::actingAs(User::factory()->create());
+        $server->tool(CreatePlanTool::class, ['title' => 'Viaje', 'city' => 'Lugar inexistente'])
+            ->assertHasErrors()->assertSee('identificador de la ciudad');
+        $server->tool(CreatePlanTool::class, ['title' => 'Viaje', 'country_code' => 'CO', 'city_id' => 3671916])
+            ->assertOk();
+        $plan = Plan::query()->sole();
+        $this->assertSame('Popayán', $plan->city);
+
+        $server->tool(UpdatePlanTool::class, ['plan_id' => $plan->id, 'country_code' => 'CO', 'city_id' => 3688689])
+            ->assertOk();
+        $this->assertSame('Bogotá', $plan->fresh()->city);
     }
 
     public function test_create_plan_links_contacts_and_schedules_dated_plans(): void

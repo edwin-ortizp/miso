@@ -82,6 +82,15 @@
 .plan-data__full { grid-column: 1 / -1; }
 .plan-data dt { color: var(--md-sys-color-on-surface-variant); font-size: .72rem; font-weight: 500; }
 .plan-data dd { margin: 2px 0 0; color: var(--md-sys-color-on-surface); font-size: .86rem; }
+.plan-address .md-menu__trigger {
+  min-height: 44px;
+  max-width: 100%;
+  height: auto;
+  padding: 6px 0;
+  text-align: start;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
 
 .plan-links-form { display: grid; gap: 16px; }
 .plan-links-form__row { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 40px; align-items: center; gap: 12px; }

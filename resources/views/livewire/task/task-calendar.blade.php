@@ -2,7 +2,7 @@
     $createAction = ['label' => 'Nueva tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm']];
 @endphp
 
-<x-module-shell module="tasks" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
+<x-module-shell module="tasks" active-route="tasks.calendar" title="Calendario" x-on:task-editor-saved.window="$wire.$refresh()" x-data="{ showRecurringDialog: $wire.entangle('showRecurringCompletion') }">
     @if ($lockedNotice)
         <x-ui.snackbar wire:key="locked-notice">
             {{ $lockedNotice }}

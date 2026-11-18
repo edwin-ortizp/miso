@@ -76,10 +76,14 @@ class Plan extends Model
         'category',
         'plan_category_id',
         'city',
+        'country_code',
+        'city_id',
         'address',
         'status',
         'scheduled_on',
         'ends_on',
+        'starts_at_time',
+        'ends_at_time',
         'notes',
     ];
 
@@ -99,6 +103,78 @@ class Plan extends Model
     public function relationships(): BelongsToMany
     {
         return $this->belongsToMany(Relationship::class);
+    }
+
+    public function calendarStart(): string
+    {
+        return $this->scheduled_on->toDateString()
+            .($this->starts_at_time ? 'T'.$this->startTime().':00' : '');
+    }
+
+    public function calendarEnd(): ?string
+    {
+        $end = $this->ends_on ?? $this->scheduled_on;
+        if ($this->ends_at_time && $this->starts_at_time) {
+            return $end->toDateString().'T'.$this->endTime().':00';
+        }
+        if ($this->starts_at_time && $end->isSameDay($this->scheduled_on)) {
+            return null;
+        }
+
+        return $end->copy()->addDay()->toDateString().($this->starts_at_time ? 'T00:00:00' : '');
+    }
+
+    public function startTime(): ?string
+    {
+        return $this->starts_at_time ? substr($this->starts_at_time, 0, 5) : null;
+    }
+
+    public function endTime(): ?string
+    {
+        return $this->ends_at_time ? substr($this->ends_at_time, 0, 5) : null;
+    }
+
+    public function scheduleLabel(): ?string
+    {
+        if (! $this->scheduled_on) {
+            return null;
+        }
+
+        $label = $this->scheduled_on->translatedFormat('j M Y');
+        if ($this->starts_at_time) {
+            $label .= ' · '.$this->clockLabel($this->startTime());
+        }
+        if ($this->ends_on && (! $this->starts_at_time || ! $this->ends_on->isSameDay($this->scheduled_on))) {
+            $label .= ' – '.$this->ends_on->translatedFormat('j M Y');
+
+            return $this->ends_at_time ? $label.' · '.$this->clockLabel($this->endTime()) : $label;
+        }
+
+        return $this->ends_at_time ? $label.' – '.$this->clockLabel($this->endTime()) : $label;
+    }
+
+    private function clockLabel(string $time): string
+    {
+        [$hour, $minutes] = explode(':', $time);
+
+        return (((int) $hour % 12) ?: 12).':'.$minutes.((int) $hour < 12 ? ' a. m.' : ' p. m.');
+    }
+
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class, 'country_code');
+    }
+
+    public function catalogCity(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
+
+    public function mapQuery(): string
+    {
+        return implode(', ', array_filter([
+            $this->address, $this->catalogCity?->name ?? $this->city, $this->catalogCity?->region, $this->country?->name,
+        ], fn ($part) => filled($part)));
     }
 
     public function planCategory(): BelongsTo

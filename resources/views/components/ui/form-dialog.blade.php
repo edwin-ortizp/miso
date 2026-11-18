@@ -8,6 +8,9 @@
     'title',
     'icon' => null,
     'sections' => [],
+    'initialSection' => null,
+    'validationSectionModel' => null,
+    'validationAttemptModel' => null,
     'submit' => 'Guardar',
     'submitAction' => null,
     'submitExpression' => null,
@@ -26,7 +29,7 @@
 
     $dialogId = $id ?? 'form-dialog-'.\Illuminate\Support\Str::slug($title);
     $clientClose = $closeExpression ?? ($state ? 'closeEditor()' : null);
-    $firstSection = array_key_first($sections);
+    $firstSection = isset($sections[$initialSection]) ? $initialSection : array_key_first($sections);
     $moduleKey = \App\Support\Ui\ModuleContext::current($module);
 @endphp
 
@@ -45,6 +48,17 @@
         <div class="md-form-dialog-layer" data-module="{{ $moduleKey }}" x-dialog-viewport="{{ $state ?? '' }}"
              @if($state) x-show="{{ $state }}" x-cloak :class="{'lt-editor-pristine': !submitted}" @endif
              @if($sectionEvent) @task-editor-section.window="section = $event.detail.section" @endif
+             @if ($validationSectionModel && $validationAttemptModel)
+                 x-init="$watch(() => $wire[@js($validationAttemptModel)], () => {
+                     const invalid = $wire[@js($validationSectionModel)];
+                     if (!invalid) return;
+                     section = invalid;
+                     $nextTick(() => requestAnimationFrame(() => {
+                         const field = Array.from($el.querySelectorAll('[aria-invalid=true]:not([disabled])')).find(input => input.offsetParent);
+                         (field ?? $el.querySelector('.md-form-dialog__nav-item[aria-current=true]'))?.focus();
+                     }));
+                 })"
+             @endif
              x-data="{ section: @js($firstSection), navCollapsed: false, expanded: @js((bool) $expanded) }" @if($state) x-effect="if ({{ $state }}) { section = @js($firstSection); expanded = @js((bool) $expanded) }" @endif>
             <div class="md-dialog-scrim" x-on:click="$el.parentElement.querySelector('[role=dialog]').dispatchEvent(new CustomEvent('md-surface-close', { bubbles: true }))"></div>
             <section {{ $attributes->class(['md-form-dialog', 'md-form-dialog--sections' => $sections !== []]) }}

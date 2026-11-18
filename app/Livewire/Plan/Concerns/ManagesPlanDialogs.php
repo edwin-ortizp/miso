@@ -5,14 +5,17 @@ namespace App\Livewire\Plan\Concerns;
 use App\Actions\RecordPlanVisit;
 use App\Actions\SavePlan;
 use App\Models\Circle;
+use App\Models\Country;
 use App\Models\Plan;
 use App\Models\PlanCategory;
 use App\Models\PlanTag;
 use App\Models\PlanVisit;
 use App\Models\Relationship;
+use App\Services\Geography\LocationCatalog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Create/edit a plan and record that it was done. Shared by the module list,
@@ -22,6 +25,12 @@ trait ManagesPlanDialogs
 {
     use \App\Livewire\Concerns\HasReminderDraft;
     public bool $showPlanForm = false;
+
+    public string $planFormSection = 'basic';
+
+    public ?string $planInvalidSection = null;
+
+    public int $planValidationAttempt = 0;
 
     public ?string $editingPlanId = null;
 
@@ -33,13 +42,25 @@ trait ManagesPlanDialogs
 
     public string $planCategoryId = '';
 
-    public string $planCity = '';
+    public string $planCountryCode = '';
+
+    public string $planCityId = '';
+
+    public string $planCitySearch = '';
+
+    public string $planPreviousCity = '';
+
+    public bool $planRemovePreviousCity = false;
 
     public string $planAddress = '';
 
     public ?string $planScheduledOn = null;
 
     public ?string $planEndsOn = null;
+
+    public ?string $planStartsAtTime = null;
+
+    public ?string $planEndsAtTime = null;
 
     public string $planNotes = '';
 
@@ -75,7 +96,19 @@ trait ManagesPlanDialogs
         $this->planCategory = '';
     }
 
-    public function openPlanForm(?string $id = null): void
+    public function updatedPlanCountryCode(): void
+    {
+        $this->reset('planCityId', 'planCitySearch');
+        $this->resetValidation('planCityId');
+    }
+
+    public function removePreviousPlanCity(): void
+    {
+        $this->planRemovePreviousCity = true;
+        $this->resetValidation('planCityId');
+    }
+
+    public function openPlanForm(?string $id = null, string $section = 'basic'): void
     {
         $this->resetPlanForm();
 
@@ -88,10 +121,14 @@ trait ManagesPlanDialogs
             $this->planType = $plan->type;
             $this->planCategory = $plan->category ?? '';
             $this->planCategoryId = $plan->plan_category_id ?? '';
-            $this->planCity = $plan->city ?? '';
+            $this->planCountryCode = $plan->country_code ?? '';
+            $this->planCityId = (string) $plan->city_id;
+            $this->planPreviousCity = $plan->city_id ? '' : ($plan->city ?? '');
             $this->planAddress = $plan->address ?? '';
             $this->planScheduledOn = $plan->scheduled_on?->toDateString();
             $this->planEndsOn = $plan->ends_on?->toDateString();
+            $this->planStartsAtTime = $plan->startTime();
+            $this->planEndsAtTime = $plan->endTime();
             $this->planNotes = $plan->notes ?? '';
             $this->planCircles = $plan->circles->pluck('id')->all();
             $this->planPeople = $plan->relationships->pluck('id')->all();
@@ -110,6 +147,7 @@ trait ManagesPlanDialogs
             $this->planImages = [''];
         }
 
+        $this->planFormSection = in_array($section, ['basic', 'reminders', 'images', 'people', 'links'], true) ? $section : 'basic';
         $this->showPlanForm = true;
     }
 
@@ -153,7 +191,20 @@ trait ManagesPlanDialogs
 
     public function savePlan(): void
     {
-        \Illuminate\Support\Facades\DB::transaction(fn () => $this->persistPlanWithReminders());
+        try {
+            \Illuminate\Support\Facades\DB::transaction(fn () => $this->persistPlanWithReminders());
+        } catch (ValidationException $exception) {
+            $field = array_key_first($exception->errors());
+            $this->planInvalidSection = match (strtok($field ?? '', '.')) {
+                'reminders' => 'reminders',
+                'planImages' => 'images',
+                'planPeople', 'planCircles' => 'people',
+                'planLinks' => 'links',
+                default => 'basic',
+            };
+            $this->planValidationAttempt++;
+            throw $exception;
+        }
     }
 
     private function persistPlanWithReminders(): void
@@ -174,9 +225,12 @@ trait ManagesPlanDialogs
             'planType' => ['required', Rule::in(array_keys(Plan::TYPES))],
             'planCategoryId' => ['nullable', 'uuid', Rule::exists('plan_categories', 'id')->where('user_id', auth()->id())],
             'planCategory' => ['nullable', 'string', 'max:80'],
-            'planCity' => ['nullable', 'string', 'max:120'],
+            'planCountryCode' => ['nullable', 'string', 'size:2', 'exists:countries,code'],
+            'planCityId' => ['nullable', 'integer', Rule::exists('cities', 'id')->where('country_code', $this->planCountryCode)],
             'planAddress' => ['nullable', 'string', 'max:255'],
-            'planScheduledOn' => ['nullable', 'date'],
+            'planScheduledOn' => ['nullable', 'date', 'required_with:planStartsAtTime'],
+            'planStartsAtTime' => ['nullable', 'date_format:H:i', 'required_with:planEndsAtTime'],
+            'planEndsAtTime' => ['nullable', 'date_format:H:i'],
             'planEndsOn' => ['nullable', 'date', 'after_or_equal:planScheduledOn'],
             'planNotes' => ['nullable', 'string', 'max:2000'],
             'planCircles' => ['array'],
@@ -194,6 +248,10 @@ trait ManagesPlanDialogs
             'planImages.*.url' => 'Escribe la URL de una imagen que empiece por http:// o https://.',
             'planLinks.*.url.required' => 'Escribe el enlace o quita la fila.',
             'planLinks.*.url.url' => 'Escribe un enlace válido que empiece por http:// o https://.',
+            'planCountryCode.exists' => 'Selecciona un país del catálogo.',
+            'planCityId.exists' => 'Selecciona una ciudad del país elegido.',
+            'planScheduledOn.required_with' => 'Indica la fecha de inicio para guardar una hora.',
+            'planStartsAtTime.required_with' => 'Indica una hora de inicio antes de agregar la hora final.',
             'planEndsOn.after_or_equal' => 'La fecha final no puede ser anterior a la fecha del plan.',
         ], [
             'planTitle' => 'nombre',
@@ -201,18 +259,35 @@ trait ManagesPlanDialogs
             'planEndsOn' => 'hasta',
         ]);
 
+        if ($this->planEndsAtTime && ($this->planEndsOn ?: $this->planScheduledOn) === $this->planScheduledOn
+            && $this->planEndsAtTime <= $this->planStartsAtTime) {
+            throw ValidationException::withMessages([
+                'planEndsAtTime' => 'La hora final debe ser posterior a la de inicio. Si termina otro día, indica la fecha final.',
+            ]);
+        }
+
+        $plan = $this->editingPlanId ? Plan::query()->findOrFail($this->editingPlanId) : new Plan;
+        if (! $plan->city_id && filled($plan->city) && $this->planCityId === '' && ! $this->planRemovePreviousCity) {
+            throw ValidationException::withMessages([
+                'planCityId' => 'Selecciona una ciudad del catálogo o quita la ciudad anterior.',
+            ]);
+        }
+
         $this->validateReminders($this->planScheduledOn);
         $savedPlan = SavePlan::handle(
-            $this->editingPlanId ? Plan::query()->findOrFail($this->editingPlanId) : new Plan,
+            $plan,
             [
                 'title' => trim($this->planTitle),
                 'type' => $this->planType,
                 'category' => trim($this->planCategory) ?: null,
                 ...($this->planCategoryId !== '' ? ['plan_category_id' => $this->planCategoryId] : []),
-                'city' => trim($this->planCity) ?: null,
+                'country_code' => $this->planCountryCode ?: null,
+                'city_id' => $this->planCityId ?: null,
                 'address' => trim($this->planAddress) ?: null,
                 'scheduled_on' => $this->planScheduledOn ?: null,
                 'ends_on' => $this->planEndsOn ?: null,
+                'starts_at_time' => $this->planStartsAtTime ?: null,
+                'ends_at_time' => $this->planEndsAtTime ?: null,
                 'notes' => trim($this->planNotes) ?: null,
             ],
             $this->planCircles,
@@ -322,6 +397,10 @@ trait ManagesPlanDialogs
     protected function planDialogOptions(): array
     {
         return [
+            'planCountryOptions' => $this->showPlanForm ? Country::query()->orderBy('name')->pluck('name', 'code')->all() : [],
+            'planCityOptions' => $this->showPlanForm
+                ? LocationCatalog::cityOptions($this->planCountryCode, mb_substr($this->planCitySearch, 0, 120), $this->planCityId)
+                : [],
             'planCategoryOptions' => PlanCategory::hierarchyOptions(auth()->id()),
             'typeOptions' => Plan::TYPES,
             'circleOptions' => Circle::query()->orderBy('sort_order')->orderBy('name')->pluck('name', 'id')->all(),
@@ -333,7 +412,7 @@ trait ManagesPlanDialogs
     private function resetPlanForm(): void
     {
         $this->reminders = [];
-        $this->reset(['editingPlanId', 'planTitle', 'planType', 'planCategory', 'planCategoryId', 'planCity', 'planAddress', 'planScheduledOn', 'planEndsOn', 'planNotes', 'planCircles', 'planPeople', 'planTags', 'planLinks', 'planImages']);
+        $this->reset(['planFormSection', 'planInvalidSection', 'planValidationAttempt', 'editingPlanId', 'planTitle', 'planType', 'planCategory', 'planCategoryId', 'planCountryCode', 'planCityId', 'planCitySearch', 'planPreviousCity', 'planRemovePreviousCity', 'planAddress', 'planScheduledOn', 'planEndsOn', 'planStartsAtTime', 'planEndsAtTime', 'planNotes', 'planCircles', 'planPeople', 'planTags', 'planLinks', 'planImages']);
         $this->resetValidation();
     }
 

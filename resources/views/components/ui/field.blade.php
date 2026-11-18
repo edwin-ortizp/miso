@@ -6,6 +6,7 @@
     'type' => 'text',
     'id' => null,
     'value' => null,
+    'placeholder' => ' ',
     'help' => null,
     'error' => null,
     'required' => false,
@@ -28,7 +29,7 @@
            id="{{ $fieldId }}"
            @if ($name) name="{{ $name }}" @endif
            value="{{ $value }}"
-           placeholder=" "
+           placeholder="{{ $placeholder ?: ' ' }}"
            {{ $attributes->class(['md-field__control']) }}
            @required($required)
            @disabled($disabled)

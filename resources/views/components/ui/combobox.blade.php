@@ -3,6 +3,7 @@
     'label',
     'id' => null,
     'options' => [],
+    'searchModel' => null,
     'placeholder' => 'Buscar',
     'empty' => 'Sin resultados',
     'help' => null,
@@ -22,6 +23,7 @@
      data-options="{{ $items->toJson() }}"
      x-data="{
          value: {!! $model ? "\$wire.entangle('{$model}')".($attributes->wire('model')->hasModifier('live') ? '.live' : '') : "''" !!},
+         searchModel: @js($searchModel),
          options: [],
          observer: null,
          init() {
@@ -41,7 +43,8 @@
          normalize: text => text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase(),
          get filtered() { const term = this.normalize(this.term.trim()); return this.options.filter(option => this.normalize(option.label).includes(term)); },
          labelFor(value) { return this.options.find(option => option.value === String(value ?? ''))?.label ?? ''; },
-         show() { this.term = ''; this.open = true; this.active = -1; },
+         search() { if (this.searchModel) this.$wire.set(this.searchModel, this.term); },
+         show() { this.term = ''; this.open = true; this.active = -1; this.search(); },
          choose(option) { this.value = option.value; this.close(); this.$refs.input.focus({ preventScroll: true }); },
          toggle() { this.$refs.input.focus({ preventScroll: true }); if (this.open) this.close(); else this.show(); },
          close() { this.open = false; this.active = -1; this.term = this.labelFor(this.value); },
@@ -60,6 +63,7 @@
            x-on:keydown.arrow-down.prevent="move(1)" x-on:keydown.arrow-up.prevent="move(-1)"
            x-on:keydown.enter="if (open && filtered[active]) { $event.preventDefault(); choose(filtered[active]) }"
            x-on:keydown.tab="close()"
+           @if ($searchModel) x-on:input.debounce.250ms="if (open) search()" @endif
            @if ($message) aria-invalid="true" aria-describedby="{{ $fieldId }}-error" @endif>
     <label for="{{ $fieldId }}">{{ $label }}</label>
     <x-ui.icon-action icon="bi-chevron-down" :label="'Mostrar opciones de '.$label"

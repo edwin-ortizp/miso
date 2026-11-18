@@ -16,7 +16,7 @@ class UpdatePlanTool extends Tool
 {
     use ResolvesPlanTargets;
 
-    private const FIELDS = ['title', 'type', 'category', 'city', 'address', 'scheduled_on', 'ends_on', 'notes', 'status'];
+    private const FIELDS = ['title', 'type', 'category', 'city', 'country_code', 'city_id', 'address', 'scheduled_on', 'ends_on', 'notes', 'status'];
 
     public function handle(Request $request): Response
     {
@@ -27,6 +27,8 @@ class UpdatePlanTool extends Tool
             'type' => ['nullable', 'string', 'in:'.implode(',', array_keys(Plan::TYPES))],
             'category' => ['nullable', 'string', 'max:80'],
             'city' => ['nullable', 'string', 'max:120'],
+            'country_code' => ['nullable', 'string', 'size:2'],
+            'city_id' => ['nullable', 'integer'],
             'address' => ['nullable', 'string', 'max:255'],
             'scheduled_on' => ['nullable', 'date_format:Y-m-d'],
             'clear_date' => ['nullable', 'boolean'],
@@ -127,6 +129,8 @@ class UpdatePlanTool extends Tool
                 ->enum(array_keys(Plan::TYPES))
                 ->description('Nuevo tipo de plan.'),
             'category' => $schema->string()->description('Nueva categoría.'),
+            'country_code' => $schema->string()->description('Código ISO de dos letras del país, por ejemplo CO.'),
+            'city_id' => $schema->integer()->description('Identificador GeoNames de la ciudad. Requiere country_code.'),
             'city' => $schema->string()->description('Nueva ciudad.'),
             'address' => $schema->string()->description('Nueva dirección.'),
             'scheduled_on' => $schema->string()->description('Nueva fecha en formato YYYY-MM-DD.'),

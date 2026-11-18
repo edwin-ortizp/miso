@@ -6,7 +6,9 @@ use App\Models\Circle;
 use App\Models\Plan;
 use App\Models\PlanCategory;
 use App\Models\Relationship;
+use App\Services\Geography\LocationCatalog;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Persists a plan with its circles, people and links. Shared by the Planes
@@ -39,7 +41,28 @@ class SavePlan
                 $attributes['plan_category_id'] = $category?->id;
                 $attributes['category'] = $category?->name;
             }
+            if (array_intersect(['country_code', 'city_id', 'city'], array_keys($attributes))) {
+                $attributes = array_replace($attributes, LocationCatalog::attributes($attributes));
+            }
+
             $plan->fill($attributes);
+
+            if (! $plan->scheduled_on && $plan->isDirty('scheduled_on')) {
+                $plan->starts_at_time = null;
+                $plan->ends_at_time = null;
+            }
+            if ($plan->starts_at_time && $plan->ends_at_time
+                && ($plan->ends_on ?? $plan->scheduled_on)?->isSameDay($plan->scheduled_on)
+                && $plan->endTime() <= $plan->startTime()) {
+                throw ValidationException::withMessages([
+                    'ends_on' => 'La fecha final debe ser posterior cuando la hora final es anterior o igual a la de inicio.',
+                ]);
+            }
+            if ($plan->starts_at_time && $plan->ends_on?->lt($plan->scheduled_on)) {
+                throw ValidationException::withMessages([
+                    'ends_on' => 'La fecha final no puede ser anterior a la fecha del plan.',
+                ]);
+            }
 
             // A date turns an open plan into a scheduled one, and removing it undoes that.
             $status = $plan->status ?? 'pending';

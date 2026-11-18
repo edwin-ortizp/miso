@@ -149,3 +149,114 @@ for (const width of [1440, 390]) {
   expect(errors).toEqual([]);
  });
 }
+
+for (const width of [1440, 390]) {
+ test(`plan detail actions and shared calendar ${width}`, async ({ page }) => {
+  test.setTimeout(60000);
+  page.setDefaultTimeout(12000);
+  await page.setViewportSize({ width, height: 950 });
+  await login(page, 'plan-bundle-browser@example.test');
+  await page.goto('/plans?sort=name');
+  await page.getByRole('link', { name: `Detalle de prueba ${width}`, exact: true }).click();
+
+  const form = page.getByRole('dialog', { name: 'Editar plan', exact: true });
+  const submit = form.getByRole('button', { name: 'Guardar', exact: true });
+  const current = name => expect(form.locator('.md-form-dialog__nav-item[aria-current=true]')).toHaveText(name);
+  await page.getByRole('button', { name: 'Asociar personas', exact: true }).click();
+  await current('Personas y círculos');
+  await form.getByRole('button', { name: 'Personas', exact: true }).click();
+  const contact = form.getByRole('checkbox', { name: 'Contacto de planes' });
+  await contact.check();
+  await contact.press('Escape');
+  await submit.click();
+  await current('Información básica');
+  await expect(form.getByRole('button', { name: 'Quitar ciudad anterior' })).toBeFocused();
+  await expect(form.getByText('Selecciona una ciudad del catálogo o quita la ciudad anterior.', { exact: true })).toBeVisible();
+
+  const country = form.getByRole('combobox', { name: 'País' });
+  await country.click();
+  await form.getByRole('option', { name: 'Colombia', exact: true }).click();
+  const city = form.getByRole('combobox', { name: 'Ciudad' });
+  await expect(city).toBeEnabled();
+  await city.fill('Popayan');
+  await form.getByRole('option', { name: 'Popayán · Cauca', exact: true }).click();
+  await expect(city).toHaveValue('Popayán · Cauca');
+  await form.getByLabel('Hora de inicio', { exact: true }).fill('19:00');
+  await submit.click();
+
+  await expect(form).toBeHidden();
+  await expect(page.getByRole('link', { name: /Contacto de planes/ })).toBeVisible();
+  await expect(page.getByText(/7:00 p\. m\./)).toBeVisible();
+  const address = page.getByRole('button', { name: /Abrir dirección en mapas/ });
+  expect(await address.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  await address.click();
+  await expect(page.getByRole('menuitem', { name: 'Abrir en Google Maps' })).toHaveAttribute('href', /Calle%201%20%232.*%2C%20Popay%C3%A1n/);
+  await expect(page.getByRole('menuitem', { name: 'Abrir en Waze' })).toHaveAttribute('href', /^https:\/\/waze.com\/ul\?/);
+  await page.keyboard.press('Escape');
+
+  await page.getByRole('button', { name: 'Compartir enlace', exact: true }).click();
+  await current('Enlaces');
+  const link = form.getByLabel('Enlace', { exact: true }).first();
+  const description = form.getByLabel('Descripción (opcional)', { exact: true }).first();
+  await expect(link).toHaveAttribute('placeholder', 'https://ejemplo.com');
+  await expect(description).toHaveAttribute('placeholder', 'Menú del restaurante');
+  await expect(link).toHaveValue('');
+  await expect(description).toHaveValue('');
+  await link.fill('https://example.test/referencia');
+  await expect(form.locator('input[placeholder="https://ejemplo.com"]:placeholder-shown')).toHaveCount(0);
+  await link.clear();
+  await expect(form.locator('input[placeholder="https://ejemplo.com"]:placeholder-shown')).toHaveCount(1);
+  await link.fill('https://example.test/referencia');
+  await description.fill('Referencia');
+  await form.getByRole('button', { name: 'Añadir enlace' }).click();
+  await expect(form.locator('input[placeholder="https://ejemplo.com"]:placeholder-shown')).toHaveCount(1);
+  await form.getByRole('button', { name: 'Imágenes', exact: true }).click();
+  await form.getByRole('button', { name: 'Añadir imagen' }).click();
+  await expect(form.locator('input[placeholder="https://ejemplo.com/imagen.jpg"]:placeholder-shown')).toHaveCount(2);
+  await submit.click();
+  await expect(page.getByRole('link', { name: /Referencia/ })).toBeVisible();
+  for (const [label, section] of [['personas', 'Personas y círculos'], ['enlaces', 'Enlaces']]) {
+   await page.getByRole('button', { name: `Más opciones de ${label}`, exact: true }).click();
+   await page.getByRole('menuitem', { name: `Gestionar ${label}`, exact: true }).click();
+   await current(section);
+   if (section === 'Enlaces') {
+    await expect(link).toHaveValue('https://example.test/referencia');
+    await expect(description).toHaveValue('Referencia');
+    await expect(form.getByLabel('Enlace', { exact: true })).toHaveCount(1);
+   }
+   await form.getByRole('button', { name: 'Cancelar', exact: true }).click();
+   await expect(form).toBeHidden();
+  }
+
+  const primaryNav = width === 390
+   ? page.getByRole('navigation', { name: 'Destinos principales' })
+   : page.locator('#app-navigation');
+  if (width === 390) {
+   await expect(primaryNav.locator('.lt-bottom__item')).toHaveCount(5);
+   expect(await primaryNav.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  }
+  await primaryNav.getByRole('link', { name: 'Calendario', exact: true }).click();
+  await expect(page).toHaveURL(/\/tasks\/calendar$/);
+  await expect(primaryNav.getByRole('link', { name: 'Calendario', exact: true })).toHaveAttribute('aria-current', 'page');
+  const timedPlan = page.locator('.fc-timegrid-event.md-calendar-plan').filter({ hasText: `Detalle de prueba ${width}` });
+  await expect(timedPlan).toHaveCount(1);
+  await expect(timedPlan.locator('.fc-event-time')).toHaveText(/19:00|7:00|7\s*p/);
+  await expect(page.getByRole('navigation', { name: 'Vistas del módulo' }).getByRole('link', { name: 'Calendario', exact: true })).toHaveAttribute('aria-current', 'page');
+
+  if (width === 390) {
+   await page.locator('#calendar-view').selectOption('dayGridMonth');
+  } else {
+   await page.getByRole('button', { name: 'Mes', exact: true }).click();
+  }
+  await expect(page.locator('.fc-daygrid-event.md-calendar-plan').filter({ hasText: `Detalle de prueba ${width}` })).toHaveCount(1);
+  if (width === 390) {
+   await page.setViewportSize({ width: 320, height: 950 });
+   expect(await primaryNav.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+  }
+  await primaryNav.getByRole('link', { name: 'Tareas', exact: true }).click();
+  await expect(page).toHaveURL(/\/tasks\/list/);
+  await page.getByRole('navigation', { name: 'Vistas del módulo' }).getByRole('link', { name: 'Calendario', exact: true }).click();
+  await expect(page).toHaveURL(/\/tasks\/calendar$/);
+  await expect(timedPlan).toHaveCount(1);
+ });
+}

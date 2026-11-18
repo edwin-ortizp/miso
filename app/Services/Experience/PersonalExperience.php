@@ -22,7 +22,7 @@ class PersonalExperience
         $items = [];
         foreach (config('modules.navigation', []) as $section) {
             foreach ($section['items'] as $item) {
-                if (! in_array($item['module'], self::ALWAYS_VISIBLE, true)) {
+                if (! isset($item['feature']) && ! in_array($item['module'], self::ALWAYS_VISIBLE, true)) {
                     $items[$item['module']] = ['label' => $item['label'], 'icon' => $item['icon'],
                         'description' => config('modules.'.$item['module'].'.subtitle', 'Organiza y consulta esta parte de tu día.')];
                 }
@@ -52,8 +52,10 @@ class PersonalExperience
         $state = $this->state($userId ?? (int) auth()->id());
         $sections = config('modules.navigation');
         foreach ($sections as $key => &$section) {
-            $section['items'] = array_values(array_filter($section['items'], fn ($item) => in_array($item['module'], self::ALWAYS_VISIBLE, true)
-                || ! isset($state['modules']) || in_array($item['module'], $state['modules'], true)));
+            $section['items'] = array_values(array_filter($section['items'], fn ($item) => isset($item['feature'])
+                ? $this->featureVisible($item['module'], $item['feature'], $userId)
+                : (in_array($item['module'], self::ALWAYS_VISIBLE, true)
+                    || ! isset($state['modules']) || in_array($item['module'], $state['modules'], true))));
             if (! $section['items']) {
                 unset($sections[$key]);
             }
