@@ -9,6 +9,7 @@ use App\Livewire\Plan\PlanScheduled;
 use App\Livewire\Plan\PlanSettings;
 use App\Livewire\Plan\PlanShow;
 use App\Livewire\Relationship\RelationshipPlans;
+use App\Livewire\Task\TaskEditor;
 use App\Models\Circle;
 use App\Models\City;
 use App\Models\Country;
@@ -17,6 +18,7 @@ use App\Models\PlanCategory;
 use App\Models\PlanTag;
 use App\Models\PlanVisit;
 use App\Models\Relationship;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
@@ -52,6 +54,79 @@ class PlanModuleTest extends TestCase
             $response = $this->actingAs($user)->get($url)->assertOk()->assertSee('md-module-shell', false);
             $this->assertSame(1, substr_count($response->getContent(), '<h1'), "{$url} should render one module heading.");
         }
+    }
+
+    public function test_plan_detail_routes_share_tabs_and_plan_data(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+        $plan = Plan::factory()->for($user)->create(['notes' => 'Notas exclusivas del plan']);
+        $sections = [
+            'plans.show' => 'Detalles',
+            'plans.show.history' => 'Historial (0)',
+            'plans.show.tasks' => 'Tareas (0)',
+            'plans.show.people' => 'Personas (0)',
+            'plans.show.links' => 'Enlaces (0)',
+        ];
+
+        foreach ($sections as $route => $label) {
+            $response = $this->get(route($route, $plan))
+                ->assertOk()
+                ->assertSeeTextInOrder(array_values($sections))
+                ->assertSee('Volver a Planes')
+                ->assertSee('Datos del plan');
+
+            $html = new \DOMDocument;
+            $html->loadHTML($response->getContent(), LIBXML_NOERROR | LIBXML_NOWARNING);
+            $xpath = new \DOMXPath($html);
+            $nav = '//nav[contains(@class, "md-module-tabs--detail")]';
+            $active = $xpath->query("{$nav}//a[@aria-current='page']/span");
+            $this->assertSame($label, $active->item(0)?->textContent);
+            $this->assertSame(5, $xpath->query("{$nav}//a[contains(@class, 'md-module-tab ')]")->length);
+        }
+        $this->get(route('plans.show', $plan))->assertSee('Notas exclusivas del plan');
+        $this->get(route('plans.show.history', $plan))->assertSee('Aún no hay visitas registradas.');
+        $this->get(route('plans.show.tasks', $plan))->assertSee('Aún no hay tareas vinculadas.');
+        $this->get(route('plans.show.people', $plan))->assertSee('Aún no está asociado a nadie.');
+        $this->get(route('plans.show.links', $plan))->assertSee('Sin enlaces.');
+    }
+
+    public function test_tasks_can_be_created_linked_and_unlinked_from_a_plan(): void
+    {
+        $this->actingAs($user = User::factory()->create());
+        $plan = Plan::factory()->for($user)->create();
+        $existing = Task::create(['title' => 'Tarea disponible']);
+        $foreign = User::factory()->create()->tasks()->create(['title' => 'Tarea de otra cuenta']);
+
+        $detail = Livewire::test(PlanShow::class, ['plan' => $plan->id, 'section' => 'tasks'])
+            ->call('openTaskLinks')
+            ->set('selectedTaskIds', [$existing->id, $foreign->id])
+            ->call('saveTaskLinks')
+            ->assertHasErrors('selectedTaskIds')
+            ->assertSee('Tareas (0)')
+            ->set('selectedTaskIds', [$existing->id])
+            ->call('saveTaskLinks')
+            ->assertHasNoErrors()
+            ->assertSee('Tareas (1)');
+
+        $detail->call('openTaskLinks')->set('selectedTaskIds', [$existing->id])
+            ->call('saveTaskLinks')->assertSee('Tareas (1)');
+
+        Livewire::test(TaskEditor::class, ['planContext' => $plan->id])
+            ->call('openForm')
+            ->set('title', 'Nueva tarea del plan')
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatched('task-editor-saved');
+
+        $detail->dispatch('task-editor-saved')->assertSee('Tareas (2)')->assertSee('Nueva tarea del plan')
+            ->call('unlinkTask', $existing->id)
+            ->assertSee('Tareas (1)')
+            ->call('deletePlan', $plan->id)
+            ->assertRedirect(route('plans'));
+
+        $this->assertDatabaseMissing('task_associations', ['target_type' => 'plan', 'target_id' => $plan->id]);
+        $this->assertDatabaseHas('tasks', ['id' => $existing->id]);
+        $this->assertDatabaseHas('tasks', ['title' => 'Nueva tarea del plan']);
     }
 
     public function test_plan_tags_can_be_managed_but_in_use_tags_cannot_be_deleted(): void
@@ -268,7 +343,9 @@ class PlanModuleTest extends TestCase
             ->set('visitDate', today()->subMonth()->toDateString())
             ->set('visitPeople', [$ali->id])
             ->call('saveVisit')
-            ->assertHasNoErrors();
+            ->assertHasNoErrors()
+            ->assertSee('Historial (2)')
+            ->assertSee('Personas (2)');
 
         $global = Plan::query()->withVisitStats()->find($plan->id);
         $this->assertSame(2, (int) $global->visits_count);

@@ -15,6 +15,10 @@ function loadFullCalendar() {
 }
 
 const compact = () => matchMedia('(max-width: 767.98px)').matches;
+function startOfDay(date = new Date()) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
 const selectedViews = new Map();
 const layerStorageKey = 'miso.task-calendar.layers.v1';
 const labels = { tasks: 'Tareas', plans: 'Planes', birthdays: 'Cumpleaños', meals: 'Comidas', habits: 'Hábitos', reservations: 'Reservas', evaluations: 'Evaluaciones', health: 'Salud' };
@@ -237,6 +241,7 @@ export function registerTaskCalendar(Alpine) {
         mobileDate: '',
         mobileView: 'Día',
         viewType: 'timeGridWeek',
+        previousPeriodDisabled: false,
         refresh: null,
         goto: null,
         goToNow(now = new Date()) {
@@ -285,6 +290,9 @@ export function registerTaskCalendar(Alpine) {
                 firstDay: 1,
                 height: 'auto',
                 initialView: selectedViews.get(account) ?? (compact() ? 'listWeek' : 'timeGridWeek'),
+                views: {
+                    listWeek: { validRange: now => ({ start: startOfDay(now) }) },
+                },
                 headerToolbar: false,
                 footerToolbar: false,
                 loading: (isLoading) => { this.calendarLoading = isLoading; },
@@ -297,16 +305,21 @@ export function registerTaskCalendar(Alpine) {
                 slotEventOverlap: false,
                 eventMinHeight: 26,
                 // La rejilla horaria necesita altura fija para desplazarse por dentro; mes y lista crecen con su contenido.
-                datesSet: ({ view }) => {
+                datesSet: ({ start, end, view }) => {
                     this.closeActions(false);
                     const date = this.calendar?.getDate() || view.currentStart;
                     this.viewType = view.type;
                     this.mobileView = { timeGridDay: 'Día', timeGridWeek: 'Semana', dayGridMonth: 'Mes', listWeek: 'Agenda' }[view.type];
                     const format = new Intl.DateTimeFormat('es', view.type === 'dayGridMonth' ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short', year: 'numeric' });
-                    if (view.type === 'timeGridWeek' || view.type === 'listWeek') {
-                        const end = new Date(view.currentEnd);
-                        end.setDate(end.getDate() - 1);
-                        this.mobileDate = `${view.currentStart.getDate()}–${format.format(end)}`;
+                    this.previousPeriodDisabled = view.type === 'listWeek' && start <= startOfDay();
+                    if (view.type === 'listWeek') {
+                        const lastDay = new Date(end);
+                        lastDay.setDate(lastDay.getDate() - 1);
+                        this.mobileDate = format.formatRange(start, lastDay);
+                    } else if (view.type === 'timeGridWeek') {
+                        const lastDay = new Date(view.currentEnd);
+                        lastDay.setDate(lastDay.getDate() - 1);
+                        this.mobileDate = `${view.currentStart.getDate()}–${format.format(lastDay)}`;
                     } else this.mobileDate = format.format(date);
                     this.fitCalendar();
                 },

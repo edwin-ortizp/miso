@@ -157,7 +157,30 @@ for (const width of [1440, 390]) {
   await page.setViewportSize({ width, height: 950 });
   await login(page, 'plan-bundle-browser@example.test');
   await page.goto('/plans?sort=name');
-  await page.getByRole('link', { name: `Detalle de prueba ${width}`, exact: true }).click();
+  const planLink = page.getByRole('link', { name: `Detalle de prueba ${width}`, exact: true });
+  const detailUrl = await planLink.getAttribute('href');
+  await planLink.click();
+  await expect(page).toHaveURL(detailUrl);
+  const tabs = page.getByRole('navigation', { name: `Secciones de Detalle de prueba ${width}` });
+  const planData = page.getByRole('heading', { name: 'Datos del plan', exact: true });
+  await expect(tabs.getByRole('link', { name: 'Detalles', exact: true })).toHaveAttribute('aria-current', 'page');
+  await expect(tabs.locator('.md-module-tab')).toHaveCount(5);
+  await expect(planData).toBeVisible();
+  await page.getByRole('button', { name: 'Registrar visita', exact: true }).click();
+  const visitForm = page.getByRole('dialog', { name: 'Registrar plan realizado', exact: true });
+  await expect(visitForm).toBeVisible();
+  await visitForm.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(visitForm).toBeHidden();
+  if (width === 1440) {
+   const [content, rail] = await Promise.all([
+    page.locator('.plans-page--detail [data-region="content"]').boundingBox(),
+    page.locator('.plans-page--detail [data-region="context"]').boundingBox(),
+   ]);
+   expect(rail.x).toBeGreaterThanOrEqual(content.x + content.width);
+  }
+  await tabs.getByRole('link', { name: 'Personas (0)', exact: true }).press('Enter');
+  await expect(page).toHaveURL(`${detailUrl}/personas`);
+  await expect(planData).toBeVisible();
 
   const form = page.getByRole('dialog', { name: 'Editar plan', exact: true });
   const submit = form.getByRole('button', { name: 'Guardar', exact: true });
@@ -186,6 +209,7 @@ for (const width of [1440, 390]) {
 
   await expect(form).toBeHidden();
   await expect(page.getByRole('link', { name: /Contacto de planes/ })).toBeVisible();
+  await expect(tabs.getByRole('link', { name: 'Personas (1)', exact: true })).toHaveAttribute('aria-current', 'page');
   await expect(page.getByText(/7:00 p\. m\./)).toBeVisible();
   const address = page.getByRole('button', { name: /Abrir dirección en mapas/ });
   expect(await address.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
@@ -194,6 +218,8 @@ for (const width of [1440, 390]) {
   await expect(page.getByRole('menuitem', { name: 'Abrir en Waze' })).toHaveAttribute('href', /^https:\/\/waze.com\/ul\?/);
   await page.keyboard.press('Escape');
 
+  await tabs.getByRole('link', { name: 'Enlaces (0)', exact: true }).click();
+  await expect(page).toHaveURL(`${detailUrl}/enlaces`);
   await page.getByRole('button', { name: 'Compartir enlace', exact: true }).click();
   await current('Enlaces');
   const link = form.getByLabel('Enlace', { exact: true }).first();
@@ -215,7 +241,14 @@ for (const width of [1440, 390]) {
   await expect(form.locator('input[placeholder="https://ejemplo.com/imagen.jpg"]:placeholder-shown')).toHaveCount(2);
   await submit.click();
   await expect(page.getByRole('link', { name: /Referencia/ })).toBeVisible();
+  await expect(tabs.getByRole('link', { name: 'Enlaces (1)', exact: true })).toHaveAttribute('aria-current', 'page');
+  await page.goBack();
+  await expect(page).toHaveURL(`${detailUrl}/personas`);
+  await page.goForward();
+  await expect(page).toHaveURL(`${detailUrl}/enlaces`);
   for (const [label, section] of [['personas', 'Personas y círculos'], ['enlaces', 'Enlaces']]) {
+   await tabs.getByRole('link', { name: new RegExp(`^${label} `, 'i') }).click();
+   await expect(planData).toBeVisible();
    await page.getByRole('button', { name: `Más opciones de ${label}`, exact: true }).click();
    await page.getByRole('menuitem', { name: `Gestionar ${label}`, exact: true }).click();
    await current(section);
@@ -238,6 +271,10 @@ for (const width of [1440, 390]) {
   await primaryNav.getByRole('link', { name: 'Calendario', exact: true }).click();
   await expect(page).toHaveURL(/\/tasks\/calendar$/);
   await expect(primaryNav.getByRole('link', { name: 'Calendario', exact: true })).toHaveAttribute('aria-current', 'page');
+  const selectWeek = () => width === 390
+   ? page.locator('#calendar-view').selectOption('timeGridWeek')
+   : page.getByRole('button', { name: 'Semana', exact: true }).click();
+  await selectWeek();
   const timedPlan = page.locator('.fc-timegrid-event.md-calendar-plan').filter({ hasText: `Detalle de prueba ${width}` });
   await expect(timedPlan).toHaveCount(1);
   await expect(timedPlan.locator('.fc-event-time')).toHaveText(/19:00|7:00|7\s*p/);
@@ -257,6 +294,46 @@ for (const width of [1440, 390]) {
   await expect(page).toHaveURL(/\/tasks\/list/);
   await page.getByRole('navigation', { name: 'Vistas del módulo' }).getByRole('link', { name: 'Calendario', exact: true }).click();
   await expect(page).toHaveURL(/\/tasks\/calendar$/);
+  await selectWeek();
   await expect(timedPlan).toHaveCount(1);
  });
 }
+
+test('plan task editor updates the current tab and the mobile rail stays below it', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 950 });
+  await login(page, 'plan-bundle-browser@example.test');
+  await page.goto('/plans?sort=name');
+  await page.getByRole('link', { name: 'Detalle de prueba 390', exact: true }).click();
+
+  const tabs = page.getByRole('navigation', { name: 'Secciones de Detalle de prueba 390' });
+  const content = page.locator('.plans-page--detail [data-region="content"]');
+  const rail = page.locator('.plans-page--detail [data-region="context"]');
+  await tabs.getByRole('link', { name: 'Tareas (0)', exact: true }).click();
+  await expect(page).toHaveURL(/\/tareas$/);
+  await expect(tabs.getByRole('link', { name: 'Tareas (0)', exact: true })).toHaveAttribute('aria-current', 'page');
+  const contentBox = await content.boundingBox();
+  expect((await rail.boundingBox()).y).toBeGreaterThanOrEqual(contentBox.y + contentBox.height);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+
+  await page.getByRole('button', { name: 'Registrar visita', exact: true }).click();
+  await page.getByRole('menuitem', { name: 'Crear tarea', exact: true }).click();
+  const editor = page.getByRole('dialog', { name: 'Nueva tarea', exact: true });
+  await editor.getByRole('textbox', { name: 'Título', exact: true }).fill('Preparar la visita');
+  await editor.getByRole('button', { name: 'Guardar', exact: true }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Editar tarea', exact: true });
+  await expect(editDialog).toBeVisible();
+  await editDialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+  await expect(tabs.getByRole('link', { name: 'Tareas (1)', exact: true })).toHaveAttribute('aria-current', 'page');
+
+  await content.getByRole('button', { name: 'Más opciones de Preparar la visita' }).click();
+  await content.getByRole('menuitem', { name: 'Desvincular' }).click();
+  await expect(tabs.getByRole('link', { name: 'Tareas (0)', exact: true })).toHaveAttribute('aria-current', 'page');
+  await content.getByRole('button', { name: 'Vincular tareas', exact: true }).click();
+  const links = page.getByRole('dialog', { name: 'Vincular tareas', exact: true });
+  await links.getByRole('button', { name: 'Tareas', exact: true }).click();
+  const option = links.getByRole('checkbox', { name: /Preparar la visita/ });
+  await option.check();
+  await option.press('Escape');
+  await links.getByRole('button', { name: 'Vincular', exact: true }).click();
+  await expect(tabs.getByRole('link', { name: 'Tareas (1)', exact: true })).toHaveAttribute('aria-current', 'page');
+});

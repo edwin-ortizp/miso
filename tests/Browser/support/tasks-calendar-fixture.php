@@ -21,11 +21,11 @@ if (config('database.default') !== 'sqlite'
 Artisan::call('migrate:fresh', ['--force' => true]);
 $user = User::factory()->create(['email' => 'tasks-calendar-browser@example.test', 'password' => 'browser-test-password']);
 auth()->login($user);
-Task::create(['title' => 'Calendar browser task', 'start_date' => now()->startOfWeek()->addDays(2)->setTime(9, 0), 'end_date' => now()->startOfWeek()->addDays(2)->setTime(10, 0), 'start_is_date' => false, 'end_is_date' => false]);
+Task::create(['title' => 'Calendar browser task', 'start_date' => today()->setTime(9, 0), 'end_date' => today()->setTime(10, 0), 'start_is_date' => false, 'end_is_date' => false]);
 Task::create(['title' => 'Calendar recurring task', 'start_date' => today(), 'start_is_date' => true, 'is_recurrent' => true, 'recurrence_interval_days' => 7]);
 Task::create([
     'title' => 'Calendar completed task with a long title that should wrap across several lines on a narrow screen',
-    'start_date' => today()->startOfWeek()->addDays(today()->dayOfWeekIso % 7),
+    'start_date' => today()->endOfWeek()->startOfDay(),
     'start_is_date' => true,
     'completed' => true,
 ]);
@@ -34,3 +34,10 @@ Task::create([
 
 $meal = \App\Models\MealPlanEntry::create(['date' => today()->toDateString(), 'meal_type' => 'desayuno', 'status' => 'planned']);
 $meal->items()->create(['name' => 'Calendar meal rice', 'position' => 0]);
+
+Task::create(['title' => 'Agenda historical task', 'start_date' => '2027-01-05', 'start_is_date' => true]);
+Task::create(['title' => 'Agenda task earlier today', 'start_date' => '2027-01-06 09:00:00', 'start_is_date' => false]);
+\App\Models\Plan::factory()->create([
+    'user_id' => $user->id, 'title' => 'Agenda ongoing plan',
+    'scheduled_on' => '2027-01-04', 'ends_on' => '2027-01-07',
+]);

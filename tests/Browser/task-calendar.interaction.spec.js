@@ -100,6 +100,58 @@ for (const width of [320, 390]) {
     });
 }
 
+for (const width of [390, 1440]) {
+    test(`Agenda starts today and retains future weeks ${width}`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.clock.setFixedTime(new Date('2027-01-06T15:00:00-05:00'));
+        await page.goto('/login');
+        await page.locator('input[type=email]').fill('tasks-calendar-browser@example.test');
+        await page.locator('input[type=password]').fill('browser-test-password');
+        await page.locator('button[type=submit]').click();
+        await page.waitForURL(url => !url.pathname.includes('/login'));
+        await page.goto('/tasks/calendar');
+
+        const toolbar = page.locator('.md-calendar-compact-toolbar');
+        const agenda = page.locator('.fc-listWeek-view');
+        const previous = toolbar.getByRole('button', { name: 'Periodo anterior' });
+        const next = toolbar.getByRole('button', { name: 'Periodo siguiente' });
+        const period = toolbar.locator('.md-calendar-period');
+        const select = async (view, label) => width < 768
+            ? toolbar.getByLabel('Vista:', { exact: true }).selectOption(view)
+            : toolbar.getByRole('button', { name: label, exact: true }).click();
+
+        if (width >= 768) await select('listWeek', 'Agenda');
+        await expect(agenda.getByText('Agenda task earlier today')).toBeVisible();
+        await expect(agenda.getByText('Agenda ongoing plan').first()).toBeVisible();
+        await expect(agenda.getByText('Agenda historical task')).toHaveCount(0);
+        await expect(agenda.locator('.fc-list-day').first()).toHaveAttribute('data-date', '2027-01-06');
+        await expect(period).toContainText(/6.*10.*2027/);
+        await expect(previous).toBeDisabled();
+
+        await next.click();
+        await expect(previous).toBeEnabled();
+        await expect(period).toContainText(/11.*17.*2027/);
+        await expect(agenda.locator('.fc-list-empty')).toBeVisible();
+        await select('timeGridWeek', 'Semana');
+        await select('listWeek', 'Agenda');
+        await expect(period).toContainText(/11.*17.*2027/);
+        await previous.click();
+        await expect(previous).toBeDisabled();
+
+        await select('timeGridWeek', 'Semana');
+        await expect(previous).toBeEnabled();
+        await expect(page.locator('.fc-timeGridWeek-view').getByText('Agenda historical task')).toBeVisible();
+        await previous.click();
+        await select('listWeek', 'Agenda');
+        await expect(previous).toBeDisabled();
+        await expect(period).toContainText(/6.*10.*2027/);
+
+        await toolbar.getByRole('button', { name: 'Ahora', exact: true }).click();
+        await expect(page.locator('.fc-timeGridDay-view')).toBeVisible();
+        await expect(previous).toBeEnabled();
+    });
+}
+
 for (const width of [1440, 768, 390]) {
     test(`calendar controls and task navigation ${width}`, async ({ page }, testInfo) => {
         await page.setViewportSize({ width, height: 900 });

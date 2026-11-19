@@ -1,57 +1,44 @@
-<x-module-shell module="plans" active-route="plans.show" :title="$plan->title" class="plans-page" :back="['href' => route('plans'), 'label' => 'Volver a Planes']">
+<x-module-shell module="plans" :active-route="$activeRoute" :title="$plan->title" class="plans-page plans-page--detail"
+                x-data x-init="$nextTick(() => {
+                    const activeTab = $el.querySelector('.md-module-tab[aria-current=page]');
+                    const track = activeTab?.parentElement;
+                    if (!track) return;
+                    const tabBounds = activeTab.getBoundingClientRect();
+                    const trackBounds = track.getBoundingClientRect();
+                    if (tabBounds.right > trackBounds.right || tabBounds.left < trackBounds.left) {
+                        track.scrollLeft += tabBounds.left - trackBounds.left;
+                    }
+                })"
+                :tabs="$detailTabs" :back="['href' => route('plans'), 'label' => 'Volver a Planes']">
+    @php
+        $visitAction = [
+            'label' => 'Registrar visita',
+            'icon' => 'bi-check2-circle',
+            'action' => "openVisitForm('{$plan->id}')",
+        ];
+
+        $sectionActions = match ($section) {
+            'tasks' => [
+                ['label' => 'Crear tarea', 'icon' => 'bi-plus-lg', 'event' => 'task-editor', 'detail' => ['action' => 'openForm'], 'create' => true],
+                ['label' => 'Vincular tareas', 'icon' => 'bi-link-45deg', 'action' => 'openTaskLinks', 'create' => true],
+            ],
+            'people' => [['label' => 'Asociar personas', 'icon' => 'bi-people', 'action' => "openPlanForm('{$plan->id}', 'people')", 'create' => true]],
+            'links' => [['label' => 'Compartir enlace', 'icon' => 'bi-link-45deg', 'action' => "openPlanForm('{$plan->id}', 'links')", 'create' => true]],
+            default => [],
+        };
+    @endphp
+
     <x-slot:actions>
-        <x-module-actions :primary="['label' => 'Registrar visita', 'icon' => 'bi-check2-circle', 'action' => 'openVisitForm(\''.$plan->id.'\')']" :fab-always="true" />
+        <x-module-actions :primary="$visitAction" :secondary="$sectionActions" />
     </x-slot:actions>
 
-    @if ($plan->images->isNotEmpty())
-        <div class="plan-gallery" role="group" aria-label="Imágenes de {{ $plan->title }}">
-            @foreach ($plan->images as $image)
-                <a class="plan-gallery__item {{ $loop->first ? 'is-main' : '' }}" href="{{ $image->url }}" target="_blank" rel="noopener noreferrer" wire:key="plan-image-{{ $image->id }}">
-                    <i class="bi {{ $plan->icon() }}" aria-hidden="true"></i>
-                    <img src="{{ $image->url }}" alt="{{ $loop->first ? 'Imagen principal de '.$plan->title : 'Imagen '.$loop->iteration.' de '.$plan->title }}" loading="lazy" referrerpolicy="no-referrer" x-data x-on:error="$el.remove()">
-                </a>
-            @endforeach
-        </div>
-    @endif
-
-    <dl class="plan-metrics">
-        <div><dt>Visitas</dt><dd>{{ (int) $plan->visits_count }}</dd></div>
-        <div><dt>Última vez</dt><dd>{{ \Illuminate\Support\Str::ucfirst($plan->lastVisitLabel()) }}</dd></div>
-        <div><dt>Personas</dt><dd>{{ $people->count() }}</dd></div>
-    </dl>
-
-    <section class="plan-card" aria-labelledby="plan-history-title">
-        <header class="plan-card__head">
-            <i class="bi bi-clock-history" aria-hidden="true"></i>
-            <h2 id="plan-history-title">Historial</h2>
-            <x-ui.action variant="tonal" icon="bi-plus-lg" size="sm" wire:click="openVisitForm('{{ $plan->id }}')">Registrar visita</x-ui.action>
-        </header>
-        <div class="plan-card__body">
-            @forelse ($visits as $visit)
-                <article class="plan-visit" wire:key="plan-visit-{{ $visit->id }}">
-                    <span class="plan-visit__dot" aria-hidden="true"></span>
-                    <div class="plan-visit__body">
-                        <strong>{{ $visit->visited_on->translatedFormat('j M Y') }}</strong>
-                        <span><i class="bi bi-people" aria-hidden="true"></i> {{ $visit->relationships->pluck('full_name')->implode(', ') }}</span>
-                        @if ($visit->comment)
-                            <p>{{ $visit->comment }}</p>
-                        @endif
-                    </div>
-                    <x-ui.menu :label="'Más opciones de la visita del '.$visit->visited_on->translatedFormat('j M Y')">
-                        <x-ui.menu-item icon="bi-trash" tone="danger" wire:click="deleteVisit('{{ $visit->id }}')" wire:confirm="¿Eliminar esta visita del historial?">Eliminar</x-ui.menu-item>
-                    </x-ui.menu>
-                </article>
-            @empty
-                <p class="plans-muted">Aún no lo han hecho. Cuando vayan, regístralo con fecha y con quién fuiste.</p>
-            @endforelse
-        </div>
-    </section>
+    @include('livewire.plan.partials.show-'.$section)
 
     <x-slot:rail>
         <section class="plan-card" aria-labelledby="plan-data-title">
             <header class="plan-card__head">
                 <i class="bi {{ $plan->icon() }}" aria-hidden="true"></i>
-                <h2 id="plan-data-title">Datos</h2>
+                <h2 id="plan-data-title">Datos del plan</h2>
                 <x-ui.menu :label="'Más opciones de '.$plan->title">
                     <x-ui.menu-item icon="bi-pencil" wire:click="openPlanForm('{{ $plan->id }}')">Editar</x-ui.menu-item>
                     @if (in_array($plan->status, ['done', 'archived'], true))
@@ -94,61 +81,7 @@
                         </div>
                     @endif
                     @if ($plan->circles->isNotEmpty())<div class="plan-data__full"><dt>Círculos</dt><dd>{{ $plan->circles->pluck('name')->implode(', ') }}</dd></div>@endif
-                    @if ($plan->notes)<div class="plan-data__full"><dt>Notas</dt><dd>{{ $plan->notes }}</dd></div>@endif
                 </dl>
-            </div>
-        </section>
-
-        <section class="plan-card" aria-labelledby="plan-people-title">
-            <header class="plan-card__head">
-                <i class="bi bi-people" aria-hidden="true"></i>
-                <h2 id="plan-people-title">Personas asociadas</h2>
-                <x-ui.menu label="Más opciones de personas">
-                    <x-ui.menu-item icon="bi-pencil" wire:click="openPlanForm('{{ $plan->id }}', 'people')">Gestionar personas</x-ui.menu-item>
-                </x-ui.menu>
-            </header>
-            <div class="plan-card__body">
-                @forelse ($people as $row)
-                    <a class="plan-mini" href="{{ route('relationships.plans', $row['person']) }}" wire:navigate>
-                        <span class="plan-mini__icon plan-mini__icon--avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr($row['person']->full_name, 0, 1)) }}</span>
-                        <span class="plan-mini__body">
-                            <strong>{{ $row['person']->full_name }}</strong>
-                            <span>{{ \App\Models\Plan::visitsLabel($row['count']) }}@if ($row['last']) · última {{ $row['last']->locale('es')->diffForHumans(['parts' => 1]) }}@endif</span>
-                        </span>
-                        <i class="bi bi-chevron-right plan-mini__trail" aria-hidden="true"></i>
-                    </a>
-                @empty
-                    <p class="plans-muted">Aún no está asociado a nadie.</p>
-                    <x-ui.action variant="outlined" icon="bi-people" wire:click="openPlanForm('{{ $plan->id }}', 'people')">Asociar personas</x-ui.action>
-                @endforelse
-            </div>
-        </section>
-
-        <section class="plan-card" aria-labelledby="plan-links-title">
-            <header class="plan-card__head">
-                <i class="bi bi-link-45deg" aria-hidden="true"></i>
-                <h2 id="plan-links-title">Enlaces</h2>
-                <x-ui.menu label="Más opciones de enlaces">
-                    <x-ui.menu-item icon="bi-pencil" wire:click="openPlanForm('{{ $plan->id }}', 'links')">Gestionar enlaces</x-ui.menu-item>
-                </x-ui.menu>
-            </header>
-            <div class="plan-card__body">
-                @forelse ($plan->links as $link)
-                    @php
-                        $platform = $link->platform();
-                    @endphp
-                    <a class="plan-mini" href="{{ $link->url }}" target="_blank" rel="noopener noreferrer">
-                        <span class="plan-mini__icon"><i class="bi {{ $platform['icon'] }}" aria-hidden="true"></i></span>
-                        <span class="plan-mini__body">
-                            <strong>{{ $link->label ?: $platform['label'] }}</strong>
-                            <span>{{ $platform['label'] }}</span>
-                        </span>
-                        <i class="bi bi-box-arrow-up-right plan-mini__trail" aria-hidden="true"></i>
-                    </a>
-                @empty
-                    <p class="plans-muted">Sin enlaces.</p>
-                    <x-ui.action variant="outlined" icon="bi-link-45deg" wire:click="openPlanForm('{{ $plan->id }}', 'links')">Compartir enlace</x-ui.action>
-                @endforelse
             </div>
         </section>
     </x-slot:rail>

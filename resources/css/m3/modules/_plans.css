@@ -65,10 +65,6 @@
 .plan-mini__badge { flex: 0 0 auto; padding: 3px 10px; border-radius: var(--md-sys-shape-corner-full); background: color-mix(in srgb, var(--md-module-accent) 12%, var(--md-sys-color-surface-container-lowest)); color: var(--md-module-accent); font-size: .72rem; font-weight: 700; }
 .plan-mini__trail { flex: 0 0 auto; color: var(--md-sys-color-on-surface-variant); }
 
-.plan-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 12px; }
-.plan-metrics > div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 4px; padding: 14px 16px; border: 1px solid var(--md-sys-color-outline-variant); border-radius: 16px; background: var(--md-sys-color-surface-container-lowest); }
-.plan-metrics dt { color: var(--md-sys-color-on-surface-variant); font-size: .76rem; font-weight: 500; }
-.plan-metrics dd { margin: 0; color: var(--md-sys-color-on-surface); font-size: 1.4rem; font-weight: 700; }
 
 .plan-visit { position: relative; display: grid; grid-template-columns: 14px minmax(0, 1fr) 40px; align-items: start; gap: 12px; padding: 6px 0; }
 .plan-visit + .plan-visit { border-top: 1px solid var(--md-sys-color-outline-variant); }
@@ -106,9 +102,6 @@
   .plan-row__person, .plan-row__tag { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
   .plan-row__avatar { flex-shrink: 0; }
   .plan-row > :last-child { grid-column: 3; grid-row: 1; }
-  .plan-metrics { gap: 8px; }
-  .plan-metrics > div { padding: 12px; }
-  .plan-metrics dd { font-size: 1.1rem; }
   .plan-links-form__row { grid-template-columns: minmax(0, 1fr) 40px; }
   .plan-links-form__row > :nth-child(2) { grid-column: 1; }
 }
@@ -136,3 +129,12 @@
 .plan-icon-picker__results { display:grid; grid-template-columns:repeat(auto-fill,minmax(40px,1fr)); gap:8px; max-height:220px; overflow:auto; padding:4px; }
 .plan-icon-picker__results [aria-pressed="true"] { background:var(--md-sys-color-primary-container); }
 .plan-row__person.md-chip { text-decoration:none; }
+
+.plan-notes { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+.plan-visit--task { grid-template-columns: minmax(0, 1fr) 40px; }
+.plan-task-link { justify-self: start; min-width: 0; text-align: start; overflow-wrap: anywhere; }
+.plan-task-link > span:last-child { white-space: normal; }
+
+@media (max-width: 1199.98px) {
+  .plans-page--detail .md-module-workspace--rail > .md-context-rail { grid-template-columns: minmax(0, 1fr); }
+}

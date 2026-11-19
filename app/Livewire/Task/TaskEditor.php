@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Task;
 
+use App\Models\Plan;
 use App\Models\Task;
+use App\Models\TaskAssociation;
 use App\Models\TaskCategory;
 use App\Models\TaskStatus;
 use App\Services\TaskCodeService;
@@ -34,14 +36,21 @@ class TaskEditor extends TaskList
     #[\Livewire\Attributes\Locked]
     public ?string $goalContext = null;
 
+    #[\Livewire\Attributes\Locked]
+    public ?string $planContext = null;
+
     /** CHG-144: «Horario fijo»; el editor es el único lugar donde se cambia la fecha de una tarea fija. */
     public bool $scheduleLocked = false;
 
-    public function mount(?string $goalContext = null): void
+    public function mount(?string $goalContext = null, ?string $planContext = null): void
     {
         if ($goalContext !== null) {
             abort_unless(auth()->check(), 403);
             $this->goalContext = \App\Models\Goal::where('user_id', auth()->id())->findOrFail($goalContext)->id;
+        }
+        if ($planContext !== null) {
+            abort_unless(auth()->check(), 403);
+            $this->planContext = Plan::where('user_id', auth()->id())->findOrFail($planContext)->id;
         }
         $this->draftTaskId = (string) \Illuminate\Support\Str::uuid();
         if ($this->editTask) $this->openForm($this->editTask);
@@ -187,6 +196,10 @@ class TaskEditor extends TaskList
             if ($this->goalContext !== null) {
                 $goal = \App\Models\Goal::where('user_id', auth()->id())->findOrFail($this->goalContext);
                 \App\Models\TaskAssociation::link($task, $goal);
+            }
+            if ($this->planContext !== null && ! $this->editingId) {
+                $plan = Plan::where('user_id', auth()->id())->lockForUpdate()->findOrFail($this->planContext);
+                TaskAssociation::link($task, $plan);
             }
             $this->saveReminders($task);
             $result = null;

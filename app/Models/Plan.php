@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Carbon;
 
 class Plan extends Model
@@ -59,6 +61,23 @@ class Plan extends Model
         'done' => 'Realizado',
         'archived' => 'Archivado',
     ];
+
+    protected static function booted(): void
+    {
+        static::deleting(fn (self $plan) => $plan->taskAssociations()->delete());
+    }
+
+    public function taskAssociations(): MorphMany
+    {
+        return $this->morphMany(TaskAssociation::class, 'target');
+    }
+
+    public function tasks(): MorphToMany
+    {
+        return $this->morphToMany(Task::class, 'target', 'task_associations', 'target_id', 'task_id')
+            ->wherePivot('user_id', $this->user_id)
+            ->withTimestamps();
+    }
 
     public function notifications(): \Illuminate\Database\Eloquent\Relations\MorphMany
     {

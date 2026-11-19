@@ -202,6 +202,10 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/plans/settings/categories', \App\Livewire\Plan\PlanSettings::class)->name('plans.settings.categories')->defaults('section', 'categories');
     Route::get('/plans', PlanIndex::class)->name('plans');
     Route::get('/plans/{plan}', PlanShow::class)->name('plans.show');
+    Route::get('/plans/{plan}/historial', PlanShow::class)->defaults('section', 'history')->name('plans.show.history');
+    Route::get('/plans/{plan}/tareas', PlanShow::class)->defaults('section', 'tasks')->name('plans.show.tasks');
+    Route::get('/plans/{plan}/personas', PlanShow::class)->defaults('section', 'people')->name('plans.show.people');
+    Route::get('/plans/{plan}/enlaces', PlanShow::class)->defaults('section', 'links')->name('plans.show.links');
     Route::get('/learning', \App\Livewire\Learning\LearningPage::class)->name('learning');
     Route::get('/learning/settings', \App\Livewire\Learning\LearningSettings::class)->name('learning.settings')->defaults('section', 'vocabulary');
     Route::get('/learning/settings/categories', \App\Livewire\Learning\LearningSettings::class)->name('learning.settings.categories')->defaults('section', 'categories');

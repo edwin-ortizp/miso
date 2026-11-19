@@ -22,7 +22,7 @@
                 <div class="md-calendar-view-mobile"><x-ui.select label="Vista:" id="calendar-view" :options="['dayGridMonth' => 'Mes', 'timeGridWeek' => 'Semana', 'timeGridDay' => 'Día', 'listWeek' => 'Agenda']" x-bind:value="viewType" x-on:change="selectView($event.target.value)" /></div>
             <div class="md-calendar-controls">
                 <div class="md-calendar-arrows" role="group" aria-label="Cambiar periodo">
-                    <button type="button" class="md-btn-icon" aria-label="Periodo anterior" @click="calendar.prev()"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
+                    <button type="button" class="md-btn-icon" aria-label="Periodo anterior" :disabled="previousPeriodDisabled" @click="calendar.prev()"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>
                     <button type="button" class="md-btn-icon" aria-label="Periodo siguiente" @click="calendar.next()"><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
                 </div>
                 <x-ui.action variant="tonal" size="sm" class="md-calendar-now" @click="goToNow()">Ahora</x-ui.action>

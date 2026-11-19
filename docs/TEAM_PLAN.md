@@ -183,6 +183,8 @@ _Última actualización: 2026-11-18_
 | CHG-177 | S | Acceso principal al calendario | in-progress | En verificación | 1/1 |
 | CHG-178 | XS | Ejemplos en los campos del formulario de planes | in-progress | En verificación | 1/1 |
 | CHG-179 | S | Mejorar la lectura de Agenda móvil | in-progress | En verificación | 1/1 |
+| CHG-180 | M | Pestañas del detalle de un plan | in-progress | En verificación | 1/2 |
+| CHG-181 | S | Mostrar Agenda desde hoy | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
