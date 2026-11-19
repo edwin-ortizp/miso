@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-18_
+_Última actualización: 2026-11-19_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -186,6 +186,11 @@ _Última actualización: 2026-11-18_
 | CHG-180 | M | Pestañas del detalle de un plan | done | Cerrado | 2/2 |
 | CHG-181 | S | Mostrar Agenda desde hoy | done | Cerrado | 1/1 |
 | CHG-182 | M | Modernizar el modal de reservas de estudio | done | Cerrado | 1/1 |
+| CHG-183 | M | Acciones y cumplimiento de hábitos desde Diario e Hidratación | to-do | Borrador | 0/4 |
+| CHG-184 | M | Catálogo de sugerencias de hábitos | to-do | Borrador | 0/3 |
+| CHG-185 | M | Editor común de tareas y Mood en contactos | in-progress | En verificación | 3/4 |
+| CHG-186 | M | Agenda consolidada y disponibilidad en el MCP | to-do | Borrador | 0/0 |
+| CHG-187 | M | Reprogramación confirmada de tareas desde el MCP | to-do | Borrador | 0/0 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

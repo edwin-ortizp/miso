@@ -107,14 +107,14 @@
                         <x-slot:trailing>
                             <x-ui.icon-action icon="bi-chat-left-text" label="Añadir contexto a {{ $entry->text }}"
                                               wire:click="openMoodContext('{{ $entry->id }}')" />
-                            <x-ui.icon-action icon="bi-pencil" label="Cambiar la emoción {{ $entry->text }}"
-                                              wire:click="openEditForm('{{ $entry->id }}')" />
+                            <x-ui.icon-action icon="bi-pencil" label="Editar el registro de {{ $entry->text }}"
+                                              :data-record-id="$entry->id" x-on:click="$dispatch('mood-editor', {mode: 'edit', id: $el.dataset.recordId})" />
                             <x-ui.icon-action icon="bi-lightbulb" label="Reflexionar sobre {{ $entry->text }}" tone="info"
                                               wire:click="openReflection('{{ $entry->id }}')" />
                             <x-ui.destructive-action label="Eliminar el registro de {{ $entry->text }}" :iconOnly="true"
                                                      action="deleteMood('{{ $entry->id }}')"
                                                      title="Eliminar registro"
-                                                     message="El estado y su contexto se eliminan de forma permanente." />
+                                                     message="El registro se elimina de Ánimo y de todas las fichas vinculadas." />
                         </x-slot:trailing>
                     </x-ui.list-item>
                 @endforeach
@@ -167,28 +167,7 @@
         @livewire('mood.mood-reflection-wizard', ['entryId' => $reflectionEntryId], key('reflection-'.$reflectionEntryId))
     @endif
 
-    @if ($showEditForm)
-        <div x-data="{ editing: true }">
-            <x-ui.dialog state="editing" title="Cambiar la emoción" x-on:md-surface-close="$wire.closeEditForm()">
-                <p class="md-body-small">Se conserva el contexto que ya registraste.</p>
-
-                <div class="md-mood-catalog" role="group" aria-label="Catálogo de emociones">
-                    @foreach ($moodStates as $state)
-                        <button type="button" wire:click="updateMoodState('{{ $state->id }}')"
-                                class="md-mood-catalog__item {{ $editMoodStateId === $state->id ? 'is-selected' : '' }}"
-                                title="{{ $state->text }}" wire:key="edit-state-{{ $state->id }}">
-                            <span class="md-mood-catalog__emoji" aria-hidden="true">{{ $state->emoji }}</span>
-                            <span class="md-label-small">{{ $state->text }}</span>
-                        </button>
-                    @endforeach
-                </div>
-
-                <x-slot:actions>
-                    <x-ui.action variant="text" wire:click="closeEditForm">Cancelar</x-ui.action>
-                </x-slot:actions>
-            </x-ui.dialog>
-        </div>
-    @endif
+    <livewire:mood.mood-editor />
 
     <x-ui.form-dialog :open="$showEnergyForm" close="closeEnergyForm" submit-action="saveEnergy" id="energy-dialog"
                       title="Registrar energía" icon="bi-lightning-charge">

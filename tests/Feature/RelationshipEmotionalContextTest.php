@@ -70,14 +70,65 @@ class RelationshipEmotionalContextTest extends TestCase
         $this->assertDatabaseCount('mood_entries', 1);
     }
 
-    public function test_emotional_records_stay_out_of_the_relationship_detail(): void
+    public function test_one_backdated_record_is_visible_on_each_linked_contact_and_can_be_unlinked(): void
     {
-        $this->linkedEntry('Frustración', ['intensity' => 4, 'situation' => 'Discutí con Alison']);
+        $other = Relationship::factory()->create(['user_id' => $this->user->id]);
+        $third = Relationship::factory()->create(['user_id' => $this->user->id]);
+        $emotion = MoodState::firstWhere('text', 'Frustración');
+        $editor = Livewire::test(\App\Livewire\Mood\MoodEditor::class, ['contactId' => $this->alison->id])
+            ->call('open', 'create')
+            ->set('emotion', $emotion->id)
+            ->set('date', '2026-08-03')
+            ->set('situation', 'Discutí con Alison')
+            ->set('contacts', [$other->id, $third->id])
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $entry = MoodEntry::sole();
+        $this->assertSame('2026-08-03', $entry->date->toDateString());
+
+        foreach ([$this->alison, $other, $third] as $person) {
+            Livewire::test(\App\Livewire\Relationship\RelationshipMood::class, ['relationship' => $person->id])
+                ->assertSee('Mood (1)')
+                ->assertSee('Discutí con Alison');
+            Livewire::test(\App\Livewire\Relationship\RelationshipHistory::class, ['relationship' => $person->id])
+                ->call('setType', 'mood')
+                ->assertSee('Discutí con Alison');
+        }
+
+        $editor->call('open', 'edit', $entry->id)
+            ->set('contacts', [$other->id, $third->id])
+            ->set('situation', 'Detalle revisado')
+            ->call('save')
+            ->assertHasNoErrors();
 
         Livewire::test(RelationshipShow::class, ['relationship' => $this->alison->id])
-            ->assertSee('Alison Restrepo')
-            ->assertDontSee('Discutí con Alison')
-            ->assertDontSee('Experiencias emocionales vinculadas');
+            ->assertSee('Mood (0)')
+            ->assertDontSee('Detalle revisado');
+        $this->assertEqualsCanonicalizing([$other->id, $third->id], $entry->relationships()->pluck('relationships.id')->all());
+        $this->assertSame('Detalle revisado', $entry->fresh()->situation);
+    }
+
+    public function test_editor_rejects_foreign_contacts_and_keeps_unlinked_entries_in_mood(): void
+    {
+        $foreign = Relationship::factory()->create(['user_id' => User::factory()->create()->id]);
+        $entry = $this->linkedEntry('Frustración');
+        $editor = Livewire::test(\App\Livewire\Mood\MoodEditor::class, ['contactId' => $this->alison->id])
+            ->call('open', 'edit', $entry->id)
+            ->set('contacts', [$foreign->id])
+            ->call('save')
+            ->assertHasErrors(['contacts.0']);
+
+        $this->assertSame([$this->alison->id], $entry->relationships->modelKeys());
+
+        $editor->set('contacts', [])->call('save')->assertHasNoErrors();
+        $this->assertDatabaseCount('mood_entry_relationship', 0);
+        $this->assertDatabaseHas('mood_entries', ['id' => $entry->id]);
+
+        Livewire::test(\App\Livewire\Mood\MoodEditor::class)
+            ->call('delete', $entry->id)
+            ->assertDispatched('mood-editor-saved');
+        $this->assertDatabaseMissing('mood_entries', ['id' => $entry->id]);
     }
 
     public function test_unlinking_keeps_the_entry_and_its_reflection(): void

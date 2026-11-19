@@ -51,13 +51,14 @@ class RelationshipRemindersTest extends TestCase
 
     public function test_a_reminder_creates_one_task_visible_in_both_surfaces(): void
     {
-        Livewire::test(RelationshipShow::class, ['relationship' => $this->relationship->id])
-            ->call('openTaskForm')
-            ->set('taskTitle', 'Recordarle pedir cita médica')
-            ->set('taskDueDate', '2026-08-20')
-            ->call('saveTask')
-            ->assertHasNoErrors()
-            ->assertSee('Recordarle pedir cita médica');
+        Livewire::test(\App\Livewire\Task\TaskEditor::class)
+            ->call('openContactForm', $this->relationship->id)
+            ->set('title', 'Recordarle pedir cita médica')
+            ->set('endDate', '2026-08-20')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        Livewire::test(RelationshipShow::class, ['relationship' => $this->relationship->id])->assertSee('Recordarle pedir cita médica');
 
         $this->assertDatabaseCount('tasks', 1);
         $this->assertDatabaseCount('task_associations', 1);
@@ -135,14 +136,15 @@ class RelationshipRemindersTest extends TestCase
 
         $this->assertDatabaseCount('tasks', 0);
 
-        $component->call('openTaskForm', 'Contactar a Alison Restrepo')
-            ->assertSet('showTaskForm', true)
-            ->assertSet('taskTitle', 'Contactar a Alison Restrepo');
+        $editor = Livewire::test(\App\Livewire\Task\TaskEditor::class)
+            ->call('openContactForm', $this->relationship->id)
+            ->assertSet('showForm', true)
+            ->set('title', 'Contactar a Alison Restrepo');
 
         // Opening the form must not create a task on its own.
         $this->assertDatabaseCount('tasks', 0);
 
-        $component->call('saveTask')->assertHasNoErrors();
+        $editor->call('save')->assertHasNoErrors();
         $this->assertDatabaseCount('tasks', 1);
     }
 

@@ -96,13 +96,14 @@ class RelationshipAlisonWalkthroughTest extends TestCase
             ->assertSee('Resultado de exámenes');
 
         // 4. An appointment reminder is one ordinary task, not a second event.
-        $detail()
-            ->call('openTaskForm')
-            ->set('taskTitle', 'Recordarle pedir cita médica')
-            ->set('taskDueDate', '2026-08-10')
-            ->call('saveTask')
-            ->assertHasNoErrors()
-            ->assertSee('Recordarle pedir cita médica');
+        Livewire::test(\App\Livewire\Task\TaskEditor::class)
+            ->call('openContactForm', $alison->id)
+            ->set('title', 'Recordarle pedir cita médica')
+            ->set('endDate', '2026-08-10')
+            ->call('save')
+            ->assertHasNoErrors();
+
+        $detail()->assertSee('Recordarle pedir cita médica');
 
         $this->assertDatabaseCount('tasks', 1);
         $this->assertDatabaseCount('relationship_events', 2);

@@ -6,7 +6,6 @@ use App\Livewire\Concerns\HasUrlDate;
 use App\Livewire\Concerns\LogsMoodProgressively;
 use App\Models\EnergyEntry;
 use App\Models\MoodEntry;
-use App\Models\MoodState;
 use Carbon\Carbon;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\On;
@@ -21,13 +20,6 @@ class MoodTracker extends Component
 {
     use HasUrlDate, LogsMoodProgressively;
     use WithManagementCard;
-
-    // Editing an entry's primary emotion from the history
-    public bool $showEditForm = false;
-
-    public ?string $editingEntryId = null;
-
-    public string $editMoodStateId = '';
 
     // Reflection wizard
     public ?string $reflectionEntryId = null;
@@ -95,29 +87,10 @@ class MoodTracker extends Component
         $this->logMood($moodStateId);
     }
 
-    public function openEditForm(string $entryId): void
+    #[On('mood-editor-saved')]
+    public function refreshMoodEntries(): void
     {
-        $entry = MoodEntry::findOrFail($entryId);
-
-        $this->editingEntryId = $entry->id;
-        $this->editMoodStateId = $entry->mood_state_id ?? '';
-        $this->showEditForm = true;
-    }
-
-    public function closeEditForm(): void
-    {
-        $this->showEditForm = false;
-        $this->editingEntryId = null;
-    }
-
-    /** Replaces the single primary emotion, leaving intensity, situation and links intact. */
-    public function updateMoodState(string $moodStateId): void
-    {
-        $entry = MoodEntry::findOrFail($this->editingEntryId);
-        $state = MoodState::findOrFail($moodStateId);
-
-        $entry->applyMoodState($state);
-        $this->closeEditForm();
+        $this->resetPage('moodPage');
     }
 
     public function deleteMood(string $id)

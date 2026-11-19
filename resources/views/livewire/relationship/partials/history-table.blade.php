@@ -38,6 +38,8 @@
                             <x-ui.menu-item icon="bi-trash" tone="danger" wire:click="deleteEvent('{{ $row['id'] }}')"
                                             wire:confirm="¿Eliminar este acontecimiento?">Eliminar</x-ui.menu-item>
                         </x-ui.row-actions>
+                    @elseif ($row['kind'] === 'mood')
+                        <x-ui.action variant="outlined" size="sm" :data-record-id="$row['id']" x-on:click="$dispatch('mood-editor', {mode: 'view', id: $el.dataset.recordId})">Ver detalle</x-ui.action>
                     @else
                         <x-ui.action variant="outlined" size="sm" :href="$row['url']" wire:navigate>Ver plan</x-ui.action>
                     @endif

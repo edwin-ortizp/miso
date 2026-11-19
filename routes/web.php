@@ -44,6 +44,7 @@ use App\Livewire\Social\FriendsIndex;
 use App\Livewire\Social\WeeklyBoard;
 use App\Livewire\Relationship\RelationshipEvents;
 use App\Livewire\Relationship\RelationshipHistory;
+use App\Livewire\Relationship\RelationshipMood;
 use App\Livewire\Relationship\RelationshipIndex;
 use App\Livewire\Relationship\RelationshipPlans;
 use App\Livewire\Relationship\RelationshipShow;
@@ -194,6 +195,7 @@ Route::middleware(['auth', \App\Http\Middleware\RequireOnboarding::class])->grou
     Route::get('/relationships/birthdays', RelationshipBirthdays::class)->name('relationships.birthdays');
     Route::get('/relationships/{relationship}', RelationshipShow::class)->name('relationships.show');
     Route::get('/relationships/{relationship}/plans', RelationshipPlans::class)->name('relationships.plans');
+    Route::get('/relationships/{relationship}/mood', RelationshipMood::class)->name('relationships.mood');
     Route::get('/relationships/{relationship}/history', RelationshipHistory::class)->name('relationships.history');
     Route::get('/relationships/{relationship}/tasks', RelationshipTasks::class)->name('relationships.tasks');
     Route::get('/plans/scheduled', \App\Livewire\Plan\PlanScheduled::class)->name('plans.scheduled');

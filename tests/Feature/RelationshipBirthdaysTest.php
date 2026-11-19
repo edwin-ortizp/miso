@@ -150,12 +150,12 @@ class RelationshipBirthdaysTest extends TestCase
             'full_name' => 'Enero Pronto',
         ]);
 
-        Livewire::test(RelationshipBirthdays::class)
-            ->call('openTaskForm', $relationship->id)
-            ->assertSet('taskDueDate', '2027-01-08')
-            ->set('taskDueDate', '2027-01-02')
-            ->set('taskTitle', 'Comprar regalo')
-            ->call('saveTask')
+        Livewire::test(\App\Livewire\Task\TaskEditor::class)
+            ->call('openBirthdayForm', $relationship->id)
+            ->assertSet('endDate', '2027-01-08')
+            ->set('endDate', '2027-01-02')
+            ->set('title', 'Comprar regalo')
+            ->call('save')
             ->assertHasNoErrors();
 
         $task = Task::firstWhere('title', 'Comprar regalo');

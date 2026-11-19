@@ -16,7 +16,7 @@
             <div class="md-chip-rail md-mcard__filter-chips" role="group" aria-label="Tipo de registro">
                 <x-ui.chip variant="filter" icon="bi-grid" :selected="$type === ''" wire:click="setType('')" wire:key="history-type-all">Todos</x-ui.chip>
                 @foreach ($typeFilters as $key => $label)
-                    <x-ui.chip variant="filter" :icon="$key === 'event' ? 'bi-calendar-event' : 'bi-map'" :selected="$type === $key"
+                    <x-ui.chip variant="filter" :icon="match ($key) {'event' => 'bi-calendar-event', 'mood' => 'bi-emoji-smile', default => 'bi-map'}" :selected="$type === $key"
                                wire:click="setType('{{ $key }}')" wire:key="history-type-{{ $key }}">{{ $label }}</x-ui.chip>
                 @endforeach
             </div>
@@ -47,4 +47,5 @@
     </x-ui.management-card>
 
     @include('livewire.relationship.partials.event-dialog')
+    <livewire:mood.mood-editor :contact-id="$relationship->id" />
 </x-module-shell>

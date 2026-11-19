@@ -1,5 +1,5 @@
 <x-module-shell module="relationships" title="Cumpleaños" subtitle="Los próximos doce meses, sin duplicar acontecimientos cada año."
-                x-data="{ showTaskDialog: $wire.entangle('showTaskForm') }">
+                >
     <div class="md-summary-strip mb-3" aria-label="Resumen de cumpleaños">
         <span class="md-count-badge--info">{{ $totalWithBirthday }} con cumpleaños</span>
         @if ($todayCount)
@@ -60,7 +60,7 @@
                 </div>
             </div>
             <x-ui.row-actions :label="'Más acciones de '.$row['relationship']->full_name">
-                <x-slot:primary wire:click="openTaskForm('{{ $row['relationship']->id }}')">Crear tarea</x-slot:primary>
+                <x-slot:primary :data-record-id="$row['relationship']->id" x-on:click="$dispatch('task-editor', {action: 'openBirthdayForm', id: $el.dataset.recordId, mode: 'edit'})">Crear tarea</x-slot:primary>
                 <x-ui.menu-item icon="bi-person" :href="route('relationships.show', $row['relationship']->id)" wire:navigate>Ver relación</x-ui.menu-item>
             </x-ui.row-actions>
         </div>
@@ -94,31 +94,5 @@
         </x-context-widget>
     </x-slot:rail>
 
-    <template x-if="showTaskDialog">
-        <div>
-            <div class="md-dialog-scrim" @click="showTaskDialog = false"></div>
-            <div class="md-dialog" @click.stop>
-                <h2 class="md-dialog-headline md-headline-small">Tarea desde un cumpleaños</h2>
-                <div class="md-dialog-content">
-                    <div class="d-flex flex-column gap-3">
-                        <div class="md-text-field">
-                            <input type="text" wire:model="taskTitle" placeholder=" " id="birthday-task-title">
-                            <label for="birthday-task-title">Título</label>
-                        </div>
-                        @error('taskTitle') <p class="md-body-small" style="color: var(--md-sys-color-error);">{{ $message }}</p> @enderror
-
-                        <div class="md-text-field">
-                            <input type="date" wire:model="taskDueDate" placeholder=" " id="birthday-task-date">
-                            <label for="birthday-task-date">Fecha</label>
-                        </div>
-                        @error('taskDueDate') <p class="md-body-small" style="color: var(--md-sys-color-error);">{{ $message }}</p> @enderror
-                    </div>
-                </div>
-                <div class="md-dialog-actions">
-                    <button @click="showTaskDialog = false" class="md-btn-text">Cancelar</button>
-                    <button wire:click="saveTask" class="md-btn-filled"><i class="bi bi-check-lg"></i> Crear tarea</button>
-                </div>
-            </div>
-        </div>
-    </template>
+    <livewire:task.task-editor />
 </x-module-shell>

@@ -4,7 +4,7 @@
     $identity = collect([$alias ? '“'.$alias.'”' : null, $relationship->circle?->name])->filter()->implode(' · ');
     $toneClass = fn (string $tone) => 'md-chip-tonal'.($tone === 'neutral' ? '' : ' md-chip-tonal--'.($tone === 'danger' ? 'error' : $tone));
     $createAction = ['label' => 'Registrar acontecimiento', 'icon' => 'bi-calendar-plus', 'action' => 'openEventForm'];
-    $createTaskAction = ['label' => 'Agregar tarea', 'icon' => 'bi-check2-square', 'action' => 'openTaskForm', 'create' => true];
+    $createTaskAction = ['label' => 'Agregar tarea', 'icon' => 'bi-check2-square', 'event' => 'task-editor', 'detail' => ['action' => 'openContactForm', 'id' => $relationship->id, 'mode' => 'edit'], 'create' => true];
 @endphp
 
 <x-module-shell module="relationships" :title="$relationship->full_name"
@@ -201,9 +201,10 @@
     </x-slot:rail>
 
     @include('livewire.relationship.partials.event-dialog')
-    @include('livewire.relationship.partials.task-dialog')
+    <livewire:task.task-editor />
     <x-ui.form-dialog module="relationships" :open="$showFriendLink" close="closeFriendLink" submit-action="saveFriendLink" id="relationship-friend-link" title="Vincular con un amigo" icon="bi-person-hearts">
         <x-ui.select name="friendChoice" label="Amigo" placeholder="Sin vínculo" :selected="$friendChoice" :options="$friendOptions" wire:model="friendChoice" />
         <p class="md-body-small">Solo se guarda el vínculo. Tus notas y datos de esta ficha nunca se comparten.</p>
     </x-ui.form-dialog>
+    <livewire:mood.mood-editor :contact-id="$relationship->id" />
 </x-module-shell>

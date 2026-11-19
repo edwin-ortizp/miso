@@ -119,7 +119,7 @@
                         @foreach ($relations as $index => $relation)
                             <div class="row g-2 align-items-center" wire:key="task-relation-{{ $index }}">
                                 <div class="col-5">
-                                    <x-ui.select :name="'relations.'.$index.'.type'" label="Módulo" :id="$dialogId.'-relation-type-'.$index"
+                                    <x-ui.combobox :name="'relations.'.$index.'.type'" label="Módulo" :id="$dialogId.'-relation-type-'.$index"
                                         :options="$relationModules" placeholder="Elige un módulo" wire:model.live="relations.{{ $index }}.type" />
                                 </div>
                                 {{-- Las opciones del combobox se fijan al iniciar Alpine: cambiar de módulo debe recrearlo. --}}

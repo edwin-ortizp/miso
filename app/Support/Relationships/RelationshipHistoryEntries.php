@@ -16,7 +16,7 @@ use Illuminate\Support\Collection;
  */
 final class RelationshipHistoryEntries
 {
-    public const TYPES = ['event' => 'Acontecimientos', 'plan' => 'Planes'];
+    public const TYPES = ['event' => 'Acontecimientos', 'plan' => 'Planes', 'mood' => 'Mood'];
 
     /**
      * @param  array{q?: string, type?: string, category?: string, archived?: bool}  $filters
@@ -80,6 +80,25 @@ final class RelationshipHistoryEntries
                     'archived' => false,
                     'sensitive' => false,
                     'url' => route('plans.show', $visit->plan_id),
+                ]));
+        }
+
+        if (($type === '' || $type === 'mood') && $category === '') {
+            $relationship->moodEntries()->chronological()->get()
+                ->each(fn ($entry) => $rows->push([
+                    'kind' => 'mood',
+                    'id' => $entry->id,
+                    'date' => $entry->date,
+                    'dateLabel' => EventDate::day($entry->date)->label(),
+                    'title' => $entry->emoji.' '.$entry->text,
+                    'type' => 'Mood',
+                    'typeTone' => 'neutral',
+                    'icon' => 'bi-emoji-smile',
+                    'category' => '',
+                    'notes' => $entry->situation,
+                    'archived' => false,
+                    'sensitive' => false,
+                    'url' => null,
                 ]));
         }
 

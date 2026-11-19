@@ -239,10 +239,12 @@ class ProgressiveMoodLoggingTest extends TestCase
         ]);
         $entry->linkRelationship($alison);
 
-        Livewire::test(MoodTracker::class)
-            ->call('openEditForm', $entry->id)
-            ->call('updateMoodState', $worried->id)
-            ->assertSet('showEditForm', false);
+        Livewire::test(\App\Livewire\Mood\MoodEditor::class)
+            ->call('open', 'edit', $entry->id)
+            ->set('emotion', $worried->id)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertSet('mode', '');
 
         $entry->refresh();
         $this->assertSame('Preocupación', $entry->text);

@@ -1,5 +1,5 @@
 @php
-    $createAction = ['label' => 'Agregar tarea', 'icon' => 'bi-check2-square', 'action' => 'openTaskForm'];
+    $createAction = ['label' => 'Agregar tarea', 'icon' => 'bi-check2-square', 'event' => 'task-editor', 'detail' => ['action' => 'openContactForm', 'id' => $relationship->id, 'mode' => 'edit']];
 @endphp
 
 <x-module-shell module="relationships" :title="$relationship->full_name"
@@ -91,5 +91,5 @@
         @endif
     </x-ui.management-card>
 
-    @include('livewire.relationship.partials.task-dialog')
+    <livewire:task.task-editor />
 </x-module-shell>

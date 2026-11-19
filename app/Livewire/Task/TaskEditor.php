@@ -3,6 +3,7 @@
 namespace App\Livewire\Task;
 
 use App\Models\Plan;
+use App\Models\Relationship;
 use App\Models\Task;
 use App\Models\TaskAssociation;
 use App\Models\TaskCategory;
@@ -39,6 +40,37 @@ class TaskEditor extends TaskList
     #[\Livewire\Attributes\Locked]
     public ?string $planContext = null;
 
+    #[\Livewire\Attributes\Locked]
+    public ?string $creationContact = null;
+
+    public function openContactForm(string $id): void
+    {
+        $this->openContactDraft($id, false);
+    }
+
+    public function openBirthdayForm(string $id): void
+    {
+        $this->openContactDraft($id, true);
+    }
+
+    private function openContactDraft(string $id, bool $birthday): void
+    {
+        abort_unless(auth()->check(), 403);
+        $person = Relationship::where('user_id', auth()->id())->findOrFail($id);
+        $this->openForm();
+        $this->creationContact = $person->id;
+        $this->relations = [['type' => 'relationship', 'id' => $person->id]];
+
+        if (TaskCategory::where('user_id', auth()->id())->where('key', 'social')->exists()) {
+            $this->category = 'social';
+        }
+
+        if ($birthday) {
+            $this->title = 'Preparar el cumpleaños de '.$person->displayName();
+            $this->endDate = $person->birthday()?->nextOccurrence()->toDateString() ?? today()->toDateString();
+        }
+    }
+
     /** CHG-144: «Horario fijo»; el editor es el único lugar donde se cambia la fecha de una tarea fija. */
     public bool $scheduleLocked = false;
 
@@ -61,6 +93,7 @@ class TaskEditor extends TaskList
         abort_unless(auth()->check(), 403);
         $task = $id ? Task::where('user_id', auth()->id())->findOrFail($id) : null;
         parent::openForm($id);
+        $this->creationContact = null;
         $this->editorIntent = '';
         $this->scheduleLocked = (bool) $task?->schedule_locked;
         if ($task) $this->statusId = (string) ($task->status_id ?? '');
@@ -193,6 +226,10 @@ class TaskEditor extends TaskList
                 $task->save();
             }
             $this->syncTaskRelations($task);
+            if (! $this->editingId && $this->creationContact !== null) {
+                $person = Relationship::where('user_id', auth()->id())->findOrFail($this->creationContact);
+                TaskAssociation::link($task, $person);
+            }
             if ($this->goalContext !== null) {
                 $goal = \App\Models\Goal::where('user_id', auth()->id())->findOrFail($this->goalContext);
                 \App\Models\TaskAssociation::link($task, $goal);
@@ -256,6 +293,7 @@ class TaskEditor extends TaskList
     public function closeForm()
     {
         parent::closeForm();
+        $this->creationContact = null;
         $this->dispatch('task-records-changed')->to(TaskList::class);
         $this->dispatch('task-calendar-refresh');
     }

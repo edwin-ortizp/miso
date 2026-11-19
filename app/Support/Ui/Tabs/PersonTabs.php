@@ -21,6 +21,7 @@ final class PersonTabs
             ['label' => 'Planes', 'route' => 'relationships.plans', 'params' => $params, 'icon' => 'bi-map', 'active' => ['relationships.plans']],
             ['label' => 'Historial', 'route' => 'relationships.history', 'params' => $params, 'icon' => 'bi-clock-history', 'active' => ['relationships.history']],
             ['label' => 'Tareas relacionadas', 'route' => 'relationships.tasks', 'params' => $params, 'icon' => 'bi-list-check', 'active' => ['relationships.tasks']],
+            ['label' => 'Mood ('.$relationship->moodEntries()->count().')', 'route' => 'relationships.mood', 'params' => $params, 'icon' => 'bi-emoji-smile', 'active' => ['relationships.mood']],
         ];
     }
 
