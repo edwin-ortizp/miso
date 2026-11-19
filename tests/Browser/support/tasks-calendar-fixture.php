@@ -23,6 +23,12 @@ $user = User::factory()->create(['email' => 'tasks-calendar-browser@example.test
 auth()->login($user);
 Task::create(['title' => 'Calendar browser task', 'start_date' => now()->startOfWeek()->addDays(2)->setTime(9, 0), 'end_date' => now()->startOfWeek()->addDays(2)->setTime(10, 0), 'start_is_date' => false, 'end_is_date' => false]);
 Task::create(['title' => 'Calendar recurring task', 'start_date' => today(), 'start_is_date' => true, 'is_recurrent' => true, 'recurrence_interval_days' => 7]);
+Task::create([
+    'title' => 'Calendar completed task with a long title that should wrap across several lines on a narrow screen',
+    'start_date' => today()->startOfWeek()->addDays(today()->dayOfWeekIso % 7),
+    'start_is_date' => true,
+    'completed' => true,
+]);
 \App\Models\Plan::factory()->create(['user_id' => $user->id, 'title' => 'Calendar browser plan', 'scheduled_on' => now()->startOfWeek(), 'ends_on' => now()->endOfWeek()]);
 \App\Models\Relationship::factory()->withBirthday((int) now()->month, (int) now()->day, 1990)->create(['user_id' => $user->id, 'full_name' => 'Calendar birthday person']);
 

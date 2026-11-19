@@ -218,7 +218,7 @@ for (const [width, height] of [[390, 844], [768, 900], [1440, 900], [740, 390]])
         await page.locator('button[type=submit]').click();
         await page.waitForURL(url => !url.pathname.includes('/login'));
         await page.goto('/tasks/calendar', { waitUntil: 'domcontentloaded' });
-        await expect(page.locator(width < 768 ? '.fc-timeGridDay-view' : '.fc-timeGridWeek-view')).toBeVisible();
+        await expect(page.locator(width < 768 ? '.fc-listWeek-view' : '.fc-timeGridWeek-view')).toBeVisible();
         const now = page.getByRole('button', { name: 'Ahora', exact: true });
         for (const view of ['timeGridDay', 'timeGridWeek', 'dayGridMonth', 'listWeek']) {
             await selectView(page, width, view);

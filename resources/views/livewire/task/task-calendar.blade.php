@@ -11,15 +11,15 @@
             </x-slot:actions>
         </x-ui.snackbar>
     @endif
-    <section class="md-card-elevated md-task-calendar" aria-label="Calendario" x-data="taskCalendar($wire, @js(auth()->id()))" @keydown.escape.window="if (actionEvent) { $event.preventDefault(); $event.stopPropagation(); closeActions() }" @resize.window="closeActions()" @scroll.window="closeActions(false)">
+    <section class="md-card-elevated md-task-calendar" aria-label="Calendario" x-data="taskCalendar($wire, @js(auth()->id()))" @keydown.escape.window="if (actionEvent) { $event.preventDefault(); $event.stopPropagation(); closeActions() }" @resize.window="closeActions()" @scroll.window="onActionScroll()">
         <div class="md-calendar-compact-toolbar" wire:ignore aria-label="Navegación del calendario">
             <h2 class="md-title-medium md-calendar-period" aria-live="polite"><i class="bi bi-calendar4" aria-hidden="true"></i><span x-text="mobileDate"></span></h2>
                 <div class="md-calendar-views" role="group" aria-label="Vista del calendario">
                     @foreach (['dayGridMonth' => 'Mes', 'timeGridWeek' => 'Semana', 'timeGridDay' => 'Día', 'listWeek' => 'Agenda'] as $view => $label)
-                        <button type="button" class="md-calendar-view-button" :aria-pressed="(viewType === @js($view)).toString()" @click="calendar.changeView(@js($view))">{{ $label }}</button>
+                        <button type="button" class="md-calendar-view-button" :aria-pressed="(viewType === @js($view)).toString()" @click="selectView(@js($view))">{{ $label }}</button>
                     @endforeach
                 </div>
-                <div class="md-calendar-view-mobile"><x-ui.select label="Vista:" id="calendar-view" :options="['dayGridMonth' => 'Mes', 'timeGridWeek' => 'Semana', 'timeGridDay' => 'Día', 'listWeek' => 'Agenda']" x-bind:value="viewType" x-on:change="calendar.changeView($event.target.value)" /></div>
+                <div class="md-calendar-view-mobile"><x-ui.select label="Vista:" id="calendar-view" :options="['dayGridMonth' => 'Mes', 'timeGridWeek' => 'Semana', 'timeGridDay' => 'Día', 'listWeek' => 'Agenda']" x-bind:value="viewType" x-on:change="selectView($event.target.value)" /></div>
             <div class="md-calendar-controls">
                 <div class="md-calendar-arrows" role="group" aria-label="Cambiar periodo">
                     <button type="button" class="md-btn-icon" aria-label="Periodo anterior" @click="calendar.prev()"><i class="bi bi-chevron-left" aria-hidden="true"></i></button>

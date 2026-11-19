@@ -490,3 +490,84 @@
 .md-task-calendar__surface .fc-list-table { width: 100%; }
 .md-task-calendar__surface .fc-list-event-title { width: 100%; max-width: 0; padding-inline-end: 36px; overflow-wrap: anywhere; }
 .md-task-calendar__surface .fc-list-event-time { white-space: nowrap; }
+
+.md-calendar-agenda-status { display: none; }
+
+@media (max-width: 767.98px) {
+  .md-task-calendar__surface .fc-listWeek-view { border: 0; padding-block-end: 56px; }
+  .md-task-calendar__surface .fc-listWeek-view :is(.fc-list-table, tbody) { display: block; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-day { display: block; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-day > th { display: block; border: 0; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-day-cushion {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-block: 12px 8px;
+    padding: 2px 8px;
+    border-inline-start: 4px solid var(--md-module-accent);
+    background: transparent;
+  }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-day-text { font-weight: 700; text-transform: capitalize; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-day-side-text { color: var(--md-sys-color-on-surface-variant); }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: baseline;
+    gap: 2px 6px;
+    min-height: 56px;
+    margin-block-end: 6px;
+    padding: 8px 10px;
+    border: 1px solid var(--fc-event-border-color);
+    border-radius: var(--md-sys-shape-corner-medium);
+    background: var(--fc-event-bg-color);
+    color: var(--fc-event-text-color);
+    opacity: 1;
+  }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event.md-calendar-task { padding-inline-end: 70px; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event > td,
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event:hover > td {
+    width: auto;
+    max-width: none;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event:focus-within { outline: 2px solid var(--md-sys-color-primary); outline-offset: -2px; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event-time {
+    grid-column: 2;
+    grid-row: 1;
+    font-size: .8125rem;
+    white-space: normal;
+  }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event-graphic { grid-column: 1; grid-row: 1; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event-dot { border-width: 4px; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event-title {
+    position: static;
+    grid-column: 1 / -1;
+    font-weight: 600;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+  .md-task-calendar__surface .fc-listWeek-view .is-completed .fc-list-event-title a { text-decoration: line-through; }
+  .md-task-calendar__surface .fc-listWeek-view .is-completed .fc-list-event-title a::before { content: var(--calendar-event-icon); }
+  .md-task-calendar__surface .fc-listWeek-view .md-calendar-task-actions.md-btn-icon {
+    inset: 5px 1px auto auto;
+    width: 44px;
+    height: 44px;
+    opacity: 1;
+  }
+  .md-task-calendar__surface .fc-listWeek-view .md-calendar-agenda-status {
+    position: absolute;
+    inset-block-start: 16px;
+    inset-inline-end: 45px;
+    display: inline-flex;
+  }
+
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event[class*="is-urgent-"],
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event[class*="is-not-urgent-"] { border-inline-start-width: 4px; }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event.is-urgent-important { border-inline-start-color: var(--md-sys-color-error); }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event.is-urgent-not-important { border-inline-start-color: var(--md-sys-color-tertiary); }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event.is-not-urgent-important { border-inline-start-color: var(--md-sys-color-primary); }
+  .md-task-calendar__surface .fc-listWeek-view .fc-list-event.is-not-urgent-not-important { border-inline-start-color: var(--md-sys-color-outline); }
+}

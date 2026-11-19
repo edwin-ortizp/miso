@@ -4,7 +4,7 @@ import { mkdirSync, closeSync, openSync } from 'node:fs';
 import path from 'node:path';
 
 const PORT = Number(process.env.MISO_TASK_CALENDAR_TEST_PORT ?? 8033);
-test.use({ baseURL: `http://127.0.0.1:${PORT}` });
+test.use({ baseURL: `http://127.0.0.1:${PORT}`, serviceWorkers: 'block' });
 let server;
 
 test.beforeAll(async () => {
@@ -20,7 +20,7 @@ test.beforeAll(async () => {
         NIGHTWATCH_ENABLED: 'false', APP_CONFIG_CACHE: path.join(directory, 'unused-tasks-calendar-config.php'),
     };
     execFileSync('php', ['tests/Browser/support/tasks-calendar-fixture.php'], { env, stdio: 'pipe' });
-    server = spawn('php', ['-S', `127.0.0.1:${PORT}`, path.resolve('vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')], { cwd: path.resolve('public'), env, stdio: 'pipe', windowsHide: true });
+    server = spawn('php', ['-S', `127.0.0.1:${PORT}`, path.resolve('vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php')], { cwd: path.resolve('public'), env, stdio: 'ignore', windowsHide: true });
     for (let i = 0; i < 60; i++) {
         try {
             if ((await fetch(`http://127.0.0.1:${PORT}/login`)).ok) return;
@@ -32,6 +32,74 @@ test.beforeAll(async () => {
 test.afterAll(() => server?.kill());
 
 
+for (const width of [320, 390]) {
+    test(`mobile Agenda layout and view preference ${width}`, async ({ page }) => {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto('/login');
+        await page.locator('input[type=email]').fill('tasks-calendar-browser@example.test');
+        await page.locator('input[type=password]').fill('browser-test-password');
+        await page.locator('button[type=submit]').click();
+        await page.waitForURL(url => !url.pathname.includes('/login'));
+        await page.goto('/tasks/calendar');
+        const toolbar = page.locator('.md-calendar-compact-toolbar');
+        await expect(page.locator('.fc-listWeek-view')).toBeVisible();
+        const agenda = page.locator('.fc-listWeek-view');
+        const row = agenda.locator('.fc-list-event').filter({ hasText: 'Calendar recurring task' }).first();
+        await expect(row).toHaveCSS('display', 'grid');
+        const completed = agenda.locator('.fc-list-event').filter({ hasText: 'Calendar completed task with a long title' });
+        await expect(completed.getByRole('img', { name: 'Completada' })).toBeVisible();
+        await expect(completed.locator('.fc-list-event-time')).toHaveText(/todo el día/i);
+        await expect(completed.locator('.fc-list-event-title a')).toHaveCSS('text-decoration-line', 'line-through');
+        const title = await completed.locator('.fc-list-event-title').boundingBox();
+        expect(title.height).toBeGreaterThan(34);
+        await expect(agenda.locator('.fc-list-event').filter({ hasText: 'Calendar browser task' })
+            .locator('.fc-list-event-time')).toContainText(/9:00.*10:00/);
+        await expect(agenda.locator('.fc-list-day').first()).toBeVisible();
+        await page.evaluate(() => { document.documentElement.dataset.theme = 'dark'; });
+        await expect.poll(() => completed.evaluate(row => getComputedStyle(row).backgroundColor))
+            .not.toBe('rgba(0, 0, 0, 0)');
+        await page.evaluate(() => { document.documentElement.dataset.theme = 'light'; });
+
+        await expect(row.locator('.md-calendar-agenda-status')).toBeVisible();
+        await expect(row.getByRole('button', { name: /Más acciones/ })).toHaveCSS('width', '44px');
+        const trigger = row.getByRole('button', { name: /Más acciones/ });
+        await trigger.scrollIntoViewIfNeeded();
+        await trigger.click();
+        const menu = page.getByRole('menu', { name: 'Acciones de la tarea' });
+        await expect(menu.getByRole('menuitem', { name: 'Completar', exact: true })).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect(trigger).toBeFocused();
+
+        await toolbar.getByRole('button', { name: 'Ahora' }).click();
+        await expect(page.locator('.fc-timeGridDay-view')).toBeVisible();
+        await toolbar.getByLabel('Vista:', { exact: true }).selectOption('listWeek');
+        await page.setViewportSize({ width: 820, height: 700 });
+        await expect(agenda).toBeVisible();
+        await expect(row).toHaveCSS('display', 'table-row');
+        await page.setViewportSize({ width, height: 900 });
+        await expect(row).toHaveCSS('display', 'grid');
+
+        await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+        const period = toolbar.locator('.md-calendar-period');
+        const initialPeriod = await period.textContent();
+        await toolbar.getByRole('button', { name: 'Periodo siguiente' }).click();
+        await expect(period).not.toHaveText(initialPeriod);
+        await toolbar.getByRole('button', { name: 'Periodo anterior' }).click();
+        await expect(period).toHaveText(initialPeriod);
+
+        await toolbar.getByLabel('Vista:', { exact: true }).selectOption('timeGridWeek');
+        await expect(page.locator('.fc-timeGridWeek-view')).toBeVisible();
+        const navigation = page.getByRole('navigation', { name: 'Vistas del módulo' });
+        await navigation.getByRole('link', { name: 'Lista', exact: true }).click();
+        await expect(navigation.getByRole('link', { name: 'Lista', exact: true })).toHaveAttribute('aria-current', 'page');
+        await navigation.getByRole('link', { name: 'Calendario', exact: true }).click();
+        await expect(page.locator('.fc-timeGridWeek-view')).toBeVisible();
+        await page.reload();
+        await expect(agenda).toBeVisible();
+    });
+}
+
 for (const width of [1440, 768, 390]) {
     test(`calendar controls and task navigation ${width}`, async ({ page }, testInfo) => {
         await page.setViewportSize({ width, height: 900 });
@@ -42,7 +110,7 @@ for (const width of [1440, 768, 390]) {
         await page.waitForURL(url => !url.pathname.includes('/login'));
         await page.goto('/tasks/calendar');
         const toolbar = page.locator('.md-calendar-compact-toolbar');
-        await expect(page.locator('.fc-view-harness')).toBeVisible();
+        await expect(page.locator(width < 768 ? '.fc-listWeek-view' : '.fc-timeGridWeek-view')).toBeVisible();
         await expect(toolbar.locator('.md-calendar-period')).not.toBeEmpty();
         await expect(toolbar.getByRole('button', { name: 'Ahora' })).toBeVisible();
         await expect(toolbar.getByRole('button', { name: 'Filtros' })).toBeVisible();
@@ -73,8 +141,15 @@ for (const width of [1440, 768, 390]) {
         for (const [view, label] of [['dayGridMonth', 'Mes'], ['listWeek', 'Agenda'], ['timeGridDay', 'Día'], ['timeGridWeek', 'Semana']]) {
             if (width >= 768) await toolbar.getByRole('button', { name: label, exact: true }).click();
             else await toolbar.getByLabel('Vista:', { exact: true }).selectOption(view);
-            const action = page.getByRole('button', { name: 'Más acciones de Calendar recurring task', exact: true }).first();
+            const viewSurface = page.locator(`.fc-${view}-view`);
+            await expect(viewSurface).toBeVisible();
+            await expect.poll(() => viewSurface.evaluate(surface =>
+                window.Alpine.$data(surface.closest('.md-task-calendar')).calendarLoading
+            )).toBe(false);
+            const action = viewSurface.getByRole('button', { name: 'Más acciones de Calendar recurring task', exact: true }).first();
+            await action.scrollIntoViewIfNeeded();
             await action.focus();
+            await expect(action).toBeFocused();
             await page.keyboard.press('Enter');
             await expect(menu).toBeVisible();
             await expect.poll(async () => {

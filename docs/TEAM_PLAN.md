@@ -182,6 +182,7 @@ _Última actualización: 2026-11-18_
 | CHG-176 | M | Mostrar horarios opcionales de planes en el calendario | in-progress | En verificación | 1/1 |
 | CHG-177 | S | Acceso principal al calendario | in-progress | En verificación | 1/1 |
 | CHG-178 | XS | Ejemplos en los campos del formulario de planes | in-progress | En verificación | 1/1 |
+| CHG-179 | S | Mejorar la lectura de Agenda móvil | in-progress | En verificación | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

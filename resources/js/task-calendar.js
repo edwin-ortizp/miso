@@ -15,6 +15,7 @@ function loadFullCalendar() {
 }
 
 const compact = () => matchMedia('(max-width: 767.98px)').matches;
+const selectedViews = new Map();
 const layerStorageKey = 'miso.task-calendar.layers.v1';
 const labels = { tasks: 'Tareas', plans: 'Planes', birthdays: 'Cumpleaños', meals: 'Comidas', habits: 'Hábitos', reservations: 'Reservas', evaluations: 'Evaluaciones', health: 'Salud' };
 const defaultLayers = () => ({ tasks: true, plans: true, birthdays: true, meals: true, habits: true, reservations: true, evaluations: true, health: false });
@@ -44,12 +45,19 @@ export function registerTaskCalendar(Alpine) {
         actionTrigger: null,
         actionBusy: false,
         actionError: '',
-        menuLeft: 0,
-        menuTop: 0,
+        get mobileAgenda() { return compact() && this.calendar?.view.type === 'listWeek'; },
+        onActionScroll() {
+            if (!this.actionEvent) return;
+            if (this.mobileAgenda) {
+                this.positionActions();
+            } else {
+                this.closeActions(false);
+            }
+        },
         closeActions(restore = true) {
             this.actionEvent = null;
             this.actionTrigger?.setAttribute('aria-expanded', 'false');
-            if (restore && this.actionTrigger?.isConnected) this.actionTrigger.focus();
+            if (restore && this.actionTrigger?.isConnected) this.actionTrigger.focus({ preventScroll: this.mobileAgenda });
             this.actionTrigger = null;
         },
         openActions(event, trigger) {
@@ -59,20 +67,34 @@ export function registerTaskCalendar(Alpine) {
             this.actionError = '';
             trigger.setAttribute('aria-expanded', 'true');
             this.$nextTick(() => {
-                const menu = this.$refs.actionMenu;
-                const rect = trigger.getBoundingClientRect();
-                // Se acota al área realmente visible (en móvil con zoom o desbordes, innerWidth puede ser mayor).
-                const view = window.visualViewport;
-                const viewLeft = view?.offsetLeft ?? 0;
-                const viewTop = view?.offsetTop ?? 0;
-                const viewWidth = Math.min(view?.width ?? innerWidth, document.documentElement.clientWidth || innerWidth);
-                const viewHeight = view?.height ?? innerHeight;
-                this.menuLeft = Math.max(viewLeft + 8, Math.min(rect.right - menu.offsetWidth, viewLeft + viewWidth - menu.offsetWidth - 8));
-                this.menuTop = Math.max(viewTop + 8, Math.min(rect.bottom + 4, viewTop + viewHeight - menu.offsetHeight - 8));
-                menu.style.left = this.menuLeft + 'px';
-                menu.style.top = this.menuTop + 'px';
-                menu.querySelector('[role="menuitem"]')?.focus();
+                if (this.actionTrigger !== trigger) return;
+                this.positionActions();
+                if (this.actionEvent) {
+                    this.$refs.actionMenu.querySelector('[role="menuitem"]')?.focus({ preventScroll: this.mobileAgenda });
+                }
             });
+        },
+        positionActions() {
+            const trigger = this.actionTrigger;
+            if (!trigger?.isConnected) {
+                this.closeActions(false);
+                return;
+            }
+            const menu = this.$refs.actionMenu;
+            const rect = trigger.getBoundingClientRect();
+            const view = window.visualViewport;
+            const viewLeft = view?.offsetLeft ?? 0;
+            const viewTop = view?.offsetTop ?? 0;
+            const viewWidth = Math.min(view?.width ?? innerWidth, document.documentElement.clientWidth || innerWidth);
+            const viewHeight = view?.height ?? innerHeight;
+            if (this.mobileAgenda && (rect.bottom <= viewTop || rect.top >= viewTop + viewHeight)) {
+                this.closeActions(false);
+                return;
+            }
+            const left = Math.max(viewLeft + 8, Math.min(rect.right - menu.offsetWidth, viewLeft + viewWidth - menu.offsetWidth - 8));
+            const top = Math.max(viewTop + 8, Math.min(rect.bottom + 4, viewTop + viewHeight - menu.offsetHeight - 8));
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
         },
         menuKey(event) {
             if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
@@ -186,6 +208,31 @@ export function registerTaskCalendar(Alpine) {
                 window.location.assign(info.event.extendedProps.detailUrl);
             }
         },
+        selectView(view) {
+            if (!this.calendar) return;
+            selectedViews.set(account, view);
+            this.calendar.changeView(view);
+        },
+        mountAgendaRow(info) {
+            if (info.view.type !== 'listWeek') return;
+            // La cuadrícula móvil cambia el display de la fila. Mantener sus roles de tabla.
+            info.el.setAttribute('role', 'row');
+            for (const cell of info.el.cells) cell.setAttribute('role', 'cell');
+
+            if (info.event.extendedProps.type !== 'tasks') return;
+            const { completed, status } = info.event.extendedProps;
+            const indicator = document.createElement('span');
+            indicator.className = 'md-calendar-agenda-status';
+            const label = completed ? 'Completada' : (status?.name || 'Pendiente');
+            indicator.setAttribute('role', 'img');
+            indicator.setAttribute('aria-label', label);
+            indicator.title = label;
+            const icon = document.createElement('i');
+            icon.className = completed ? 'bi bi-check-circle-fill' : 'bi bi-circle';
+            icon.setAttribute('aria-hidden', 'true');
+            indicator.append(icon);
+            info.el.querySelector('.fc-list-event-title').append(indicator);
+        },
         calendarLoading: false,
         mobileDate: '',
         mobileView: 'Día',
@@ -237,7 +284,7 @@ export function registerTaskCalendar(Alpine) {
                 locale,
                 firstDay: 1,
                 height: 'auto',
-                initialView: compact() ? 'timeGridDay' : 'timeGridWeek',
+                initialView: selectedViews.get(account) ?? (compact() ? 'listWeek' : 'timeGridWeek'),
                 headerToolbar: false,
                 footerToolbar: false,
                 loading: (isLoading) => { this.calendarLoading = isLoading; },
@@ -276,9 +323,16 @@ export function registerTaskCalendar(Alpine) {
                         failure(error);
                     });
                 },
+                dayHeaderDidMount: ({ el, view }) => {
+                    if (view.type !== 'listWeek') return;
+                    el.closest('table')?.setAttribute('role', 'table');
+                    el.parentElement?.setAttribute('role', 'rowgroup');
+                    el.setAttribute('role', 'row');
+                    el.cells[0].setAttribute('role', 'columnheader');
+                },
                 eventClick: (info) => this.clickEvent(info),
                 // El clic en otro evento no debe contar como «clic afuera» del popover abierto.
-                eventDidMount: (info) => { this.mountActionTrigger(info); if (info.event.extendedProps.locked) { const lock = document.createElement('i'); lock.className = 'bi bi-lock-fill md-calendar-lock'; lock.setAttribute('role', 'img'); lock.setAttribute('aria-label', 'Horario fijo'); lock.title = 'Horario fijo'; (info.el.querySelector('.fc-event-time') ?? info.el.querySelector('.fc-event-title') ?? info.el).prepend(lock); } info.el.dataset.popoverTrigger = ''; if (info.event.extendedProps.type === 'tasks') { const color = info.event.extendedProps.categoryColor; if (['gray', 'blue', 'indigo', 'violet', 'pink', 'red', 'orange', 'yellow', 'green', 'teal'].includes(color)) info.el.classList.add(`md-catalog-chip--${color}`); } if (info.event.extendedProps.type === 'meals') { info.el.title = `${info.event.extendedProps.timeLabel} · ${info.event.title}`; info.el.setAttribute('aria-label', info.el.title); } },
+                eventDidMount: (info) => { this.mountActionTrigger(info); this.mountAgendaRow(info); if (info.event.extendedProps.locked) { const lock = document.createElement('i'); lock.className = 'bi bi-lock-fill md-calendar-lock'; lock.setAttribute('role', 'img'); lock.setAttribute('aria-label', 'Horario fijo'); lock.title = 'Horario fijo'; (info.el.querySelector('.fc-event-time, .fc-list-event-time') ?? info.el.querySelector('.fc-event-title') ?? info.el).prepend(lock); } info.el.dataset.popoverTrigger = ''; if (info.event.extendedProps.type === 'tasks') { const color = info.event.extendedProps.categoryColor; if (['gray', 'blue', 'indigo', 'violet', 'pink', 'red', 'orange', 'yellow', 'green', 'teal'].includes(color)) info.el.classList.add(`md-catalog-chip--${color}`); } if (info.event.extendedProps.type === 'meals') { info.el.title = `${info.event.extendedProps.timeLabel} · ${info.event.title}`; info.el.setAttribute('aria-label', info.el.title); } },
                 dateClick: (info) => this.$dispatch('task-editor', {
                     action: 'openForm',
                     prefill: info.allDay
