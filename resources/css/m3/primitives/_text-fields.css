@@ -287,3 +287,34 @@
 .md-switch:has(input:disabled) { cursor: not-allowed; }
 .md-switch__text { display: grid; gap: 2px; }
 @media (prefers-reduced-motion: reduce) { .md-switch__track, .md-switch__thumb { transition: none; } }
+
+.md-combobox__list[aria-multiselectable="true"] {
+    position: relative;
+    inset: auto;
+    margin-top: 4px;
+}
+
+.md-combobox__list[aria-multiselectable="true"] .md-combobox__option {
+    min-height: 44px;
+    align-content: center;
+    overflow-wrap: anywhere;
+}
+
+.md-combobox__selection {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.md-combobox__selection .md-applied-chip {
+    max-width: 100%;
+    min-height: 44px;
+    overflow-wrap: anywhere;
+}
+
+.md-combobox__selection .md-applied-chip__remove {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+}

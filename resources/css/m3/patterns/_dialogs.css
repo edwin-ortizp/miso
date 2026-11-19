@@ -332,7 +332,8 @@
 .md-form-dialog__nav-item { position: relative; display: flex; align-items: center; gap: 14px; min-height: 48px; padding: 0 16px; border: 0; border-radius: 0 999px 999px 0; background: transparent; color: var(--md-sys-color-on-surface-variant); font: inherit; font-size: .88rem; font-weight: 600; text-align: left; cursor: pointer; }
 .md-form-dialog__nav-item i { font-size: 1.15rem; }
 .md-form-dialog__nav-item:hover { background: var(--md-sys-color-surface-container); color: var(--md-sys-color-on-surface); }
-.md-form-dialog__nav-item[aria-current="true"] { background: color-mix(in srgb, var(--md-module-accent) 10%, transparent); box-shadow: inset 3px 0 0 var(--md-module-accent); color: var(--md-module-accent); font-weight: 700; }
+.md-form-dialog__nav-item[aria-current="true"] { background: color-mix(in srgb, var(--md-module-accent) 10%, transparent); box-shadow: inset 3px 0 0 var(--md-module-accent); color: var(--md-sys-color-on-surface); font-weight: 700; }
+.md-form-dialog__nav-item[aria-current="true"] i { color: var(--md-module-accent); }
 .md-form-dialog__nav-dot { width: 8px; height: 8px; margin-left: auto; border-radius: 50%; background: var(--md-sys-color-error); }
 .md-form-dialog__body { min-width: 0; overflow: auto; padding: 24px 32px; color: var(--md-sys-color-on-surface); }
 .md-form-dialog__section-head { margin-bottom: 24px; }

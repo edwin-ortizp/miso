@@ -111,7 +111,7 @@ _Última actualización: 2026-11-18_
 | CHG-105 | M | Evitar bloqueo de Mi día al registrar foco en PWA móvil | done | Cerrado | 4/4 |
 | CHG-106 | M | Restaurar chat y cierre de superficies en Android | in-progress | En desarrollo | 1/4 |
 | CHG-107 | S | Editar tareas y Markdown con una sola acción | done | Cerrado | 2/2 |
-| CHG-108 | M | Secciones de formularios visibles en móvil | in-progress | En desarrollo | 3/4 |
+| CHG-108 | M | Secciones de formularios visibles en móvil | done | Cerrado | 4/4 |
 | CHG-109 | M | Corregir barra de estado y escala de Android | to-do | Aprobado | 0/4 |
 | CHG-110 | XS | Alinear controles del header móvil | done | Cerrado | 1/1 |
 | CHG-111 | M | Objetivos conectados con tareas y hábitos | done | Cerrado | 4/4 |
@@ -125,7 +125,7 @@ _Última actualización: 2026-11-18_
 | CHG-119 | S | Objetivos: alinear fecha límite si el inicio la supera | done | Cerrado | 1/1 |
 | CHG-120 | M | Modo oscuro de la app | done | Cerrado | 4/4 |
 | CHG-121 | S | Objetivos: crear un KPI más intuitivo | done | Cerrado | 2/2 |
-| CHG-122 | M | Social A: perfil social y amistades por código o usuario | in-progress | En desarrollo | 6/6 |
+| CHG-122 | M | Social A: perfil social y amistades por código o usuario | done | Cerrado | 6/6 |
 | CHG-123 | M | Social B: racha compartida sin castigo entre amigos | done | Cerrado | 5/5 |
 | CHG-124 | M | Social C: tabla semanal de amigos con doble opt-in | done | Cerrado | 5/5 |
 | CHG-125 | M | Social D: notificaciones de amistad y racha compartida | done | Cerrado | 4/4 |
@@ -158,33 +158,34 @@ _Última actualización: 2026-11-18_
 | CHG-152 | M | CategorySettings sobre el trait compartido de categorias | done | Cerrado | 2/2 |
 | CHG-153 | M | Favoritos de recetas en el mecanismo comun de favoritos | done | Cerrado | 3/3 |
 | CHG-154 | M | Documentar la arquitectura comun y lo que no se migra | done | Cerrado | 2/2 |
-| CHG-155 | S | Abrir rutina desde un hábito pendiente | in-progress | En verificación | 1/1 |
-| CHG-156 | XS | Agregar guías de conexión en Ajustes MCP | in-progress | En desarrollo | 0/1 |
-| CHG-157 | S | Recordar filtros de Tareas y agregar Mañana | in-progress | En verificación | 1/1 |
-| CHG-158 | S | Editar fechas desde la lista de tareas | in-progress | En verificación | 1/1 |
-| CHG-159 | S | Mostrar institución y cambiar semestre de materias | in-progress | En verificación | 1/1 |
-| CHG-160 | M | Accesos de creación en los menús de tablas | in-progress | En verificación | 1/1 |
-| CHG-161 | M | Hábitos elegidos en calendario | in-progress | En verificación | 1/1 |
-| CHG-162 | M | Salud privada en calendario | in-progress | En verificación | 1/1 |
-| CHG-163 | M | Reservas de estudio en calendario | in-progress | En verificación | 1/1 |
-| CHG-164 | M | Personalizar la conversación del compañero por pantalla | in-progress | En verificación | 1/1 |
+| CHG-155 | S | Abrir rutina desde un hábito pendiente | done | Cerrado | 1/1 |
+| CHG-156 | XS | Agregar guías de conexión en Ajustes MCP | done | Cerrado | 1/1 |
+| CHG-157 | S | Recordar filtros de Tareas y agregar Mañana | done | Cerrado | 1/1 |
+| CHG-158 | S | Editar fechas desde la lista de tareas | done | Cerrado | 1/1 |
+| CHG-159 | S | Mostrar institución y cambiar semestre de materias | done | Cerrado | 1/1 |
+| CHG-160 | M | Accesos de creación en los menús de tablas | done | Cerrado | 1/1 |
+| CHG-161 | M | Hábitos elegidos en calendario | done | Cerrado | 1/1 |
+| CHG-162 | M | Salud privada en calendario | done | Cerrado | 1/1 |
+| CHG-163 | M | Reservas de estudio en calendario | done | Cerrado | 1/1 |
+| CHG-164 | M | Personalizar la conversación del compañero por pantalla | done | Cerrado | 1/1 |
 | CHG-165 | M | Mi estudio agenda y tareas académicas | in-progress | En desarrollo | 0/1 |
 | CHG-166 | M | Notas cortes y simulador académico | in-progress | En desarrollo | 0/1 |
 | CHG-167 | M | Evaluaciones académicas en Calendario | in-progress | En desarrollo | 0/1 |
-| CHG-168 | M | Registro de ejercicio según la actividad | in-progress | En verificación | 3/3 |
-| CHG-169 | S | Sincronizar inicio fin y duración de las tareas | in-progress | En verificación | 1/1 |
-| CHG-170 | S | Reorganizar información en las tarjetas de tareas | in-progress | En verificación | 1/1 |
-| CHG-171 | S | Mostrar candado junto al horario fijo | in-progress | En verificación | 1/1 |
-| CHG-172 | S | Corregir carga duplicada de Livewire y Alpine | in-progress | En verificación | 1/1 |
-| CHG-173 | XS | Presentar el listado de tareas como tarjetas en desktop | in-progress | En verificación | 1/1 |
-| CHG-174 | S | Gestionar personas y enlaces desde el detalle del plan | in-progress | En verificación | 1/1 |
-| CHG-175 | M | Normalizar ubicaciones de planes y abrir mapas | in-progress | En verificación | 1/1 |
-| CHG-176 | M | Mostrar horarios opcionales de planes en el calendario | in-progress | En verificación | 1/1 |
-| CHG-177 | S | Acceso principal al calendario | in-progress | En verificación | 1/1 |
-| CHG-178 | XS | Ejemplos en los campos del formulario de planes | in-progress | En verificación | 1/1 |
-| CHG-179 | S | Mejorar la lectura de Agenda móvil | in-progress | En verificación | 1/1 |
-| CHG-180 | M | Pestañas del detalle de un plan | in-progress | En verificación | 1/2 |
-| CHG-181 | S | Mostrar Agenda desde hoy | in-progress | En verificación | 1/1 |
+| CHG-168 | M | Registro de ejercicio según la actividad | done | Cerrado | 3/3 |
+| CHG-169 | S | Sincronizar inicio fin y duración de las tareas | done | Cerrado | 1/1 |
+| CHG-170 | S | Reorganizar información en las tarjetas de tareas | done | Cerrado | 1/1 |
+| CHG-171 | S | Mostrar candado junto al horario fijo | done | Cerrado | 1/1 |
+| CHG-172 | S | Corregir carga duplicada de Livewire y Alpine | done | Cerrado | 1/1 |
+| CHG-173 | XS | Presentar el listado de tareas como tarjetas en desktop | done | Cerrado | 1/1 |
+| CHG-174 | S | Gestionar personas y enlaces desde el detalle del plan | done | Cerrado | 1/1 |
+| CHG-175 | M | Normalizar ubicaciones de planes y abrir mapas | done | Cerrado | 1/1 |
+| CHG-176 | M | Mostrar horarios opcionales de planes en el calendario | done | Cerrado | 1/1 |
+| CHG-177 | S | Acceso principal al calendario | done | Cerrado | 1/1 |
+| CHG-178 | XS | Ejemplos en los campos del formulario de planes | done | Cerrado | 1/1 |
+| CHG-179 | S | Mejorar la lectura de Agenda móvil | done | Cerrado | 1/1 |
+| CHG-180 | M | Pestañas del detalle de un plan | done | Cerrado | 2/2 |
+| CHG-181 | S | Mostrar Agenda desde hoy | done | Cerrado | 1/1 |
+| CHG-182 | M | Modernizar el modal de reservas de estudio | done | Cerrado | 1/1 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias

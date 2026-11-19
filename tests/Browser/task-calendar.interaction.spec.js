@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
 import { spawn, execFileSync } from 'node:child_process';
 import { mkdirSync, closeSync, openSync } from 'node:fs';
 import path from 'node:path';
@@ -250,7 +251,7 @@ for (const width of [1440, 768, 390]) {
     });
 }
 
-for (const width of [1440, 390]) {
+for (const width of [1440, 768, 390]) {
     test(`personal calendar filters and reservation editor ${width}`, async ({ page }) => {
         await page.setViewportSize({ width, height: 900 });
         await page.goto('/login');
@@ -278,12 +279,51 @@ for (const width of [1440, 390]) {
         const dialog = page.getByRole('dialog', { name: 'Reservar tiempo de estudio' });
         await expect(dialog).toBeVisible();
         await dialog.getByLabel('Título').fill(`Reserva de prueba ${width}`);
+        const schedule = dialog.getByRole('button', { name: 'Horario', exact: true });
+        const tasks = dialog.getByRole('button', { name: 'Tareas vinculadas', exact: true });
+        await schedule.click();
+        await dialog.getByLabel('Repetir').selectOption('daily');
+        await dialog.getByLabel('Hora de finalización').fill('15:00');
+        await tasks.click();
+        const search = dialog.getByRole('combobox', { name: 'Buscar tareas pendientes' });
+        await search.fill('Calendar browser');
+        await expect(dialog.getByRole('option', { name: 'Calendar browser task', exact: true })).toBeVisible();
+        await search.press('ArrowDown');
+        await search.press('Enter');
+        if (width === 390) {
+            await page.setViewportSize({ width, height: 480 });
+            await expect(dialog.getByRole('button', { name: 'Guardar', exact: true })).toBeInViewport();
+            const audit = await new AxeBuilder({ page }).include('#study-reservation-dialog')
+                .withTags(['wcag2a', 'wcag2aa', 'wcag21aa']).analyze();
+            expect(audit.violations).toEqual([]);
+        }
+        await search.fill('Calendar recurring');
+        await dialog.getByRole('option', { name: 'Calendar recurring task', exact: true }).click();
+        await search.press('Escape');
+        await expect(dialog).toBeVisible();
+        await expect(dialog.getByRole('button', { name: 'Quitar Calendar browser task' })).toBeVisible();
+        await dialog.getByRole('button', { name: 'Quitar Calendar recurring task' }).click();
+        await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
+        await expect(dialog.getByLabel('Hora de finalización')).toBeFocused();
+        await dialog.getByLabel('Hora de finalización').fill('17:00');
         await dialog.getByRole('button', { name: 'Guardar', exact: true }).click();
         await expect(dialog).toBeHidden();
-        const reservation = page.locator('.md-calendar-reservation').filter({ hasText: `Reserva de prueba ${width}` });
+        const reservation = page.locator('.md-calendar-reservation').filter({ hasText: `Reserva de prueba ${width}` }).first();
         await expect(reservation).toBeVisible();
         await reservation.click();
-        await expect(page.getByRole('dialog', { name: 'Editar reserva' })).toBeVisible();
+        const edit = page.getByRole('dialog', { name: 'Editar reserva' });
+        await expect(edit).toBeVisible();
+        await edit.getByLabel('Título').fill('Cambios sin guardar');
+        await edit.getByRole('button', { name: 'Horario', exact: true }).click();
+        let confirmation;
+        page.once('dialog', async prompt => { confirmation = prompt.message(); await prompt.dismiss(); });
+        await edit.getByLabel('Aplicar a').selectOption('series');
+        await expect(edit.getByLabel('Aplicar a')).toHaveValue('one');
+        expect(confirmation).toContain('Descartar');
+        await edit.getByRole('button', { name: 'Tareas vinculadas', exact: true }).click();
+        await expect(edit.getByRole('button', { name: 'Quitar Calendar browser task' })).toBeVisible();
+        await edit.getByRole('button', { name: 'General', exact: true }).click();
+        await expect(edit.getByLabel('Título')).toHaveValue('Cambios sin guardar');
         await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     });
 }

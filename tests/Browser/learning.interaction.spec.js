@@ -268,3 +268,21 @@ for (const width of [390, 768, 1440]) {
         expect(errors).toEqual([]);
     });
 }
+
+test('study reservation starts with the current formation and unit', async ({ page }) => {
+    await login(page);
+    await page.locator('.learning-shortcuts a').filter({ hasText: 'Cálculo diferencial' }).click();
+    await expect(page).toHaveURL(new RegExp(`/learning/${fixture.degree}/units/${fixture.subject}`));
+    await page.getByRole('button', { name: 'Más acciones de creación', exact: true }).click();
+    await page.getByRole('menuitem', { name: 'Reservar tiempo de estudio', exact: true }).click();
+    const dialog = page.getByRole('dialog', { name: 'Reservar tiempo de estudio' });
+    const formation = dialog.getByRole('combobox', { name: 'Formación (opcional)' });
+    await expect(formation).toHaveValue('Ingeniería de Sistemas');
+    await expect(dialog.getByRole('combobox', { name: 'Unidad (opcional)' })).toHaveValue('Cálculo diferencial');
+    await formation.fill('ingenieria');
+    await expect(dialog.getByRole('option', { name: 'Ingeniería de Sistemas' })).toBeVisible();
+    await formation.press('Escape');
+    await expect(formation).toHaveValue('Ingeniería de Sistemas');
+    await dialog.getByRole('button', { name: 'Cancelar', exact: true }).click();
+    await expect(dialog).toBeHidden();
+});
