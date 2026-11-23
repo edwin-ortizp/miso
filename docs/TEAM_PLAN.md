@@ -1,5 +1,5 @@
 # Plan del equipo
-_Última actualización: 2026-11-19_
+_Última actualización: 2026-11-23_
 
 > Tabla generada por `node .claude/team.mjs`. No la edites a mano.
 
@@ -189,8 +189,9 @@ _Última actualización: 2026-11-19_
 | CHG-183 | M | Acciones y cumplimiento de hábitos desde Diario e Hidratación | to-do | Borrador | 0/4 |
 | CHG-184 | M | Catálogo de sugerencias de hábitos | to-do | Borrador | 0/3 |
 | CHG-185 | M | Editor común de tareas y Mood en contactos | in-progress | En verificación | 3/4 |
-| CHG-186 | M | Agenda consolidada y disponibilidad en el MCP | to-do | Borrador | 0/0 |
-| CHG-187 | M | Reprogramación confirmada de tareas desde el MCP | to-do | Borrador | 0/0 |
+| CHG-186 | M | Agenda consolidada y disponibilidad en el MCP | to-do | Borrador | 0/4 |
+| CHG-187 | M | Reprogramación confirmada de tareas desde el MCP | to-do | Borrador | 0/4 |
+| CHG-188 | S | Precargar el registro manual en Pomodoro | in-progress | En verificación | 2/3 |
 <!-- team:table:end -->
 
 ## Prioridades y dependencias
