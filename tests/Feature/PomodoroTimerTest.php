@@ -51,21 +51,90 @@ class PomodoroTimerTest extends TestCase
         $this->assertSame('Preparar entrega', $session->description);
     }
 
-    public function test_manual_session_can_cross_midnight_and_uses_start_date(): void
+    public function test_manual_form_prefills_current_interval_and_saves_without_description(): void
+    {
+        Carbon::setTestNow('2026-07-13 15:30:48');
+        $user = User::factory()->create();
+
+        Livewire::actingAs($user)
+            ->test(PomodoroTimer::class)
+            ->set('selectedDate', '2026-07-10')
+            ->call('openForm')
+            ->assertSet('manualStart', '2026-07-13T15:05')
+            ->assertSet('manualEnd', '2026-07-13T15:30')
+            ->assertSee('25 min')
+            ->call('saveManualSession')
+            ->assertHasNoErrors()
+            ->assertSet('showForm', false);
+
+        $session = PomodoroSession::firstOrFail();
+        $this->assertSame($user->id, $session->user_id);
+        $this->assertSame('2026-07-13', $session->date->toDateString());
+        $this->assertSame(1500, $session->duration);
+        $this->assertNull($session->description);
+    }
+
+    public function test_manual_form_prefills_the_same_date_near_midnight(): void
+    {
+        Carbon::setTestNow('2026-07-14 00:00:20');
+
+        $form = Livewire::actingAs(User::factory()->create())
+            ->test(PomodoroTimer::class)
+            ->call('openForm')
+            ->assertSet('manualStart', '2026-07-14T00:00')
+            ->assertSet('manualEnd', '2026-07-14T00:00')
+            ->call('saveManualSession')
+            ->assertHasErrors(['manualEnd'])
+            ->call('closeForm');
+
+        foreach (['00:10', '00:25'] as $end) {
+            Carbon::setTestNow("2026-07-14 $end:00");
+            $form->call('openForm')
+                ->assertHasNoErrors()
+                ->assertSet('manualStart', '2026-07-14T00:00')
+                ->assertSet('manualEnd', "2026-07-14T$end")
+                ->call('closeForm');
+        }
+
+        $this->assertDatabaseCount('pomodoro_sessions', 0);
+    }
+
+    public function test_manual_form_synchronizes_dates_preserving_edited_times_until_reopened(): void
+    {
+        Carbon::setTestNow('2026-07-14 15:30:00');
+        $form = Livewire::actingAs(User::factory()->create())
+            ->test(PomodoroTimer::class)
+            ->call('openForm')
+            ->set('manualStart', '2026-07-14T14:40')
+            ->set('manualEnd', '2026-07-14T15:10')
+            ->set('manualStart', '2026-07-13T14:40')
+            ->assertSet('manualStart', '2026-07-13T14:40')
+            ->assertSet('manualEnd', '2026-07-13T15:10')
+            ->assertSee('30 min')
+            ->call('closeForm');
+
+        Carbon::setTestNow('2026-07-14 16:00:00');
+        $form->call('openForm')
+            ->assertSet('manualStart', '2026-07-14T15:35')
+            ->assertSet('manualEnd', '2026-07-14T16:00');
+    }
+
+    public function test_manual_session_rejects_crossing_midnight(): void
     {
         Carbon::setTestNow('2026-07-14 08:00:00');
         $user = User::factory()->create();
 
         Livewire::actingAs($user)
             ->test(PomodoroTimer::class)
+            ->call('openForm')
             ->set('manualStart', '2026-07-13T23:30')
             ->set('manualEnd', '2026-07-14T01:00')
+            ->assertDontSee('Duración calculada:')
             ->call('saveManualSession')
-            ->assertHasNoErrors();
+            ->assertHasErrors(['manualEnd'])
+            ->assertSee('Usa la misma fecha para el inicio y el fin.');
 
-        $session = PomodoroSession::firstOrFail();
-        $this->assertSame('2026-07-13', $session->date->toDateString());
-        $this->assertSame(5400, $session->duration);
+        $this->assertDatabaseCount('pomodoro_sessions', 0);
     }
 
     public function test_manual_session_rejects_invalid_future_and_overlong_intervals(): void
@@ -82,8 +151,8 @@ class PomodoroTimerTest extends TestCase
             ->set('manualEnd', '2026-07-14T09:00')
             ->call('saveManualSession')
             ->assertHasErrors(['manualEnd'])
-            ->set('manualStart', '2026-07-13T14:00')
-            ->set('manualEnd', '2026-07-14T07:00')
+            ->set('manualStart', '2026-07-13T06:00')
+            ->set('manualEnd', '2026-07-13T23:00')
             ->call('saveManualSession')
             ->assertHasErrors(['manualEnd']);
 

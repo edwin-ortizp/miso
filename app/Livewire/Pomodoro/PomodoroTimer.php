@@ -70,6 +70,8 @@ class PomodoroTimer extends Component
 
     public string $manualDescription = '';
 
+    private bool $manualStartDateChanged = false;
+
     #[\Livewire\Attributes\Locked]
     public ?string $manualTaskId = null;
 
@@ -225,9 +227,27 @@ class PomodoroTimer extends Component
             $this->manualStart = $start->format('H:i');
             $this->manualEnd = Carbon::createFromTimestamp($session->end_time['timestamp'], $timezone)->format('H:i');
             $this->manualDescription = (string) $session->description;
+        } elseif ($this->isNewPomodoroEntry()) {
+            $end = Carbon::now(config('app.timezone'))->startOfMinute();
+            $start = $end->copy()->subMinutes(25)->max($end->copy()->startOfDay());
+            $this->manualStart = $start->format('Y-m-d\TH:i');
+            $this->manualEnd = $end->format('Y-m-d\TH:i');
         }
 
         $this->showForm = true;
+    }
+
+    public function updatingManualStart(string $value): void
+    {
+        $this->manualStartDateChanged = $this->isNewPomodoroEntry()
+            && substr($value, 0, 10) !== substr($this->manualStart, 0, 10);
+    }
+
+    public function updatedManualStart(): void
+    {
+        if ($this->manualStartDateChanged && strlen($this->manualStart) === 16 && strlen($this->manualEnd) === 16) {
+            $this->manualEnd = substr($this->manualStart, 0, 10).substr($this->manualEnd, 10);
+        }
     }
 
     public function closeForm(): void
@@ -247,6 +267,12 @@ class PomodoroTimer extends Component
         ]);
 
         [$start, $end] = $this->manualInterval();
+
+        if ($this->isNewPomodoroEntry() && ! $start->isSameDay($end)) {
+            $this->addError('manualEnd', 'Usa la misma fecha para el inicio y el fin.');
+
+            return;
+        }
 
         if ($end->lessThanOrEqualTo($start)) {
             $this->addError('manualEnd', 'La fecha y hora de fin debe ser posterior al inicio.');
@@ -429,6 +455,10 @@ class PomodoroTimer extends Component
         try {
             [$start, $end] = $this->manualInterval();
 
+            if ($this->isNewPomodoroEntry() && ! $start->isSameDay($end)) {
+                return null;
+            }
+
             return $end->greaterThan($start) ? $start->diffInSeconds($end) : null;
         } catch (\Throwable) {
             return null;
@@ -462,6 +492,12 @@ class PomodoroTimer extends Component
     private function parseManualDateTime(string $value): Carbon
     {
         return Carbon::createFromFormat('!Y-m-d\TH:i', $value, config('app.timezone'));
+    }
+
+    private function isNewPomodoroEntry(): bool
+    {
+        // El panel de Inicio y el registro desde Tareas reutilizan este componente.
+        return static::class === self::class && $this->editingId === null;
     }
 
     protected function manualUsesToday(): bool
